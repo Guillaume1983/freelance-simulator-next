@@ -32,7 +32,7 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
         {/* TITRE CENTRAL */}
         <div className="text-center">
           <h2 className="text-sm md:text-base font-800 text-slate-900 dark:text-white leading-tight">
-            Moteur de simulation toto <span className="text-indigo-600">Expert</span>
+            Moteur de simulation <span className="text-indigo-600">Expert</span>
           </h2>
           <p className="text-[10px] text-slate-500 dark:text-white font-bold uppercase tracking-widest hidden md:block">
             Données certifiées Loi de Finances 2026
