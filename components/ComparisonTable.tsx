@@ -111,7 +111,7 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
 
       {/* Vue mobile : carrousel de cartes par régime (toujours étendues) */}
       <div className="block md:hidden p-4 pt-5">
-        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">
+        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3 text-center">
           Comparatif stratégique
         </h3>
         <div className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3">
@@ -121,41 +121,37 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
             return (
               <div
                 key={r.id}
-                className={`snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg transition-all duration-300`}
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg transition-all duration-300"
               >
-                <div className="px-4 pt-4 pb-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-black uppercase tracking-tight dark:text-white">
-                          {r.id}
-                        </span>
-                        {r.id === 'Micro' && r.ca > 77700 && (
-                          <AlertCircle size={12} className="text-rose-500" />
-                        )}
-                      </div>
-                      <div className="text-2xl font-black dark:text-white leading-none tracking-tighter">
-                        {fmt(r.net / 12)}
-                        <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold ml-1">
-                          /mois
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">
-                          🧠 {r.mental}/5
-                        </span>
-                        <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">
-                          {r.safety}
-                        </span>
-                      </div>
-                    </div>
-                    {isWinner && (
-                      <div className="bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                        <span>🏆</span> OPTIMUM
-                      </div>
+                <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
+                  <div className="mb-1 flex items-center justify-center gap-2">
+                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+                      {r.id}
+                    </span>
+                    {r.id === 'Micro' && r.ca > 77700 && (
+                      <AlertCircle size={12} className="text-rose-500" />
                     )}
                   </div>
-                  <div className="mt-3 text-[11px] text-slate-600 dark:text-slate-300">
+                  <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-2">
+                    {fmt(r.net / 12)}
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold ml-1">
+                      /mois
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5 mt-1 mb-2">
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">
+                      🧠 {r.mental}/5
+                    </span>
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">
+                      {r.safety}
+                    </span>
+                  </div>
+                  {isWinner && (
+                    <div className="mt-1 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                      <span>🏆</span> OPTIMUM
+                    </div>
+                  )}
+                  <div className="mt-4 text-[11px] text-slate-600 dark:text-slate-300 w-full">
                     <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-500 mb-1">
                       Analyse statutaire
                     </p>
