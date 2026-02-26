@@ -24,7 +24,14 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
 
   const getDisplayValue = (r: any, row: (typeof rows)[number]) => {
     const rawValue = r[row.key] as number;
+    // On reste cohérent avec la vue desktop :
+    // - net & beforeTax : ramenés au mensuel
+    // - le reste : valeur annuelle
     return (row.key === 'net' || row.key === 'beforeTax') ? rawValue / 12 : rawValue;
+  };
+
+  const getMobileUnit = (rowKey: string) => {
+    return rowKey === 'net' || rowKey === 'beforeTax' ? '/mois' : '/an';
   };
 
   return (
@@ -165,6 +172,20 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
               )}
 
               <div className="px-4 pb-4 pt-0">
+                {/* Analyse courte directement sous la pastille, spécifique au statut */}
+                <div className="mb-3 text-[11px] text-slate-600 dark:text-slate-300">
+                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-500 mb-1">
+                    Analyse rapide
+                  </p>
+                  <p className="leading-snug">
+                    {r.id === 'Portage' && "Sécurité maximale et gestion administrative déléguée, idéal si tu privilégies la simplicité au coût total."}
+                    {r.id === 'Micro' && "Formalisme ultra léger, mais plafonds de chiffre d’affaires et moins d’optimisations avancées."}
+                    {r.id === 'EURL IR' && "Bon compromis entre optimisation et lisibilité fiscale, adapté aux profils très impliqués dans la gestion."}
+                    {r.id === 'EURL IS' && "Structure orientée optimisation long terme avec IS, intéressante si tu capitalises dans ta société."}
+                    {r.id === 'SASU' && "Grande flexibilité sur la rémunération dividendes/salaire, statut prisé mais cotisations plus élevées."}
+                  </p>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => setSelectedId(r.id === selectedId ? null : r.id)}
@@ -181,6 +202,7 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                     {rows.map((row) => {
                       const displayValue = getDisplayValue(r, row);
+                      const unit = getMobileUnit(row.key);
 
                       return (
                         <div
@@ -208,7 +230,7 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
                             >
                               {row.prefix} {fmt(displayValue)}
                               <span className="text-[9px] text-slate-400 dark:text-slate-500 ml-1">
-                                /mois
+                                {unit}
                               </span>
                             </span>
                           </div>

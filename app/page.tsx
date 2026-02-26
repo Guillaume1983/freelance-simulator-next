@@ -24,7 +24,7 @@ export default function Home() {
         
         <TopCards sim={sim} togglePanel={togglePanel} />
 
-        <div className="max-w-[1600px] mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
           <ExpandPanels activePanel={activePanel} sim={sim} />
           
           <div className="flex flex-col md:flex-row gap-6 items-start mt-4">
@@ -37,7 +37,7 @@ export default function Home() {
             </div>
 
             {selectedId && (
-              <div className="w-full md:w-[32%] mt-4 md:mt-0">
+              <div className="hidden md:block md:w-[32%] md:mt-0">
                 <SidePanel 
                   selectedId={selectedId} 
                   setSelectedId={setSelectedId} 
