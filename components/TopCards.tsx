@@ -7,14 +7,14 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-6 mb-4 mt-8">
       {/* Carrousel vertical mobile */}
-      <div className="grid grid-cols-1 gap-4 max-h-[420px] overflow-y-auto snap-y snap-mandatory md:hidden pb-2">
+      <div className="md:hidden h-[80vh] overflow-y-auto snap-y snap-mandatory space-y-4 pb-4">
         {/* Production */}
-        <div className="card-pro px-4 py-4 border-l-4 border-l-indigo-500 flex items-center justify-between snap-start">
-          <div className="flex items-center gap-4">
+        <div className="card-pro px-4 py-5 border-l-4 border-l-indigo-500 flex flex-col justify-between gap-4 snap-start min-h-[70vh]">
+          <div className="flex items-center justify-between gap-4">
             <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 p-3 rounded-2xl">
               <Zap className="w-5 h-5" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Production Annuelle</p>
               <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">
                 {fmt(sim.state.tjm * sim.state.days)}
@@ -44,7 +44,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
         </div>
 
         {/* Charges */}
-        <div className="card-pro px-4 py-4 border-l-4 border-l-rose-500 flex items-center justify-between snap-start">
+        <div className="card-pro px-4 py-5 border-l-4 border-l-rose-500 flex items-center justify-between snap-start min-h-[70vh]">
           <div className="flex items-center gap-4">
             <div className="bg-rose-50 dark:bg-rose-900/30 text-rose-600 p-3 rounded-2xl">
               <Receipt className="w-5 h-5" />
@@ -71,7 +71,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
         </div>
 
         {/* Optimisations */}
-        <div className="card-pro px-4 py-4 border-l-4 border-l-emerald-500 flex items-center justify-between snap-start">
+        <div className="card-pro px-4 py-5 border-l-4 border-l-emerald-500 flex items-center justify-between snap-start min-h-[70vh]">
           <div className="flex items-center gap-4">
             <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 p-3 rounded-2xl">
               <Sparkles className="w-5 h-5" />
@@ -98,7 +98,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
         </div>
 
         {/* Situation */}
-        <div className="card-pro px-4 py-4 border-l-4 border-l-amber-500 flex items-center justify-between snap-start">
+        <div className="card-pro px-4 py-5 border-l-4 border-l-amber-500 flex items-center justify-between snap-start min-h-[70vh]">
           <div className="flex items-center gap-4">
             <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-3 rounded-2xl">
               <Users className="w-5 h-5" />
