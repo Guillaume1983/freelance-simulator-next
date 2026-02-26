@@ -172,19 +172,21 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
               )}
 
               <div className="px-4 pb-4 pt-0">
-                {/* Analyse courte directement sous la pastille, spécifique au statut */}
-                <div className="mb-3 text-[11px] text-slate-600 dark:text-slate-300">
-                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-500 mb-1">
-                    Analyse rapide
-                  </p>
-                  <p className="leading-snug">
-                    {r.id === 'Portage' && "Sécurité maximale et gestion administrative déléguée, idéal si tu privilégies la simplicité au coût total."}
-                    {r.id === 'Micro' && "Formalisme ultra léger, mais plafonds de chiffre d’affaires et moins d’optimisations avancées."}
-                    {r.id === 'EURL IR' && "Bon compromis entre optimisation et lisibilité fiscale, adapté aux profils très impliqués dans la gestion."}
-                    {r.id === 'EURL IS' && "Structure orientée optimisation long terme avec IS, intéressante si tu capitalises dans ta société."}
-                    {r.id === 'SASU' && "Grande flexibilité sur la rémunération dividendes/salaire, statut prisé mais cotisations plus élevées."}
-                  </p>
-                </div>
+                {/* Analyse détaillée qui s'ouvre sous la pastille quand on active l'analyse */}
+                {selectedId === r.id && (
+                  <div className="mb-3 text-[11px] text-slate-600 dark:text-slate-300 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-500 mb-1">
+                      Analyse statutaire
+                    </p>
+                    <p className="leading-snug">
+                      {r.id === 'Portage' && "Sécurité maximale et gestion administrative déléguée : tu échanges un peu de net contre un confort administratif très élevé."}
+                      {r.id === 'Micro' && "Formalisme ultra léger et très accessible, mais plafonds de chiffre d’affaires et moins d’optimisations fiscales possibles à moyen terme."}
+                      {r.id === 'EURL IR' && "Bon compromis entre optimisation et lisibilité fiscale, adapté aux profils prêts à gérer un peu plus d’administratif pour gagner en net."}
+                      {r.id === 'EURL IS' && "Structure orientée capitalisation dans la société : intéressante si tu laisses une partie du bénéfice en réserve et raisonnes long terme."}
+                      {r.id === 'SASU' && "Grande flexibilité sur la combinaison salaire/dividendes, statut prisé des consultants premium mais avec des cotisations souvent plus élevées."}
+                    </p>
+                  </div>
+                )}
 
                 <button
                   type="button"
