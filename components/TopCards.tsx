@@ -1,7 +1,8 @@
 'use client';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
+import ExpandPanels from '@/components/ExpandPanels';
 
-export default function TopCards({ sim, togglePanel }: any) {
+export default function TopCards({ sim, activePanel, togglePanel }: any) {
   const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
 
   return (
@@ -28,31 +29,59 @@ export default function TopCards({ sim, togglePanel }: any) {
       </div>
 
       {/* Charges */}
-      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-rose-500 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-rose-50 dark:bg-rose-900/30 text-rose-600 p-3 rounded-2xl"><Receipt className="w-5 h-5" /></div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Charges / mois</p>
-            <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(sim.resultats[0].fees / 12)}</p>
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-rose-500 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="bg-rose-50 dark:bg-rose-900/30 text-rose-600 p-3 rounded-2xl">
+              <Receipt className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Charges / mois</p>
+              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(sim.resultats[0].fees / 12)}</p>
+            </div>
           </div>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1.5 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            onClick={() => togglePanel('charges')}
+            aria-label="Ouvrir le détail des charges"
+          >
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activePanel === 'charges' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
-        <div className="expand-trigger shadow-sm" onClick={() => togglePanel('charges')}>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </div>
+        {activePanel === 'charges' && (
+          <div className="mt-3 md:mt-4">
+            <ExpandPanels activePanel="charges" sim={sim} />
+          </div>
+        )}
       </div>
 
       {/* Optimisations */}
-      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-emerald-500 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 p-3 rounded-2xl"><Sparkles className="w-5 h-5" /></div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Optimisations</p>
-            <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight uppercase">IK & Loyer</p>
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-emerald-500 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 p-3 rounded-2xl">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Optimisations</p>
+              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight uppercase">IK & Loyer</p>
+            </div>
           </div>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1.5 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            onClick={() => togglePanel('opti')}
+            aria-label="Ouvrir le détail des optimisations"
+          >
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activePanel === 'opti' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
-        <div className="expand-trigger shadow-sm" onClick={() => togglePanel('opti')}>
-          <ChevronDown className="w-3.5 h-3.5" />
-        </div>
+        {activePanel === 'opti' && (
+          <div className="mt-3 md:mt-4">
+            <ExpandPanels activePanel="opti" sim={sim} />
+          </div>
+        )}
       </div>
 
       {/* Situation */}

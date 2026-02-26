@@ -4,7 +4,6 @@ import { SlidersVertical, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function ComparisonTable({ sim, selectedId, setSelectedId }: any) {
   const [openDetails, setOpenDetails] = useState<number[]>([]);
-  const [openMobileId, setOpenMobileId] = useState<string | null>(null);
   const regimes = sim.resultats;
   const winnerId = [...regimes].sort((a, b) => b.net - a.net)[0].id;
   const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
@@ -110,71 +109,53 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
       </table>
       </div>
 
-      {/* Vue mobile : cartes accordéon par régime */}
-      <div className="block md:hidden space-y-4 p-4 pt-5">
-        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">
+      {/* Vue mobile : carrousel de cartes par régime (toujours étendues) */}
+      <div className="block md:hidden p-4 pt-5">
+        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">
           Comparatif stratégique
         </h3>
-        {regimes.map((r: any) => {
-          const isWinner = r.id === winnerId;
-          const isOpen = openMobileId === r.id;
+        <div className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3">
+          {regimes.map((r: any) => {
+            const isWinner = r.id === winnerId;
 
-          return (
-            <div
-              key={r.id}
-              className={`relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg transition-all duration-300 ${
-                selectedId === r.id ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-50 dark:ring-offset-slate-950' : ''
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenMobileId(isOpen ? null : r.id)}
-                className="w-full text-left px-4 py-4 flex items-center justify-between gap-3"
+            return (
+              <div
+                key={r.id}
+                className={`snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg transition-all duration-300`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-black uppercase tracking-tight dark:text-white">
-                        {r.id}
-                      </span>
-                      {r.id === 'Micro' && r.ca > 77700 && (
-                        <AlertCircle size={12} className="text-rose-500" />
-                      )}
+                <div className="px-4 pt-4 pb-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-black uppercase tracking-tight dark:text-white">
+                          {r.id}
+                        </span>
+                        {r.id === 'Micro' && r.ca > 77700 && (
+                          <AlertCircle size={12} className="text-rose-500" />
+                        )}
+                      </div>
+                      <div className="text-2xl font-black dark:text-white leading-none tracking-tighter">
+                        {fmt(r.net / 12)}
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold ml-1">
+                          /mois
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">
+                          🧠 {r.mental}/5
+                        </span>
+                        <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">
+                          {r.safety}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-2xl font-black dark:text-white leading-none tracking-tighter">
-                      {fmt(r.net / 12)}
-                      <span className="text-[11px] text-slate-400 dark:text-slate-500 font-bold ml-1">
-                        /mois
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">
-                        🧠 {r.mental}/5
-                      </span>
-                      <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">
-                        {r.safety}
-                      </span>
-                    </div>
+                    {isWinner && (
+                      <div className="bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                        <span>🏆</span> OPTIMUM
+                      </div>
+                    )}
                   </div>
-                </div>
-                <ArrowRight
-                  size={16}
-                  className={`text-slate-400 transition-transform duration-300 ${
-                    isOpen ? 'rotate-90' : ''
-                  }`}
-                />
-              </button>
-
-              {isWinner && (
-                <div className="absolute top-2 right-3 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                  <span>🏆</span> OPTIMUM
-                </div>
-              )}
-
-              <div className="px-4 pb-4 pt-0">
-                {/* Analyse détaillée qui s'ouvre sous la pastille quand on active l'analyse */}
-                {selectedId === r.id && (
-                  <div className="mb-3 text-[11px] text-slate-600 dark:text-slate-300 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="mt-3 text-[11px] text-slate-600 dark:text-slate-300">
                     <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-500 mb-1">
                       Analyse statutaire
                     </p>
@@ -186,22 +167,10 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
                       {r.id === 'SASU' && "Grande flexibilité sur la combinaison salaire/dividendes, statut prisé des consultants premium mais avec des cotisations souvent plus élevées."}
                     </p>
                   </div>
-                )}
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(r.id === selectedId ? null : r.id)}
-                  className={`w-full mb-3 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl border text-center transition-all ${
-                    selectedId === r.id
-                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900'
-                  }`}
-                >
-                  {selectedId === r.id ? 'Analyse active' : 'Activer cette analyse'}
-                </button>
-
-                {isOpen && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="px-4 pb-4">
+                  <div className="space-y-2">
                     {rows.map((row) => {
                       const displayValue = getDisplayValue(r, row);
                       const unit = getMobileUnit(row.key);
@@ -240,11 +209,11 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
                       );
                     })}
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

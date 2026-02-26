@@ -20,6 +20,13 @@ export const useSimulation = () => {
   const [activeCharges, setActiveCharges] = useState(['compta', 'mutuelle', 'assurance', 'repas', 'tel']);
   const [sectionsActive, setSectionsActive] = useState({ vehicule: true, loyer: true });
   const [portageComm, setPortageComm] = useState(5);
+  const [chargeAmounts, setChargeAmounts] = useState<Record<string, number>>(
+    () =>
+      CHARGES_CATALOG.reduce((acc, c) => {
+        acc[c.id] = c.amount;
+        return acc;
+      }, {} as Record<string, number>)
+  );
 
   // Fonctions de calcul brutes (Recopiées de ton script)
   const getIK = (km: number, cv: string) => {
@@ -42,7 +49,12 @@ export const useSimulation = () => {
     const ik = sectionsActive.vehicule ? getIK(kmAnnuel, cvFiscaux) : 0;
     const loyerA = sectionsActive.loyer ? loyerPercu * 12 : 0;
     let cf = 0; 
-    CHARGES_CATALOG.forEach(c => { if(activeCharges.includes(c.id)) cf += c.amount * 12; });
+    CHARGES_CATALOG.forEach(c => {
+      if (activeCharges.includes(c.id)) {
+        const monthly = chargeAmounts[c.id] ?? c.amount;
+        cf += monthly * 12;
+      }
+    });
 
     const regimes = [
       { id: 'Portage', class: 'portage', mental: 0, safety: 'Haut' },
@@ -91,11 +103,11 @@ export const useSimulation = () => {
     });
 
     return regimes;
-  }, [tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm]);
+  }, [tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm, chargeAmounts]);
 
   return {
-    state: { tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm },
-    setters: { setTjm, setDays, setTaxParts, setKmAnnuel, setCvFiscaux, setLoyerPercu, setActiveCharges, setSectionsActive, setPortageComm },
+    state: { tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm, chargeAmounts },
+    setters: { setTjm, setDays, setTaxParts, setKmAnnuel, setCvFiscaux, setLoyerPercu, setActiveCharges, setSectionsActive, setPortageComm, setChargeAmounts },
     resultats
   };
 };
