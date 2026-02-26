@@ -9,76 +9,89 @@ export default function ExpandPanels({ activePanel, sim }: any) {
     <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
       {/* PANNEAU CATALOGUE DES CHARGES */}
       {activePanel === 'charges' && (
-        <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-rose-500 shadow-xl">
-          <div className="flex justify-between items-end mb-6">
+        <div className="mt-2 md:mt-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 px-4 md:px-6 py-4 md:py-5 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0 mb-4">
             <div>
-              <h3 className="text-sm font-900 uppercase tracking-widest text-slate-900 dark:text-white">Catalogue des charges</h3>
-              <p className="text-[11px] text-slate-500 font-bold uppercase mt-1">
-                Activez les charges utiles et ajustez rapidement leurs montants mensuels
+              <h3 className="text-xs md:text-sm font-900 uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+                Catalogue des charges
+              </h3>
+              <p className="text-[10px] text-slate-500 font-medium mt-1">
+                Active uniquement ce que tu supportes vraiment chaque mois.
               </p>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-black text-rose-500 uppercase italic">Total mensuel</span>
-              <p className="text-2xl font-900 text-slate-900 dark:text-white leading-none">
+              <span className="text-[9px] font-black text-rose-500 uppercase italic">
+                Total mensuel
+              </span>
+              <p className="text-xl font-900 text-slate-900 dark:text-white leading-none">
                 {Math.round(sim.resultats[0].fees / 12)} €
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
+          <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:gap-3">
             {CHARGES_CATALOG.map((item) => {
               const isActive = sim.state.activeCharges.includes(item.id);
-              const currentAmount =
-                sim.state.chargeAmounts?.[item.id] ?? item.amount;
+              const currentAmount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
 
               return (
-                <div 
+                <button
                   key={item.id}
+                  type="button"
                   onClick={() => {
-                    const newCharges = isActive 
+                    const newCharges = isActive
                       ? sim.state.activeCharges.filter((id: string) => id !== item.id)
                       : [...sim.state.activeCharges, item.id];
                     sim.setters.setActiveCharges(newCharges);
                   }}
-                  className={`p-4 rounded-2xl border-2 transition-transform duration-200 cursor-pointer flex flex-col gap-3 group hover:-translate-y-0.5 ${
-                    isActive 
-                    ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-900/20' 
-                    : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'
+                  className={`w-full flex items-center justify-between rounded-2xl px-3 py-2 text-left transition-colors ${
+                    isActive
+                      ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200/60 dark:border-rose-800/60'
+                      : 'bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800'
                   }`}
                 >
-                  <div className="flex justify-between items-start">
-                    {isActive ? <CheckCircle2 className="w-5 h-5 text-rose-500" /> : <Circle className="w-5 h-5 text-slate-200" />}
-                      <span className={`text-[10px] font-900 ${isActive ? 'text-rose-600' : 'text-slate-400'}`}>
-                        {currentAmount.toLocaleString()}€<span className="text-[9px] opacity-60">/mois</span>
-                    </span>
-                  </div>
-                  <p className={`text-[11px] font-800 uppercase tracking-tight leading-tight ${isActive ? 'text-rose-900 dark:text-rose-100' : 'text-slate-500'}`}>
-                    {item.name}
-                  </p>
-                  <div className="mt-2">
-                    <label className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400 block mb-1">
-                      Montant mensuel
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        onClick={(e) => e.stopPropagation()}
-                        value={currentAmount}
-                        onChange={(e) => {
-                          const value = Number(e.target.value) || 0;
-                          sim.setters.setChargeAmounts({
-                            ...sim.state.chargeAmounts,
-                            [item.id]: value,
-                          });
-                        }}
-                        className="w-full pr-10 py-2 text-xs font-bold"
-                      />
-                      <span className="absolute right-3 top-1.5 text-[9px] font-black text-slate-400">
-                        €/m
+                  <div className="flex items-center gap-2">
+                    {isActive ? (
+                      <CheckCircle2 className="w-4 h-4 text-rose-500" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-slate-300" />
+                    )}
+                    <div className="flex flex-col">
+                      <span
+                        className={`text-[10px] font-800 uppercase tracking-tight ${
+                          isActive ? 'text-rose-900 dark:text-rose-100' : 'text-slate-500'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      <span className="text-[9px] text-slate-400">
+                        {currentAmount.toLocaleString()} €/mois
                       </span>
                     </div>
                   </div>
-                </div>
+                  <div
+                    className="relative ml-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                  >
+                    <input
+                      type="number"
+                      value={currentAmount}
+                      onChange={(e) => {
+                        const value = Number(e.target.value) || 0;
+                        sim.setters.setChargeAmounts({
+                          ...sim.state.chargeAmounts,
+                          [item.id]: value,
+                        });
+                      }}
+                      className="w-16 pr-5 py-1 text-[10px] font-bold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg text-right"
+                    />
+                    <span className="absolute right-1 top-1 text-[8px] font-black text-slate-400">
+                      €/m
+                    </span>
+                  </div>
+                </button>
               );
             })}
           </div>
