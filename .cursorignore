@@ -1,0 +1,17 @@
+# Ne pas indexer les bibliothèques
+node_modules/
+.next/
+out/
+build/
+
+# Ne pas indexer les assets lourds
+public/assets/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.ico
+
+# Ne pas indexer les fichiers de config système
+.env*
+.git/
