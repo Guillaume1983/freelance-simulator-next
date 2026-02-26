@@ -18,7 +18,7 @@
 
 @layer components {
   .card-pro { 
-    @apply bg-white dark:bg-[#0f172a] rounded-[24px] border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300; 
+    @apply bg-white/90 dark:bg-[#0f172a]/90 rounded-[24px] border border-slate-200/80 dark:border-slate-800/80 shadow-lg shadow-slate-200/60 dark:shadow-black/20 backdrop-blur-xl transition-all duration-300; 
   }
 
   /* --- RECTANGLE DE SÉLECTION (COL-ACTIVE) --- */

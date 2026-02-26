@@ -5,8 +5,8 @@ export default function SidePanel({ selectedId, setSelectedId }: any) {
   if (!selectedId) return null;
 
   return (
-    <aside className="animate-in slide-in-from-right duration-500 sticky top-24">
-      <div className="card-pro p-8 shadow-2xl border-indigo-100 dark:border-indigo-900/30 bg-white dark:bg-[#0f172a]">
+    <aside className="animate-in slide-in-from-right duration-500 md:sticky md:top-24">
+      <div className="card-pro px-5 md:px-7 py-6 md:py-8 shadow-2xl border-indigo-100 dark:border-indigo-900/30 bg-white dark:bg-[#0f172a]">
         <div className="flex justify-between items-start mb-10">
           <div>
             <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic">Analyse Statutaire</span>

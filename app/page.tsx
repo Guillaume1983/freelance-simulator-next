@@ -27,8 +27,8 @@ export default function Home() {
         <div className="max-w-[1600px] mx-auto px-6">
           <ExpandPanels activePanel={activePanel} sim={sim} />
           
-          <div className="flex gap-6 items-start mt-4">
-            <div className={`transition-all duration-500 ${selectedId ? 'w-[68%]' : 'w-full'}`}>
+          <div className="flex flex-col md:flex-row gap-6 items-start mt-4">
+            <div className={`transition-all duration-500 w-full ${selectedId ? 'md:w-[68%]' : 'md:w-full'}`}>
               <ComparisonTable 
                 sim={sim} 
                 selectedId={selectedId} 
@@ -37,7 +37,7 @@ export default function Home() {
             </div>
 
             {selectedId && (
-              <div className="w-[32%]">
+              <div className="w-full md:w-[32%] mt-4 md:mt-0">
                 <SidePanel 
                   selectedId={selectedId} 
                   setSelectedId={setSelectedId} 

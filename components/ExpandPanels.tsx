@@ -6,10 +6,10 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
 
   return (
-    <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+    <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
       {/* PANNEAU CATALOGUE DES CHARGES */}
       {activePanel === 'charges' && (
-        <div className="card-pro p-8 border-t-4 border-t-rose-500 shadow-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
+        <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-rose-500 shadow-xl">
           <div className="flex justify-between items-end mb-6">
             <div>
               <h3 className="text-sm font-900 uppercase tracking-widest text-slate-900 dark:text-white">Catalogue des charges</h3>
@@ -23,7 +23,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
             {CHARGES_CATALOG.map((item) => {
               const isActive = sim.state.activeCharges.includes(item.id);
               return (
@@ -35,7 +35,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       : [...sim.state.activeCharges, item.id];
                     sim.setters.setActiveCharges(newCharges);
                   }}
-                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col gap-3 group ${
+                  className={`p-4 rounded-2xl border-2 transition-transform duration-200 cursor-pointer flex flex-col gap-3 group hover:-translate-y-0.5 ${
                     isActive 
                     ? 'border-rose-500 bg-rose-50/50 dark:bg-rose-900/20' 
                     : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'
@@ -43,8 +43,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 >
                   <div className="flex justify-between items-start">
                     {isActive ? <CheckCircle2 className="w-5 h-5 text-rose-500" /> : <Circle className="w-5 h-5 text-slate-200" />}
-                    <span className={`text-xs font-900 ${isActive ? 'text-rose-600' : 'text-slate-400'}`}>
-                      {item.amount}€<span className="text-[9px] opacity-60">/m</span>
+                      <span className={`text-xs font-900 ${isActive ? 'text-rose-600' : 'text-slate-400'}`}>
+                      {item.amount}€<span className="text-[9px] opacity-60">/mois</span>
                     </span>
                   </div>
                   <p className={`text-[11px] font-800 uppercase tracking-tight leading-tight ${isActive ? 'text-rose-900 dark:text-rose-100' : 'text-slate-500'}`}>
@@ -59,8 +59,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
 
       {/* PANNEAU OPTIMISATIONS (IK & LOYER) */}
       {activePanel === 'opti' && (
-        <div className="card-pro p-8 border-t-4 border-t-emerald-500 shadow-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-emerald-500 shadow-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {/* Colonne IK */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">

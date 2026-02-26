@@ -5,9 +5,9 @@ export default function TopCards({ sim, togglePanel }: any) {
   const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4 mt-8 max-w-[1600px] mx-auto px-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-4 mt-8 max-w-[1600px] mx-auto px-4 md:px-6">
       {/* Production */}
-      <div className="card-pro p-5 border-l-4 border-l-indigo-500 flex items-center justify-between">
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-indigo-500 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 p-3 rounded-2xl"><Zap className="w-5 h-5" /></div>
           <div>
@@ -28,7 +28,7 @@ export default function TopCards({ sim, togglePanel }: any) {
       </div>
 
       {/* Charges */}
-      <div className="card-pro p-5 border-l-4 border-l-rose-500 flex items-center justify-between">
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-rose-500 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-rose-50 dark:bg-rose-900/30 text-rose-600 p-3 rounded-2xl"><Receipt className="w-5 h-5" /></div>
           <div>
@@ -42,7 +42,7 @@ export default function TopCards({ sim, togglePanel }: any) {
       </div>
 
       {/* Optimisations */}
-      <div className="card-pro p-5 border-l-4 border-l-emerald-500 flex items-center justify-between">
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-emerald-500 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 p-3 rounded-2xl"><Sparkles className="w-5 h-5" /></div>
           <div>
@@ -56,7 +56,7 @@ export default function TopCards({ sim, togglePanel }: any) {
       </div>
 
       {/* Situation */}
-      <div className="card-pro p-5 border-l-4 border-l-amber-500 flex items-center justify-between">
+      <div className="card-pro px-4 md:px-5 py-4 md:py-5 border-l-4 border-l-amber-500 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-3 rounded-2xl"><Users className="w-5 h-5" /></div>
           <div>

@@ -4,9 +4,9 @@ import { LineChart, MessageSquare } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-white dark:bg-[#0f172a] border-t border-slate-200 dark:border-slate-800 py-10 px-6 mt-12">
+    <footer className="bg-white dark:bg-[#0f172a] border-t border-slate-200 dark:border-slate-800 py-8 md:py-10 px-4 md:px-6 mt-12">
       <div className="max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-10">
           
           {/* Logo & Description */}
           <div className="col-span-1 md:col-span-2 space-y-6">
