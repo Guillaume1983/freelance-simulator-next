@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Moon, Sun, LineChart, Menu, X } from 'lucide-react';
 
 export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDark: (d: boolean) => void }) {
@@ -56,17 +57,17 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
           {/* Liens desktop uniquement */}
           <div className="hidden lg:flex items-center gap-4">
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <a href="#" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
+            <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
               Tarifs
-            </a>
-            <a href="#" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
+            </Link>
+            <Link href="/connexion" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
               Se connecter
-            </a>
+            </Link>
           </div>
 
-          <button className="hidden md:block bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap">
+          <Link href="/inscription" className="hidden md:block bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap">
             S&apos;inscrire
-          </button>
+          </Link>
 
           {/* Hamburger — mobile uniquement */}
           <button
@@ -84,27 +85,28 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
       {menuOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
           <div className="max-w-[1600px] mx-auto px-4 py-4 flex flex-col gap-1">
-            <a
-              href="#"
+            <Link
+              href="/tarifs"
               className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Tarifs
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/connexion"
               className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Se connecter
-            </a>
+            </Link>
             <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
-              <button
-                className="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all"
+              <Link
+                href="/inscription"
+                className="block w-full bg-indigo-600 text-white py-2.5 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-center"
                 onClick={() => setMenuOpen(false)}
               >
                 S&apos;inscrire
-              </button>
+              </Link>
             </div>
           </div>
         </div>

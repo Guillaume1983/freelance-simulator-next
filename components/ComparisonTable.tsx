@@ -1,9 +1,10 @@
 'use client';
 import React, { useState } from 'react';
-import { SlidersVertical, AlertCircle, ArrowRight } from 'lucide-react';
+import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle } from 'lucide-react';
 
 export default function ComparisonTable({ sim, selectedId, setSelectedId }: any) {
   const [openDetails, setOpenDetails] = useState<number[]>([]);
+  const [openSettings, setOpenSettings] = useState<string | null>(null);
   const regimes = sim.resultats;
   const winnerId = [...regimes].sort((a, b) => b.net - a.net)[0].id;
   const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
@@ -20,6 +21,29 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
     { label: "Prélèvement Fiscal (IR/IS)", key: 'ir', div: 1, prefix: '-', color: 'text-rose-600' },
     { label: "DISPONIBLE FINAL (Cash-out)", key: 'net', div: 12, isFinal: true }
   ];
+
+  const renderSettingsContent = (regimeId: string) => {
+    if (regimeId === 'Portage') {
+      return (
+        <div className="w-full">
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 text-center">Frais Gestion %</p>
+          <input
+            type="number"
+            value={sim.state.portageComm}
+            onChange={e => sim.setters.setPortageComm(Math.max(1, Math.min(15, parseFloat(e.target.value) || 5)))}
+            min={1} max={15} step={0.5}
+            className="w-full text-center text-sm p-2 rounded-xl"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      );
+    }
+    return (
+      <p className="text-[9px] text-slate-400 text-center leading-relaxed mt-2">
+        Paramètres configurés<br/>dans la simulation globale
+      </p>
+    );
+  };
 
   const getDisplayValue = (r: any, row: (typeof rows)[number]) => {
     const rawValue = r[row.key] as number;
@@ -49,9 +73,23 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
               <th key={r.id} className={`p-4 relative pt-12 border-b dark:border-slate-800 transition-all duration-300 ${selectedId === r.id ? 'col-active' : ''}`}>
                 <div className={`header-band band-${r.class}`}></div>
                 {r.id === winnerId && <div className="winner-badge">🏆 OPTIMUM</div>}
-                <button className="absolute top-4 right-3 text-slate-400 hover:text-indigo-500 transition-colors">
+                <button
+                  onClick={e => { e.stopPropagation(); setOpenSettings(openSettings === r.id ? null : r.id); }}
+                  className={`absolute top-4 right-3 transition-colors z-30 ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
+                >
                   <SlidersVertical size={14}/>
                 </button>
+                {openSettings === r.id && (
+                  <div className="absolute inset-0 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-sm z-20 flex flex-col items-center justify-start pt-4 px-3">
+                    <div className="flex items-center justify-between w-full mb-4">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Réglages {r.id}</span>
+                      <button onClick={() => setOpenSettings(null)}>
+                        <CheckCircle size={16} className="text-indigo-500 hover:text-indigo-600 transition-colors" />
+                      </button>
+                    </div>
+                    {renderSettingsContent(r.id)}
+                  </div>
+                )}
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter">{r.id}</span>
                   {r.id === 'Micro' && r.ca > 77700 && <AlertCircle size={12} className="text-rose-500" />}
@@ -123,6 +161,27 @@ export default function ComparisonTable({ sim, selectedId, setSelectedId }: any)
                 key={r.id}
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg transition-all duration-300"
               >
+                {/* Bouton réglages mobile */}
+                <button
+                  onClick={e => { e.stopPropagation(); setOpenSettings(openSettings === r.id ? null : r.id); }}
+                  className={`absolute top-3 right-3 z-10 transition-colors ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
+                >
+                  <SlidersVertical size={14} />
+                </button>
+
+                {/* Overlay réglages mobile */}
+                {openSettings === r.id && (
+                  <div className="absolute inset-0 bg-white/96 dark:bg-[#020617]/96 backdrop-blur-sm z-20 rounded-2xl p-4 flex flex-col">
+                    <div className="flex items-center justify-between mb-5">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Réglages {r.id}</span>
+                      <button onClick={() => setOpenSettings(null)}>
+                        <CheckCircle size={18} className="text-indigo-500 hover:text-indigo-600 transition-colors" />
+                      </button>
+                    </div>
+                    {renderSettingsContent(r.id)}
+                  </div>
+                )}
+
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
                   <div className="mb-1 flex items-center justify-center gap-2">
                     <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
