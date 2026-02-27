@@ -23,14 +23,14 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-4">
 
         {/* LOGO */}
-        <div className="flex items-center gap-2.5 group cursor-pointer shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 group cursor-pointer shrink-0">
           <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200 transition-transform group-hover:rotate-12">
             <LineChart className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
           <h1 className="text-base md:text-xl font-800 text-slate-900 dark:text-white tracking-tighter">
             Free<span className="text-indigo-600">Calcul</span>
           </h1>
-        </div>
+        </Link>
 
         {/* TITRE CENTRAL — desktop uniquement */}
         <div className="hidden md:block text-center">
