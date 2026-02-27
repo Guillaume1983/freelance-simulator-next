@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 // Constantes brutes extraites de ton HTML
 export const CHARGES_CATALOG = [
@@ -10,7 +11,6 @@ export const CHARGES_CATALOG = [
 ];
 
 export const useSimulation = () => {
-  // States calqués sur tes inputs
   const [tjm, setTjm] = useState(600);
   const [days, setDays] = useState(210);
   const [taxParts, setTaxParts] = useState(1);
@@ -27,6 +27,84 @@ export const useSimulation = () => {
         return acc;
       }, {} as Record<string, number>)
   );
+
+  // Auth + sync Supabase
+  const [userId, setUserId] = useState<string | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const hasSavedOnce = useRef(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Charger les settings depuis Supabase au montage
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setSettingsLoaded(true);
+        return;
+      }
+
+      setUserId(user.id);
+
+      const { data } = await supabase
+        .from('simulation_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data) {
+        if (data.tjm != null)          setTjm(data.tjm);
+        if (data.days != null)         setDays(data.days);
+        if (data.tax_parts != null)    setTaxParts(data.tax_parts);
+        if (data.km_annuel != null)    setKmAnnuel(data.km_annuel);
+        if (data.cv_fiscaux != null)   setCvFiscaux(data.cv_fiscaux);
+        if (data.loyer_percu != null)  setLoyerPercu(data.loyer_percu);
+        if (data.portage_comm != null) setPortageComm(parseFloat(data.portage_comm));
+        if (data.active_charges)       setActiveCharges(data.active_charges);
+        if (data.charge_amounts)       setChargeAmounts(data.charge_amounts);
+        if (data.sections_active)      setSectionsActive(data.sections_active);
+      }
+
+      setSettingsLoaded(true);
+    };
+    load();
+  }, []);
+
+  // Sauvegarder automatiquement (debounce 1.2s) dès qu'un paramètre change
+  useEffect(() => {
+    if (!settingsLoaded || !userId) return;
+
+    // Ignorer la première exécution après le chargement initial
+    if (!hasSavedOnce.current) {
+      hasSavedOnce.current = true;
+      return;
+    }
+
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      const supabase = createClient();
+      await supabase.from('simulation_settings').upsert({
+        user_id: userId,
+        tjm, days,
+        tax_parts: taxParts,
+        km_annuel: kmAnnuel,
+        cv_fiscaux: cvFiscaux,
+        loyer_percu: loyerPercu,
+        portage_comm: portageComm,
+        active_charges: activeCharges,
+        charge_amounts: chargeAmounts,
+        sections_active: sectionsActive,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+    }, 1200);
+
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, portageComm, activeCharges, chargeAmounts, sectionsActive, settingsLoaded, userId]);
 
   // Fonctions de calcul brutes (Recopiées de ton script)
   const getIK = (km: number, cv: string) => {
@@ -106,8 +184,9 @@ export const useSimulation = () => {
   }, [tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm, chargeAmounts]);
 
   return {
-    state: { tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm, chargeAmounts },
+    state: { tjm, days, taxParts, kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive, portageComm, chargeAmounts, userId },
     setters: { setTjm, setDays, setTaxParts, setKmAnnuel, setCvFiscaux, setLoyerPercu, setActiveCharges, setSectionsActive, setPortageComm, setChargeAmounts },
-    resultats
+    resultats,
+    isLoading: !settingsLoaded,
   };
 };

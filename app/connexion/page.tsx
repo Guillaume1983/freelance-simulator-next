@@ -1,29 +1,55 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LineChart, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ConnexionPage() {
+  const router = useRouter();
   const [isDark, setIsDark] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    if (!form.email.includes('@')) e.email = 'Email invalide';
-    if (!form.password) e.password = 'Mot de passe requis';
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    if (!form.email.includes('@')) newErrors.email = 'Email invalide';
+    if (!form.password) newErrors.password = 'Mot de passe requis';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
+    setLoading(true);
+    setErrors({});
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setErrors({ global: 'Email ou mot de passe incorrect.' });
+      return;
+    }
+
+    router.push('/');
+    router.refresh();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validate()) {
-      // TODO: Appel API
-    }
+  const handleGoogleSignIn = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
   };
 
   return (
@@ -84,6 +110,12 @@ export default function ConnexionPage() {
                 </p>
               </div>
 
+              {errors.global && (
+                <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-[12px] text-rose-600 font-bold">{errors.global}</p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Email</label>
@@ -139,16 +171,20 @@ export default function ConnexionPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 mt-2"
+                  disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Se connecter
-                  <ArrowRight size={13} />
+                  {loading ? 'Connexion…' : 'Se connecter'}
+                  {!loading && <ArrowRight size={13} />}
                 </button>
               </form>
 
               <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
                 <p className="text-[11px] text-slate-400 font-bold text-center uppercase tracking-widest mb-3">ou continuer avec</p>
-                <button className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 px-4 text-[12px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 px-4 text-[12px] font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                >
                   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>

@@ -1,10 +1,41 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Moon, Sun, LineChart, Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDark: (d: boolean) => void }) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Détecter l'utilisateur connecté et écouter les changements d'auth
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fermer le menu utilisateur en cliquant en dehors
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const toggleTheme = () => {
     const newDarkState = !isDark;
@@ -14,6 +45,28 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
     } else {
       document.documentElement.classList.remove('dark');
     }
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserMenuOpen(false);
+    router.push('/');
+    router.refresh();
+  };
+
+  const getInitials = (u: User) => {
+    const prenom = u.user_metadata?.prenom || '';
+    const nom = u.user_metadata?.nom || '';
+    if (prenom && nom) return `${prenom[0]}${nom[0]}`.toUpperCase();
+    return (u.email?.[0] || '?').toUpperCase();
+  };
+
+  const getDisplayName = (u: User) => {
+    const prenom = u.user_metadata?.prenom;
+    if (prenom) return prenom;
+    return u.email?.split('@')[0] || 'Mon compte';
   };
 
   return (
@@ -54,20 +107,70 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Liens desktop uniquement */}
-          <div className="hidden lg:flex items-center gap-4">
-            <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
-              Tarifs
-            </Link>
-            <Link href="/connexion" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
-              Se connecter
-            </Link>
-          </div>
+          {user ? (
+            /* ── UTILISATEUR CONNECTÉ ── */
+            <>
+              {/* Liens desktop */}
+              <div className="hidden lg:flex items-center gap-4">
+                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
+                  Tarifs
+                </Link>
+              </div>
 
-          <Link href="/inscription" className="hidden md:block bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap">
-            S&apos;inscrire
-          </Link>
+              {/* Menu utilisateur desktop */}
+              <div className="hidden md:block relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(o => !o)}
+                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
+                    {getInitials(user)}
+                  </div>
+                  <span className="text-[12px] font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                    {getDisplayName(user)}
+                  </span>
+                  <ChevronDown size={12} className={`text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#0f172a] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                      <p className="text-[11px] font-black text-slate-800 dark:text-white truncate">{getDisplayName(user)}</p>
+                      <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
+                    </div>
+                    <div className="p-1.5">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                      >
+                        <LogOut size={13} />
+                        Se déconnecter
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            /* ── NON CONNECTÉ ── */
+            <>
+              {/* Liens desktop uniquement */}
+              <div className="hidden lg:flex items-center gap-4">
+                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
+                  Tarifs
+                </Link>
+                <Link href="/connexion" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
+                  Se connecter
+                </Link>
+              </div>
+
+              <Link href="/inscription" className="hidden md:block bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap">
+                S&apos;inscrire
+              </Link>
+            </>
+          )}
 
           {/* Hamburger — mobile uniquement */}
           <button
@@ -85,6 +188,19 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
       {menuOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
           <div className="max-w-[1600px] mx-auto px-4 py-4 flex flex-col gap-1">
+
+            {user && (
+              <div className="flex items-center gap-3 px-3 py-3 mb-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[12px] font-black shrink-0">
+                  {getInitials(user)}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[12px] font-black text-slate-800 dark:text-white truncate">{getDisplayName(user)}</p>
+                  <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
+                </div>
+              </div>
+            )}
+
             <Link
               href="/tarifs"
               className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
@@ -92,22 +208,35 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
             >
               Tarifs
             </Link>
-            <Link
-              href="/connexion"
-              className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Se connecter
-            </Link>
-            <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
-              <Link
-                href="/inscription"
-                className="block w-full bg-indigo-600 text-white py-2.5 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-center"
-                onClick={() => setMenuOpen(false)}
+
+            {user ? (
+              <button
+                onClick={() => { handleSignOut(); setMenuOpen(false); }}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-left"
               >
-                S&apos;inscrire
-              </Link>
-            </div>
+                <LogOut size={14} />
+                Se déconnecter
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/connexion"
+                  className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Se connecter
+                </Link>
+                <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
+                  <Link
+                    href="/inscription"
+                    className="block w-full bg-indigo-600 text-white py-2.5 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-center"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    S&apos;inscrire
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
