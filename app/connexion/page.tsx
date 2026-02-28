@@ -66,7 +66,7 @@ export default function ConnexionPage() {
                 <LineChart className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">
-                Free<span className="text-indigo-600">Calcul</span>
+                freelance-<span className="text-indigo-600">simulateur</span>
               </span>
             </div>
 
@@ -82,9 +82,9 @@ export default function ConnexionPage() {
 
             <div className="space-y-3">
               {[
-                { emoji: '📊', label: 'Simulations sauvegardées', sub: 'Retrouvez l\'historique de vos simulations' },
-                { emoji: '📄', label: 'Exports PDF', sub: 'Téléchargez vos rapports complets' },
-                { emoji: '🔔', label: 'Alertes réglementaires', sub: 'Soyez notifié des changements fiscaux' },
+                { emoji: '💾', label: 'Paramètres sauvegardés', sub: 'Vos réglages sont restaurés à chaque connexion' },
+                { emoji: '📊', label: '5 régimes comparés', sub: 'Portage, Micro, EURL IR/IS, SASU' },
+                { emoji: '⚖️', label: 'Calculs certifiés 2026', sub: 'Loi de Finances 2026 intégrée' },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl p-4">
                   <span className="text-lg shrink-0">{item.emoji}</span>

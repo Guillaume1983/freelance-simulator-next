@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown } from 'lucide-react';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -81,7 +81,7 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
             <LineChart className="w-4 h-4 md:w-5 md:h-5 text-white" />
           </div>
           <h1 className="text-base md:text-xl font-800 text-slate-900 dark:text-white tracking-tighter">
-            Free<span className="text-indigo-600">Calcul</span>
+            freelance-<span className="text-indigo-600">simulateur</span>
           </h1>
         </Link>
 
@@ -109,58 +109,51 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
 
           {user ? (
             /* ── UTILISATEUR CONNECTÉ ── */
-            <>
-              {/* Liens desktop */}
-              <div className="hidden lg:flex items-center gap-4">
-                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
-                  Tarifs
-                </Link>
-              </div>
+            <div className="hidden md:block relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(o => !o)}
+                className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+              >
+                <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
+                  {getInitials(user)}
+                </div>
+                <span className="text-[12px] font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
+                  {getDisplayName(user)}
+                </span>
+                <ChevronDown size={12} className={`text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-              {/* Menu utilisateur desktop */}
-              <div className="hidden md:block relative" ref={userMenuRef}>
-                <button
-                  onClick={() => setUserMenuOpen(o => !o)}
-                  className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
-                    {getInitials(user)}
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#0f172a] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                    <p className="text-[11px] font-black text-slate-800 dark:text-white truncate">{getDisplayName(user)}</p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
                   </div>
-                  <span className="text-[12px] font-bold text-slate-700 dark:text-slate-200 max-w-[100px] truncate">
-                    {getDisplayName(user)}
-                  </span>
-                  <ChevronDown size={12} className={`text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#0f172a] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
-                      <p className="text-[11px] font-black text-slate-800 dark:text-white truncate">{getDisplayName(user)}</p>
-                      <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
-                    </div>
-                    <div className="p-1.5">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
-                      >
-                        <LogOut size={13} />
-                        Se déconnecter
-                      </button>
-                    </div>
+                  <div className="p-1.5">
+                    <Link
+                      href="/mon-compte"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <UserCircle size={13} />
+                      Mon compte
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    >
+                      <LogOut size={13} />
+                      Se déconnecter
+                    </button>
                   </div>
-                )}
-              </div>
-            </>
+                </div>
+              )}
+            </div>
           ) : (
             /* ── NON CONNECTÉ ── */
             <>
-              {/* Liens desktop uniquement */}
               <div className="hidden lg:flex items-center gap-4">
                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-                <Link href="/tarifs" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
-                  Tarifs
-                </Link>
                 <Link href="/connexion" className="text-xs text-slate-600 dark:text-slate-300 font-bold hover:text-indigo-600 transition-colors">
                   Se connecter
                 </Link>
@@ -201,22 +194,24 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
               </div>
             )}
 
-            <Link
-              href="/tarifs"
-              className="px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Tarifs
-            </Link>
-
             {user ? (
-              <button
-                onClick={() => { handleSignOut(); setMenuOpen(false); }}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-left"
-              >
-                <LogOut size={14} />
-                Se déconnecter
-              </button>
+              <>
+                <Link
+                  href="/mon-compte"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <UserCircle size={15} />
+                  Mon compte
+                </Link>
+                <button
+                  onClick={() => { handleSignOut(); setMenuOpen(false); }}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors text-left"
+                >
+                  <LogOut size={14} />
+                  Se déconnecter
+                </button>
+              </>
             ) : (
               <>
                 <Link

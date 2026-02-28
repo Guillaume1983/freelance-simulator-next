@@ -63,9 +63,9 @@ export default function InscriptionPage() {
   };
 
   const perks = [
-    'Simulations illimitées pendant 14 jours',
-    'Comparatif des 5 régimes fiscaux 2026',
-    'Aucune carte bancaire requise',
+    'Simulation complète des 5 régimes fiscaux 2026',
+    'Sauvegarde automatique de vos paramètres',
+    'Accès gratuit, sans engagement',
   ];
 
   return (
@@ -82,7 +82,7 @@ export default function InscriptionPage() {
                 <LineChart className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter">
-                Free<span className="text-indigo-600">Calcul</span>
+                freelance-<span className="text-indigo-600">simulateur</span>
               </span>
             </div>
 
@@ -109,10 +109,10 @@ export default function InscriptionPage() {
             </ul>
 
             <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <span className="text-2xl">⭐</span>
+              <span className="text-2xl">📊</span>
               <div>
-                <p className="text-[11px] font-black text-slate-700 dark:text-slate-200">4.9/5 satisfaction</p>
-                <p className="text-[11px] text-slate-400 font-medium">Données certifiées Loi de Finances 2026</p>
+                <p className="text-[11px] font-black text-slate-700 dark:text-slate-200">Données certifiées</p>
+                <p className="text-[11px] text-slate-400 font-medium">Loi de Finances 2026</p>
               </div>
             </div>
           </div>
