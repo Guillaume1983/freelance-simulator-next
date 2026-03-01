@@ -1,13 +1,14 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, Send, CheckCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { createClient } from '@/lib/supabase/client';
 
 const SUBJECTS = [
   'Question générale',
   'Problème technique',
-  'Suggestion d\'amélioration',
+  "Suggestion d'amélioration",
   'Demande de suppression de compte',
   'Autre',
 ];
@@ -15,10 +16,24 @@ const SUBJECTS = [
 export default function ContactPage() {
   const [isDark, setIsDark] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', _honeypot: '' });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [globalError, setGlobalError] = useState('');
+
+  // Pré-remplir les champs si l'utilisateur est connecté
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const prenom = user.user_metadata?.prenom || '';
+      const nom = user.user_metadata?.nom || '';
+      const fullName = [prenom, nom].filter(Boolean).join(' ') || user.email?.split('@')[0] || '';
+      setForm(f => ({ ...f, name: fullName, email: user.email || '' }));
+      setIsLoggedIn(true);
+    });
+  }, []);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -141,28 +156,30 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
-                          Nom complet <span className="text-rose-400">*</span>
+                          Nom complet {!isLoggedIn && <span className="text-rose-400">*</span>}
                         </label>
                         <input
                           type="text"
                           value={form.name}
-                          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                          onChange={e => !isLoggedIn && setForm(f => ({ ...f, name: e.target.value }))}
+                          readOnly={isLoggedIn}
                           placeholder="Jean Dupont"
-                          className={`w-full px-3 py-2.5 text-sm ${errors.name ? 'ring-rose-400' : ''}`}
+                          className={`w-full px-3 py-2.5 text-sm ${errors.name ? 'ring-rose-400' : ''} ${isLoggedIn ? 'opacity-60 cursor-default' : ''}`}
                         />
                         {errors.name && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.name}</p>}
                       </div>
 
                       <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
-                          Email <span className="text-rose-400">*</span>
+                          Email {!isLoggedIn && <span className="text-rose-400">*</span>}
                         </label>
                         <input
                           type="email"
                           value={form.email}
-                          onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                          onChange={e => !isLoggedIn && setForm(f => ({ ...f, email: e.target.value }))}
+                          readOnly={isLoggedIn}
                           placeholder="jean@email.com"
-                          className={`w-full px-3 py-2.5 text-sm ${errors.email ? 'ring-rose-400' : ''}`}
+                          className={`w-full px-3 py-2.5 text-sm ${errors.email ? 'ring-rose-400' : ''} ${isLoggedIn ? 'opacity-60 cursor-default' : ''}`}
                         />
                         {errors.email && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.email}</p>}
                       </div>
