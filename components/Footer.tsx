@@ -31,6 +31,7 @@ export default function Footer() {
             <Link href="/" className="footer-link">Simulateur</Link>
             <Link href="/connexion" className="footer-link">Se connecter</Link>
             <Link href="/inscription" className="footer-link">Créer un compte</Link>
+            <Link href="/contact" className="footer-link">Contact</Link>
           </div>
 
         </div>
@@ -42,7 +43,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-8">
             <a href="#" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Confidentialité</a>
-            <a href="mailto:contact@freelance-simulateur.fr" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Contact</a>
+            <Link href="/contact" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Contact</Link>
           </div>
         </div>
       </div>
