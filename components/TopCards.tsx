@@ -79,22 +79,28 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
 
         {/* Situation Fiscale */}
         <div className="card-pro px-3 py-3 border-l-4 border-l-amber-500 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-2 rounded-xl">
-              <Users className="w-3.5 h-3.5" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-2 rounded-xl">
+                <Users className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Foyer<br/>Fiscal</p>
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Situation<br/>Fiscale</p>
+            <button
+              type="button"
+              className="expand-trigger shadow-sm rounded-full p-1 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              onClick={() => togglePanel('fiscal')}
+              aria-label="Ouvrir les paramètres fiscaux"
+            >
+              <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'fiscal' ? 'rotate-180' : ''}`} />
+            </button>
           </div>
-          <p className="font-900 text-slate-900 dark:text-white text-base tracking-tight">Impôts</p>
-          <select
-            value={sim.state.taxParts}
-            onChange={(e) => sim.setters.setTaxParts(Number(e.target.value))}
-            className="w-full text-xs font-bold h-6"
-          >
-            <option value="1">1 part</option>
-            <option value="2">2 pts</option>
-            <option value="3">3 pts</option>
-          </select>
+          <p className="font-900 text-slate-900 dark:text-white text-base tracking-tight">
+            {sim.state.taxParts} parts
+          </p>
+          <p className="text-[9px] text-slate-400 font-bold">
+            {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enf.` : ''}
+          </p>
         </div>
 
       </div>
@@ -170,17 +176,21 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <div className="flex items-center gap-4">
             <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-3 rounded-2xl"><Users className="w-5 h-5" /></div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Situation Fiscale</p>
-              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">Impôts</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Foyer Fiscal</p>
+              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{sim.state.taxParts} parts</p>
+              <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enfant${sim.state.nbEnfants > 1 ? 's' : ''}` : ''}
+              </p>
             </div>
           </div>
-          <div className="flex flex-col items-end">
-            <select value={sim.state.taxParts} onChange={(e) => sim.setters.setTaxParts(Number(e.target.value))} className="w-20 text-xs font-bold h-7">
-              <option value="1">1 part</option>
-              <option value="2">2 pts</option>
-              <option value="3">3 pts</option>
-            </select>
-          </div>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1.5 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            onClick={() => togglePanel('fiscal')}
+            aria-label="Ouvrir les paramètres fiscaux"
+          >
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${activePanel === 'fiscal' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
       </div>
