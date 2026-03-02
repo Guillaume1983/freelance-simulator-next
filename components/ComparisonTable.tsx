@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText, Rocket } from 'lucide-react';
+import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText, Rocket, Info } from 'lucide-react';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -490,6 +490,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         </div>
         <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>
+
+      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 py-3 flex items-center gap-1">
+        <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
+      </p>
 
       {/* ── PDF Comparatif (masqué) ── */}
       <div style={{ display: 'none' }}>
