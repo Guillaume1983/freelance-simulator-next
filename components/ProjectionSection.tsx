@@ -132,7 +132,7 @@ export default function ProjectionSection({
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
       {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
-      <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b dark:border-slate-800 rounded-t-2xl">
+      <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
 
         {/* Sélecteur de régime — desktop uniquement (mobile a le sien plus bas) */}
         <div className="hidden md:flex gap-1 flex-wrap">
@@ -277,7 +277,7 @@ export default function ProjectionSection({
       <div className="block md:hidden">
 
         {/* Contrôle mobile : sélecteur régime + slider croissance + export */}
-        <div className="px-4 pt-3 pb-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+        <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800 space-y-3">
           <div className="flex gap-1 flex-wrap">
             {allRegimes.map((id: string) => (
               <button
@@ -329,11 +329,11 @@ export default function ProjectionSection({
             return (
               <div
                 key={i}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-2xl bg-white dark:bg-[#020617] border border-slate-200 dark:border-slate-800 shadow-lg"
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-2xl bg-white dark:bg-[#020617] border shadow-lg"
               >
                 {/* Bande couleur + header */}
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
-                <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b border-slate-200 dark:border-slate-800">
+                <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
                   {i === 0 && sim.state.acreEnabled
                     ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE −50% cotis</span>

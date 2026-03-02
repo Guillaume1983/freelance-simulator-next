@@ -304,9 +304,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 const data  = REGIME_ANALYSIS[r.id];
                 const color = REGIME_COLORS[r.id] ?? '#6366f1';
                 return (
-                  <td key={r.id} className="p-3 align-top">
+                  <td key={r.id} className="p-3 align-top" style={{ height: '1px' }}>
                     {data && (
-                      <div className="space-y-2">
+                      <div className="flex flex-col gap-2 h-full">
                         <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
                           <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
                             <CheckCircle size={10} /> Points Forts
@@ -330,7 +330,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                         </div>
                         <Link
                           href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
-                          className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
+                          className="mt-auto flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
                           style={{ background: color }}
                         >
                           <Rocket size={12} /> Je me lance en {r.id}
