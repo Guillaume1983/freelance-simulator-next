@@ -1,9 +1,8 @@
 import {
-  CHARGES_CATALOG,
-  CFE_PAR_VILLE,
   CitySize,
   SEUIL_TRIMESTRE_RETRAITE,
 } from './constants';
+import { runPipeline, buildContextFromInput } from './financial/pipeline';
 
 export type { CitySize };
 
@@ -79,27 +78,8 @@ export interface RegimeResult {
   salaireNet?: number;
   dividendesNets?: number;
   tauxNet?: number;
-}
-
-function getIK(km: number, cv: string): number {
-  const b: Record<string, { a: number; b: number; c: number }> = {
-    '4': { a: 0.529, b: 0.316, c: 0.370 },
-    '5': { a: 0.606, b: 0.340, c: 0.407 },
-    '6': { a: 0.665, b: 0.386, c: 0.455 },
-    '7': { a: 0.697, b: 0.415, c: 0.486 },
-  };
-  const r = b[cv] ?? b['6'];
-  return km <= 5000 ? km * r.a : km <= 20000 ? km * r.b + 1500 : km * r.c;
-}
-
-function computeIR(base: number, parts: number): number {
-  let b = (base * 0.9) / parts;
-  let r = 0;
-  if (b > 177106) { r += (b - 177106) * 0.45; b = 177106; }
-  if (b > 82341) { r += (b - 82341) * 0.41; b = 82341; }
-  if (b > 28797) { r += (b - 28797) * 0.30; b = 28797; }
-  if (b > 11294) { r += (b - 11294) * 0.11; }
-  return Math.max(0, r * parts);
+  /** Lignes financières pour traçabilité (Phase 3) */
+  lines?: import('./financial/types').FinancialLine[];
 }
 
 function retirementQuarters(beforeTax: number, isAssimile: boolean): number {
@@ -107,41 +87,27 @@ function retirementQuarters(beforeTax: number, isAssimile: boolean): number {
   return Math.min(4, Math.floor(beforeTax / threshold));
 }
 
-function buildFinancialContext(params: ProjectionParams & { annee?: number }): FinancialContext {
-  const {
-    tjm, days, taxParts, spouseIncome,
-    kmAnnuel, cvFiscaux, loyerPercu,
-    activeCharges, sectionsActive, portageComm, chargeAmounts,
-    acreEnabled, citySize, growthRate,
-    annee = 1,
-  } = params;
-
-  const ca = tjm * days * Math.pow(1 + growthRate, annee - 1);
-  const ik = sectionsActive.vehicule ? getIK(kmAnnuel, cvFiscaux) : 0;
-  const loyer = sectionsActive.loyer ? loyerPercu * 12 : 0;
-  const cfe = annee === 1 ? 0 : CFE_PAR_VILLE[citySize];
-  const avantages = params.avantagesOptimises ?? 1500;
-
-  let depensesPro = 0;
-  CHARGES_CATALOG.forEach(c => {
-    if (activeCharges.includes(c.id)) {
-      depensesPro += (chargeAmounts[c.id] ?? c.amount) * 12;
-    }
-  });
-  const materiel = params.materielAnnuel ?? 0;
-  depensesPro += materiel / 3;
-
+function toPipelineInput(params: ProjectionParams & { annee?: number }) {
   return {
-    ca,
-    depensesPro,
-    indemnitesKm: ik,
-    loyer,
-    avantagesOptimises: avantages,
-    cfe,
-    taxParts,
-    spouseIncome,
-    acreActive: acreEnabled && annee === 1,
-    fraisGestionPortage: portageComm,
+    tjm: params.tjm,
+    days: params.days,
+    growthRate: params.growthRate,
+    annee: params.annee ?? 1,
+    activeCharges: params.activeCharges,
+    chargeAmounts: params.chargeAmounts,
+    materielAnnuel: params.materielAnnuel ?? 0,
+    materielActive: (params.materielAnnuel ?? 0) > 0,
+    kmAnnuel: params.kmAnnuel,
+    cvFiscaux: params.cvFiscaux,
+    vehiculeActive: params.sectionsActive.vehicule,
+    loyerPercu: params.loyerPercu,
+    loyerActive: params.sectionsActive.loyer,
+    avantagesOptimises: params.avantagesOptimises ?? 1500,
+    taxParts: params.taxParts,
+    spouseIncome: params.spouseIncome,
+    acreEnabled: params.acreEnabled,
+    citySize: params.citySize,
+    portageComm: params.portageComm,
     typeActiviteMicro: params.typeActiviteMicro ?? 'BNC',
     prelevementLiberatoire: params.prelevementLiberatoire ?? false,
     remunerationDirigeantMensuelle: params.remunerationDirigeantMensuelle ?? 1,
@@ -152,9 +118,9 @@ function buildFinancialContext(params: ProjectionParams & { annee?: number }): F
 export function calculateRegimes(
   params: ProjectionParams & { annee?: number }
 ): RegimeResult[] {
-  const ctx = buildFinancialContext(params);
-  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm;
-  const acreActif = ctx.acreActive;
+  const pipelineInput = toPipelineInput(params);
+  const ctx = buildContextFromInput(pipelineInput);
+  const chargeFixes = ctx.depensesPro;
 
   const REGIMES = [
     { id: 'Portage', class: 'portage', mental: 0, safety: 'Haut', assimile: true },
@@ -164,68 +130,52 @@ export function calculateRegimes(
     { id: 'SASU', class: 'sasu', mental: 5, safety: 'Dirigeant', assimile: true },
   ];
 
-  return REGIMES.map(r => {
+  const pipelineResults = runPipeline(pipelineInput);
+
+  return pipelineResults.map((pr, i) => {
+    const r = REGIMES[i];
+    const lines = pr.lines;
+
+    const getAmt = (id: string) => lines.find(l => l.id === id)?.amount ?? 0;
+
+    const cotis = getAmt('portage_cotis') || getAmt('micro_cotis') || getAmt('eurl_ir_cotis') || getAmt('eurl_is_cotis');
+    const beforeTax = getAmt('portage_remuneration') || getAmt('micro_remuneration') || getAmt('eurl_ir_remuneration') || getAmt('eurl_is_remuneration') || (getAmt('sasu_dividendes') ? getAmt('sasu_dividendes') / 0.70 : 0);
+    const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || getAmt('sasu_ir');
+
+    let fees = 0;
+    if (r.id === 'Micro') fees = 0;
+    else fees = chargeFixes;
+
     const res: RegimeResult = {
-      ...r, ca: ctx.ca, fees: 0, cotis: 0, ir: 0, beforeTax: 0, net: 0, l: 0,
-      retirementQuarters: 0,
+      ...r,
+      ca: ctx.ca,
+      fees,
+      cotis,
+      ir,
+      beforeTax,
+      net: pr.net,
+      l: ctx.loyer,
+      retirementQuarters: retirementQuarters(beforeTax, r.assimile),
       depensesPro: ctx.depensesPro,
       indemnitesKm: ctx.indemnitesKm,
       loyerPercu: ctx.loyer,
       avantagesOptimises: ctx.avantagesOptimises,
+      tauxNet: ctx.ca > 0 ? (pr.net / ctx.ca) * 100 : 0,
+      lines: pr.lines,
     };
 
-    if (r.id === 'Micro') {
-      const cotisRate = acreActif ? 0.211 * 0.5 : 0.211;
-      res.cotis = ctx.ca * cotisRate;
-      res.fees = ctx.cfe;
-      res.beforeTax = ctx.ca - res.cotis - ctx.cfe;
-      res.ir = ctx.prelevementLiberatoire
-        ? ctx.ca * 0.022
-        : computeIR(ctx.ca * 0.66 + ctx.spouseIncome, ctx.taxParts);
-    } else if (r.id === 'Portage') {
-      const comm = ctx.ca * (ctx.fraisGestionPortage / 100);
-      res.fees = chargeFixes + comm;
-      const base = ctx.ca - res.fees;
-      const cotisRate = acreActif ? 0.45 * 0.5 : 0.45;
-      res.cotis = base * cotisRate;
-      res.beforeTax = base - res.cotis;
-      res.l = ctx.loyer;
-      res.ir = computeIR(res.beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
-    } else if (r.id === 'EURL IR') {
-      res.fees = chargeFixes + ctx.cfe;
-      const base = ctx.ca - res.fees;
-      const cotisRate = acreActif ? 0.40 * 0.25 : 0.40;
-      res.cotis = base * cotisRate;
-      res.beforeTax = base - res.cotis;
-      res.l = ctx.loyer;
-      res.ir = computeIR(res.beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
-    } else if (r.id === 'EURL IS') {
-      res.fees = chargeFixes + ctx.cfe;
-      res.beforeTax = (ctx.ca - res.fees) / 1.45;
-      const cotisRate = acreActif ? 0.45 * 0.25 : 0.45;
-      res.cotis = res.beforeTax * cotisRate;
-      res.l = ctx.loyer;
-      res.ir = computeIR(res.beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
-      res.resultatSociete = ctx.ca - res.fees;
-      res.isSociete = Math.max(0, res.resultatSociete - res.beforeTax) * 0.25;
-      res.salaireNet = res.beforeTax;
+    if (r.id === 'EURL IS') {
+      res.resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      res.isSociete = getAmt('eurl_is_is');
+      res.salaireNet = beforeTax;
       res.dividendesNets = 0;
-    } else {
-      res.fees = chargeFixes + ctx.cfe;
-      const base = ctx.ca - res.fees;
-      const is = base * 0.20;
-      res.beforeTax = base - is;
-      res.ir = res.beforeTax * 0.30;
-      res.l = ctx.loyer;
-      res.resultatSociete = base;
-      res.isSociete = is;
+    } else if (r.id === 'SASU') {
+      res.resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      res.isSociete = getAmt('sasu_is');
       res.salaireNet = 0;
-      res.dividendesNets = res.beforeTax * 0.70;
+      res.dividendesNets = getAmt('sasu_dividendes');
     }
 
-    res.net = Math.max(0, res.beforeTax + res.l - res.ir);
-    res.retirementQuarters = retirementQuarters(res.beforeTax, r.assimile);
-    res.tauxNet = ctx.ca > 0 ? (res.net / ctx.ca) * 100 : 0;
     return res;
   });
 }

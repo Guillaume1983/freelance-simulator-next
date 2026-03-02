@@ -2,6 +2,7 @@
 import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
+import { getDetailTextFromLines } from '@/lib/financial';
 import { FileBarChart2, Info, Eye, EyeOff } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
@@ -130,7 +131,8 @@ export default function ProjectionSection({
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
-    { label: 'Charges & IK déductibles',      key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
+    { label: 'Dépenses pro cochées',         key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
+    { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Cotisations Sociales',          key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: true  },
     { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
@@ -140,35 +142,8 @@ export default function ProjectionSection({
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
 
-  const getDetailText = (r: any, key: string): string => {
-    const f = (v: number) => Math.round(v).toLocaleString() + ' €';
-    switch (key) {
-      case 'ca':        return `${sim.state.tjm} € × ${sim.state.days} j × croissance`;
-      case 'fees':
-        if (r.id === 'Micro')   return r.fees > 0 ? `CFE = ${f(r.fees)}` : 'Aucune charge déductible';
-        if (r.id === 'Portage') return `Commission ${sim.state.portageComm}% + Charges + IK`;
-        return `Charges + IK + CFE`;
-      case 'cotis':
-        if (r.id === 'Micro')   return `${f(r.ca)} × 21,1%`;
-        if (r.id === 'Portage') return `Base nette × 45%`;
-        if (r.id === 'EURL IR') return `(CA − Charges) × 40%`;
-        if (r.id === 'EURL IS') return `Rémunération × 45%`;
-        return `IS 20% (inclus dans rémunération)`;
-      case 'beforeTax':
-        if (r.id === 'EURL IS') return `(${f(r.ca)} − ${f(r.fees)}) ÷ 1,45`;
-        if (r.id === 'SASU')    return `(${f(r.ca)} − ${f(r.fees)}) × 80% (IS 20%)`;
-        return `${f(r.ca)} − ${f(r.fees)} − ${f(r.cotis)}`;
-      case 'ir':
-        if (r.id === 'Micro') return `Barème IR (base = CA × 66%)`;
-        if (r.id === 'SASU')  return `Rémunération × 30% (PFU)`;
-        return `Barème progressif IR — ${sim.state.taxParts} parts`;
-      case 'net':
-        return r.l > 0
-          ? `${f(r.beforeTax)} − ${f(r.ir)} + Loyer ${f(r.l)}`
-          : `${f(r.beforeTax)} − ${f(r.ir)}`;
-      default: return '';
-    }
-  };
+  const getDetailText = (r: any, key: string): string =>
+    getDetailTextFromLines(r, key, sim);
 
   return (
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
@@ -277,12 +252,22 @@ export default function ProjectionSection({
                   </td>
                   {projections.map((yr, i) => {
                     const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                    const val = row.monthly ? r[row.key] / 12 : r[row.key];
+                    let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                    if (row.key === 'portageCommission') {
+                      if (activeRegime !== 'Portage') val = null;
+                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                    }
                     return (
                       <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${row.isFinal ? 'text-lg' : 'text-sm'} ${row.color}`}>
-                        {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
-                        {fmt(val)}
-                        {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
+                        {val === null ? (
+                          '—'
+                        ) : (
+                          <>
+                            {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
+                            {fmt(val)}
+                            {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
+                          </>
+                        )}
                         {row.isFinal && (
                           <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
                         )}
@@ -436,7 +421,11 @@ export default function ProjectionSection({
                 {/* Métriques */}
                 <div className="px-4 py-3 space-y-1.5">
                   {rows.map((row) => {
-                    const val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
+                    let val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
+                    if (r && row.key === 'portageCommission') {
+                      if (activeRegime !== 'Portage') val = null;
+                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                    }
                     return (
                       <div key={row.key}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
@@ -446,8 +435,12 @@ export default function ProjectionSection({
                         }`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
-                            {row.prefix}{val !== null ? fmt(val) : '—'}
-                            {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
+                            {val !== null ? (
+                              <>
+                                {row.prefix}{fmt(val)}
+                                {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
+                              </>
+                            ) : '—'}
                           </span>
                         </div>
                         {showDetails && r && (
@@ -494,10 +487,14 @@ export default function ProjectionSection({
                   <td style={{ padding: '5px 8px', fontWeight: row.isFinal ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
                   {projections.map((yr, j) => {
                     const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                    const val = row.monthly ? r[row.key] / 12 : r[row.key];
+                    let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                    if (row.key === 'portageCommission') {
+                      if (activeRegime !== 'Portage') val = null;
+                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                    }
                     return (
                       <td key={j} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: '1px solid #e2e8f0', color: row.isFinal && j === 4 ? '#4f46e5' : 'inherit' }}>
-                        {row.prefix}{fmt(val)}{row.monthly ? '/mois' : ''}
+                        {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
                       </td>
                     );
                   })}

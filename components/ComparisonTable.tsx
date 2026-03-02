@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
 import { AlertCircle, AlertTriangle, CheckCircle, FileText, Rocket, Info, Eye, EyeOff } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
+import { getDetailTextFromLines } from '@/lib/financial';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -151,45 +152,26 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        div: 1  },
-    { label: 'Charges & IK déductibles',      key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
+    { label: 'Dépenses pro cochées',         key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
+    { label: 'Commission de portage',        key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations Sociales',          key: 'cotis',     div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', div: 12, highlight: true },
     { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        div: 1,  prefix: '-', color: 'text-rose-600' },
     { label: 'DISPONIBLE FINAL (Cash-out)',   key: 'net',       div: 12, isFinal: true },
   ];
 
-  const getDisplayValue = (r: any, row: typeof rows[number]) => (r[row.key] as number) / row.div;
+  const getDisplayValue = (r: any, row: typeof rows[number]) => {
+    if (row.key === 'portageCommission') {
+      if (r.id !== 'Portage') return null;
+      const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+      return commission / row.div;
+    }
+    return (r[row.key] as number) / row.div;
+  };
   const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
 
-  const getDetailText = (r: any, key: string): string => {
-    const f = (v: number) => Math.round(v).toLocaleString() + ' €';
-    switch (key) {
-      case 'ca':        return `${sim.state.tjm} € × ${sim.state.days} jours`;
-      case 'fees':
-        if (r.id === 'Micro')   return r.fees > 0 ? `CFE = ${f(r.fees)}` : 'Aucune charge déductible';
-        if (r.id === 'Portage') return `Commission ${sim.state.portageComm}% + Charges + IK`;
-        return `Charges + IK + CFE`;
-      case 'cotis':
-        if (r.id === 'Micro')    return `${f(r.ca)} × 21,1%`;
-        if (r.id === 'Portage')  return `Base nette × 45%`;
-        if (r.id === 'EURL IR')  return `(CA − Charges) × 40%`;
-        if (r.id === 'EURL IS')  return `Rémunération × 45%`;
-        return `IS 20% (inclus dans rémunération)`;
-      case 'beforeTax':
-        if (r.id === 'EURL IS') return `(${f(r.ca)} − ${f(r.fees)}) ÷ 1,45`;
-        if (r.id === 'SASU')    return `(${f(r.ca)} − ${f(r.fees)}) × 80% (IS 20%)`;
-        return `${f(r.ca)} − ${f(r.fees)} − ${f(r.cotis)}`;
-      case 'ir':
-        if (r.id === 'Micro') return `Barème IR (base = CA × 66%)`;
-        if (r.id === 'SASU')  return `Rémunération × 30% (PFU)`;
-        return `Barème progressif IR — ${sim.state.taxParts} parts`;
-      case 'net':
-        return r.l > 0
-          ? `${f(r.beforeTax)} − ${f(r.ir)} + Loyer ${f(r.l)}`
-          : `${f(r.beforeTax)} − ${f(r.ir)}`;
-      default: return '';
-    }
-  };
+  const getDetailText = (r: any, key: string): string =>
+    getDetailTextFromLines(r, key, sim);
 
   const RetirementBadge = ({ quarters }: { quarters: number }) => (
     <span title={quarters >= 4 ? '4 trimestres retraite validés' : `~${quarters}/4 trimestres`} className="text-[10px]">
@@ -277,7 +259,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       key={r.id}
                       className={`p-4 text-center font-bold ${(row as any).isFinal ? 'text-lg' : 'text-sm'} ${(row as any).color || ''}`}
                     >
-                      {(row as any).prefix} {fmt(getDisplayValue(r, row))}
+                      {(() => {
+                        const val = getDisplayValue(r, row);
+                        if (val === null) return '—';
+                        return <>{(row as any).prefix} {fmt(val)}</>;
+                      })()}
                     </td>
                   ))}
                 </tr>
@@ -471,8 +457,16 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       }`}>
                         <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
                         <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
-                          {(row as any).prefix} {fmt(getDisplayValue(r, row))}
-                          <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
+                          {(() => {
+                            const val = getDisplayValue(r, row);
+                            if (val === null) return '—';
+                            return (
+                              <>
+                                {(row as any).prefix} {fmt(val)}
+                                <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
+                              </>
+                            );
+                          })()}
                         </span>
                       </div>
                       {showDetails && (
@@ -551,7 +545,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             <tbody>
               {[
                 { label: 'CA Annuel',      key: 'ca' },
-                { label: 'Charges & IK',   key: 'fees' },
+                { label: 'Dépenses pro',   key: 'fees' },
+                { label: 'Commission portage', key: 'portageCommission' },
                 { label: 'Cotisations',    key: 'cotis' },
                 { label: 'Net avant IR',   key: 'beforeTax', monthly: true },
                 { label: 'Impôts (IR/IS)', key: 'ir' },
@@ -561,7 +556,14 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   <td style={{ padding: '5px 8px', fontWeight: (row as any).monthly ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
                   {regimes.map((r: any) => (
                     <td key={r.id} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: (row as any).monthly ? 900 : 'normal', borderBottom: '1px solid #e2e8f0' }}>
-                      {(row as any).monthly ? fmt((r[row.key] as number) / 12) + '/mois' : fmt(r[row.key] as number)}
+                      {(() => {
+                        if (row.key === 'portageCommission') {
+                          if (r.id !== 'Portage') return '—';
+                          const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                          return fmt(commission);
+                        }
+                        return (row as any).monthly ? fmt((r[row.key] as number) / 12) + '/mois' : fmt(r[row.key] as number);
+                      })()}
                     </td>
                   ))}
                 </tr>

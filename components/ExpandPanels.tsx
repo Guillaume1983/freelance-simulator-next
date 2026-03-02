@@ -4,6 +4,13 @@ import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift } from 'lu
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
+  const totalDepensesMensuelles = (
+    CHARGES_CATALOG.reduce((sum, item) => {
+      if (!sim.state.activeCharges.includes(item.id)) return sum;
+      const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
+      return sum + amount;
+    }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
+  );
 
   return (
     <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -23,7 +30,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             <div className="text-right">
               <span className="text-[9px] font-black text-rose-500 uppercase italic">Total mensuel</span>
               <p className="text-xl font-900 text-slate-900 dark:text-white leading-none">
-                {Math.round(sim.resultats[0].fees / 12)} €
+                {Math.round(totalDepensesMensuelles)} €
               </p>
             </div>
           </div>
