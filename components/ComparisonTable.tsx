@@ -3,6 +3,24 @@ import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText } from 'lucide-react';
 
+/* ── Pastilles de scroll mobile ── */
+function ScrollDots({ total, active }: { total: number; active: number }) {
+  return (
+    <div className="flex justify-center items-center gap-1.5 py-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-full transition-all duration-300"
+          style={{ width: i === active ? 20 : 6, height: 6, background: i === active ? '#6366f1' : '#cbd5e1' }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Style unifié pour tous les boutons export PDF ── */
+const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
+
 const REGIME_COLORS: Record<string, string> = {
   'Portage':  '#6366f1',
   'Micro':    '#f59e0b',
@@ -54,8 +72,18 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 export default function ComparisonTable({ sim }: { sim: any }) {
   const [openDetails, setOpenDetails] = useState<number[]>([]);
   const [openSettings, setOpenSettings] = useState<string | null>(null);
+  const [activeCard, setActiveCard] = useState(0);
 
-  const printRef    = useRef<HTMLDivElement>(null);
+  const printRef      = useRef<HTMLDivElement>(null);
+  const cardScrollRef = useRef<HTMLDivElement>(null);
+
+  const onCardScroll = () => {
+    const el = cardScrollRef.current;
+    if (!el) return;
+    const count = sim.resultats.length;
+    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count));
+    setActiveCard(Math.min(idx, count - 1));
+  };
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
@@ -122,10 +150,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
                   Comparatif<br />Stratégique
                 </h3>
-                <button
-                  onClick={handlePrint}
-                  className="cursor-pointer mt-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-500 dark:text-slate-400 hover:text-indigo-600 text-[9px] font-black uppercase tracking-wide transition-colors"
-                >
+                <button onClick={handlePrint} className={`mt-3 ${PDF_BTN}`}>
                   <FileText size={11} /> Export PDF
                 </button>
               </th>
@@ -235,14 +260,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
             Comparatif stratégique
           </h3>
-          <button
-            onClick={handlePrint}
-            className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-500 dark:text-slate-400 hover:text-indigo-600 text-[9px] font-black uppercase tracking-wide transition-colors"
-          >
+          <button onClick={handlePrint} className={PDF_BTN}>
             <FileText size={11} /> Export PDF
           </button>
         </div>
-        <div className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3">
+        <div
+          ref={cardScrollRef}
+          onScroll={onCardScroll}
+          className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2"
+        >
           {regimes.map((r: any) => {
             const isWinner = r.id === winnerId;
             const color    = REGIME_COLORS[r.id] ?? '#6366f1';
@@ -312,6 +338,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             );
           })}
         </div>
+        <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>
 
       {/* ── PDF Comparatif (masqué) ── */}

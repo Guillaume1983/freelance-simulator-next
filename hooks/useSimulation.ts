@@ -34,7 +34,7 @@ export const useSimulation = () => {
   // --- Paramètres projection ---
   const [acreEnabled, setAcreEnabled] = useState(true);
   const [citySize, setCitySize] = useState<CitySize>('moyenne');
-  const [growthRate, setGrowthRate] = useState(15);
+  const [growthRate, setGrowthRate] = useState(2);
 
   // --- Auth + sync Supabase ---
   const [userId, setUserId] = useState<string | null>(null);

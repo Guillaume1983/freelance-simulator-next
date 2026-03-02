@@ -58,7 +58,7 @@ create table public.simulation_settings (
   -- Projection
   acre_enabled     boolean      not null default true,
   city_size        text         not null default 'moyenne',  -- petite | moyenne | grande
-  growth_rate      integer      not null default 15,         -- taux de croissance CA en %
+  growth_rate      integer      not null default 2,           -- taux de croissance CA en %
 
   -- Méta
   updated_at       timestamptz  default now()

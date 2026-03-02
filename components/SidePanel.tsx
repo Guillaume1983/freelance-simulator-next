@@ -113,7 +113,7 @@ export default function SidePanel({ selectedId }: { selectedId: string }) {
           className="cursor-pointer flex items-center justify-center gap-3 w-full px-6 py-4 rounded-2xl text-white font-black text-sm md:text-base uppercase tracking-wider transition-all duration-200 hover:opacity-90 hover:shadow-xl shadow-lg"
           style={{ background: color }}
         >
-          <Rocket size={18} /> Je me lance avec {selectedId}
+          <Rocket size={18} /> Je me lance en {selectedId}
         </Link>
 
       </div>

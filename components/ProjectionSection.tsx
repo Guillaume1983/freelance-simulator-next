@@ -1,9 +1,27 @@
 'use client';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
-import { TrendingUp, FileBarChart2, Info } from 'lucide-react';
+import { TrendingUp, FileBarChart2, FileText, Info } from 'lucide-react';
 import SidePanel from './SidePanel';
+
+/* ── Pastilles de scroll mobile ── */
+function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
+  return (
+    <div className="flex justify-center items-center gap-1.5 py-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-full transition-all duration-300"
+          style={{ width: i === active ? 20 : 6, height: 6, background: i === active ? color : '#cbd5e1' }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Style unifié pour tous les boutons export PDF ── */
+const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage':  '#6366f1',
@@ -62,7 +80,9 @@ export default function ProjectionSection({
   activeRegime: string;
   setActiveRegime: (id: string) => void;
 }) {
-  const printBizRef = useRef<HTMLDivElement>(null);
+  const printBizRef    = useRef<HTMLDivElement>(null);
+  const yearScrollRef  = useRef<HTMLDivElement>(null);
+  const [activeYear, setActiveYear] = useState(0);
 
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
@@ -88,6 +108,14 @@ export default function ProjectionSection({
   }), [sim.state]);
 
   const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+
+  const onYearScroll = () => {
+    const el = yearScrollRef.current;
+    if (!el) return;
+    const count = projections.length;
+    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count));
+    setActiveYear(Math.min(idx, count - 1));
+  };
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
@@ -138,15 +166,15 @@ export default function ProjectionSection({
           ))}
         </div>
 
-        {/* Croissance CA — desktop uniquement (mobile a le sien plus bas) */}
-        <div className="hidden md:block space-y-0.5 min-w-[160px] ml-auto">
+        {/* Croissance CA — desktop uniquement */}
+        <div className="hidden md:block space-y-0.5 min-w-[180px] ml-auto">
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
             Croissance CA / an
             <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>
           </label>
           <input
             type="range"
-            min={0} max={50} step={5}
+            min={0} max={50} step={1}
             value={sim.state.growthRate}
             onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
             className="w-full accent-indigo-600"
@@ -155,6 +183,11 @@ export default function ProjectionSection({
             <span>0%</span><span>25%</span><span>50%</span>
           </div>
         </div>
+
+        {/* Export Business Plan — desktop uniquement */}
+        <button onClick={handlePrintBiz} className={`hidden md:flex ${PDF_BTN}`}>
+          <FileBarChart2 size={12} /> Business Plan
+        </button>
       </div>
 
       {/* ── Tableau Projections (desktop) ── */}
@@ -163,7 +196,7 @@ export default function ProjectionSection({
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
 
-              {/* Cellule haut-gauche : PROJECTIONS + bouton Business Plan */}
+              {/* Cellule haut-gauche : PROJECTIONS */}
               <th className="p-6 text-left border-b dark:border-slate-800 min-w-[200px]">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">Projections</h3>
                 <div className="flex items-center gap-2 mt-2">
@@ -171,12 +204,6 @@ export default function ProjectionSection({
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
-                <button
-                  onClick={handlePrintBiz}
-                  className="cursor-pointer mt-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-wide transition-colors"
-                >
-                  <FileBarChart2 size={11} /> Business Plan
-                </button>
               </th>
 
               {/* Colonnes années (5 ans) */}
@@ -291,7 +318,7 @@ export default function ProjectionSection({
             </label>
             <input
               type="range"
-              min={0} max={50} step={5}
+              min={0} max={50} step={1}
               value={sim.state.growthRate}
               onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
               className="w-full accent-indigo-600"
@@ -300,17 +327,18 @@ export default function ProjectionSection({
               <span>0%</span><span>25%</span><span>50%</span>
             </div>
           </div>
-          {/* Export Business Plan (mobile) */}
-          <button
-            onClick={handlePrintBiz}
-            className="cursor-pointer flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-wide transition-colors"
-          >
-            <FileBarChart2 size={13} /> Business Plan PDF
+          {/* Export Business Plan (mobile) — style unifié */}
+          <button onClick={handlePrintBiz} className={PDF_BTN}>
+            <FileBarChart2 size={12} /> Business Plan PDF
           </button>
         </div>
 
         {/* Cartes années (scroll horizontal snap) */}
-        <div className="px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-4">
+        <div
+          ref={yearScrollRef}
+          onScroll={onYearScroll}
+          className="px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 pt-4"
+        >
           {projections.map((yr, i) => {
             const r = yr.find((x: any) => x.id === activeRegime) as any;
             return (
@@ -363,6 +391,7 @@ export default function ProjectionSection({
           })}
         </div>
 
+        <ScrollDots total={projections.length} active={activeYear} color={regimeColor} />
         <p className="text-[9px] text-slate-400 italic px-4 pb-3 flex items-center gap-1">
           <Info size={10} /> Simulation estimative — barèmes 2026.
         </p>
