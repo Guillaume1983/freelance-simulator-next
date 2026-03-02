@@ -154,7 +154,7 @@ export default function ProjectionSection({
         </div>
 
         {/* Croissance CA — desktop uniquement */}
-        <div className="hidden md:block space-y-0.5 min-w-[180px]">
+        <div className="hidden md:block space-y-0.5 min-w-[180px] ml-4">
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
             Croissance CA / an
             <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>

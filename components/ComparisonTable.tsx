@@ -295,48 +295,71 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               ))}
             </tr>
 
-            {/* ── Ligne Analyse Statutaire ── */}
+            {/* ── Ligne Points Forts ── */}
             <tr className="bg-white dark:bg-[#0f172a]">
-              <td className="p-4 border-r dark:border-slate-800 align-top">
+              <td className="px-4 pt-4 pb-2 border-r dark:border-slate-800 align-top">
                 <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Analyse<br />Statutaire</div>
               </td>
               {regimes.map((r: any) => {
-                const data  = REGIME_ANALYSIS[r.id];
-                const color = REGIME_COLORS[r.id] ?? '#6366f1';
+                const data = REGIME_ANALYSIS[r.id];
                 return (
-                  <td key={r.id} className="p-3 align-top" style={{ height: '1px' }}>
+                  <td key={r.id} className="px-3 pt-3 pb-1" style={{ height: '1px' }}>
                     {data && (
-                      <div className="flex flex-col gap-2 h-full">
-                        <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
-                          <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
-                            <CheckCircle size={10} /> Points Forts
-                          </h4>
-                          <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
-                            {data.forts.map(f => (
-                              <li key={f} className="flex gap-1.5">
-                                <span className="shrink-0 text-emerald-500">✓</span>
-                                {f}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20">
-                          <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
-                            <AlertCircle size={10} /> Vigilance
-                          </h4>
-                          <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
-                            {data.vigilance}
-                          </p>
-                        </div>
-                        <Link
-                          href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
-                          className="mt-auto flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
-                          style={{ background: color }}
-                        >
-                          <Rocket size={12} /> Je me lance en {r.id}
-                        </Link>
+                      <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20 h-full">
+                        <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
+                          <CheckCircle size={10} /> Points Forts
+                        </h4>
+                        <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
+                          {data.forts.map(f => (
+                            <li key={f} className="flex gap-1.5">
+                              <span className="shrink-0 text-emerald-500">✓</span>
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
+                  </td>
+                );
+              })}
+            </tr>
+
+            {/* ── Ligne Vigilance ── */}
+            <tr className="bg-white dark:bg-[#0f172a]">
+              <td className="border-r dark:border-slate-800" />
+              {regimes.map((r: any) => {
+                const data = REGIME_ANALYSIS[r.id];
+                return (
+                  <td key={r.id} className="px-3 py-1" style={{ height: '1px' }}>
+                    {data && (
+                      <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 h-full">
+                        <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
+                          <AlertCircle size={10} /> Vigilance
+                        </h4>
+                        <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {data.vigilance}
+                        </p>
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+
+            {/* ── Ligne Boutons Je me lance ── */}
+            <tr className="bg-white dark:bg-[#0f172a]">
+              <td className="border-r dark:border-slate-800" />
+              {regimes.map((r: any) => {
+                const color = REGIME_COLORS[r.id] ?? '#6366f1';
+                return (
+                  <td key={r.id} className="px-3 pt-1 pb-4">
+                    <Link
+                      href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
+                      className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
+                      style={{ background: color }}
+                    >
+                      <Rocket size={12} /> Je me lance en {r.id}
+                    </Link>
                   </td>
                 );
               })}
