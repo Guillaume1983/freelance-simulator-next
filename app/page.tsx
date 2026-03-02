@@ -6,7 +6,6 @@ import TopCards from '@/components/TopCards';
 import ExpandPanels from '@/components/ExpandPanels';
 import ComparisonTable from '@/components/ComparisonTable';
 import ProjectionSection from '@/components/ProjectionSection';
-import SidePanel from '@/components/SidePanel';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -31,24 +30,12 @@ export default function Home() {
           {/* ── Tableau comparatif (pleine largeur) ── */}
           <ComparisonTable sim={sim} />
 
-          {/* ── Tableau projection + panneau analyse (toujours visibles) ── */}
-          <div className="flex flex-col md:flex-row gap-6 items-start mt-6">
-
-            {/* Tableau projection */}
-            <div className="flex-1 min-w-0">
-              <ProjectionSection
-                sim={sim}
-                activeRegime={projectionRegime}
-                setActiveRegime={setProjectionRegime}
-              />
-            </div>
-
-            {/* Panneau analyse (sticky, desktop uniquement) */}
-            <div className="hidden md:block w-[300px] shrink-0">
-              <SidePanel selectedId={projectionRegime} />
-            </div>
-
-          </div>
+          {/* ── Tableau de projection 5 ans (contient le SidePanel intégré) ── */}
+          <ProjectionSection
+            sim={sim}
+            activeRegime={projectionRegime}
+            setActiveRegime={setProjectionRegime}
+          />
         </div>
 
         <Footer />

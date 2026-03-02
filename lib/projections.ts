@@ -147,7 +147,7 @@ export function calculateRegimes(
 }
 
 export function projeterSurNAns(params: ProjectionParams): RegimeResult[][] {
-  return [1, 2, 3].map(annee => calculateRegimes({ ...params, annee }));
+  return [1, 2, 3, 4, 5].map(annee => calculateRegimes({ ...params, annee }));
 }
 
 export function computeTaxParts(nbAdultes: number, nbEnfants: number): number {

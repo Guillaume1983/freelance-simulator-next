@@ -1,32 +1,46 @@
 'use client';
-import React, { useState } from 'react';
-import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText } from 'lucide-react';
 
-/* ── Histogramme vertical (répartition du CA) ── */
-function MiniVerticalBars({ ca, fees, cotis, ir, net }: {
+const REGIME_COLORS: Record<string, string> = {
+  'Portage':  '#6366f1',
+  'Micro':    '#f59e0b',
+  'EURL IR':  '#10b981',
+  'EURL IS':  '#3b82f6',
+  'SASU':     '#8b5cf6',
+};
+
+/* ── Barre unique segmentée (Charges → Cotis → IR → Net, de haut en bas) ── */
+function StackedBar({ ca, fees, cotis, ir, net }: {
   ca: number; fees: number; cotis: number; ir: number; net: number;
 }) {
   const total = Math.max(ca, 1);
-  const MAX_H = 52;
-  const bars = [
-    { value: fees,  color: '#fb7185', label: 'Chg' },
-    { value: cotis, color: '#fbbf24', label: 'Cot' },
-    { value: ir,    color: '#f87171', label: 'IR'  },
-    { value: net,   color: '#34d399', label: 'Net' },
+  const segs = [
+    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Chg' },
+    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cot' },
+    { pct: (ir    / total) * 100, color: '#f87171', label: 'IR'  },
+    { pct: (net   / total) * 100, color: '#34d399', label: 'Net' },
   ];
   return (
-    <div className="flex items-end justify-center gap-2 py-1">
-      {bars.map((bar, i) => {
-        const pct = (bar.value / total) * 100;
-        const h   = Math.max(2, (bar.value / total) * MAX_H);
-        return (
-          <div key={i} className="flex flex-col items-center gap-0.5">
-            <span className="text-[7px] font-black" style={{ color: bar.color }}>{Math.round(pct)}%</span>
-            <div className="w-5 rounded-t-sm transition-all duration-500" style={{ height: `${h}px`, background: bar.color }} />
-            <span className="text-[7px] text-slate-400 font-bold">{bar.label}</span>
-          </div>
-        );
-      })}
+    <div className="flex flex-col items-center gap-1.5 py-1">
+      <div className="w-10 rounded-xl overflow-hidden shadow-inner" style={{ height: 60 }}>
+        {segs.map((s, i) => (
+          <div
+            key={i}
+            style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
+            className="transition-all duration-500 w-full"
+            title={`${s.label} : ${Math.round(s.pct)}%`}
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+        {segs.map(s => (
+          <span key={s.label} className="text-[7px] font-black leading-tight" style={{ color: s.color }}>
+            {s.label} {Math.round(s.pct)}%
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -34,6 +48,13 @@ function MiniVerticalBars({ ca, fees, cotis, ir, net }: {
 export default function ComparisonTable({ sim }: { sim: any }) {
   const [openDetails, setOpenDetails] = useState<number[]>([]);
   const [openSettings, setOpenSettings] = useState<string | null>(null);
+
+  const printRef    = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
+    pageStyle: '@page { size: A4 landscape; margin: 12mm; }',
+  });
 
   const regimes  = sim.resultats;
   const winnerId = [...regimes].sort((a: any, b: any) => b.net - a.net)[0].id;
@@ -72,8 +93,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     );
   };
 
-  const getDisplayValue  = (r: any, row: typeof rows[number]) => (r[row.key] as number) / row.div;
-  const getMobileUnit    = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
+  const getDisplayValue = (r: any, row: typeof rows[number]) => (r[row.key] as number) / row.div;
+  const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
 
   const RetirementBadge = ({ quarters }: { quarters: number }) => (
     <span title={quarters >= 4 ? '4 trimestres retraite validés' : `~${quarters}/4 trimestres`} className="text-[10px]">
@@ -89,11 +110,20 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <table className="w-full border-separate border-spacing-0 table-fixed">
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
+
+              {/* Cellule haut-gauche avec bouton Export PDF */}
               <th className="p-6 text-left border-b dark:border-slate-800 w-[220px]">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
                   Comparatif<br />Stratégique
                 </h3>
+                <button
+                  onClick={handlePrint}
+                  className="cursor-pointer mt-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-500 dark:text-slate-400 hover:text-indigo-600 text-[9px] font-black uppercase tracking-wide transition-colors"
+                >
+                  <FileText size={11} /> Export PDF
+                </button>
               </th>
+
               {regimes.map((r: any) => (
                 <th key={r.id} className="p-4 relative pt-12 border-b dark:border-slate-800">
                   <div className={`header-band band-${r.class}`} />
@@ -182,8 +212,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 </div>
               </td>
               {regimes.map((r: any) => (
-                <td key={r.id} className="px-4 py-2">
-                  <MiniVerticalBars ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                <td key={r.id} className="px-4 py-3 text-center">
+                  <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
                 </td>
               ))}
             </tr>
@@ -191,7 +221,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         </table>
       </div>
 
-      {/* ── Vue mobile ── */}
+      {/* ── Vue mobile : cartes par régime ── */}
       <div className="block md:hidden p-4 pt-5">
         <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3 text-center">
           Comparatif stratégique
@@ -199,14 +229,16 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <div className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3">
           {regimes.map((r: any) => {
             const isWinner = r.id === winnerId;
+            const color    = REGIME_COLORS[r.id] ?? '#6366f1';
             return (
               <div
                 key={r.id}
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
+                <div className="h-1 w-full" style={{ background: color }} />
                 <button
                   onClick={e => { e.stopPropagation(); setOpenSettings(openSettings === r.id ? null : r.id); }}
-                  className={`absolute top-3 right-3 z-10 transition-colors ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
+                  className={`absolute top-4 right-3 z-10 transition-colors ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
                 >
                   <SlidersVertical size={14} />
                 </button>
@@ -231,42 +263,80 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     {fmt(r.net / 12)}
                     <span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
                   </div>
-                  <div className="flex items-center justify-center gap-1.5 mb-2">
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">🧠 {r.mental}/5</span>
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
-                  </div>
                   {isWinner && (
-                    <div className="bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <div className="mb-2 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                       <span>🏆</span> OPTIMUM
                     </div>
                   )}
-                  <div className="mt-3 w-full">
-                    <MiniVerticalBars ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  <div className="flex items-center justify-center gap-1.5 mt-2">
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">🧠 {r.mental}/5</span>
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
                   </div>
                 </div>
-                <div className="px-4 pb-4">
-                  <div className="space-y-2 mb-3">
-                    {rows.map((row) => (
-                      <div
-                        key={row.key}
-                        className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
-                          (row as any).isFinal ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
-                          : (row as any).highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
-                          : 'bg-slate-50/40 dark:bg-slate-900/20'
-                        }`}
-                      >
-                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
-                        <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
-                          {(row as any).prefix} {fmt(getDisplayValue(r, row))}
-                          <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="px-4 pb-4 space-y-2">
+                  {rows.map((row) => (
+                    <div
+                      key={row.key}
+                      className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
+                        (row as any).isFinal ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
+                        : (row as any).highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
+                        : 'bg-slate-50/40 dark:bg-slate-900/20'
+                      }`}
+                    >
+                      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                      <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
+                        {(row as any).prefix} {fmt(getDisplayValue(r, row))}
+                        <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* ── PDF Comparatif (masqué) ── */}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef} style={{ fontFamily: 'Arial, sans-serif', padding: '10mm', fontSize: 11 }}>
+          <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>Comparatif statuts freelance 2026</h1>
+            <p style={{ fontSize: 10, color: '#666', margin: '4px 0 0' }}>
+              CA : {fmt(sim.state.tjm * sim.state.days)} · {sim.state.taxParts} parts fiscales · freelance-simulateur.fr
+            </p>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+            <thead>
+              <tr style={{ background: '#f1f5f9' }}>
+                <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
+                {regimes.map((r: any) => (
+                  <th key={r.id} style={{ padding: '6px 8px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: 'CA Annuel',      key: 'ca' },
+                { label: 'Charges & IK',   key: 'fees' },
+                { label: 'Cotisations',    key: 'cotis' },
+                { label: 'Net avant IR',   key: 'beforeTax', monthly: true },
+                { label: 'Impôts (IR/IS)', key: 'ir' },
+                { label: 'NET MENSUEL',    key: 'net',       monthly: true },
+              ].map((row, i) => (
+                <tr key={i} style={{ background: (row as any).monthly ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                  <td style={{ padding: '5px 8px', fontWeight: (row as any).monthly ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
+                  {regimes.map((r: any) => (
+                    <td key={r.id} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: (row as any).monthly ? 900 : 'normal', borderBottom: '1px solid #e2e8f0' }}>
+                      {(row as any).monthly ? fmt((r[row.key] as number) / 12) + '/mois' : fmt(r[row.key] as number)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p style={{ fontSize: 8, color: '#999', marginTop: 8 }}>Simulation estimative — barèmes 2026.</p>
         </div>
       </div>
     </div>

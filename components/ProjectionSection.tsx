@@ -2,7 +2,8 @@
 import { useRef, useMemo } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
-import { TrendingUp, FileText, FileBarChart2, Info } from 'lucide-react';
+import { TrendingUp, FileBarChart2, Info } from 'lucide-react';
+import SidePanel from './SidePanel';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage':  '#6366f1',
@@ -12,31 +13,36 @@ const REGIME_COLORS: Record<string, string> = {
   'SASU':     '#8b5cf6',
 };
 
-/* ── Histogramme vertical ── */
-function MiniVerticalBars({ ca, fees, cotis, ir, net }: {
+/* ── Barre unique segmentée (Charges → Cotis → IR → Net, de haut en bas) ── */
+function StackedBar({ ca, fees, cotis, ir, net }: {
   ca: number; fees: number; cotis: number; ir: number; net: number;
 }) {
   const total = Math.max(ca, 1);
-  const MAX_H = 52;
-  const bars = [
-    { value: fees,  color: '#fb7185', label: 'Chg' },
-    { value: cotis, color: '#fbbf24', label: 'Cot' },
-    { value: ir,    color: '#f87171', label: 'IR'  },
-    { value: net,   color: '#34d399', label: 'Net' },
+  const segs = [
+    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Chg' },
+    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cot' },
+    { pct: (ir    / total) * 100, color: '#f87171', label: 'IR'  },
+    { pct: (net   / total) * 100, color: '#34d399', label: 'Net' },
   ];
   return (
-    <div className="flex items-end justify-center gap-2 py-1">
-      {bars.map((bar, i) => {
-        const pct = (bar.value / total) * 100;
-        const h   = Math.max(2, (bar.value / total) * MAX_H);
-        return (
-          <div key={i} className="flex flex-col items-center gap-0.5">
-            <span className="text-[7px] font-black" style={{ color: bar.color }}>{Math.round(pct)}%</span>
-            <div className="w-5 rounded-t-sm transition-all duration-500" style={{ height: `${h}px`, background: bar.color }} />
-            <span className="text-[7px] text-slate-400 font-bold">{bar.label}</span>
-          </div>
-        );
-      })}
+    <div className="flex flex-col items-center gap-1.5 py-1">
+      <div className="w-10 rounded-xl overflow-hidden shadow-inner" style={{ height: 60 }}>
+        {segs.map((s, i) => (
+          <div
+            key={i}
+            style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
+            className="transition-all duration-500 w-full"
+            title={`${s.label} : ${Math.round(s.pct)}%`}
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+        {segs.map(s => (
+          <span key={s.label} className="text-[7px] font-black leading-tight" style={{ color: s.color }}>
+            {s.label} {Math.round(s.pct)}%
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -50,17 +56,11 @@ export default function ProjectionSection({
   activeRegime: string;
   setActiveRegime: (id: string) => void;
 }) {
-  const printComparRef = useRef<HTMLDivElement>(null);
-  const printBizRef   = useRef<HTMLDivElement>(null);
+  const printBizRef = useRef<HTMLDivElement>(null);
 
-  const handlePrintCompar = useReactToPrint({
-    contentRef: printComparRef,
-    documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
-    pageStyle: '@page { size: A4 landscape; margin: 12mm; }',
-  });
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
-    documentTitle: 'BusinessPlan-Projection3ans-FreelanceSimulateur',
+    documentTitle: 'BusinessPlan-Projection5ans-FreelanceSimulateur',
     pageStyle: '@page { size: A4 portrait; margin: 15mm; }',
   });
 
@@ -106,7 +106,7 @@ export default function ProjectionSection({
             <TrendingUp size={18} />
           </div>
           <div>
-            <h2 className="text-sm font-black uppercase tracking-widest dark:text-white leading-none">Projection 3 ans</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest dark:text-white leading-none">Projection 5 ans</h2>
             <p className="text-[10px] text-slate-400 font-bold mt-0.5">
               ACRE an 1{sim.state.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
             </p>
@@ -149,46 +149,41 @@ export default function ProjectionSection({
             <span>0%</span><span>25%</span><span>50%</span>
           </div>
         </div>
+      </div>
 
-        {/* Exports PDF */}
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={handlePrintCompar}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase tracking-wide transition-colors border border-slate-200 dark:border-slate-700"
-          >
-            <FileText size={12} /> Comparatif
-          </button>
-          <button
-            onClick={handlePrintBiz}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-wide transition-colors"
-          >
-            <FileBarChart2 size={12} /> Business Plan
-          </button>
-        </div>
+      {/* ── Panneau analyse statutaire (desktop uniquement, entre contrôle et tableau) ── */}
+      <div className="hidden md:block px-4 md:px-6 pt-4">
+        <SidePanel selectedId={activeRegime} />
       </div>
 
       {/* ── Tableau Projections (desktop) ── */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full border-separate border-spacing-0 table-fixed">
+      <div className="hidden md:block overflow-x-auto mt-4">
+        <table className="w-full border-separate border-spacing-0">
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
 
-              {/* Cellule haut-gauche : PROJECTIONS */}
-              <th className="p-6 text-left border-b dark:border-slate-800 w-[220px]">
+              {/* Cellule haut-gauche : PROJECTIONS + bouton Business Plan */}
+              <th className="p-6 text-left border-b dark:border-slate-800 min-w-[200px]">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">Projections</h3>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="w-2 h-6 rounded-full shrink-0" style={{ background: regimeColor }} />
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
+                <button
+                  onClick={handlePrintBiz}
+                  className="cursor-pointer mt-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase tracking-wide transition-colors"
+                >
+                  <FileBarChart2 size={11} /> Business Plan
+                </button>
               </th>
 
-              {/* Colonnes années */}
-              {[0, 1, 2].map(i => {
-                const r = projections[i]?.find((x: any) => x.id === activeRegime);
+              {/* Colonnes années (5 ans) */}
+              {projections.map((yr, i) => {
+                const r = yr.find((x: any) => x.id === activeRegime);
                 return (
-                  <th key={i} className="p-4 relative pt-12 border-b dark:border-slate-800">
-                    <div className="header-band" style={{ background: regimeColor, opacity: 0.55 + i * 0.15 }} />
+                  <th key={i} className="p-4 relative pt-12 border-b dark:border-slate-800 min-w-[130px]">
+                    <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
                     <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
                     <div className="text-[9px] font-bold mt-0.5 text-slate-400">
                       {i === 0 && sim.state.acreEnabled ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
@@ -250,8 +245,8 @@ export default function ProjectionSection({
               {projections.map((yr, i) => {
                 const r = yr.find((x: any) => x.id === activeRegime) as any;
                 return (
-                  <td key={i} className="px-4 py-2">
-                    <MiniVerticalBars ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  <td key={i} className="px-4 py-3 text-center">
+                    <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
                   </td>
                 );
               })}
@@ -263,98 +258,96 @@ export default function ProjectionSection({
         </p>
       </div>
 
-      {/* ── Tableau Projections (mobile) ── */}
-      <div className="block md:hidden overflow-x-auto px-2 py-3">
-        <table className="w-full border-separate border-spacing-0 text-xs min-w-[340px]">
-          <thead>
-            <tr className="bg-slate-50 dark:bg-slate-900/60">
-              <th className="p-2 text-left text-[9px] font-black uppercase tracking-widest text-slate-400 border-b dark:border-slate-800 min-w-[120px]">Projections</th>
-              {[1, 2, 3].map(y => (
-                <th key={y} className="p-2 text-center border-b dark:border-slate-800">
-                  <div className="text-[9px] font-black uppercase" style={{ color: regimeColor }}>An {y}</div>
-                  <div className="text-[8px] text-slate-400 font-bold">
-                    {y === 1 && sim.state.acreEnabled ? 'ACRE' : y > 1 ? '+CFE' : '—'}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, idx) => (
-              <tr key={idx} className={row.isFinal ? 'bg-indigo-50/40 dark:bg-indigo-900/20 font-black' : row.highlight ? 'bg-slate-50/40 dark:bg-slate-900/20 font-bold' : ''}>
-                <td className="p-2 text-[8px] font-bold uppercase tracking-wider text-slate-400 border-b dark:border-slate-800/60">{row.label}</td>
-                {projections.map((yr, i) => {
-                  const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                  const val = row.monthly ? r[row.key] / 12 : r[row.key];
-                  return (
-                    <td key={i} className={`p-2 text-center text-[10px] border-b dark:border-slate-800/60 ${row.isFinal ? 'text-indigo-600 dark:text-indigo-400 font-black' : row.color}`}>
-                      {row.prefix}{fmt(val)}{row.monthly ? <span className="text-[8px] text-slate-400">/m</span> : null}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-            {/* Répartitions mobile */}
-            <tr className="bg-slate-50/20 dark:bg-slate-900/10">
-              <td className="p-2 text-[8px] font-black uppercase tracking-wider text-slate-400">Répartitions</td>
-              {projections.map((yr, i) => {
-                const r = yr.find((x: any) => x.id === activeRegime) as any;
-                return (
-                  <td key={i} className="px-2 py-1">
-                    <MiniVerticalBars ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
-                  </td>
-                );
-              })}
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {/* ── Vue mobile : cartes par année ── */}
+      <div className="block md:hidden">
 
-      {/* ══ PDF — Comparatif (masqué) ══ */}
-      <div style={{ display: 'none' }}>
-        <div ref={printComparRef} style={{ fontFamily: 'Arial, sans-serif', padding: '10mm', fontSize: 11 }}>
-          <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <h1 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>Comparatif statuts freelance 2026</h1>
-            <p style={{ fontSize: 10, color: '#666', margin: '4px 0 0' }}>
-              CA : {fmt(sim.state.tjm * sim.state.days)} · {sim.state.taxParts} parts fiscales · freelance-simulateur.fr
-            </p>
+        {/* Contrôle mobile : régime + croissance */}
+        <div className="px-4 py-3 flex flex-wrap gap-2 items-center border-b dark:border-slate-800">
+          <div className="flex gap-1 flex-wrap">
+            {allRegimes.map((id: string) => (
+              <button
+                key={id}
+                onClick={() => setActiveRegime(id)}
+                className={`px-2 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
+                  activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
+                }`}
+                style={{
+                  background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
+                  borderColor: REGIME_COLORS[id],
+                }}
+              >
+                {id}
+              </button>
+            ))}
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
-            <thead>
-              <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
-                {sim.resultats.map((r: any) => (
-                  <th key={r.id} style={{ padding: '6px 8px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { label: 'CA Annuel',      key: 'ca' },
-                { label: 'Charges & IK',   key: 'fees' },
-                { label: 'Cotisations',    key: 'cotis' },
-                { label: 'Net avant IR',   key: 'beforeTax', monthly: true },
-                { label: 'Impôts (IR/IS)', key: 'ir' },
-                { label: 'NET MENSUEL',    key: 'net', monthly: true },
-              ].map((row, i) => (
-                <tr key={i} style={{ background: row.monthly ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                  <td style={{ padding: '5px 8px', fontWeight: row.monthly ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
-                  {sim.resultats.map((r: any) => (
-                    <td key={r.id} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: row.monthly ? 900 : 'normal', borderBottom: '1px solid #e2e8f0' }}>
-                      {row.monthly ? fmt((r[row.key] as number) / 12) + '/mois' : fmt(r[row.key] as number)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="ml-auto text-[9px] font-black text-slate-400 uppercase">
+            +{sim.state.growthRate}%/an
+          </div>
         </div>
+
+        {/* Cartes années (scroll horizontal snap) */}
+        <div className="px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-4">
+          {projections.map((yr, i) => {
+            const r = yr.find((x: any) => x.id === activeRegime) as any;
+            return (
+              <div
+                key={i}
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-2xl bg-white dark:bg-[#020617] border shadow-lg"
+              >
+                {/* Bande couleur + header */}
+                <div className="h-1 w-full" style={{ background: regimeColor }} />
+                <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
+                  {i === 0 && sim.state.acreEnabled
+                    ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE −50% cotis</span>
+                    : <span className="text-[8px] text-slate-400 font-bold mt-0.5">+CFE</span>
+                  }
+                  <div className="text-3xl font-black mt-2 leading-none tracking-tighter" style={{ color: regimeColor }}>
+                    {r ? fmt(r.net / 12) : '—'}
+                    <span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-bold mt-0.5">{r ? fmt(r.net) : '—'} /an</div>
+                  <div className="mt-3">
+                    {r && <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />}
+                  </div>
+                </div>
+
+                {/* Métriques */}
+                <div className="px-4 py-3 space-y-2">
+                  {rows.map((row) => {
+                    const val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
+                    return (
+                      <div
+                        key={row.key}
+                        className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
+                          row.isFinal   ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
+                          : row.highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
+                          : 'bg-slate-50/40 dark:bg-slate-900/20'
+                        }`}
+                      >
+                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                        <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
+                          {row.prefix}{val !== null ? fmt(val) : '—'}
+                          {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-[9px] text-slate-400 italic px-4 pb-3 flex items-center gap-1">
+          <Info size={10} /> Simulation estimative — barèmes 2026.
+        </p>
       </div>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>
         <div ref={printBizRef} style={{ fontFamily: 'Arial, sans-serif', padding: '12mm', fontSize: 11 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 4px' }}>Business Plan Freelance — Projection 3 ans</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 4px' }}>Business Plan Freelance — Projection 5 ans</h1>
           <p style={{ fontSize: 10, color: '#666', margin: '0 0 16px' }}>
             Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm}€ · {sim.state.days} jours · +{sim.state.growthRate}%/an
           </p>
@@ -377,7 +370,7 @@ export default function ProjectionSection({
                     const r   = yr.find((x: any) => x.id === activeRegime) as any;
                     const val = row.monthly ? r[row.key] / 12 : r[row.key];
                     return (
-                      <td key={j} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: '1px solid #e2e8f0', color: row.isFinal && j === 2 ? '#4f46e5' : 'inherit' }}>
+                      <td key={j} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: '1px solid #e2e8f0', color: row.isFinal && j === 4 ? '#4f46e5' : 'inherit' }}>
                         {row.prefix}{fmt(val)}{row.monthly ? '/mois' : ''}
                       </td>
                     );
