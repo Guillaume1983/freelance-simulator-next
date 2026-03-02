@@ -2,11 +2,16 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle } from 'lucide-react';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import type { SaveStatus } from '@/hooks/useSimulation';
 
-export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDark: (d: boolean) => void }) {
+export default function Header({ isDark, setIsDark, saveStatus }: {
+  isDark: boolean;
+  setIsDark: (d: boolean) => void;
+  saveStatus?: SaveStatus;
+}) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -70,7 +75,7 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
   };
 
   return (
-    <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-[100]">
+    <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-100">
 
       {/* Barre principale */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-4">
@@ -106,6 +111,20 @@ export default function Header({ isDark, setIsDark }: { isDark: boolean, setIsDa
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+
+          {/* Indicateur de sauvegarde — visible uniquement si connecté */}
+          {user && saveStatus && saveStatus !== 'idle' && (
+            <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide transition-all duration-300 ${
+              saveStatus === 'saving' ? 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+              : saveStatus === 'saved' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600'
+              : 'bg-rose-50 dark:bg-rose-900/30 text-rose-500'
+            }`}>
+              {saveStatus === 'saving' && <Loader size={11} className="animate-spin" />}
+              {saveStatus === 'saved'  && <Check size={11} />}
+              {saveStatus === 'error'  && <AlertCircle size={11} />}
+              {saveStatus === 'saving' ? 'Sauvegarde…' : saveStatus === 'saved' ? 'Sauvegardé' : 'Erreur save'}
+            </div>
+          )}
 
           {user ? (
             /* ── UTILISATEUR CONNECTÉ ── */

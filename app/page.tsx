@@ -21,7 +21,7 @@ export default function Home() {
     <div className={isDark ? 'dark' : ''}>
       <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
 
-        <Header isDark={isDark} setIsDark={setIsDark} />
+        <Header isDark={isDark} setIsDark={setIsDark} saveStatus={sim.saveStatus} />
 
         {/* ── Intro avant les 4 blocs de paramètres ── */}
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 mt-6 mb-2">
