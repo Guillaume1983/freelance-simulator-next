@@ -15,8 +15,11 @@ export const CHARGES_CATALOG = [
   { id: 'compta', name: 'Expert-Comptable', amount: 160 },
   { id: 'mutuelle', name: 'Protection Sociale', amount: 140 },
   { id: 'assurance', name: 'Responsabilité Civile', amount: 45 },
+  { id: 'bureau', name: 'Bureau / Coworking', amount: 250 },
+  { id: 'formation', name: 'Formation & Développement pro', amount: 120 },
   { id: 'repas', name: 'Restauration', amount: 190 },
   { id: 'tel', name: 'Outils & Logiciels', amount: 90 },
+  { id: 'fraisBancaires', name: 'Frais bancaires / Compte pro', amount: 35 },
   { id: 'transport', name: 'Transport public', amount: 50 },
 ];
 

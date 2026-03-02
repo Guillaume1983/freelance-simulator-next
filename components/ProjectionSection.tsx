@@ -3,6 +3,9 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { FileBarChart2, Info, Eye, EyeOff } from 'lucide-react';
+import { useUser } from '@/hooks/useUser';
+import ConnectorModal from '@/components/ConnectorModal';
+import RegimeParamsInline from '@/components/RegimeParamsInline';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -83,6 +86,8 @@ export default function ProjectionSection({
   const yearScrollRef  = useRef<HTMLDivElement>(null);
   const [activeYear, setActiveYear]     = useState(0);
   const [showDetails, setShowDetails]   = useState(false);
+  const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const { isConnected } = useUser();
 
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
@@ -223,12 +228,18 @@ export default function ProjectionSection({
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                  <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+                </div>
                 <div className="flex flex-wrap gap-2 mt-3">
-                  <button onClick={handlePrintBiz} className={PDF_BTN}>
+                  <button
+                    onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
+                    className={PDF_BTN}
+                  >
                     <FileBarChart2 size={12} /> PDF
                   </button>
                   <button
-                    onClick={() => setShowDetails(v => !v)}
+                    onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
                     className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
                   >
                     {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
@@ -353,6 +364,10 @@ export default function ProjectionSection({
               </button>
             ))}
           </div>
+          {/* Paramètres spécifiques du statut sélectionné */}
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+            <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+          </div>
           {/* Slider croissance CA */}
           <div className="space-y-1">
             <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
@@ -372,13 +387,16 @@ export default function ProjectionSection({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => setShowDetails(v => !v)}
+              onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
               className={`flex-1 ${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
             >
               {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
               {showDetails ? 'Masquer détails' : 'Détails'}
             </button>
-            <button onClick={handlePrintBiz} className={PDF_BTN}>
+            <button
+              onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
+              className={PDF_BTN}
+            >
               <FileBarChart2 size={12} /> PDF
             </button>
           </div>
@@ -490,6 +508,13 @@ export default function ProjectionSection({
           <p style={{ fontSize: 8, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
+
+      <ConnectorModal
+        open={showConnectorModal}
+        onClose={() => setShowConnectorModal(false)}
+        title="Connectez-vous pour débloquer"
+        message="Connectez-vous ou créez un compte pour exporter la projection en PDF et accéder aux détails de calcul."
+      />
     </div>
   );
 }
