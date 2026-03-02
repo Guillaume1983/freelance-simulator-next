@@ -3,7 +3,6 @@ import { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { FileBarChart2, Info } from 'lucide-react';
-import SidePanel from './SidePanel';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -155,7 +154,7 @@ export default function ProjectionSection({
         </div>
 
         {/* Croissance CA — desktop uniquement */}
-        <div className="hidden md:block space-y-0.5 min-w-[180px] ml-auto">
+        <div className="hidden md:block space-y-0.5 min-w-[180px]">
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
             Croissance CA / an
             <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>
@@ -171,11 +170,6 @@ export default function ProjectionSection({
             <span>0%</span><span>25%</span><span>50%</span>
           </div>
         </div>
-
-        {/* Export Business Plan — desktop uniquement */}
-        <button onClick={handlePrintBiz} className={`hidden md:flex ${PDF_BTN}`}>
-          <FileBarChart2 size={12} /> Business Plan
-        </button>
       </div>
 
       {/* ── Tableau Projections (desktop) ── */}
@@ -192,6 +186,9 @@ export default function ProjectionSection({
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
+                <button onClick={handlePrintBiz} className={`mt-3 ${PDF_BTN}`}>
+                  <FileBarChart2 size={12} /> Business Plan
+                </button>
               </th>
 
               {/* Colonnes années (5 ans) */}
@@ -383,11 +380,6 @@ export default function ProjectionSection({
         <p className="text-[9px] text-slate-400 italic px-4 pb-3 flex items-center gap-1">
           <Info size={10} /> Simulation estimative — barèmes 2026.
         </p>
-      </div>
-
-      {/* ── Analyse statutaire — visible desktop ET mobile, sous les tableaux ── */}
-      <div className="px-4 md:px-6 pb-6">
-        <SidePanel selectedId={activeRegime} />
       </div>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}

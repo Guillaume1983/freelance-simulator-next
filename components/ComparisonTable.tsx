@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useRef } from 'react';
+import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText } from 'lucide-react';
+import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText, Rocket } from 'lucide-react';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -27,6 +28,49 @@ const REGIME_COLORS: Record<string, string> = {
   'EURL IR':  '#10b981',
   'EURL IS':  '#3b82f6',
   'SASU':     '#8b5cf6',
+};
+
+const REGIME_ANALYSIS: Record<string, { forts: string[]; vigilance: string }> = {
+  Portage: {
+    forts: [
+      'Accès au chômage (ARE) en fin de mission',
+      'Protection sociale complète (régime salarié)',
+      'Zéro gestion administrative',
+    ],
+    vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net. À comparer avec le gain en tranquillité administrative.",
+  },
+  Micro: {
+    forts: [
+      'Création instantanée, formalités nulles',
+      'Comptabilité ultra simplifiée',
+      'Charges proportionnelles au CA réel',
+    ],
+    vigilance: "Plafond de CA à 77 700 € en BNC. Au-delà, passage obligatoire en société. Pas de déduction des charges réelles.",
+  },
+  'EURL IR': {
+    forts: [
+      'Déduction des charges professionnelles réelles',
+      'IR progressif : avantageux si revenus modérés',
+      'Structure souple et personnalisable',
+    ],
+    vigilance: "Cotisations TNS d'environ 40 % de la base. Comptabilité obligatoire (expert-comptable recommandé).",
+  },
+  'EURL IS': {
+    forts: [
+      "Bénéfice en société taxé à l'IS réduit (15–25 %)",
+      'Pilotage flexible de la rémunération',
+      'Optimisation par capitalisation possible',
+    ],
+    vigilance: "Double imposition si distribution de dividendes (IS + PFU 30 %). Comptabilité exigeante.",
+  },
+  SASU: {
+    forts: [
+      'Protection assimilé-salarié (retraite, prévoyance)',
+      'Dividendes possibles au PFU 30 %',
+      'Statut reconnu pour les missions premium',
+    ],
+    vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d'accès à l'ARE en fin d'activité de président.",
+  },
 };
 
 /* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
@@ -250,6 +294,53 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 </td>
               ))}
             </tr>
+
+            {/* ── Ligne Analyse Statutaire ── */}
+            <tr className="bg-white dark:bg-[#0f172a]">
+              <td className="p-4 border-r dark:border-slate-800 align-top">
+                <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Analyse<br />Statutaire</div>
+              </td>
+              {regimes.map((r: any) => {
+                const data  = REGIME_ANALYSIS[r.id];
+                const color = REGIME_COLORS[r.id] ?? '#6366f1';
+                return (
+                  <td key={r.id} className="p-3 align-top">
+                    {data && (
+                      <div className="space-y-2">
+                        <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
+                          <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
+                            <CheckCircle size={10} /> Points Forts
+                          </h4>
+                          <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
+                            {data.forts.map(f => (
+                              <li key={f} className="flex gap-1.5">
+                                <span className="shrink-0 text-emerald-500">✓</span>
+                                {f}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20">
+                          <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
+                            <AlertCircle size={10} /> Vigilance
+                          </h4>
+                          <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                            {data.vigilance}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
+                          className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
+                          style={{ background: color }}
+                        >
+                          <Rocket size={12} /> Je me lance en {r.id}
+                        </Link>
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
           </tbody>
         </table>
       </div>
@@ -316,7 +407,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
                   </div>
                 </div>
-                <div className="px-4 pb-4 space-y-2">
+                <div className="px-4 pb-2 space-y-2">
                   {rows.map((row) => (
                     <div
                       key={row.key}
@@ -334,6 +425,42 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     </div>
                   ))}
                 </div>
+                {/* Analyse statutaire mobile */}
+                {(() => {
+                  const data = REGIME_ANALYSIS[r.id];
+                  return data ? (
+                    <div className="px-4 pb-4 space-y-2 border-t dark:border-slate-800 pt-3 mt-1">
+                      <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
+                        <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
+                          <CheckCircle size={10} /> Points Forts
+                        </h4>
+                        <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
+                          {data.forts.map(f => (
+                            <li key={f} className="flex gap-1.5">
+                              <span className="shrink-0 text-emerald-500">✓</span>
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20">
+                        <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
+                          <AlertCircle size={10} /> Vigilance
+                        </h4>
+                        <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {data.vigilance}
+                        </p>
+                      </div>
+                      <Link
+                        href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
+                        className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
+                        style={{ background: color }}
+                      >
+                        <Rocket size={12} /> Je me lance en {r.id}
+                      </Link>
+                    </div>
+                  ) : null;
+                })()}
               </div>
             );
           })}
