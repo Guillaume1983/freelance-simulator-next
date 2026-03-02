@@ -2,7 +2,7 @@
 import { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
-import { TrendingUp, FileBarChart2, FileText, Info } from 'lucide-react';
+import { FileBarChart2, Info } from 'lucide-react';
 import SidePanel from './SidePanel';
 
 /* ── Pastilles de scroll mobile ── */
@@ -134,18 +134,6 @@ export default function ProjectionSection({
 
       {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
       <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b dark:border-slate-800 rounded-t-2xl">
-
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
-            <TrendingUp size={18} />
-          </div>
-          <div>
-            <h2 className="text-sm font-black uppercase tracking-widest dark:text-white leading-none">Projection 5 ans</h2>
-            <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-              ACRE an 1{sim.state.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
-            </p>
-          </div>
-        </div>
 
         {/* Sélecteur de régime — desktop uniquement (mobile a le sien plus bas) */}
         <div className="hidden md:flex gap-1 flex-wrap">

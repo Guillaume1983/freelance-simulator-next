@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { TrendingUp } from 'lucide-react';
 import { useSimulation } from '@/hooks/useSimulation';
 import Header from '@/components/Header';
 import TopCards from '@/components/TopCards';
@@ -47,8 +48,18 @@ export default function Home() {
 
           {/* ── Intro avant le tableau de projection ── */}
           <div className="mt-10 mb-2">
-            <h2 className="text-lg md:text-xl font-black uppercase tracking-tight dark:text-white">Trajectoire sur 5 ans</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-xl text-indigo-600">
+                <TrendingUp size={18} />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight dark:text-white">Projection sur 5 ans</h2>
+                <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                  ACRE an 1{sim.state.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold mt-2">
               Visualisez votre business plan sur 5 ans — sélectionnez un statut et ajustez le taux de croissance annuel du CA.
             </p>
           </div>
