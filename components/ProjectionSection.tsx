@@ -1,8 +1,8 @@
 'use client';
-import { useRef, useMemo, useState } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
-import { FileBarChart2, Info } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff } from 'lucide-react';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -46,7 +46,7 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
       {/* Barre */}
       <div
         className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
-        style={{ width: 28, height: 88 }}
+        style={{ width: 56, height: 88 }}
       >
         {segs.map((s, i) => (
           <div
@@ -81,7 +81,8 @@ export default function ProjectionSection({
 }) {
   const printBizRef    = useRef<HTMLDivElement>(null);
   const yearScrollRef  = useRef<HTMLDivElement>(null);
-  const [activeYear, setActiveYear] = useState(0);
+  const [activeYear, setActiveYear]     = useState(0);
+  const [showDetails, setShowDetails]   = useState(false);
 
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
@@ -128,6 +129,36 @@ export default function ProjectionSection({
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
 
+  const getDetailText = (r: any, key: string): string => {
+    const f = (v: number) => Math.round(v).toLocaleString() + ' €';
+    switch (key) {
+      case 'ca':        return `${sim.state.tjm} € × ${sim.state.days} j × croissance`;
+      case 'fees':
+        if (r.id === 'Micro')   return r.fees > 0 ? `CFE = ${f(r.fees)}` : 'Aucune charge déductible';
+        if (r.id === 'Portage') return `Commission ${sim.state.portageComm}% + Charges + IK`;
+        return `Charges + IK + CFE`;
+      case 'cotis':
+        if (r.id === 'Micro')   return `${f(r.ca)} × 21,1%`;
+        if (r.id === 'Portage') return `Base nette × 45%`;
+        if (r.id === 'EURL IR') return `(CA − Charges) × 40%`;
+        if (r.id === 'EURL IS') return `Rémunération × 45%`;
+        return `IS 20% (inclus dans rémunération)`;
+      case 'beforeTax':
+        if (r.id === 'EURL IS') return `(${f(r.ca)} − ${f(r.fees)}) ÷ 1,45`;
+        if (r.id === 'SASU')    return `(${f(r.ca)} − ${f(r.fees)}) × 80% (IS 20%)`;
+        return `${f(r.ca)} − ${f(r.fees)} − ${f(r.cotis)}`;
+      case 'ir':
+        if (r.id === 'Micro') return `Barème IR (base = CA × 66%)`;
+        if (r.id === 'SASU')  return `Rémunération × 30% (PFU)`;
+        return `Barème progressif IR — ${sim.state.taxParts} parts`;
+      case 'net':
+        return r.l > 0
+          ? `${f(r.beforeTax)} − ${f(r.ir)} + Loyer ${f(r.l)}`
+          : `${f(r.beforeTax)} − ${f(r.ir)}`;
+      default: return '';
+    }
+  };
+
   return (
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
@@ -152,6 +183,15 @@ export default function ProjectionSection({
             </button>
           ))}
         </div>
+
+        {/* Bouton Détails — desktop uniquement */}
+        <button
+          onClick={() => setShowDetails(v => !v)}
+          className={`hidden md:flex ${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
+        >
+          {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+          {showDetails ? 'Masquer' : 'Détails'}
+        </button>
 
         {/* Croissance CA — desktop uniquement */}
         <div className="hidden md:block space-y-0.5 min-w-[180px] ml-4">
@@ -213,28 +253,40 @@ export default function ProjectionSection({
 
           <tbody className="text-slate-700 dark:text-slate-300">
             {rows.map((row, idx) => (
-              <tr
-                key={idx}
-                className={`transition-colors ${row.highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${row.isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}
-              >
-                <td className="p-4 border-r dark:border-slate-800">
-                  <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
-                </td>
-                {projections.map((yr, i) => {
-                  const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                  const val = row.monthly ? r[row.key] / 12 : r[row.key];
-                  return (
-                    <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${row.isFinal ? 'text-lg' : 'text-sm'} ${row.color}`}>
-                      {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
-                      {fmt(val)}
-                      {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                      {row.isFinal && (
-                        <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
-                      )}
-                    </td>
-                  );
-                })}
-              </tr>
+              <React.Fragment key={idx}>
+                <tr className={`transition-colors ${row.highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${row.isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
+                  <td className="p-4 border-r dark:border-slate-800">
+                    <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
+                  </td>
+                  {projections.map((yr, i) => {
+                    const r   = yr.find((x: any) => x.id === activeRegime) as any;
+                    const val = row.monthly ? r[row.key] / 12 : r[row.key];
+                    return (
+                      <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${row.isFinal ? 'text-lg' : 'text-sm'} ${row.color}`}>
+                        {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
+                        {fmt(val)}
+                        {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
+                        {row.isFinal && (
+                          <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+                {showDetails && (
+                  <tr className="bg-slate-50/40 dark:bg-slate-800/20">
+                    <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
+                    {projections.map((yr, i) => {
+                      const r = yr.find((x: any) => x.id === activeRegime) as any;
+                      return (
+                        <td key={i} className="px-4 py-1.5 text-center">
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key)}</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
 
             {/* ── Ligne Répartitions ── */}
@@ -312,10 +364,18 @@ export default function ProjectionSection({
               <span>0%</span><span>25%</span><span>50%</span>
             </div>
           </div>
-          {/* Export Business Plan (mobile) — style unifié */}
-          <button onClick={handlePrintBiz} className={PDF_BTN}>
-            <FileBarChart2 size={12} /> Business Plan PDF
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDetails(v => !v)}
+              className={`flex-1 ${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
+            >
+              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+              {showDetails ? 'Masquer détails' : 'Détails'}
+            </button>
+            <button onClick={handlePrintBiz} className={PDF_BTN}>
+              <FileBarChart2 size={12} /> Business Plan PDF
+            </button>
+          </div>
         </div>
 
         {/* Cartes années (scroll horizontal snap) */}
@@ -350,23 +410,27 @@ export default function ProjectionSection({
                 </div>
 
                 {/* Métriques */}
-                <div className="px-4 py-3 space-y-2">
+                <div className="px-4 py-3 space-y-1.5">
                   {rows.map((row) => {
                     const val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
                     return (
-                      <div
-                        key={row.key}
-                        className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
+                      <div key={row.key}>
+                        <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
                           row.isFinal   ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
                           : row.highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
                           : 'bg-slate-50/40 dark:bg-slate-900/20'
-                        }`}
-                      >
-                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
-                        <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
-                          {row.prefix}{val !== null ? fmt(val) : '—'}
-                          {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
-                        </span>
+                        }`}>
+                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                          <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
+                            {row.prefix}{val !== null ? fmt(val) : '—'}
+                            {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
+                          </span>
+                        </div>
+                        {showDetails && r && (
+                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
+                            {getDetailText(r, row.key)}
+                          </p>
+                        )}
                       </div>
                     );
                   })}

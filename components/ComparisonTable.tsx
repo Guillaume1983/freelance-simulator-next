@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { SlidersVertical, AlertCircle, ArrowRight, CheckCircle, FileText, Rocket, Info } from 'lucide-react';
+import { SlidersVertical, AlertCircle, CheckCircle, FileText, Rocket, Info, Eye, EyeOff } from 'lucide-react';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -89,7 +89,7 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
       {/* Barre */}
       <div
         className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
-        style={{ width: 28, height: 88 }}
+        style={{ width: 56, height: 88 }}
       >
         {segs.map((s, i) => (
           <div
@@ -114,7 +114,7 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 }
 
 export default function ComparisonTable({ sim }: { sim: any }) {
-  const [openDetails, setOpenDetails] = useState<number[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
   const [openSettings, setOpenSettings] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState(0);
 
@@ -137,9 +137,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const regimes  = sim.resultats;
   const winnerId = [...regimes].sort((a: any, b: any) => b.net - a.net)[0].id;
   const fmt      = (v: number) => Math.round(v).toLocaleString() + ' €';
-
-  const toggleDetail = (idx: number) =>
-    setOpenDetails(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]);
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        div: 1  },
@@ -174,6 +171,36 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const getDisplayValue = (r: any, row: typeof rows[number]) => (r[row.key] as number) / row.div;
   const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
 
+  const getDetailText = (r: any, key: string): string => {
+    const f = (v: number) => Math.round(v).toLocaleString() + ' €';
+    switch (key) {
+      case 'ca':        return `${sim.state.tjm} € × ${sim.state.days} jours`;
+      case 'fees':
+        if (r.id === 'Micro')   return r.fees > 0 ? `CFE = ${f(r.fees)}` : 'Aucune charge déductible';
+        if (r.id === 'Portage') return `Commission ${sim.state.portageComm}% + Charges + IK`;
+        return `Charges + IK + CFE`;
+      case 'cotis':
+        if (r.id === 'Micro')    return `${f(r.ca)} × 21,1%`;
+        if (r.id === 'Portage')  return `Base nette × 45%`;
+        if (r.id === 'EURL IR')  return `(CA − Charges) × 40%`;
+        if (r.id === 'EURL IS')  return `Rémunération × 45%`;
+        return `IS 20% (inclus dans rémunération)`;
+      case 'beforeTax':
+        if (r.id === 'EURL IS') return `(${f(r.ca)} − ${f(r.fees)}) ÷ 1,45`;
+        if (r.id === 'SASU')    return `(${f(r.ca)} − ${f(r.fees)}) × 80% (IS 20%)`;
+        return `${f(r.ca)} − ${f(r.fees)} − ${f(r.cotis)}`;
+      case 'ir':
+        if (r.id === 'Micro') return `Barème IR (base = CA × 66%)`;
+        if (r.id === 'SASU')  return `Rémunération × 30% (PFU)`;
+        return `Barème progressif IR — ${sim.state.taxParts} parts`;
+      case 'net':
+        return r.l > 0
+          ? `${f(r.beforeTax)} − ${f(r.ir)} + Loyer ${f(r.l)}`
+          : `${f(r.beforeTax)} − ${f(r.ir)}`;
+      default: return '';
+    }
+  };
+
   const RetirementBadge = ({ quarters }: { quarters: number }) => (
     <span title={quarters >= 4 ? '4 trimestres retraite validés' : `~${quarters}/4 trimestres`} className="text-[10px]">
       {quarters >= 4 ? '✅' : '⚠️'}
@@ -194,9 +221,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
                   Comparatif<br />Stratégique
                 </h3>
-                <button onClick={handlePrint} className={`mt-3 ${PDF_BTN}`}>
-                  <FileText size={11} /> Export PDF
-                </button>
+                <div className="flex flex-col gap-2 mt-3">
+                  <button onClick={handlePrint} className={PDF_BTN}>
+                    <FileText size={11} /> Export PDF
+                  </button>
+                  <button
+                    onClick={() => setShowDetails(v => !v)}
+                    className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
+                  >
+                    {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+                    {showDetails ? 'Masquer' : 'Détails'}
+                  </button>
+                </div>
               </th>
 
               {regimes.map((r: any) => (
@@ -239,12 +275,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <tbody className="text-slate-700 dark:text-slate-300">
             {rows.map((row, idx) => (
               <React.Fragment key={idx}>
-                <tr className={`group transition-colors ${(row as any).highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${(row as any).isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
+                <tr className={`transition-colors ${(row as any).highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${(row as any).isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
                   <td className="p-4 border-r dark:border-slate-800">
                     <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
-                    <div onClick={() => toggleDetail(idx)} className="text-[8px] text-indigo-500 font-black cursor-pointer uppercase mt-1 inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Détails <ArrowRight size={10} />
-                    </div>
                   </td>
                   {regimes.map((r: any) => (
                     <td
@@ -255,12 +288,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     </td>
                   ))}
                 </tr>
-                {openDetails.includes(idx) && (
-                  <tr className="bg-slate-100/30 dark:bg-slate-800/20 animate-in fade-in slide-in-from-top-1 duration-300">
-                    <td className="p-2 border-r dark:border-slate-800 text-[9px] text-slate-400 font-bold uppercase text-center italic tracking-widest">Base mensuelle</td>
+                {showDetails && (
+                  <tr className="bg-slate-50/40 dark:bg-slate-800/20">
+                    <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
                     {regimes.map((r: any) => (
-                      <td key={r.id} className="p-2 text-center">
-                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400">{fmt((r[row.key] as number) / 12)} / mois</span>
+                      <td key={r.id} className="px-4 py-1.5 text-center">
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key)}</span>
                       </td>
                     ))}
                   </tr>
@@ -374,9 +407,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
             Comparatif stratégique
           </h3>
-          <button onClick={handlePrint} className={PDF_BTN}>
-            <FileText size={11} /> Export PDF
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDetails(v => !v)}
+              className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
+            >
+              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+              {showDetails ? 'Masquer' : 'Détails'}
+            </button>
+            <button onClick={handlePrint} className={PDF_BTN}>
+              <FileText size={11} /> PDF
+            </button>
+          </div>
         </div>
         <div
           ref={cardScrollRef}
@@ -430,21 +472,25 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
                   </div>
                 </div>
-                <div className="px-4 pb-2 space-y-2">
+                <div className="px-4 pb-2 space-y-1.5">
                   {rows.map((row) => (
-                    <div
-                      key={row.key}
-                      className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
+                    <div key={row.key}>
+                      <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
                         (row as any).isFinal ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
                         : (row as any).highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
                         : 'bg-slate-50/40 dark:bg-slate-900/20'
-                      }`}
-                    >
-                      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
-                      <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
-                        {(row as any).prefix} {fmt(getDisplayValue(r, row))}
-                        <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
-                      </span>
+                      }`}>
+                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                        <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
+                          {(row as any).prefix} {fmt(getDisplayValue(r, row))}
+                          <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
+                        </span>
+                      </div>
+                      {showDetails && (
+                        <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
+                          {getDetailText(r, row.key)}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
