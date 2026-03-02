@@ -37,7 +37,7 @@ const regimeData: Record<string, { forts: string[]; vigilance: string }> = {
   },
   'EURL IS': {
     forts: [
-      'Bénéfice en société taxé à l\'IS réduit (15–25 %)',
+      "Bénéfice en société taxé à l'IS réduit (15–25 %)",
       'Pilotage flexible de la rémunération',
       'Optimisation par capitalisation possible',
     ],
@@ -59,60 +59,63 @@ export default function SidePanel({ selectedId }: { selectedId: string }) {
 
   return (
     <div className="card-pro bg-white dark:bg-[#0f172a] shadow-xl animate-in fade-in duration-300 overflow-hidden">
-      {/* Bande couleur */}
-      <div className="h-1 w-full" style={{ background: color }} />
+      {/* Bande couleur top */}
+      <div className="h-1.5 w-full" style={{ background: color }} />
 
-      <div className="px-5 md:px-6 py-5">
-        {/* Layout horizontal sur desktop : [Identité + CTA | Points forts | Vigilance] */}
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr] gap-5 md:gap-6 items-start">
+      <div className="px-5 md:px-8 py-6 md:py-8">
 
-          {/* Colonne 1 : Identité du régime + bouton Je me lance */}
-          <div className="md:border-r dark:border-slate-800 md:pr-6 flex flex-col gap-3">
-            <div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyse Statutaire</span>
-              <h2
-                className="text-2xl md:text-3xl font-black uppercase tracking-tighter leading-none mt-1"
-                style={{ color }}
-              >
-                {selectedId}
-              </h2>
-            </div>
-            <Link
-              href={`/partenaires?regime=${encodeURIComponent(selectedId)}`}
-              className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-white font-black text-[11px] uppercase tracking-wider transition-all duration-200 hover:opacity-90 hover:shadow-lg shadow-md whitespace-nowrap w-fit"
-              style={{ background: color }}
-            >
-              <Rocket size={13} /> Je me lance
-            </Link>
-          </div>
+        {/* ── Titre ── */}
+        <div className="mb-6">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Analyse Statutaire
+          </span>
+          <h2
+            className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none mt-1"
+            style={{ color }}
+          >
+            {selectedId}
+          </h2>
+        </div>
 
-          {/* Colonne 2 : Points forts */}
-          {data && (
-            <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/20">
-              <h4 className="text-[11px] font-black text-emerald-600 uppercase mb-2.5 flex items-center gap-1.5 italic">
+        {/* ── 2 colonnes : Points forts | Vigilance ── */}
+        {data && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+            <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-900/20">
+              <h4 className="text-[11px] font-black text-emerald-600 uppercase mb-3 flex items-center gap-1.5 italic">
                 <CheckCircle size={13} /> Points Forts
               </h4>
-              <ul className="text-[11px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
+              <ul className="text-[12px] font-bold text-slate-700 dark:text-slate-300 space-y-2.5">
                 {data.forts.map(f => (
-                  <li key={f} className="flex gap-2"><span className="shrink-0">•</span>{f}</li>
+                  <li key={f} className="flex gap-2">
+                    <span className="shrink-0 text-emerald-500">✓</span>
+                    {f}
+                  </li>
                 ))}
               </ul>
             </div>
-          )}
 
-          {/* Colonne 3 : Vigilance */}
-          {data && (
-            <div className="bg-amber-50/50 dark:bg-amber-900/10 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/20">
-              <h4 className="text-[11px] font-black text-amber-600 uppercase mb-2.5 flex items-center gap-1.5 italic">
-                <AlertCircle size={13} /> Vigilance
+            <div className="bg-amber-50/50 dark:bg-amber-900/10 p-5 rounded-2xl border border-amber-100 dark:border-amber-900/20">
+              <h4 className="text-[11px] font-black text-amber-600 uppercase mb-3 flex items-center gap-1.5 italic">
+                <AlertCircle size={13} /> Point de vigilance
               </h4>
-              <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-[12px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
                 {data.vigilance}
               </p>
             </div>
-          )}
 
-        </div>
+          </div>
+        )}
+
+        {/* ── Bouton Je me lance (pleine largeur, gros) ── */}
+        <Link
+          href={`/partenaires?regime=${encodeURIComponent(selectedId)}`}
+          className="cursor-pointer flex items-center justify-center gap-3 w-full px-6 py-4 rounded-2xl text-white font-black text-sm md:text-base uppercase tracking-wider transition-all duration-200 hover:opacity-90 hover:shadow-xl shadow-lg"
+          style={{ background: color }}
+        >
+          <Rocket size={18} /> Je me lance avec {selectedId}
+        </Link>
+
       </div>
     </div>
   );

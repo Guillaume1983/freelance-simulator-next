@@ -157,11 +157,6 @@ export default function ProjectionSection({
         </div>
       </div>
 
-      {/* ── Panneau analyse statutaire (desktop uniquement, entre contrôle et tableau) ── */}
-      <div className="hidden md:block px-4 md:px-6 pt-4">
-        <SidePanel selectedId={activeRegime} />
-      </div>
-
       {/* ── Tableau Projections (desktop) ── */}
       <div className="hidden md:block overflow-x-auto mt-4">
         <table className="w-full border-separate border-spacing-0">
@@ -269,7 +264,7 @@ export default function ProjectionSection({
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden">
 
-        {/* Contrôle mobile : sélecteur régime + slider croissance en dessous */}
+        {/* Contrôle mobile : sélecteur régime + slider croissance + export */}
         <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800 space-y-3">
           <div className="flex gap-1 flex-wrap">
             {allRegimes.map((id: string) => (
@@ -305,6 +300,13 @@ export default function ProjectionSection({
               <span>0%</span><span>25%</span><span>50%</span>
             </div>
           </div>
+          {/* Export Business Plan (mobile) */}
+          <button
+            onClick={handlePrintBiz}
+            className="cursor-pointer flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-wide transition-colors"
+          >
+            <FileBarChart2 size={13} /> Business Plan PDF
+          </button>
         </div>
 
         {/* Cartes années (scroll horizontal snap) */}
@@ -364,6 +366,11 @@ export default function ProjectionSection({
         <p className="text-[9px] text-slate-400 italic px-4 pb-3 flex items-center gap-1">
           <Info size={10} /> Simulation estimative — barèmes 2026.
         </p>
+      </div>
+
+      {/* ── Analyse statutaire — visible desktop ET mobile, sous les tableaux ── */}
+      <div className="px-4 md:px-6 pb-6">
+        <SidePanel selectedId={activeRegime} />
       </div>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}

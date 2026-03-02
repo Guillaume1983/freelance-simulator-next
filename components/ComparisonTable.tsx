@@ -231,9 +231,17 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
       {/* ── Vue mobile : cartes par régime ── */}
       <div className="block md:hidden p-4 pt-5">
-        <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3 text-center">
-          Comparatif stratégique
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+            Comparatif stratégique
+          </h3>
+          <button
+            onClick={handlePrint}
+            className="cursor-pointer flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-500 dark:text-slate-400 hover:text-indigo-600 text-[9px] font-black uppercase tracking-wide transition-colors"
+          >
+            <FileText size={11} /> Export PDF
+          </button>
+        </div>
         <div className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-3">
           {regimes.map((r: any) => {
             const isWinner = r.id === winnerId;
