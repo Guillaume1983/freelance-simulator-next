@@ -13,20 +13,24 @@ const REGIME_COLORS: Record<string, string> = {
   'SASU':     '#8b5cf6',
 };
 
-/* ── Barre unique segmentée (Charges → Cotis → IR → Net, de haut en bas) ── */
+/* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
 function StackedBar({ ca, fees, cotis, ir, net }: {
   ca: number; fees: number; cotis: number; ir: number; net: number;
 }) {
   const total = Math.max(ca, 1);
   const segs = [
-    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Chg' },
-    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cot' },
-    { pct: (ir    / total) * 100, color: '#f87171', label: 'IR'  },
-    { pct: (net   / total) * 100, color: '#34d399', label: 'Net' },
+    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Charges' },
+    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
+    { pct: (ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
+    { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
   ];
   return (
-    <div className="flex flex-col items-center gap-1.5 py-1">
-      <div className="w-10 rounded-xl overflow-hidden shadow-inner" style={{ height: 60 }}>
+    <div className="flex items-center gap-3 py-1">
+      {/* Barre */}
+      <div
+        className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
+        style={{ width: 28, height: 88 }}
+      >
         {segs.map((s, i) => (
           <div
             key={i}
@@ -36,9 +40,11 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+      {/* Labels à droite */}
+      <div className="flex flex-col gap-1.5">
         {segs.map(s => (
-          <span key={s.label} className="text-[7px] font-black leading-tight" style={{ color: s.color }}>
+          <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
+            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
             {s.label} {Math.round(s.pct)}%
           </span>
         ))}
@@ -98,7 +104,7 @@ export default function ProjectionSection({
   return (
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
-      {/* ── Barre de contrôle ── */}
+      {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
       <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b dark:border-slate-800 rounded-t-2xl">
 
         <div className="flex items-center gap-2.5">
@@ -113,8 +119,8 @@ export default function ProjectionSection({
           </div>
         </div>
 
-        {/* Sélecteur de régime */}
-        <div className="flex gap-1 flex-wrap">
+        {/* Sélecteur de régime — desktop uniquement (mobile a le sien plus bas) */}
+        <div className="hidden md:flex gap-1 flex-wrap">
           {allRegimes.map((id: string) => (
             <button
               key={id}
@@ -132,8 +138,8 @@ export default function ProjectionSection({
           ))}
         </div>
 
-        {/* Croissance CA */}
-        <div className="space-y-0.5 min-w-[160px] ml-auto">
+        {/* Croissance CA — desktop uniquement (mobile a le sien plus bas) */}
+        <div className="hidden md:block space-y-0.5 min-w-[160px] ml-auto">
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
             Croissance CA / an
             <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>
@@ -245,8 +251,10 @@ export default function ProjectionSection({
               {projections.map((yr, i) => {
                 const r = yr.find((x: any) => x.id === activeRegime) as any;
                 return (
-                  <td key={i} className="px-4 py-3 text-center">
-                    <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  <td key={i} className="px-4 py-3">
+                    <div className="flex justify-center">
+                      <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                    </div>
                   </td>
                 );
               })}
@@ -261,8 +269,8 @@ export default function ProjectionSection({
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden">
 
-        {/* Contrôle mobile : régime + croissance */}
-        <div className="px-4 py-3 flex flex-wrap gap-2 items-center border-b dark:border-slate-800">
+        {/* Contrôle mobile : sélecteur régime + slider croissance en dessous */}
+        <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800 space-y-3">
           <div className="flex gap-1 flex-wrap">
             {allRegimes.map((id: string) => (
               <button
@@ -280,8 +288,22 @@ export default function ProjectionSection({
               </button>
             ))}
           </div>
-          <div className="ml-auto text-[9px] font-black text-slate-400 uppercase">
-            +{sim.state.growthRate}%/an
+          {/* Slider croissance CA */}
+          <div className="space-y-1">
+            <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
+              Croissance CA / an
+              <span className="font-black" style={{ color: regimeColor }}>{sim.state.growthRate}%</span>
+            </label>
+            <input
+              type="range"
+              min={0} max={50} step={5}
+              value={sim.state.growthRate}
+              onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
+              className="w-full accent-indigo-600"
+            />
+            <div className="flex justify-between text-[8px] text-slate-400 font-bold">
+              <span>0%</span><span>25%</span><span>50%</span>
+            </div>
           </div>
         </div>
 

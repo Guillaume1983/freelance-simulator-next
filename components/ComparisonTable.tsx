@@ -11,20 +11,24 @@ const REGIME_COLORS: Record<string, string> = {
   'SASU':     '#8b5cf6',
 };
 
-/* ── Barre unique segmentée (Charges → Cotis → IR → Net, de haut en bas) ── */
+/* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
 function StackedBar({ ca, fees, cotis, ir, net }: {
   ca: number; fees: number; cotis: number; ir: number; net: number;
 }) {
   const total = Math.max(ca, 1);
   const segs = [
-    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Chg' },
-    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cot' },
-    { pct: (ir    / total) * 100, color: '#f87171', label: 'IR'  },
-    { pct: (net   / total) * 100, color: '#34d399', label: 'Net' },
+    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Charges' },
+    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
+    { pct: (ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
+    { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
   ];
   return (
-    <div className="flex flex-col items-center gap-1.5 py-1">
-      <div className="w-10 rounded-xl overflow-hidden shadow-inner" style={{ height: 60 }}>
+    <div className="flex items-center gap-3 py-1">
+      {/* Barre */}
+      <div
+        className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
+        style={{ width: 28, height: 88 }}
+      >
         {segs.map((s, i) => (
           <div
             key={i}
@@ -34,9 +38,11 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
           />
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0">
+      {/* Labels à droite */}
+      <div className="flex flex-col gap-1.5">
         {segs.map(s => (
-          <span key={s.label} className="text-[7px] font-black leading-tight" style={{ color: s.color }}>
+          <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
+            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
             {s.label} {Math.round(s.pct)}%
           </span>
         ))}
@@ -212,8 +218,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 </div>
               </td>
               {regimes.map((r: any) => (
-                <td key={r.id} className="px-4 py-3 text-center">
-                  <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                <td key={r.id} className="px-4 py-3">
+                  <div className="flex justify-center">
+                    <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  </div>
                 </td>
               ))}
             </tr>
