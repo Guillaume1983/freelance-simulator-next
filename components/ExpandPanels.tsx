@@ -1,6 +1,6 @@
 'use client';
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2 } from 'lucide-react';
+import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift } from 'lucide-react';
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
@@ -14,10 +14,10 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0 mb-4">
             <div>
               <h3 className="text-xs md:text-sm font-900 uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
-                Catalogue des charges
+                Dépenses professionnelles
               </h3>
               <p className="text-[10px] text-slate-500 font-medium mt-1">
-                Active uniquement ce que tu supportes vraiment chaque mois.
+                Mensuelles. Micro : frais ignorés. Sociétés : TVA 20% récupérée. Matériel amorti 3 ans.
               </p>
             </div>
             <div className="text-right">
@@ -72,13 +72,27 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               );
             })}
           </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <label className="text-[10px] font-black text-slate-400 uppercase">Matériel annuel (amorti 3 ans)</label>
+            <div className="relative mt-1">
+              <input
+                type="number"
+                value={sim.state.materielAnnuel ?? 0}
+                onChange={e => sim.setters.setMaterielAnnuel(Number(e.target.value) || 0)}
+                className="w-full p-3 font-800 text-sm pr-12"
+                placeholder="0"
+              />
+              <span className="absolute right-3 top-3 text-[10px] font-black text-slate-300">€/an</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* PANNEAU OPTIMISATIONS (IK & LOYER) */}
+      {/* PANNEAU OPTIMISATIONS (IK, LOYER, AVANTAGES) */}
       {activePanel === 'opti' && (
         <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-emerald-500 shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl text-emerald-600"><Car size={20} /></div>
@@ -115,11 +129,31 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <p className="text-[10px] text-slate-400 italic font-medium">Ce montant sera réinjecté en revenu net sans cotisations sociales.</p>
               </div>
             </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-100 dark:bg-violet-900/40 rounded-xl text-violet-600"><Gift size={20} /></div>
+                <h3 className="text-sm font-900 uppercase tracking-widest dark:text-white">Avantages optimisés</h3>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase">Montant annuel (CE, CSE, etc.)</label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={sim.state.avantagesOptimises ?? 1500}
+                    onChange={e => sim.setters.setAvantagesOptimises(Number(e.target.value) || 0)}
+                    className="w-full p-3 font-800 text-sm pr-12"
+                    placeholder="1500"
+                  />
+                  <span className="absolute right-3 top-3 text-[10px] font-black text-slate-300">€/an</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* PANNEAU FISCAL : foyer, CFE, ACRE, croissance */}
+      {/* PANNEAU SITUATION FISCALE */}
       {activePanel === 'fiscal' && (
         <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-amber-500 shadow-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -128,7 +162,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-amber-100 dark:bg-amber-900/40 rounded-xl text-amber-600"><Users size={20} /></div>
-                <h3 className="text-sm font-900 uppercase tracking-widest dark:text-white">Foyer fiscal</h3>
+                <h3 className="text-sm font-900 uppercase tracking-widest dark:text-white">Situation fiscale</h3>
               </div>
 
               <div className="space-y-3">

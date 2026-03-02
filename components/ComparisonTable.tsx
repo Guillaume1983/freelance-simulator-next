@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { SlidersVertical, AlertCircle, CheckCircle, FileText, Rocket, Info, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, CheckCircle, FileText, Rocket, Info, Eye, EyeOff } from 'lucide-react';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -115,7 +115,6 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 
 export default function ComparisonTable({ sim }: { sim: any }) {
   const [showDetails, setShowDetails] = useState(false);
-  const [openSettings, setOpenSettings] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState(0);
 
   const printRef      = useRef<HTMLDivElement>(null);
@@ -147,25 +146,77 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'DISPONIBLE FINAL (Cash-out)',   key: 'net',       div: 12, isFinal: true },
   ];
 
-  const renderSettingsContent = (regimeId: string) => {
+  const RegimeParamsInline = ({ regimeId }: { regimeId: string }) => {
     if (regimeId === 'Portage') return (
-      <div className="w-full">
-        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 text-center">Frais Gestion %</p>
-        <input
-          type="number"
-          value={sim.state.portageComm}
-          onChange={e => sim.setters.setPortageComm(Math.max(1, Math.min(15, parseFloat(e.target.value) || 5)))}
-          min={1} max={15} step={0.5}
-          className="w-full text-center text-sm p-2 rounded-xl"
-          onClick={e => e.stopPropagation()}
-        />
+      <div className="space-y-1">
+        <label className="text-[8px] font-black text-slate-400 uppercase block">Frais gestion</label>
+        <div className="flex items-center justify-center gap-1">
+          <input
+            type="number"
+            value={sim.state.portageComm}
+            onChange={e => sim.setters.setPortageComm(Math.max(1, Math.min(15, parseFloat(e.target.value) || 7)))}
+            min={1} max={15} step={0.5}
+            className="w-12 text-center text-[10px] font-bold p-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+            onClick={e => e.stopPropagation()}
+          />
+          <span className="text-[8px] text-slate-400">%</span>
+        </div>
       </div>
     );
-    return (
-      <p className="text-[9px] text-slate-400 text-center leading-relaxed mt-2">
-        Paramètres configurés<br />dans la simulation globale
-      </p>
+    if (regimeId === 'Micro') return (
+      <div className="space-y-1">
+        <label className="text-[8px] font-black text-slate-400 uppercase block">Type</label>
+        <select
+          value={sim.state.typeActiviteMicro}
+          onChange={e => sim.setters.setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')}
+          className="w-full text-[9px] p-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600"
+          onClick={e => e.stopPropagation()}
+        >
+          <option value="BNC">BNC</option>
+          <option value="BIC_SERVICE">BIC Service</option>
+          <option value="BIC_COMMERCE">BIC Commerce</option>
+        </select>
+        <label className="flex items-center gap-1.5 mt-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={sim.state.prelevementLiberatoire}
+            onChange={() => sim.setters.setPrelevementLiberatoire(!sim.state.prelevementLiberatoire)}
+            className="rounded"
+            onClick={e => e.stopPropagation()}
+          />
+          <span className="text-[8px] font-bold text-slate-500">Prélèv. libératoire</span>
+        </label>
+      </div>
     );
+    if (regimeId === 'EURL IS') return (
+      <div className="space-y-1">
+        <label className="text-[8px] font-black text-slate-400 uppercase block">Rémunération</label>
+        <input
+          type="range"
+          min={0} max={100} step={5}
+          value={(sim.state.remunerationDirigeantMensuelle ?? 1) * 100}
+          onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
+          className="w-full accent-indigo-600 h-1.5"
+          onClick={e => e.stopPropagation()}
+        />
+        <span className="text-[8px] font-bold text-slate-500">{Math.round((sim.state.remunerationDirigeantMensuelle ?? 1) * 100)}% salaire</span>
+      </div>
+    );
+    if (regimeId === 'SASU') return (
+      <div className="space-y-1">
+        <label className="text-[8px] font-black text-slate-400 uppercase block">Répartition</label>
+        <input
+          type="range"
+          min={0} max={100} step={5}
+          value={sim.state.repartitionRemuneration ?? 70}
+          onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
+          className="w-full accent-indigo-600 h-1.5"
+          onClick={e => e.stopPropagation()}
+        />
+        <span className="text-[8px] font-bold text-slate-500">{sim.state.repartitionRemuneration ?? 70}% dividendes</span>
+      </div>
+    );
+    return <p className="text-[8px] text-slate-400 italic">—</p>;
   };
 
   const getDisplayValue = (r: any, row: typeof rows[number]) => (r[row.key] as number) / row.div;
@@ -212,6 +263,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">
+        <div className="flex justify-end items-center px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 rounded-t-2xl border-b border-slate-200 dark:border-slate-800">
+          <p className="text-[8px] text-slate-400">
+            🧠 = complexité gestion (1 simple → 5 expert) · Niveau = sécurité statut
+          </p>
+        </div>
         <table className="w-full border-separate border-spacing-0 table-fixed">
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
@@ -221,9 +277,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
                   Comparatif<br />Stratégique
                 </h3>
-                <div className="flex flex-col gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   <button onClick={handlePrint} className={PDF_BTN}>
-                    <FileText size={11} /> Export PDF
+                    <FileText size={11} /> PDF
                   </button>
                   <button
                     onClick={() => setShowDetails(v => !v)}
@@ -236,37 +292,27 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               </th>
 
               {regimes.map((r: any) => (
-                <th key={r.id} className="p-4 relative pt-12 border-b dark:border-slate-800">
+                <th key={r.id} className="p-4 relative pt-12 border-b dark:border-slate-800 align-top">
                   <div className={`header-band band-${r.class}`} />
                   {r.id === winnerId && <div className="winner-badge">🏆 OPTIMUM</div>}
-                  <button
-                    onClick={e => { e.stopPropagation(); setOpenSettings(openSettings === r.id ? null : r.id); }}
-                    className={`absolute top-4 right-3 transition-colors z-30 ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
-                  >
-                    <SlidersVertical size={14} />
-                  </button>
-                  {openSettings === r.id && (
-                    <div className="absolute inset-0 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-sm z-20 flex flex-col items-center justify-start pt-4 px-3">
-                      <div className="flex items-center justify-between w-full mb-4">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Réglages {r.id}</span>
-                        <button onClick={() => setOpenSettings(null)}>
-                          <CheckCircle size={16} className="text-indigo-500 hover:text-indigo-600 transition-colors" />
-                        </button>
-                      </div>
-                      {renderSettingsContent(r.id)}
+                  <div className="grid grid-cols-1 gap-0">
+                    <div className="min-h-[28px] flex items-center justify-center gap-2">
+                      <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter">{r.id}</span>
+                      {r.id === 'Micro' && r.ca > 77700 && <AlertCircle size={12} className="text-rose-500" />}
+                      <RetirementBadge quarters={r.retirementQuarters} />
                     </div>
-                  )}
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter">{r.id}</span>
-                    {r.id === 'Micro' && r.ca > 77700 && <AlertCircle size={12} className="text-rose-500" />}
-                    <RetirementBadge quarters={r.retirementQuarters} />
-                  </div>
-                  <div className="text-3xl font-black dark:text-white leading-none tracking-tighter">
-                    {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-2 justify-center">
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">🧠 {r.mental}/5</span>
-                    <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
+                    <div className="min-h-[36px] flex items-center justify-center">
+                      <span className="text-3xl font-black dark:text-white leading-none tracking-tighter">
+                        {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
+                      </span>
+                    </div>
+                    <div className="min-h-[32px] flex items-center justify-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion (1 simple → 5 expert)">🧠 {r.mental}/5</span>
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Niveau de sécurité du statut">{r.safety}</span>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                      <RegimeParamsInline regimeId={r.id} />
+                    </div>
                   </div>
                 </th>
               ))}
@@ -404,9 +450,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       {/* ── Vue mobile : cartes par régime ── */}
       <div className="block md:hidden p-4 pt-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-            Comparatif stratégique
-          </h3>
+          <div>
+            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+              Comparatif stratégique
+            </h3>
+            <p className="text-[8px] text-slate-400 mt-0.5">🧠 complexité · Niveau = sécurité</p>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => setShowDetails(v => !v)}
@@ -434,23 +483,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
                 <div className="h-1 w-full" style={{ background: color }} />
-                <button
-                  onClick={e => { e.stopPropagation(); setOpenSettings(openSettings === r.id ? null : r.id); }}
-                  className={`absolute top-4 right-3 z-10 transition-colors ${openSettings === r.id ? 'text-indigo-600' : 'text-slate-400 hover:text-indigo-500'}`}
-                >
-                  <SlidersVertical size={14} />
-                </button>
-                {openSettings === r.id && (
-                  <div className="absolute inset-0 bg-white/96 dark:bg-[#020617]/96 backdrop-blur-sm z-20 rounded-2xl p-4 flex flex-col">
-                    <div className="flex items-center justify-between mb-5">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Réglages {r.id}</span>
-                      <button onClick={() => setOpenSettings(null)}>
-                        <CheckCircle size={18} className="text-indigo-500" />
-                      </button>
-                    </div>
-                    {renderSettingsContent(r.id)}
-                  </div>
-                )}
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
                   <div className="mb-1 flex items-center justify-center gap-2">
                     <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">{r.id}</span>
@@ -468,8 +500,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   )}
                   <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
                   <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1">🧠 {r.mental}/5</span>
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter">{r.safety}</span>
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion">🧠 {r.mental}/5</span>
+                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Sécurité statut">{r.safety}</span>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 w-full px-2">
+                    <RegimeParamsInline regimeId={r.id} />
                   </div>
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">

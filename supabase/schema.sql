@@ -60,6 +60,16 @@ create table public.simulation_settings (
   city_size        text         not null default 'moyenne',  -- petite | moyenne | grande
   growth_rate      integer      not null default 2,           -- taux de croissance CA en %
 
+  -- Dépenses & optimisations
+  materiel_annuel  integer      default 0,
+  avantages_optimises integer   default 1500,
+
+  -- Paramètres par statut
+  type_activite_micro text     default 'BNC',  -- BNC | BIC_SERVICE | BIC_COMMERCE
+  prelevement_liberatoire boolean default false,
+  remuneration_dirigeant decimal(5,2) default 1,  -- EURL IS : % en salaire (0-1)
+  repartition_remuneration integer default 70,    -- SASU : 0=100% salaire, 100=100% dividendes
+
   -- Méta
   updated_at       timestamptz  default now()
 );

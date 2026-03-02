@@ -27,7 +27,7 @@ export default function Home() {
         {/* ── Intro avant les 4 blocs de paramètres ── */}
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 mt-6 mb-2">
           <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 font-semibold">
-            Renseignez votre TJM, votre foyer et vos charges — les résultats se recalculent en temps réel.
+            Renseignez votre activité, vos dépenses et votre situation fiscale — les résultats se recalculent en temps réel.
           </p>
         </div>
 

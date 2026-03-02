@@ -91,20 +91,26 @@ export default function ProjectionSection({
   });
 
   const projections = useMemo(() => projeterSurNAns({
-    tjm:           sim.state.tjm,
-    days:          sim.state.days,
-    taxParts:      sim.state.taxParts,
-    spouseIncome:  sim.state.spouseIncome,
-    kmAnnuel:      sim.state.kmAnnuel,
-    cvFiscaux:     sim.state.cvFiscaux,
-    loyerPercu:    sim.state.loyerPercu,
+    tjm: sim.state.tjm,
+    days: sim.state.days,
+    taxParts: sim.state.taxParts,
+    spouseIncome: sim.state.spouseIncome,
+    kmAnnuel: sim.state.kmAnnuel,
+    cvFiscaux: sim.state.cvFiscaux,
+    loyerPercu: sim.state.loyerPercu,
     activeCharges: sim.state.activeCharges,
-    sectionsActive:sim.state.sectionsActive,
-    portageComm:   sim.state.portageComm,
+    sectionsActive: sim.state.sectionsActive,
+    portageComm: sim.state.portageComm,
     chargeAmounts: sim.state.chargeAmounts,
-    acreEnabled:   sim.state.acreEnabled,
-    citySize:      sim.state.citySize,
-    growthRate:    sim.state.growthRate / 100,
+    acreEnabled: sim.state.acreEnabled,
+    citySize: sim.state.citySize,
+    growthRate: sim.state.growthRate / 100,
+    materielAnnuel: sim.state.materielAnnuel,
+    avantagesOptimises: sim.state.avantagesOptimises,
+    typeActiviteMicro: sim.state.typeActiviteMicro,
+    prelevementLiberatoire: sim.state.prelevementLiberatoire,
+    remunerationDirigeantMensuelle: sim.state.remunerationDirigeantMensuelle,
+    repartitionRemuneration: sim.state.repartitionRemuneration,
   }), [sim.state]);
 
   const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
@@ -184,15 +190,6 @@ export default function ProjectionSection({
           ))}
         </div>
 
-        {/* Bouton Détails — desktop uniquement */}
-        <button
-          onClick={() => setShowDetails(v => !v)}
-          className={`hidden md:flex ${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
-        >
-          {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-          {showDetails ? 'Masquer' : 'Détails'}
-        </button>
-
         {/* Croissance CA — desktop uniquement */}
         <div className="hidden md:block space-y-0.5 min-w-[180px] ml-4">
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
@@ -226,9 +223,18 @@ export default function ProjectionSection({
                   <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
-                <button onClick={handlePrintBiz} className={`mt-3 ${PDF_BTN}`}>
-                  <FileBarChart2 size={12} /> Business Plan
-                </button>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <button onClick={handlePrintBiz} className={PDF_BTN}>
+                    <FileBarChart2 size={12} /> PDF
+                  </button>
+                  <button
+                    onClick={() => setShowDetails(v => !v)}
+                    className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
+                  >
+                    {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+                    {showDetails ? 'Masquer' : 'Détails'}
+                  </button>
+                </div>
               </th>
 
               {/* Colonnes années (5 ans) */}
@@ -373,7 +379,7 @@ export default function ProjectionSection({
               {showDetails ? 'Masquer détails' : 'Détails'}
             </button>
             <button onClick={handlePrintBiz} className={PDF_BTN}>
-              <FileBarChart2 size={12} /> Business Plan PDF
+              <FileBarChart2 size={12} /> PDF
             </button>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 p-2 rounded-xl">
               <Zap className="w-3.5 h-3.5" />
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Production<br/>Annuelle</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Activité</p>
           </div>
           <p className="font-900 text-slate-900 dark:text-white text-base tracking-tight">
             {fmt(sim.state.tjm * sim.state.days)}
@@ -40,7 +40,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <div className="bg-rose-50 dark:bg-rose-900/30 text-rose-600 p-2 rounded-xl">
                 <Receipt className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Charges<br/>/ mois</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Dépenses<br/>pro</p>
             </div>
             <button
               type="button"
@@ -84,7 +84,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-2 rounded-xl">
                 <Users className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Foyer<br/>Fiscal</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-tight">Situation<br/>fiscale</p>
             </div>
             <button
               type="button"
@@ -113,7 +113,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <div className="flex items-center gap-4">
             <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 p-3 rounded-2xl"><Zap className="w-5 h-5" /></div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Production Annuelle</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Activité</p>
               <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(sim.state.tjm * sim.state.days)}</p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <Receipt className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Charges / mois</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Dépenses pro</p>
               <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(sim.resultats[0].fees / 12)}</p>
             </div>
           </div>
@@ -176,7 +176,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <div className="flex items-center gap-4">
             <div className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 p-3 rounded-2xl"><Users className="w-5 h-5" /></div>
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Foyer Fiscal</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Situation fiscale</p>
               <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{sim.state.taxParts} parts</p>
               <p className="text-[10px] text-slate-400 font-bold mt-0.5">
                 {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enfant${sim.state.nbEnfants > 1 ? 's' : ''}` : ''}

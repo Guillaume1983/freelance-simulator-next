@@ -27,9 +27,17 @@ export const useSimulation = () => {
   const [chargeAmounts, setChargeAmounts] = useState<Record<string, number>>(
     () => CHARGES_CATALOG.reduce((acc, c) => { acc[c.id] = c.amount; return acc; }, {} as Record<string, number>)
   );
+  const [materielAnnuel, setMaterielAnnuel] = useState(0);
 
   // --- Portage ---
-  const [portageComm, setPortageComm] = useState(5);
+  const [portageComm, setPortageComm] = useState(7);
+
+  // --- Paramètres par statut ---
+  const [typeActiviteMicro, setTypeActiviteMicro] = useState<'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'>('BNC');
+  const [prelevementLiberatoire, setPrelevementLiberatoire] = useState(false);
+  const [remunerationDirigeantMensuelle, setRemunerationDirigeantMensuelle] = useState(1);
+  const [repartitionRemuneration, setRepartitionRemuneration] = useState(70);
+  const [avantagesOptimises, setAvantagesOptimises] = useState(1500);
 
   // --- Paramètres projection ---
   const [acreEnabled, setAcreEnabled] = useState(true);
@@ -81,9 +89,15 @@ export const useSimulation = () => {
       if (data.active_charges)        setActiveCharges(data.active_charges);
       if (data.charge_amounts)        setChargeAmounts(data.charge_amounts);
       if (data.sections_active)       setSectionsActive(data.sections_active);
-      if (data.acre_enabled  != null) setAcreEnabled(data.acre_enabled);
-      if (data.city_size     != null) setCitySize(data.city_size as CitySize);
-      if (data.growth_rate   != null) setGrowthRate(data.growth_rate);
+      if (data.acre_enabled != null) setAcreEnabled(data.acre_enabled);
+      if (data.city_size != null) setCitySize(data.city_size as CitySize);
+      if (data.growth_rate != null) setGrowthRate(data.growth_rate);
+      if (data.materiel_annuel != null) setMaterielAnnuel(data.materiel_annuel);
+      if (data.avantages_optimises != null) setAvantagesOptimises(data.avantages_optimises);
+      if (data.type_activite_micro != null) setTypeActiviteMicro(data.type_activite_micro);
+      if (data.prelevement_liberatoire != null) setPrelevementLiberatoire(data.prelevement_liberatoire);
+      if (data.remuneration_dirigeant != null) setRemunerationDirigeantMensuelle(data.remuneration_dirigeant);
+      if (data.repartition_remuneration != null) setRepartitionRemuneration(data.repartition_remuneration);
       // Rétro-compat
       if (data.nb_adultes == null && data.tax_parts != null) {
         setNbAdultes(data.tax_parts >= 2 ? 2 : 1);
@@ -148,20 +162,26 @@ export const useSimulation = () => {
       const { error } = await supabase.from('simulation_settings').upsert({
         user_id: userId,
         tjm, days,
-        nb_adultes:     nbAdultes,
-        nb_enfants:     nbEnfants,
-        spouse_income:  spouseIncome,
-        km_annuel:      kmAnnuel,
-        cv_fiscaux:     cvFiscaux,
-        loyer_percu:    loyerPercu,
-        portage_comm:   portageComm,
+        nb_adultes: nbAdultes,
+        nb_enfants: nbEnfants,
+        spouse_income: spouseIncome,
+        km_annuel: kmAnnuel,
+        cv_fiscaux: cvFiscaux,
+        loyer_percu: loyerPercu,
+        portage_comm: portageComm,
         active_charges: activeCharges,
         charge_amounts: chargeAmounts,
-        sections_active:sectionsActive,
-        acre_enabled:   acreEnabled,
-        city_size:      citySize,
-        growth_rate:    growthRate,
-        updated_at:     new Date().toISOString(),
+        sections_active: sectionsActive,
+        acre_enabled: acreEnabled,
+        city_size: citySize,
+        growth_rate: growthRate,
+        materiel_annuel: materielAnnuel,
+        avantages_optimises: avantagesOptimises,
+        type_activite_micro: typeActiviteMicro,
+        prelevement_liberatoire: prelevementLiberatoire,
+        remuneration_dirigeant: remunerationDirigeantMensuelle,
+        repartition_remuneration: repartitionRemuneration,
+        updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
 
       if (error) {
@@ -180,7 +200,8 @@ export const useSimulation = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tjm, days, nbAdultes, nbEnfants, spouseIncome, kmAnnuel, cvFiscaux, loyerPercu,
       portageComm, activeCharges, chargeAmounts, sectionsActive, acreEnabled, citySize,
-      growthRate, userId]);
+      growthRate, materielAnnuel, avantagesOptimises, typeActiviteMicro,
+      prelevementLiberatoire, remunerationDirigeantMensuelle, repartitionRemuneration, userId]);
 
   const resultats = useMemo(() => calculateRegimes({
     tjm, days, taxParts, spouseIncome,
@@ -189,25 +210,37 @@ export const useSimulation = () => {
     acreEnabled, citySize,
     growthRate: growthRate / 100,
     annee: 1,
+    materielAnnuel,
+    avantagesOptimises,
+    typeActiviteMicro,
+    prelevementLiberatoire,
+    remunerationDirigeantMensuelle,
+    repartitionRemuneration,
   }), [
     tjm, days, taxParts, spouseIncome,
     kmAnnuel, cvFiscaux, loyerPercu,
     activeCharges, sectionsActive, portageComm, chargeAmounts,
     acreEnabled, citySize, growthRate,
+    materielAnnuel, avantagesOptimises, typeActiviteMicro,
+    prelevementLiberatoire, remunerationDirigeantMensuelle, repartitionRemuneration,
   ]);
 
   return {
     state: {
       tjm, days, taxParts, nbAdultes, nbEnfants, spouseIncome,
       kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive,
-      portageComm, chargeAmounts, userId,
+      portageComm, chargeAmounts, materielAnnuel, userId,
       acreEnabled, citySize, growthRate,
+      avantagesOptimises, typeActiviteMicro, prelevementLiberatoire,
+      remunerationDirigeantMensuelle, repartitionRemuneration,
     },
     setters: {
       setTjm, setDays, setNbAdultes, setNbEnfants, setSpouseIncome,
       setKmAnnuel, setCvFiscaux, setLoyerPercu, setActiveCharges,
-      setSectionsActive, setPortageComm, setChargeAmounts,
+      setSectionsActive, setPortageComm, setChargeAmounts, setMaterielAnnuel,
       setAcreEnabled, setCitySize, setGrowthRate,
+      setAvantagesOptimises, setTypeActiviteMicro, setPrelevementLiberatoire,
+      setRemunerationDirigeantMensuelle, setRepartitionRemuneration,
     },
     resultats,
     isLoading: !settingsLoaded,
