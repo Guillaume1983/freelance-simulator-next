@@ -1,6 +1,6 @@
 'use client';
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2 } from 'lucide-react';
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
@@ -122,7 +122,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {/* PANNEAU FISCAL : foyer, CFE, ACRE, croissance */}
       {activePanel === 'fiscal' && (
         <div className="card-pro px-5 md:px-8 py-6 md:py-8 border-t-4 border-t-amber-500 shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
             {/* Situation familiale */}
             <div className="space-y-5">
@@ -235,41 +235,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   <div className={`w-9 h-5 rounded-full transition-colors flex items-center ${sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${sim.state.acreEnabled ? 'translate-x-4' : ''}`} />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Croissance & Retraite */}
-            <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl text-blue-600"><TrendingUp size={20} /></div>
-                <h3 className="text-sm font-900 uppercase tracking-widest dark:text-white">Projection</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase">
-                    Croissance CA / an: <span className="text-indigo-500">{sim.state.growthRate}%</span>
-                  </label>
-                  <input
-                    type="range"
-                    min={0} max={50} step={5}
-                    value={sim.state.growthRate}
-                    onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
-                    className="w-full accent-indigo-600"
-                  />
-                  <div className="flex justify-between text-[8px] text-slate-400 font-bold">
-                    <span>0%</span><span>25%</span><span>50%</span>
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 px-3 py-2.5 border border-blue-100 dark:border-blue-800/40">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheck size={13} className="text-blue-600" />
-                    <p className="text-[9px] font-black text-blue-600 uppercase">Retraite (4 trimestres)</p>
-                  </div>
-                  <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    L&apos;indicateur ✅/⚠️ dans le tableau indique si votre CA valide les 4 trimestres requis par an pour votre régime (basé sur les seuils 2026).
-                  </p>
                 </div>
               </div>
             </div>

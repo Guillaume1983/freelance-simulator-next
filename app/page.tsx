@@ -5,45 +5,49 @@ import Header from '@/components/Header';
 import TopCards from '@/components/TopCards';
 import ExpandPanels from '@/components/ExpandPanels';
 import ComparisonTable from '@/components/ComparisonTable';
-import SidePanel from '@/components/SidePanel'; // Nouveau
-import Footer from '@/components/Footer';       // Nouveau
+import ProjectionSection from '@/components/ProjectionSection';
+import SidePanel from '@/components/SidePanel';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   const sim = useSimulation();
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark]           = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [projectionRegime, setProjectionRegime] = useState('Portage');
 
-  const togglePanel = (panelId: string) => setActivePanel(activePanel === panelId ? null : panelId);
+  const togglePanel = (panelId: string) =>
+    setActivePanel(activePanel === panelId ? null : panelId);
 
   return (
     <div className={isDark ? 'dark' : ''}>
       <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
-        
+
         <Header isDark={isDark} setIsDark={setIsDark} />
-        
         <TopCards sim={sim} activePanel={activePanel} togglePanel={togglePanel} />
 
         <div className="max-w-[1600px] mx-auto px-4 md:px-6">
           <ExpandPanels activePanel={activePanel} sim={sim} />
-          
-          <div className="flex flex-col md:flex-row gap-6 items-start mt-4">
-            <div className={`transition-all duration-500 w-full ${selectedId ? 'md:w-[68%]' : 'md:w-full'}`}>
-              <ComparisonTable 
-                sim={sim} 
-                selectedId={selectedId} 
-                setSelectedId={setSelectedId} 
+
+          {/* ── Tableau comparatif (pleine largeur) ── */}
+          <ComparisonTable sim={sim} />
+
+          {/* ── Tableau projection + panneau analyse (toujours visibles) ── */}
+          <div className="flex flex-col md:flex-row gap-6 items-start mt-6">
+
+            {/* Tableau projection */}
+            <div className="flex-1 min-w-0">
+              <ProjectionSection
+                sim={sim}
+                activeRegime={projectionRegime}
+                setActiveRegime={setProjectionRegime}
               />
             </div>
 
-            {selectedId && (
-              <div className="hidden md:block md:w-[32%] md:mt-0">
-                <SidePanel 
-                  selectedId={selectedId} 
-                  setSelectedId={setSelectedId} 
-                />
-              </div>
-            )}
+            {/* Panneau analyse (sticky, desktop uniquement) */}
+            <div className="hidden md:block w-[300px] shrink-0">
+              <SidePanel selectedId={projectionRegime} />
+            </div>
+
           </div>
         </div>
 
@@ -51,4 +55,4 @@ export default function Home() {
       </main>
     </div>
   );
-} 
+}

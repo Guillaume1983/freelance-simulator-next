@@ -1,71 +1,77 @@
 'use client';
-import { X, CheckCircle, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { CheckCircle, AlertCircle, Rocket } from 'lucide-react';
+
+const REGIME_COLORS: Record<string, string> = {
+  'Portage':  '#6366f1',
+  'Micro':    '#f59e0b',
+  'EURL IR':  '#10b981',
+  'EURL IS':  '#3b82f6',
+  'SASU':     '#8b5cf6',
+};
 
 const regimeData: Record<string, { forts: string[]; vigilance: string }> = {
   Portage: {
     forts: [
-      "Accès au chômage (ARE) en fin de mission",
-      "Protection sociale complète (régime salarié)",
-      "Zéro gestion administrative",
+      'Accès au chômage (ARE) en fin de mission',
+      'Protection sociale complète (régime salarié)',
+      'Zéro gestion administrative',
     ],
     vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net. À comparer avec le gain en tranquillité administrative.",
   },
   Micro: {
     forts: [
-      "Création instantanée, formalités nulles",
-      "Comptabilité ultra simplifiée",
-      "Charges proportionnelles au CA réel",
+      'Création instantanée, formalités nulles',
+      'Comptabilité ultra simplifiée',
+      'Charges proportionnelles au CA réel',
     ],
     vigilance: "Plafond de CA à 77 700 € en BNC. Au-delà, passage obligatoire en société. Pas de déduction des charges réelles.",
   },
-  "EURL IR": {
+  'EURL IR': {
     forts: [
-      "Déduction des charges professionnelles réelles",
-      "IR progressif : avantageux si revenus modérés",
-      "Structure souple et personnalisable",
+      'Déduction des charges professionnelles réelles',
+      'IR progressif : avantageux si revenus modérés',
+      'Structure souple et personnalisable',
     ],
-    vigilance: "Cotisations TNS d\u2019environ 40 % de la base. Comptabilité obligatoire (expert-comptable recommandé).",
+    vigilance: "Cotisations TNS d'environ 40 % de la base. Comptabilité obligatoire (expert-comptable recommandé).",
   },
-  "EURL IS": {
+  'EURL IS': {
     forts: [
-      "Bénéfice en société taxé à l\u2019IS réduit (15–25 %)",
-      "Pilotage flexible de la rémunération",
-      "Optimisation par capitalisation possible",
+      'Bénéfice en société taxé à l\'IS réduit (15–25 %)',
+      'Pilotage flexible de la rémunération',
+      'Optimisation par capitalisation possible',
     ],
     vigilance: "Double imposition si distribution de dividendes (IS + PFU 30 %). Comptabilité exigeante.",
   },
   SASU: {
     forts: [
-      "Protection assimilé-salarié (retraite, prévoyance)",
-      "Dividendes possibles au PFU 30 %",
-      "Statut reconnu pour les missions premium",
+      'Protection assimilé-salarié (retraite, prévoyance)',
+      'Dividendes possibles au PFU 30 %',
+      'Statut reconnu pour les missions premium',
     ],
-    vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d\u2019accès à l\u2019ARE en fin d\u2019activité de président.",
+    vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d'accès à l'ARE en fin d'activité de président.",
   },
 };
 
-export default function SidePanel({ selectedId, setSelectedId }: any) {
-  if (!selectedId) return null;
-  const data = regimeData[selectedId];
+export default function SidePanel({ selectedId }: { selectedId: string }) {
+  const data  = regimeData[selectedId];
+  const color = REGIME_COLORS[selectedId] ?? '#6366f1';
 
   return (
-    <aside className="animate-in slide-in-from-right duration-500 md:sticky md:top-24">
+    <aside className="md:sticky md:top-24 animate-in fade-in duration-300">
       <div className="card-pro px-5 md:px-7 py-6 md:py-8 shadow-2xl border-indigo-100 dark:border-indigo-900/30 bg-white dark:bg-[#0f172a]">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest italic">Analyse Statutaire</span>
-            <h2 className="text-3xl font-black dark:text-white uppercase tracking-tighter leading-none mt-1">{selectedId}</h2>
-          </div>
-          <button
-            onClick={() => setSelectedId(null)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all"
-          >
-            <X size={20} className="text-slate-400" />
-          </button>
+
+        {/* En-tête */}
+        <div className="mb-6">
+          <div className="w-8 h-1.5 rounded-full mb-3" style={{ background: color }} />
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyse Statutaire</span>
+          <h2 className="text-3xl font-black dark:text-white uppercase tracking-tighter leading-none mt-1">
+            {selectedId}
+          </h2>
         </div>
 
         {data && (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-5 rounded-[20px] border border-emerald-100 dark:border-emerald-900/20">
               <h4 className="text-[11px] font-black text-emerald-600 uppercase mb-3 flex items-center gap-2 italic">
                 <CheckCircle size={13} /> Points Forts
@@ -85,6 +91,15 @@ export default function SidePanel({ selectedId, setSelectedId }: any) {
                 {data.vigilance}
               </p>
             </div>
+
+            {/* Bouton Je me lance */}
+            <Link
+              href={`/partenaires?regime=${encodeURIComponent(selectedId)}`}
+              className="flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-2xl text-white font-black text-[11px] uppercase tracking-wider transition-all duration-200 hover:opacity-90 hover:shadow-lg shadow-md"
+              style={{ background: color }}
+            >
+              <Rocket size={14} /> Je me lance avec {selectedId}
+            </Link>
           </div>
         )}
       </div>
