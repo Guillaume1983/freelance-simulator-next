@@ -4,13 +4,72 @@ import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift } from 'lu
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
-  const totalDepensesMensuelles = (
+
+  const totalDepensesMensuelles = Math.round(
     CHARGES_CATALOG.reduce((sum, item) => {
       if (!sim.state.activeCharges.includes(item.id)) return sum;
-      const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
-      return sum + amount;
+      return sum + (sim.state.chargeAmounts?.[item.id] ?? item.amount);
     }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
   );
+
+  const totalPortageMensuel = Math.round(
+    CHARGES_CATALOG.reduce((sum, item) => {
+      if (item.portageWarning) return sum;
+      if (!sim.state.activeCharges.includes(item.id)) return sum;
+      return sum + (sim.state.chargeAmounts?.[item.id] ?? item.amount);
+    }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
+  );
+
+  const nonWarning = CHARGES_CATALOG.filter(c => !c.portageWarning);
+  const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
+
+  const renderChargeBtn = (item: typeof CHARGES_CATALOG[number] | undefined) => {
+    if (!item) return null;
+    const isActive = sim.state.activeCharges.includes(item.id);
+    const isAmber  = item.portageWarning;
+    const amount   = sim.state.chargeAmounts?.[item.id] ?? item.amount;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => {
+          const newCharges = isActive
+            ? sim.state.activeCharges.filter((id: string) => id !== item.id)
+            : [...sim.state.activeCharges, item.id];
+          sim.setters.setActiveCharges(newCharges);
+        }}
+        className={`w-full flex items-center justify-between rounded-2xl px-3 py-2 text-left transition-colors ${
+          isActive && !isAmber ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200/60 dark:border-rose-800/60'
+          : isActive && isAmber ? 'bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/40'
+          : 'bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800'
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          {isActive
+            ? <CheckCircle2 className={`w-4 h-4 ${isAmber ? 'text-amber-400' : 'text-rose-500'}`} />
+            : <Circle className="w-4 h-4 text-slate-300" />
+          }
+          <div className="flex flex-col">
+            <span className={`text-[10px] font-800 uppercase tracking-tight ${
+              isActive && isAmber ? 'text-amber-700 dark:text-amber-300'
+              : isActive ? 'text-rose-900 dark:text-rose-100'
+              : 'text-slate-500'
+            }`}>{item.name}</span>
+            <span className="text-[9px] text-slate-400">{amount.toLocaleString()} €/mois</span>
+          </div>
+        </div>
+        <div className="relative ml-2" onClick={e => e.stopPropagation()}>
+          <input
+            type="number"
+            value={amount}
+            onChange={e => sim.setters.setChargeAmounts({ ...sim.state.chargeAmounts, [item.id]: Number(e.target.value) || 0 })}
+            className="w-16 pr-5 py-1 text-[10px] font-bold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg text-right"
+          />
+          <span className="absolute right-1 top-1 text-[8px] font-black text-slate-400">€/m</span>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -18,73 +77,60 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {/* PANNEAU CATALOGUE DES CHARGES */}
       {activePanel === 'charges' && (
         <div className="mt-2 md:mt-4 rounded-2xl bg-white/70 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 px-4 md:px-6 py-4 md:py-5 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0 mb-4">
+
+          {/* En-tête */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0 mb-5">
             <div>
               <h3 className="text-xs md:text-sm font-900 uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
                 Dépenses professionnelles
               </h3>
               <p className="text-[10px] text-slate-500 font-medium mt-1">
-                Mensuelles. Micro : frais ignorés. Sociétés : TVA 20% récupérée. Matériel amorti 3 ans.
+                Mensuelles · TVA 20% récupérée en société · Matériel amorti 3 ans · Micro : abattement forfaitaire, dépenses non déductibles
               </p>
             </div>
-            <div className="text-right">
-              <span className="text-[9px] font-black text-rose-500 uppercase italic">Total mensuel</span>
-              <p className="text-xl font-900 text-slate-900 dark:text-white leading-none">
-                {Math.round(totalDepensesMensuelles)} €
-              </p>
+            <div className="flex gap-4 items-end">
+              <div className="text-right">
+                <span className="text-[9px] font-black text-amber-500 uppercase italic">Portage</span>
+                <p className="text-lg font-900 text-amber-600 dark:text-amber-400 leading-none">
+                  {Math.round(totalPortageMensuel)} €<span className="text-[9px] font-normal text-slate-400 ml-0.5">/mois</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-[9px] font-black text-rose-500 uppercase italic">EURL · SASU</span>
+                <p className="text-xl font-900 text-slate-900 dark:text-white leading-none">
+                  {totalDepensesMensuelles} €<span className="text-[9px] font-normal text-slate-400 ml-0.5">/mois</span>
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:gap-3">
-            {CHARGES_CATALOG.map((item) => {
-              const isActive = sim.state.activeCharges.includes(item.id);
-              const currentAmount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    const newCharges = isActive
-                      ? sim.state.activeCharges.filter((id: string) => id !== item.id)
-                      : [...sim.state.activeCharges, item.id];
-                    sim.setters.setActiveCharges(newCharges);
-                  }}
-                  className={`w-full flex items-center justify-between rounded-2xl px-3 py-2 text-left transition-colors ${
-                    isActive
-                      ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200/60 dark:border-rose-800/60'
-                      : 'bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {isActive ? <CheckCircle2 className="w-4 h-4 text-rose-500" /> : <Circle className="w-4 h-4 text-slate-300" />}
-                    <div className="flex flex-col">
-                      <span className={`text-[10px] font-800 uppercase tracking-tight ${isActive ? 'text-rose-900 dark:text-rose-100' : 'text-slate-500'}`}>
-                        {item.name}
-                      </span>
-                      <span className="text-[9px] text-slate-400">{currentAmount.toLocaleString()} €/mois</span>
-                    </div>
-                  </div>
-                  <div className="relative ml-2" onClick={e => e.stopPropagation()}>
-                    <input
-                      type="number"
-                      value={currentAmount}
-                      onChange={e => {
-                        sim.setters.setChargeAmounts({ ...sim.state.chargeAmounts, [item.id]: Number(e.target.value) || 0 });
-                      }}
-                      className="w-16 pr-5 py-1 text-[10px] font-bold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg text-right"
-                    />
-                    <span className="absolute right-1 top-1 text-[8px] font-black text-slate-400">€/m</span>
-                  </div>
-                </button>
-              );
-            })}
-            {/* Matériel annuel — intégré dans la grille, largeur limitée */}
-            <div className="rounded-2xl px-3 py-2 bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 min-w-0">
-              <div className="flex flex-col min-w-0">
+          {/* Grille 5 colonnes — mobile : 1 col, desktop : 5 cols */}
+          <div className="hidden md:grid md:grid-cols-5 md:gap-3">
+
+            {/* Ligne d'en-têtes des groupes */}
+            <div className="col-span-2 pb-1 border-b border-slate-200 dark:border-slate-700 mb-1">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Portage · EURL · SASU</span>
+            </div>
+            <div className="col-span-3 pb-1 border-b border-amber-200 dark:border-amber-800/50 mb-1">
+              <span className="text-[9px] font-black uppercase tracking-widest text-amber-500">EURL · SASU uniquement</span>
+            </div>
+
+            {/* Ligne 1 : nonWarning[0..1], warning[0..2] */}
+            {renderChargeBtn(nonWarning[0])}
+            {renderChargeBtn(nonWarning[1])}
+            {renderChargeBtn(warning[0])}
+            {renderChargeBtn(warning[1])}
+            {renderChargeBtn(warning[2])}
+
+            {/* Ligne 2 : nonWarning[2], matériel, warning[3..5] */}
+            {renderChargeBtn(nonWarning[2])}
+            {/* Matériel annuel — col 2, ligne 2 */}
+            <div className="rounded-2xl px-3 py-2 bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <div className="flex flex-col">
                 <span className="text-[10px] font-800 uppercase tracking-tight text-slate-600 dark:text-slate-300">Matériel annuel</span>
                 <span className="text-[9px] text-slate-400">amorti 3 ans</span>
               </div>
-              <div className="relative shrink-0" onClick={e => e.stopPropagation()}>
+              <div className="relative" onClick={e => e.stopPropagation()}>
                 <input
                   type="number"
                   value={sim.state.materielAnnuel ?? 0}
@@ -95,7 +141,37 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <span className="absolute right-1.5 top-1 text-[8px] font-black text-slate-400">€/an</span>
               </div>
             </div>
+            {renderChargeBtn(warning[3])}
+            {renderChargeBtn(warning[4])}
+            {renderChargeBtn(warning[5])}
+
           </div>
+
+          {/* Mobile : liste verticale avec séparateur entre les groupes */}
+          <div className="md:hidden space-y-2">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Portage · EURL · SASU</p>
+            {nonWarning.map(renderChargeBtn)}
+            {/* Matériel */}
+            <div className="rounded-2xl px-3 py-2 bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-800 uppercase tracking-tight text-slate-600 dark:text-slate-300">Matériel annuel</span>
+                <span className="text-[9px] text-slate-400">amorti 3 ans</span>
+              </div>
+              <div className="relative" onClick={e => e.stopPropagation()}>
+                <input
+                  type="number"
+                  value={sim.state.materielAnnuel ?? 0}
+                  onChange={e => sim.setters.setMaterielAnnuel(Number(e.target.value) || 0)}
+                  className="w-20 pr-8 py-1 text-[10px] font-bold bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg text-right"
+                  placeholder="0"
+                />
+                <span className="absolute right-1.5 top-1 text-[8px] font-black text-slate-400">€/an</span>
+              </div>
+            </div>
+            <p className="text-[9px] font-black uppercase tracking-widest text-amber-500 pt-2">EURL · SASU uniquement</p>
+            {warning.map(renderChargeBtn)}
+          </div>
+
         </div>
       )}
 

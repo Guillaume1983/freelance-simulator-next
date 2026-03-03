@@ -47,6 +47,7 @@ export interface PipelineResult {
 export function buildContextFromInput(input: PipelineInput): {
   ca: number;
   depensesPro: number;
+  depensesProPortage: number;
   indemnitesKm: number;
   loyer: number;
   cfe: number;
@@ -56,6 +57,7 @@ export function buildContextFromInput(input: PipelineInput): {
   acreActive: boolean;
   fraisGestionPortage: number;
   prelevementLiberatoire: boolean;
+  typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
 } {
   return buildStatutContext(input);
 }
@@ -63,6 +65,7 @@ export function buildContextFromInput(input: PipelineInput): {
 function buildStatutContext(input: PipelineInput): {
   ca: number;
   depensesPro: number;
+  depensesProPortage: number;
   indemnitesKm: number;
   loyer: number;
   cfe: number;
@@ -72,6 +75,7 @@ function buildStatutContext(input: PipelineInput): {
   acreActive: boolean;
   fraisGestionPortage: number;
   prelevementLiberatoire: boolean;
+  typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
 } {
   const annee = input.annee ?? 1;
   const ca = input.tjm * input.days * Math.pow(1 + input.growthRate, annee - 1);
@@ -80,18 +84,24 @@ function buildStatutContext(input: PipelineInput): {
   const cfe = annee === 1 ? 0 : CFE_PAR_VILLE[input.citySize];
 
   let depensesPro = 0;
+  let depensesProPortage = 0;
   CHARGES_CATALOG.forEach(c => {
     if (input.activeCharges.includes(c.id)) {
-      depensesPro += (input.chargeAmounts[c.id] ?? c.amount) * 12;
+      const amount = (input.chargeAmounts[c.id] ?? c.amount) * 12;
+      depensesPro += amount;
+      if (!c.portageWarning) depensesProPortage += amount;
     }
   });
   if (input.materielActive && input.materielAnnuel > 0) {
-    depensesPro += input.materielAnnuel / 3;
+    const mat = input.materielAnnuel / 3;
+    depensesPro += mat;
+    depensesProPortage += mat; // matériel spécifique à la mission : accepté en portage
   }
 
   return {
     ca,
     depensesPro,
+    depensesProPortage,
     indemnitesKm,
     loyer,
     cfe,
@@ -101,6 +111,7 @@ function buildStatutContext(input: PipelineInput): {
     acreActive: input.acreEnabled && annee === 1,
     fraisGestionPortage: input.portageComm,
     prelevementLiberatoire: input.prelevementLiberatoire,
+    typeActiviteMicro: input.typeActiviteMicro,
   };
 }
 
@@ -131,8 +142,8 @@ export function runPipeline(input: PipelineInput): PipelineResult[] {
   );
 
   const statutBuilders: Record<StatusId, () => FinancialLine[]> = {
-    Portage: () => buildPortageLines({ ...ctx, fraisGestionPortage: input.portageComm }),
-    Micro: () => buildMicroLines(ctx),
+    Portage: () => buildPortageLines({ ...ctx, fraisGestionPortage: input.portageComm, depensesPro: ctx.depensesProPortage }),
+    Micro: () => buildMicroLines({ ...ctx, typeActiviteMicro: input.typeActiviteMicro }),
     'EURL IR': () => buildEurlIrLines(ctx),
     'EURL IS': () => buildEurlIsLines(ctx),
     SASU: () => buildSasuLines(ctx),

@@ -17,7 +17,9 @@ export function buildProductionLines(
       fiscalImpact: ca,
       socialImpact: 0,
       applicableStatuses: [],
-      formula: `TJM × Jours × (1 + ${(growthRate * 100).toFixed(0)}%)^${annee - 1}`,
+      formula: annee === 1
+        ? `${tjm} € × ${days} jours`
+        : `${tjm} € × ${days} jours × (1 + ${(growthRate * 100).toFixed(0)}%)^${annee - 1}`,
     },
     {
       id: 'tjm',

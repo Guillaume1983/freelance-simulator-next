@@ -13,17 +13,19 @@ export interface StatutContext {
   spouseIncome: number;
   acreActive: boolean;
   prelevementLiberatoire: boolean;
+  typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
 }
 
 export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
+  const microRates = RATES_2026.micro[ctx.typeActiviteMicro];
   const cotisRate = ctx.acreActive
-    ? RATES_2026.micro.cotis * RATES_2026.micro.acre
-    : RATES_2026.micro.cotis;
+    ? microRates.cotis * RATES_2026.micro.acre
+    : microRates.cotis;
   const cotis = ctx.ca * cotisRate;
   const beforeTax = ctx.ca - cotis - ctx.cfe;
   const ir = ctx.prelevementLiberatoire
-    ? ctx.ca * RATES_2026.prelevementLiberatoire
-    : computeIR(ctx.ca * (1 - RATES_2026.abattementMicroBnc) + ctx.spouseIncome, ctx.taxParts);
+    ? ctx.ca * microRates.pl
+    : computeIR(ctx.ca * (1 - microRates.abattement) + ctx.spouseIncome, ctx.taxParts);
 
   return [
     {
@@ -66,6 +68,9 @@ export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['Micro'],
+      formula: ctx.prelevementLiberatoire
+        ? `CA × ${(microRates.pl * 100).toFixed(1)}%`
+        : `Barème IR — base = CA × ${((1 - microRates.abattement) * 100).toFixed(0)}% — ${ctx.taxParts} parts`,
     },
   ];
 }

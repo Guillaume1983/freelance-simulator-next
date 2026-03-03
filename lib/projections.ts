@@ -120,7 +120,6 @@ export function calculateRegimes(
 ): RegimeResult[] {
   const pipelineInput = toPipelineInput(params);
   const ctx = buildContextFromInput(pipelineInput);
-  const chargeFixes = ctx.depensesPro;
 
   const REGIMES = [
     { id: 'Portage', class: 'portage', mental: 0, safety: 'Haut', assimile: true },
@@ -144,7 +143,8 @@ export function calculateRegimes(
 
     let fees = 0;
     if (r.id === 'Micro') fees = 0;
-    else fees = chargeFixes;
+    else if (r.id === 'Portage') fees = ctx.depensesProPortage;
+    else fees = ctx.depensesPro;
 
     const res: RegimeResult = {
       ...r,

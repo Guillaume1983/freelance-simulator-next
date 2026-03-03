@@ -1,8 +1,16 @@
 'use client';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
+import { CHARGES_CATALOG } from '@/lib/constants';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
   const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
+
+  const totalDepensesMensuelles = Math.round(
+    CHARGES_CATALOG.reduce((sum, item) => {
+      if (!sim.state.activeCharges.includes(item.id)) return sum;
+      return sum + (sim.state.chargeAmounts?.[item.id] ?? item.amount);
+    }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
+  );
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-6 mb-4 mt-8">
@@ -52,7 +60,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             </button>
           </div>
           <p className="font-900 text-slate-900 dark:text-white text-base tracking-tight">
-            {fmt(sim.resultats[0].fees / 12)}
+            {fmt(totalDepensesMensuelles)}
           </p>
         </div>
 
@@ -137,7 +145,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Dépenses pro</p>
-              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(sim.resultats[0].fees / 12)}</p>
+              <p className="font-900 text-slate-900 dark:text-white text-xl tracking-tight">{fmt(totalDepensesMensuelles)}</p>
             </div>
           </div>
           <button

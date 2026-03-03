@@ -152,7 +152,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        div: 1  },
-    { label: 'Dépenses pro cochées',         key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
+    { label: 'Dépenses pro',                 key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
     { label: 'Commission de portage',        key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations Sociales',          key: 'cotis',     div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', div: 12, highlight: true },
@@ -170,8 +170,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   };
   const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
 
-  const getDetailText = (r: any, key: string): string =>
-    getDetailTextFromLines(r, key, sim);
+  const getDetailText = (r: any, key: string, monthly = false): string =>
+    getDetailTextFromLines(r, key, sim, monthly);
 
   const RetirementBadge = ({ quarters }: { quarters: number }) => (
     <span title={quarters >= 4 ? '4 trimestres retraite validés' : `~${quarters}/4 trimestres`} className="text-[10px]">
@@ -272,7 +272,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
                     {regimes.map((r: any) => (
                       <td key={r.id} className="px-4 py-1.5 text-center">
-                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key)}</span>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key, row.div === 12)}</span>
                       </td>
                     ))}
                   </tr>
@@ -471,7 +471,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       </div>
                       {showDetails && (
                         <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
-                          {getDetailText(r, row.key)}
+                          {getDetailText(r, row.key, row.div === 12)}
                         </p>
                       )}
                     </div>

@@ -12,15 +12,15 @@ export type DepenseId = (typeof DEPENSES_MENSUELLES)[number]['id'];
 /* ── Rétro-compat : ancien catalogue charges ── */
 /* Mapping ancien → nouveau pour rétrocompat */
 export const CHARGES_CATALOG = [
-  { id: 'compta', name: 'Expert-Comptable', amount: 160 },
-  { id: 'mutuelle', name: 'Protection Sociale', amount: 140 },
-  { id: 'assurance', name: 'Responsabilité Civile', amount: 45 },
-  { id: 'bureau', name: 'Bureau / Coworking', amount: 250 },
-  { id: 'formation', name: 'Formation & Développement pro', amount: 120 },
-  { id: 'repas', name: 'Restauration', amount: 190 },
-  { id: 'tel', name: 'Outils & Logiciels', amount: 90 },
-  { id: 'fraisBancaires', name: 'Frais bancaires / Compte pro', amount: 35 },
-  { id: 'transport', name: 'Transport public', amount: 50 },
+  { id: 'compta',        name: 'Expert-Comptable',            amount: 160, portageWarning: true  },
+  { id: 'mutuelle',      name: 'Protection Sociale',          amount: 140, portageWarning: true  },
+  { id: 'assurance',     name: 'Responsabilité Civile',       amount:  45, portageWarning: true  },
+  { id: 'bureau',        name: 'Bureau / Coworking',          amount: 250, portageWarning: true  },
+  { id: 'formation',     name: 'Formation & Développement pro', amount: 120, portageWarning: true },
+  { id: 'repas',         name: 'Restauration',                amount: 190, portageWarning: false },
+  { id: 'tel',           name: 'Outils & Logiciels',          amount:  90, portageWarning: false },
+  { id: 'fraisBancaires',name: 'Frais bancaires / Compte pro',amount:  35, portageWarning: true  },
+  { id: 'transport',     name: 'Transport public',            amount:  50, portageWarning: false },
 ];
 
 export const CFE_PAR_VILLE: Record<CitySize, number> = {

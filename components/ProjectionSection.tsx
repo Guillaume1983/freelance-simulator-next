@@ -131,7 +131,7 @@ export default function ProjectionSection({
 
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
-    { label: 'Dépenses pro cochées',         key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
+    { label: 'Dépenses pro',                 key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Cotisations Sociales',          key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: true  },
@@ -142,8 +142,8 @@ export default function ProjectionSection({
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
 
-  const getDetailText = (r: any, key: string): string =>
-    getDetailTextFromLines(r, key, sim);
+  const getDetailText = (r: any, key: string, monthly = false): string =>
+    getDetailTextFromLines(r, key, sim, monthly);
 
   return (
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
@@ -282,7 +282,7 @@ export default function ProjectionSection({
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
                       return (
                         <td key={i} className="px-4 py-1.5 text-center">
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key)}</span>
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key, row.monthly)}</span>
                         </td>
                       );
                     })}
@@ -445,7 +445,7 @@ export default function ProjectionSection({
                         </div>
                         {showDetails && r && (
                           <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
-                            {getDetailText(r, row.key)}
+                            {getDetailText(r, row.key, row.monthly)}
                           </p>
                         )}
                       </div>
