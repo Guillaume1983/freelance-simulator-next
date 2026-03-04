@@ -16,7 +16,8 @@ export interface StatutContext {
 export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
   const e = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
 
-  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
+  // Charges déductibles au niveau du bénéfice : dépenses pro + IK + loyer + avantages exonérés
+  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises;
   const fees = chargeFixes + ctx.cfe;
   const benefice = ctx.ca - fees;
 
@@ -51,7 +52,11 @@ export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: -tns.total,
       applicableStatuses: ['EURL IR'],
-      formula: computeTNSDetail(benefice, ctx.acreActive),
+      formula: [
+        'Bénéfice = CA − (dépenses pro + IK + loyer + avantages exonérés + CFE)',
+        `= ${e(ctx.ca)} − ${e(fees)} = ${e(benefice)}`,
+        computeTNSDetail(benefice, ctx.acreActive),
+      ].join('\n'),
     },
     {
       id: 'eurl_ir_remuneration',

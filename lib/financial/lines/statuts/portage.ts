@@ -15,7 +15,8 @@ export interface StatutContext {
 }
 
 export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
-  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
+  // Charges supportées par la société de portage : dépenses pro + IK + avantages exonérés (pas de loyer bureau à domicile, l'employeur est la société de portage)
+  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.avantagesOptimises;
   const comm = ctx.ca * (ctx.fraisGestionPortage / 100);
   const fees = chargeFixes + comm;
   const base = ctx.ca - fees;
@@ -23,7 +24,7 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
   const cotisRate = RATES_2026.portage.cotis;
   const cotis = base * cotisRate;
   const beforeTax = base - cotis;
-  const ir = computeIR(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
+  const ir = computeIR(beforeTax + ctx.spouseIncome, ctx.taxParts);
 
   return [
     {
@@ -46,7 +47,11 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: -cotis,
       applicableStatuses: ['Portage'],
-      formula: `Base × ${(cotisRate * 100).toFixed(1)}%`,
+      formula: [
+        'Base nette = CA − (dépenses pro portage + IK + avantages exonérés + commission)',
+        `= ${Math.round(ctx.ca).toLocaleString('fr-FR')} € − ${Math.round(fees).toLocaleString('fr-FR')} € = ${Math.round(base).toLocaleString('fr-FR')} €`,
+        `Cotisations = Base nette × ${(cotisRate * 100).toFixed(1)}%`,
+      ].join('\n'),
     },
     {
       id: 'portage_remuneration',
@@ -57,6 +62,10 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: beforeTax,
       socialImpact: 0,
       applicableStatuses: ['Portage'],
+      formula: [
+        `Base = CA − charges − commission = ${Math.round(ctx.ca).toLocaleString('fr-FR')} € − ${Math.round(chargeFixes).toLocaleString('fr-FR')} € − ${Math.round(comm).toLocaleString('fr-FR')} € = ${Math.round(base).toLocaleString('fr-FR')} €`,
+        `Rémunération nette = Base − cotisations = ${Math.round(base).toLocaleString('fr-FR')} € − ${Math.round(cotis).toLocaleString('fr-FR')} € = ${Math.round(beforeTax).toLocaleString('fr-FR')} €`,
+      ].join('\n'),
     },
     {
       id: 'portage_ir',
@@ -67,7 +76,7 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['Portage'],
-      formula: computeIRDetail(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts),
+      formula: computeIRDetail(beforeTax + ctx.spouseIncome, ctx.taxParts),
     },
   ];
 }

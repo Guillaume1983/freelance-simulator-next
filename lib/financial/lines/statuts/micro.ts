@@ -57,6 +57,7 @@ export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: beforeTax,
       socialImpact: 0,
       applicableStatuses: ['Micro'],
+      formula: `Revenu avant IR = CA − cotisations − CFE\n= ${Math.round(ctx.ca).toLocaleString('fr-FR')} € − ${Math.round(cotis).toLocaleString('fr-FR')} € − ${Math.round(ctx.cfe).toLocaleString('fr-FR')} € = ${Math.round(beforeTax).toLocaleString('fr-FR')} €`,
     },
     {
       id: 'micro_ir',

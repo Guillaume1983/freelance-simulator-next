@@ -8,6 +8,11 @@ interface RegimeWithLines {
   beforeTax: number;
   ir: number;
   l?: number;
+  depensesPro?: number;
+  depensesProPortage?: number;
+  indemnitesKm?: number;
+  loyerPercu?: number;
+  avantagesOptimises?: number;
   lines?: FinancialLine[];
 }
 
@@ -34,18 +39,56 @@ export function getDetailTextFromLines(
         const labels = { BNC: 'BNC', BIC_SERVICE: 'BIC services', BIC_COMMERCE: 'BIC commerce' };
         return `Non déductibles en Micro — abattement forfaitaire de ${abattements[type]} % (${labels[type]}) appliqué sur le CA`;
       }
-      return 'Dépenses professionnelles cochées (charges réelles déductibles du résultat)';
+      // Portage : toujours afficher le calcul explicite (dépenses pro + IK + avantages, pas de loyer)
+      if (r.id === 'Portage') {
+        const dep = r.depensesProPortage ?? 0;
+        const ik = r.indemnitesKm ?? 0;
+        const avantages = r.avantagesOptimises ?? 0;
+        const total = dep + ik + avantages;
+        const parts: string[] = [
+          `Charges = dépenses pro + IK + avantages exonérés`,
+          `= ${fmt(dep)} + ${fmt(ik)} + ${fmt(avantages)} = ${fmt(total)}`,
+        ];
+        if (dep > 0) parts.push(`• Dépenses pro (acceptées en portage) : ${fmt(dep)}`);
+        if (ik > 0) parts.push(`• Indemnités kilométriques : ${fmt(ik)}`);
+        if (avantages > 0) parts.push(`• Avantages exonérés : ${fmt(avantages)}`);
+        return parts.join('\n');
+      }
+      // EURL / SASU : détail depuis les lignes (dépenses pro + IK + loyer + avantages)
+      const depenseLines = lines.filter((l: FinancialLine) => l.category === 'depense');
+      const ikLine = getLine('indemnites_km');
+      const loyerLine = getLine('loyer_percu');
+      const avantagesLine = getLine('avantages');
+      const parts: string[] = [];
+      if (depenseLines.length > 0) {
+        const totalDepenses = depenseLines.reduce((s, l) => s + l.amount, 0);
+        const detail = depenseLines.map(l => `  • ${l.label} : ${fmt(l.amount)}${l.formula ? ` (${l.formula})` : ''}`).join('\n');
+        parts.push(`Dépenses professionnelles : ${fmt(totalDepenses)}\n${detail}`);
+      }
+      if (ikLine && ikLine.amount > 0) {
+        parts.push(`Indemnités kilométriques : ${fmt(ikLine.amount)}${ikLine.formula ? ` (${ikLine.formula})` : ''}`);
+      }
+      if (loyerLine && loyerLine.amount > 0) {
+        parts.push(`Loyer (location bureau) : ${fmt(loyerLine.amount)}${loyerLine.formula ? ` (${loyerLine.formula})` : ''}`);
+      }
+      if (avantagesLine && avantagesLine.amount > 0) {
+        parts.push(`Avantages exonérés : ${fmt(avantagesLine.amount)}`);
+      }
+      if (parts.length === 0 && r.fees > 0) {
+        return `Charges déductibles : ${fmt(r.fees)} (détail non disponible pour ce statut)`;
+      }
+      if (parts.length === 0) return 'Aucune charge professionnelle';
+      return parts.join('\n');
     }
     case 'optimisations': {
       const ik = getLine('indemnites_km')?.amount ?? 0;
       const loyer = getLine('loyer_percu')?.amount ?? 0;
       const avantages = getLine('avantages')?.amount ?? 0;
       const parts: string[] = [];
-      if (ik > 0) parts.push(`Indemnités kilométriques : ${fmt(ik)} (remboursées en net, déductibles pour la société)`);
-      if (loyer > 0) parts.push(`Loyer perçu (bureau domicile) : ${fmt(loyer)} (cash + revenu foncier, charge pour la société)`);
-      if (avantages > 0) parts.push(`Avantages exonérés (CE, chèques vacances, etc.) : ${fmt(avantages)}`);
+      if (ik > 0) parts.push(`Indemnités kilométriques : ${fmt(ik)}\n  Coût pour l'entreprise (inclus dans "Charges") et remboursement net — exonéré de cotisations et d'IR.`);
+      if (loyer > 0) parts.push(`Loyer perçu (location bureau) : ${fmt(loyer)}\n  Coût pour la société (inclus dans "Charges") et revenu foncier pour le foyer.`);
+      if (avantages > 0) parts.push(`Avantages exonérés (CE, chèques vacances, mutuelle…) : ${fmt(avantages)}\n  Coût employeur (inclus dans "Charges") mais avantage net pour vous — sans cotisations sociales ni IR dans les plafonds légaux.`);
       if (parts.length === 0) return 'Aucune optimisation activée (IK, loyer, avantages)';
-      parts.push('Ces montants sont déjà inclus dans le disponible final et ne supportent pas de cotisations sociales supplémentaires.');
       return parts.join('\n');
     }
     case 'portageCommission': {
@@ -55,16 +98,27 @@ export function getDetailTextFromLines(
     }
     case 'cotis': {
       const line = getLine('portage_cotis') ?? getLine('micro_cotis') ?? getLine('eurl_ir_cotis') ?? getLine('eurl_is_cotis');
-      return line?.formula ?? (r.id === 'Micro' ? `${fmt(r.ca)} × 21,1%` : r.id === 'Portage' ? 'Base nette × 45%' : r.id === 'EURL IR' ? '(CA − Charges) × 40%' : r.id === 'EURL IS' ? 'Rémunération × 45%' : 'IS 20% (inclus)');
+      if (line?.formula) return line.formula;
+      const typeMicro = sim.state.typeActiviteMicro ?? 'BNC';
+      const tauxMicro: Record<string, string> = { BNC: '21,1 %', BIC_SERVICE: '21,2 %', BIC_COMMERCE: '12,3 %' };
+      return r.id === 'Micro' ? `CA × ${tauxMicro[typeMicro]} (micro ${typeMicro})` : r.id === 'Portage' ? 'Base nette × 45 %' : r.id === 'EURL IR' ? '(CA − Charges) × ~40 % (TNS)' : r.id === 'EURL IS' ? 'Salaire net × 45 %' : 'IS 20 % (inclus)';
     }
     case 'beforeTax': {
       const line = getLine('portage_remuneration') ?? getLine('micro_remuneration') ?? getLine('eurl_ir_remuneration') ?? getLine('eurl_is_remuneration') ?? getLine('sasu_dividendes');
       if (line?.formula) return monthly12(line.formula);
       if (r.id === 'EURL IS') return monthly12(`(${fmt(r.ca)} − ${fmt(r.fees)}) ÷ 1,45`);
-      if (r.id === 'SASU') return monthly12(`(${fmt(r.ca)} − ${fmt(r.fees)}) × 80% (IS 20%)`);
-      // Construire la formule en omettant les termes nuls
+      if (r.id === 'SASU') return monthly12(`Résultat après IS × % distribué = dividendes bruts (voir détail ligne)`);
+      // Construire la formule : CA − charges − [commission si Portage] − [CFE si Micro] − cotis
       const terms: string[] = [fmt(r.ca)];
-      if (r.fees > 0) terms.push(`− ${fmt(r.fees)}`);
+      if (r.fees > 0) terms.push(`− ${fmt(r.fees)} (charges)`);
+      if (r.id === 'Portage') {
+        const comm = getLine('portage_commission')?.amount ?? 0;
+        if (comm > 0) terms.push(`− ${fmt(comm)} (commission)`);
+      }
+      if (r.id === 'Micro') {
+        const cfe = getLine('micro_cfe')?.amount ?? 0;
+        if (cfe > 0) terms.push(`− ${fmt(cfe)} (CFE)`);
+      }
       if (r.cotis > 0) terms.push(`− ${fmt(r.cotis)}`);
       return monthly12(terms.join(' '));
     }

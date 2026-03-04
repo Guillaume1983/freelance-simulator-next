@@ -16,7 +16,8 @@ export interface StatutContext {
 }
 
 export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
-  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
+  // Charges déductibles de la SASU : dépenses pro + IK + loyer + avantages exonérés
+  const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises;
   const fees = chargeFixes + ctx.cfe;
   const base = ctx.ca - fees;
 
@@ -49,7 +50,11 @@ export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['SASU'],
-      formula: `Base × ${(RATES_2026.isSasu.taux * 100).toFixed(0)}%`,
+      formula: [
+        'Base IS = CA − (dépenses pro + IK + loyer + avantages exonérés + CFE)',
+        `= ${Math.round(ctx.ca).toLocaleString('fr-FR')} € − ${Math.round(fees).toLocaleString('fr-FR')} € = ${Math.round(base).toLocaleString('fr-FR')} €`,
+        `IS = Base IS × ${(RATES_2026.isSasu.taux * 100).toFixed(0)}%`,
+      ].join('\n'),
     },
     {
       id: 'sasu_dividendes',

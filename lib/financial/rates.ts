@@ -21,7 +21,7 @@ export const RATES_2026 = {
     acre: 0.5,
   },
   portage: { cotis: 0.45, acre: 0.5 },
-  eurlIs: { cotis: 0.45, acre: 0.25 },
+  eurlIs: { cotis: 0.45, acre: 0.5 }, // ACRE : exonération 50 % cotisations an 1
   is: { taux: 0.25 },
   isSasu: { taux: 0.20 },
   flatTaxDividendes: 0.30,

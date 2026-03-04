@@ -42,6 +42,8 @@ export function buildOptimisationsLines(
     });
   }
 
+  // Avantages exonérés (titres-resto, CE, mutuelle…) : employeur → salarié ou société → dirigeant.
+  // Ne s'applique pas à la micro-entreprise (pas d'employeur, pas de dispositif équivalent).
   if (avantagesOptimises > 0) {
     lines.push({
       id: 'avantages',
@@ -49,9 +51,10 @@ export function buildOptimisationsLines(
       category: 'optimisation',
       amount: avantagesOptimises,
       cashImpact: avantagesOptimises,
-      fiscalImpact: 0,
+      // Coût pour l'entreprise, avantage net pour l'individu
+      fiscalImpact: -avantagesOptimises,
       socialImpact: 0,
-      applicableStatuses: [],
+      applicableStatuses: ['Portage', 'EURL IR', 'EURL IS', 'SASU'],
     });
   }
 

@@ -137,7 +137,16 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
-    pageStyle: '@page { size: A4 landscape; margin: 12mm; }',
+    pageStyle: `
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    `,
   });
 
   const regimes = sim.resultats;
@@ -150,14 +159,20 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     : null;
   const fmt      = (v: number) => Math.round(v).toLocaleString() + ' €';
 
+  const getBeforeTaxRowLabel = (regimeId: string) => {
+    if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
+    if (regimeId === 'SASU') return 'Dividendes bruts (avant PFU)';
+    return 'Rémunération nette (avant IR)';
+  };
+
   const rows = [
     { label: 'CA Annuel Brut',                key: 'ca',             div: 1  },
-    { label: 'Dépenses pro',                  key: 'fees',           div: 1,  prefix: '-', color: 'text-rose-500' },
+    { label: 'Charges (dépenses + optimisations)', key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
     { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations Sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
-    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax',      div: 1,  highlight: true },
-    { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',             div: 1,  prefix: '-', color: 'text-rose-600' },
+    { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
+    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
     { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false },
     { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true  },
@@ -285,6 +300,14 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       {(() => {
                         const val = getDisplayValue(r, row);
                         if (val === null) return '—';
+                        if (row.key === 'beforeTax') {
+                          return (
+                            <>
+                              <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(r.id)}</div>
+                              {(row as any).prefix} {fmt(val)}
+                            </>
+                          );
+                        }
                         return <>{(row as any).prefix} {fmt(val)}</>;
                       })()}
                     </td>
@@ -483,7 +506,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                         : (row as any).highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
                         : 'bg-slate-50/40 dark:bg-slate-900/20'
                       }`}>
-                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label}</p>
                         <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
                           {(() => {
                             const val = getDisplayValue(r, row);
@@ -594,8 +617,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <td style={{ padding: '4px 7px', fontWeight: (row as any).isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
                     {regimes.map((r: any) => {
                       const val = getDisplayValue(r, row);
+                      const sublabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : null;
                       return (
                         <td key={r.id} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: (row as any).isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: (row as any).isFinal ? '#4f46e5' : 'inherit' }}>
+                          {sublabel ? <div style={{ fontSize: 7, color: '#94a3b8', marginBottom: 2 }}>{sublabel}</div> : null}
                           {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/mois' : ''}`}
                         </td>
                       );
@@ -618,11 +643,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
           {/* Histogrammes */}
           {(() => {
-            const BAR_H = 80;
             return (
-              <div style={{ marginTop: 18 }}>
-                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Répartition du CA par statut</h2>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+              <div style={{ marginTop: 16 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Répartition du CA par statut</h2>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                   {regimes.map((r: any) => {
                     const total = Math.max(r.ca, 1);
                     const segs = [
@@ -631,17 +655,19 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       { pct: (r.ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
                       { pct: (r.net   / total) * 100, color: '#34d399', label: 'Net'     },
                     ];
-                    let top = 0;
                     return (
                       <div key={r.id} style={{ textAlign: 'center', flex: 1 }}>
                         <p style={{ fontSize: 8, fontWeight: 900, margin: '0 0 4px', color: REGIME_COLORS[r.id] }}>{r.id}</p>
-                        <div style={{ position: 'relative', width: '100%', height: BAR_H, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
-                          {segs.map((s, j) => {
-                            const h = Math.round((Math.max(0, s.pct) / 100) * BAR_H);
-                            const t = top;
-                            top += h;
-                            return <div key={j} style={{ position: 'absolute', top: t, left: 0, right: 0, height: h, background: s.color }} />;
-                          })}
+                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 4, overflow: 'hidden', background: '#e2e8f0' }}>
+                          {segs.map((s, j) => (
+                            <div
+                              key={j}
+                              style={{
+                                width: `${Math.max(0, s.pct)}%`,
+                                background: s.color,
+                              }}
+                            />
+                          ))}
                         </div>
                         <div style={{ marginTop: 4 }}>
                           {segs.map(s => (

@@ -70,6 +70,8 @@ export interface RegimeResult {
   retirementQuarters: number;
   /* Nouveaux champs pour tableau détaillé */
   depensesPro?: number;
+  /** Dépenses pro retenues en portage (sous-ensemble de depensesPro) */
+  depensesProPortage?: number;
   indemnitesKm?: number;
   loyerPercu?: number;
   avantagesOptimises?: number;
@@ -143,10 +145,16 @@ export function calculateRegimes(
     const beforeTax = getAmt('portage_remuneration') || getAmt('micro_remuneration') || getAmt('eurl_ir_remuneration') || getAmt('eurl_is_remuneration') || (getAmt('sasu_dividendes') ? getAmt('sasu_dividendes') / 0.70 : 0);
     const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || getAmt('sasu_ir');
 
+    // "Charges" = dépenses pro + coût des optimisations utilisées comme charges
+    // (IK, loyer, avantages exonérés). On laisse la micro à 0 car les charges réelles ne sont pas déductibles.
     let fees = 0;
-    if (r.id === 'Micro') fees = 0;
-    else if (r.id === 'Portage') fees = ctx.depensesProPortage;
-    else fees = ctx.depensesPro;
+    if (r.id === 'Micro') {
+      fees = 0;
+    } else if (r.id === 'Portage') {
+      fees = ctx.depensesProPortage + ctx.indemnitesKm + ctx.avantagesOptimises;
+    } else {
+      fees = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises;
+    }
 
     const res: RegimeResult = {
       ...r,
@@ -159,6 +167,7 @@ export function calculateRegimes(
       l: ctx.loyer,
       retirementQuarters: retirementQuarters(beforeTax, r.assimile),
       depensesPro: ctx.depensesPro,
+      depensesProPortage: r.id === 'Portage' ? ctx.depensesProPortage : undefined,
       indemnitesKm: ctx.indemnitesKm,
       loyerPercu: ctx.loyer,
       avantagesOptimises: ctx.avantagesOptimises,
@@ -167,7 +176,7 @@ export function calculateRegimes(
     };
 
     if (r.id === 'EURL IS') {
-      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises + ctx.cfe);
       const isSociete = getAmt('eurl_is_is');
       const salaireNet = getAmt('eurl_is_remuneration');
       const cotisSoc = getAmt('eurl_is_cotis');
@@ -180,7 +189,7 @@ export function calculateRegimes(
       res.dividendesNets = 0;
       res.cashInCompany = resteEnSociete;
     } else if (r.id === 'SASU') {
-      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises + ctx.cfe);
       const isSociete = getAmt('sasu_is');
       const apresIS = resultatSociete - isSociete;
       const dividendesNets = getAmt('sasu_dividendes');

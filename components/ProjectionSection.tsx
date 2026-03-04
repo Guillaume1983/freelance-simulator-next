@@ -93,7 +93,16 @@ export default function ProjectionSection({
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
     documentTitle: 'BusinessPlan-Projection5ans-FreelanceSimulateur',
-    pageStyle: '@page { size: A4 portrait; margin: 15mm; }',
+    pageStyle: `
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    `,
   });
 
   const projections = useMemo(() => projeterSurNAns({
@@ -129,14 +138,20 @@ export default function ProjectionSection({
     setActiveYear(Math.min(idx, count - 1));
   };
 
+  const getBeforeTaxRowLabel = (regimeId: string) => {
+    if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
+    if (regimeId === 'SASU') return 'Dividendes bruts (avant PFU)';
+    return 'Rémunération nette (avant IR)';
+  };
+
   const rows = [
     { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
     { label: 'Dépenses pro',                 key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Cotisations Sociales',         key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '+', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
-    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
-    { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
+    { label: 'Base avant impôt',             key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
+    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false },
     { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true  },
   ];
@@ -255,7 +270,7 @@ export default function ProjectionSection({
               <React.Fragment key={idx}>
                 <tr className={`transition-colors ${row.highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${row.isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
                   <td className="p-4 border-r dark:border-slate-800">
-                    <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
+                    <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</div>
                   </td>
                 {projections.map((yr, i) => {
                   const r   = yr.find((x: any) => x.id === activeRegime) as any;
@@ -459,7 +474,7 @@ export default function ProjectionSection({
                           : row.highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
                           : 'bg-slate-50/40 dark:bg-slate-900/20'
                         }`}>
-                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.label}</p>
+                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
                             {val !== null ? (
                               <>
@@ -494,10 +509,12 @@ export default function ProjectionSection({
         <div ref={printBizRef} style={{ fontFamily: 'Arial, sans-serif', padding: '12mm', fontSize: 10 }}>
 
           {/* En-tête */}
-          <h1 style={{ fontSize: 17, fontWeight: 900, margin: '0 0 4px' }}>Business Plan Freelance — Projection 5 ans</h1>
-          <p style={{ fontSize: 9, color: '#666', margin: '0 0 14px' }}>
-            Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · +{sim.state.growthRate} %/an · {sim.state.taxParts} parts fiscales
-          </p>
+          <div style={{ textAlign: 'center', margin: '0 0 14px' }}>
+            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Projections 5 ans — Freelance</h1>
+            <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0' }}>
+              Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · +{sim.state.growthRate} %/an · {sim.state.taxParts} parts fiscales
+            </p>
+          </div>
 
           {/* Tableau projections */}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 9 }}>
@@ -515,7 +532,7 @@ export default function ProjectionSection({
               {rows.map((row, i) => (
                 <React.Fragment key={i}>
                   <tr style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                    <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
+                    <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</td>
                     {projections.map((yr, j) => {
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
                       let val: number | null = null;
@@ -562,10 +579,9 @@ export default function ProjectionSection({
 
           {/* Histogrammes — évolution sur 5 ans */}
           {(() => {
-            const BAR_H = 70;
             return (
-              <div style={{ marginTop: 18 }}>
-                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Évolution du net disponible — {activeRegime}</h2>
+              <div style={{ marginTop: 16 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Évolution du net disponible — {activeRegime}</h2>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                   {projections.map((yr, i) => {
                     const r = yr.find((x: any) => x.id === activeRegime) as any;
@@ -576,16 +592,18 @@ export default function ProjectionSection({
                       { pct: (r.ir    / total) * 100, color: '#f87171' },
                       { pct: (r.net   / total) * 100, color: '#34d399' },
                     ];
-                    let top = 0;
                     return (
                       <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                        <div style={{ position: 'relative', width: '100%', height: BAR_H, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
-                          {segs.map((s, j) => {
-                            const h = Math.round((Math.max(0, s.pct) / 100) * BAR_H);
-                            const t = top;
-                            top += h;
-                            return <div key={j} style={{ position: 'absolute', top: t, left: 0, right: 0, height: h, background: s.color }} />;
-                          })}
+                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 3, overflow: 'hidden', background: '#e2e8f0' }}>
+                          {segs.map((s, j) => (
+                            <div
+                              key={j}
+                              style={{
+                                width: `${Math.max(0, s.pct)}%`,
+                                background: s.color,
+                              }}
+                            />
+                          ))}
                         </div>
                         <p style={{ fontSize: 8, fontWeight: 900, color: '#34d399', margin: '3px 0 0' }}>{fmt(r.net / 12)}/m</p>
                         <p style={{ fontSize: 7, color: '#64748b', margin: 0 }}>An {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? '*' : ''}</p>
