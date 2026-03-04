@@ -36,15 +36,12 @@ export default function Footer() {
 
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar : © + lien légal (Contact déjà dans Accès rapide) */}
         <div className="border-t border-slate-100 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em]">
             © 2026 freelance-simulateur.fr
           </p>
-          <div className="flex gap-8">
-            <a href="#" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Confidentialité</a>
-            <Link href="/contact" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Contact</Link>
-          </div>
+          <a href="#" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Confidentialité</a>
         </div>
       </div>
     </footer>

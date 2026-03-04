@@ -179,26 +179,20 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   ];
 
   const getRowBgClass = (row: (typeof rows)[number]) => {
-    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; color?: string };
-    if (r.isFinal) return 'bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-black';
-    if (r.highlight) return 'bg-slate-100/90 dark:bg-slate-800/50 font-bold';
-    if (r.color === 'text-rose-500' || r.color === 'text-rose-600') return 'bg-rose-100/75 dark:bg-rose-900/30';
-    if (r.color === 'text-violet-600') return 'bg-violet-100/75 dark:bg-violet-900/30';
-    if (r.color === 'text-amber-600') return 'bg-amber-100/75 dark:bg-amber-900/30';
-    if (r.color === 'text-emerald-600') return 'bg-emerald-100/75 dark:bg-emerald-900/30';
-    if (r.color === 'text-slate-500') return 'bg-slate-100/75 dark:bg-slate-800/40';
+    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
+    if (r.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
+    if (r.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30 font-bold';
+    if (r.key === 'optimisations') return 'bg-emerald-50/50 dark:bg-emerald-900/25';
+    if (r.key === 'cashInCompany') return 'bg-slate-50/50 dark:bg-slate-800/25';
     return '';
   };
 
   const getRowBgClassCard = (row: (typeof rows)[number]) => {
-    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; color?: string };
-    if (r.isFinal) return 'bg-indigo-100/85 dark:bg-indigo-900/50';
-    if (r.highlight) return 'bg-slate-100/85 dark:bg-slate-800/50';
-    if (r.color === 'text-rose-500' || r.color === 'text-rose-600') return 'bg-rose-100/80 dark:bg-rose-900/35';
-    if (r.color === 'text-violet-600') return 'bg-violet-100/80 dark:bg-violet-900/35';
-    if (r.color === 'text-amber-600') return 'bg-amber-100/80 dark:bg-amber-900/35';
-    if (r.color === 'text-emerald-600') return 'bg-emerald-100/80 dark:bg-emerald-900/35';
-    if (r.color === 'text-slate-500') return 'bg-slate-100/80 dark:bg-slate-800/45';
+    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
+    if (r.isFinal) return 'bg-indigo-50/70 dark:bg-indigo-900/35';
+    if (r.highlight) return 'bg-slate-50/70 dark:bg-slate-800/35';
+    if (r.key === 'optimisations') return 'bg-emerald-50/60 dark:bg-emerald-900/30';
+    if (r.key === 'cashInCompany') return 'bg-slate-50/60 dark:bg-slate-800/30';
     return 'bg-slate-50/40 dark:bg-slate-900/20';
   };
 
