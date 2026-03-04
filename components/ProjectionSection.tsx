@@ -133,11 +133,12 @@ export default function ProjectionSection({
     { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
     { label: 'Dépenses pro',                 key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
-    { label: 'Cotisations Sociales',          key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Cotisations Sociales',         key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '+', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
     { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false },
-    { label: 'MENSUEL',                       key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true  },
+    { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true  },
   ];
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
@@ -258,7 +259,17 @@ export default function ProjectionSection({
                   </td>
                 {projections.map((yr, i) => {
                   const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                  let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                  let val: number | null = null;
+                  if (row.key === 'optimisations') {
+                    const lines = (r.lines as any[] | undefined) ?? [];
+                    const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+                    const sum = lines
+                      .filter((l: any) => ids.includes(l.id))
+                      .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+                    val = sum > 0 ? sum : null;
+                  } else {
+                    val = row.monthly ? r[row.key] / 12 : r[row.key];
+                  }
                   if (row.key === 'portageCommission') {
                     if (activeRegime !== 'Portage') val = null;
                     else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
@@ -507,7 +518,17 @@ export default function ProjectionSection({
                     <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
                     {projections.map((yr, j) => {
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
-                      let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                      let val: number | null = null;
+                      if (row.key === 'optimisations') {
+                        const lines = (r.lines as any[] | undefined) ?? [];
+                        const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+                        const sum = lines
+                          .filter((l: any) => ids.includes(l.id))
+                          .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+                        val = sum > 0 ? sum : null;
+                      } else {
+                        val = row.monthly ? r[row.key] / 12 : r[row.key];
+                      }
                       if (row.key === 'portageCommission') {
                         if (activeRegime !== 'Portage') val = null;
                         else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
@@ -585,11 +606,11 @@ export default function ProjectionSection({
           {/* Analyse */}
           {(() => {
             const analysis: Record<string, { forts: string[]; vigilance: string }> = {
-              Portage:  { forts: ['Accès au chômage (ARE) en fin de mission','Protection sociale complète (régime salarié)','Zéro gestion administrative'], vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net." },
+              Portage:  { forts: ['Accès au chômage (ARE) en fin de mission','Protection sociale complète (régime salarié)','Zéro gestion administrative'], vigilance: "Les frais de gestion (5–15 % du CA, selon le contrat) réduisent directement votre net." },
               Micro:    { forts: ['Création instantanée, formalités nulles','Comptabilité ultra simplifiée','Charges proportionnelles au CA réel'], vigilance: "Plafond de CA à 77 700 € en BNC. Pas de déduction des charges réelles." },
-              'EURL IR':{ forts: ['Déduction des charges professionnelles réelles','IR progressif : avantageux si revenus modérés','Structure souple'], vigilance: "Cotisations TNS ~40 %. Comptabilité obligatoire." },
-              'EURL IS':{ forts: ["Bénéfice taxé à l'IS réduit (15–25 %)","Pilotage flexible de la rémunération","Optimisation par capitalisation"], vigilance: "Double imposition si distribution de dividendes. Comptabilité exigeante." },
-              SASU:     { forts: ['Protection assimilé-salarié','Dividendes au PFU 30 %','Statut reconnu pour missions premium'], vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d'ARE." },
+              'EURL IR':{ forts: ['Déduction des charges professionnelles réelles','IR progressif : avantageux si revenus modérés','Structure souple'], vigilance: "Cotisations TNS calculées selon le barème réel (URSSAF/CIPAV). Comptabilité obligatoire." },
+              'EURL IS':{ forts: ["Bénéfice non versé en salaire taxé à l'IS 25 %","Pilotage précis de la part en salaire TNS vs capitalisation en société","Création d’une trésorerie de société mobilisable plus tard"], vigilance: "IS 25 % sur le bénéfice restant + impôt sur le revenu sur le salaire TNS. Comptabilité exigeante." },
+              SASU:     { forts: ['Protection assimilé-salarié (retraite, prévoyance)','Dividendes au PFU 30 %','Statut reconnu pour missions premium'], vigilance: "Bénéfice taxé à l'IS 20 % puis dividendes imposés au PFU 30 % (dont 17,2 % prélèvements sociaux). Pas d'accès à l'ARE en fin de mandat de président." },
             };
             const data = analysis[activeRegime];
             if (!data) return null;

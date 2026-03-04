@@ -36,6 +36,18 @@ export function getDetailTextFromLines(
       }
       return 'Dépenses professionnelles cochées (charges réelles déductibles du résultat)';
     }
+    case 'optimisations': {
+      const ik = getLine('indemnites_km')?.amount ?? 0;
+      const loyer = getLine('loyer_percu')?.amount ?? 0;
+      const avantages = getLine('avantages')?.amount ?? 0;
+      const parts: string[] = [];
+      if (ik > 0) parts.push(`Indemnités kilométriques : ${fmt(ik)} (remboursées en net, déductibles pour la société)`);
+      if (loyer > 0) parts.push(`Loyer perçu (bureau domicile) : ${fmt(loyer)} (cash + revenu foncier, charge pour la société)`);
+      if (avantages > 0) parts.push(`Avantages exonérés (CE, chèques vacances, etc.) : ${fmt(avantages)}`);
+      if (parts.length === 0) return 'Aucune optimisation activée (IK, loyer, avantages)';
+      parts.push('Ces montants sont déjà inclus dans le disponible final et ne supportent pas de cotisations sociales supplémentaires.');
+      return parts.join('\n');
+    }
     case 'portageCommission': {
       if (r.id !== 'Portage') return 'Non applicable';
       const line = getLine('portage_commission');
@@ -64,10 +76,16 @@ export function getDetailTextFromLines(
       return `Barème progressif IR — ${sim.state.taxParts} parts`;
     }
     case 'net': {
-      const base = r.l && r.l > 0
-        ? `${fmt(r.beforeTax)} − ${fmt(r.ir)} + Loyer ${fmt(r.l)}`
-        : `${fmt(r.beforeTax)} − ${fmt(r.ir)}`;
-      return monthly12(base);
+      const ik = getLine('indemnites_km')?.amount ?? 0;
+      const loyerPercu = getLine('loyer_percu')?.amount ?? 0;
+      const avantages = getLine('avantages')?.amount ?? 0;
+
+      const parts: string[] = [`${fmt(r.beforeTax)} − ${fmt(r.ir)}`];
+      if (loyerPercu > 0) parts.push(`+ Loyer ${fmt(loyerPercu)}`);
+      if (ik > 0) parts.push(`+ IK ${fmt(ik)}`);
+      if (avantages > 0) parts.push(`+ Avantages ${fmt(avantages)}`);
+
+      return monthly12(parts.join(' '));
     }
     default:
       return '';

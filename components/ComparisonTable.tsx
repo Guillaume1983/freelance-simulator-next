@@ -62,11 +62,11 @@ const REGIME_ANALYSIS: Record<string, { forts: string[]; vigilance: string }> = 
   },
   'EURL IS': {
     forts: [
-      "Bénéfice en société taxé à l'IS réduit (15–25 %)",
-      'Pilotage flexible de la rémunération',
-      'Optimisation par capitalisation possible',
+      "Bénéfice non versé en salaire taxé à l'IS 25 %",
+      'Pilotage précis de la part en salaire TNS vs capitalisation en société',
+      'Création d’une trésorerie de société mobilisable plus tard',
     ],
-    vigilance: "Double imposition si distribution de dividendes (IS + PFU 30 %). Comptabilité exigeante.",
+    vigilance: "Impôt sur le revenu calculé sur le salaire net TNS et IS 25 % sur le bénéfice restant. Comptabilité exigeante.",
   },
   SASU: {
     forts: [
@@ -74,7 +74,7 @@ const REGIME_ANALYSIS: Record<string, { forts: string[]; vigilance: string }> = 
       'Dividendes possibles au PFU 30 %',
       'Statut reconnu pour les missions premium',
     ],
-    vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d'accès à l'ARE en fin d'activité de président.",
+    vigilance: "Bénéfice taxé à l'IS 20 % puis dividendes imposés au PFU 30 % (dont 17,2 % prélèvements sociaux). Pas d'accès à l'ARE en fin d'activité de président.",
   },
 };
 
@@ -155,11 +155,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'Dépenses pro',                  key: 'fees',           div: 1,  prefix: '-', color: 'text-rose-500' },
     { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations Sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
+    { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
     { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax',      div: 1,  highlight: true },
     { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',             div: 1,  prefix: '-', color: 'text-rose-600' },
-    { label: 'Reste en société (après IS)',   key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
+    { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
     { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false },
-    { label: 'MENSUEL',                       key: 'net',            div: 12, isFinal: true, bigAmount: true  },
+    { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true  },
   ];
 
   const getDisplayValue = (r: any, row: typeof rows[number]) => {
@@ -167,6 +168,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       if (r.id !== 'Portage') return null;
       const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
       return commission / row.div;
+    }
+    if (row.key === 'optimisations') {
+      const lines = (r.lines as any[] | undefined) ?? [];
+      const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+      const sum = lines
+        .filter((l: any) => ids.includes(l.id))
+        .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+      if (sum === 0) return null;
+      return sum / row.div;
     }
     // Micro : dépenses pro non déductibles → ne pas afficher "- 0 €"
     if (row.key === 'fees' && r.id === 'Micro') return null;
@@ -538,7 +548,20 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>
 
-      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 py-3 flex items-center gap-1">
+      {/* Hypothèses principales */}
+      <div className="px-4 md:px-6 pb-2">
+        <div className="inline-flex flex-col gap-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 px-3 py-2">
+          <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-500">Hypothèses principales</span>
+          <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-500">
+            <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
+            <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
+            <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
+            <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
         <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
       </p>
 

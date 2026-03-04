@@ -18,7 +18,8 @@ export function buildOptimisationsLines(
       label: 'Indemnités kilométriques',
       category: 'optimisation',
       amount: ik,
-      cashImpact: 0,
+      // Remboursement de frais : déductible pour la société, perçu en net pour le dirigeant.
+      cashImpact: ik,
       fiscalImpact: -ik,
       socialImpact: 0,
       applicableStatuses: ['EURL IR', 'EURL IS', 'SASU'],
@@ -47,7 +48,7 @@ export function buildOptimisationsLines(
       label: 'Avantages exonérés',
       category: 'optimisation',
       amount: avantagesOptimises,
-      cashImpact: 0,
+      cashImpact: avantagesOptimises,
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: [],

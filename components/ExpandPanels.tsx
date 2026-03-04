@@ -350,7 +350,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 >
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-wide text-slate-600 dark:text-slate-300">ACRE activé</p>
-                    <p className="text-[9px] text-slate-400">Cotisations réduites 50% an 1</p>
+                    <p className="text-[9px] text-slate-400">Cotisations sociales allégées la 1ʳᵉ année (≈ −50 % hors CSG/CRDS)</p>
                   </div>
                   <div className={`w-9 h-5 rounded-full transition-colors flex items-center ${sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${sim.state.acreEnabled ? 'translate-x-4' : ''}`} />
