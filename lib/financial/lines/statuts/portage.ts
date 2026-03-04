@@ -1,5 +1,5 @@
 import type { FinancialLine } from '../../types';
-import { RATES_2026, computeIR } from '../../rates';
+import { RATES_2026, computeIR, computeIRDetail } from '../../rates';
 
 export interface StatutContext {
   ca: number;
@@ -19,7 +19,8 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
   const comm = ctx.ca * (ctx.fraisGestionPortage / 100);
   const fees = chargeFixes + comm;
   const base = ctx.ca - fees;
-  const cotisRate = ctx.acreActive ? RATES_2026.portage.cotis * RATES_2026.portage.acre : RATES_2026.portage.cotis;
+  // ACRE ne s'applique pas en portage salarial (statut salarié du porté)
+  const cotisRate = RATES_2026.portage.cotis;
   const cotis = base * cotisRate;
   const beforeTax = base - cotis;
   const ir = computeIR(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
@@ -66,6 +67,7 @@ export function buildPortageLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['Portage'],
+      formula: computeIRDetail(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts),
     },
   ];
 }

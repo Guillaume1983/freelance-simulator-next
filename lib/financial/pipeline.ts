@@ -58,6 +58,8 @@ export function buildContextFromInput(input: PipelineInput): {
   fraisGestionPortage: number;
   prelevementLiberatoire: boolean;
   typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
+  remunerationDirigeantMensuelle: number;
+  repartitionRemuneration: number;
 } {
   return buildStatutContext(input);
 }
@@ -76,6 +78,8 @@ function buildStatutContext(input: PipelineInput): {
   fraisGestionPortage: number;
   prelevementLiberatoire: boolean;
   typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
+  remunerationDirigeantMensuelle: number;
+  repartitionRemuneration: number;
 } {
   const annee = input.annee ?? 1;
   const ca = input.tjm * input.days * Math.pow(1 + input.growthRate, annee - 1);
@@ -112,6 +116,8 @@ function buildStatutContext(input: PipelineInput): {
     fraisGestionPortage: input.portageComm,
     prelevementLiberatoire: input.prelevementLiberatoire,
     typeActiviteMicro: input.typeActiviteMicro,
+    remunerationDirigeantMensuelle: input.remunerationDirigeantMensuelle,
+    repartitionRemuneration: input.repartitionRemuneration,
   };
 }
 

@@ -1,6 +1,5 @@
 import type { FinancialLine } from '../../types';
-import { RATES_2026 } from '../../rates';
-import { computeIR } from '../../rates';
+import { computeIR, computeIRDetail, computeTNSCotisations, computeTNSDetail } from '../../rates';
 
 export interface StatutContext {
   ca: number;
@@ -15,15 +14,22 @@ export interface StatutContext {
 }
 
 export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
+  const e = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
+
   const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
   const fees = chargeFixes + ctx.cfe;
-  const base = ctx.ca - fees;
-  const cotisRate = ctx.acreActive
-    ? RATES_2026.eurlIr.cotis * RATES_2026.eurlIr.acre
-    : RATES_2026.eurlIr.cotis;
-  const cotis = base * cotisRate;
-  const beforeTax = base - cotis;
-  const ir = computeIR(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
+  const benefice = ctx.ca - fees;
+
+  // Calcul TNS détaillé (vraies tranches URSSAF)
+  const tns = computeTNSCotisations(benefice, ctx.acreActive);
+
+  // Revenu imposable IR = bénéfice − cotisations déductibles (hors CSG non-déd. + CRDS)
+  const irBase = benefice - tns.deductible;
+
+  // Cash disponible avant IR = bénéfice − toutes cotisations (dont CSG non-déductible)
+  const cashBeforeIR = benefice - tns.total;
+
+  const ir = computeIR(irBase + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
 
   return [
     {
@@ -38,24 +44,32 @@ export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
     },
     {
       id: 'eurl_ir_cotis',
-      label: 'Cotisations sociales',
+      label: 'Cotisations sociales TNS',
       category: 'statut',
-      amount: cotis,
+      amount: tns.total,
       cashImpact: 0,
       fiscalImpact: 0,
-      socialImpact: -cotis,
+      socialImpact: -tns.total,
       applicableStatuses: ['EURL IR'],
-      formula: `Base × ${(cotisRate * 100).toFixed(0)}%`,
+      formula: computeTNSDetail(benefice, ctx.acreActive),
     },
     {
       id: 'eurl_ir_remuneration',
-      label: 'Rémunération nette',
+      label: 'Revenu imposable (avant IR)',
       category: 'statut',
-      amount: beforeTax,
-      cashImpact: beforeTax,
-      fiscalImpact: beforeTax,
+      // Le montant affiché est le revenu imposable (bénéfice − cotis. déductibles).
+      // Le cashImpact est le cash réel avant IR (bénéfice − toutes cotisations).
+      // L'écart = CSG non-déductible + CRDS (3,4 %), non déduite de l'assiette IR.
+      amount: irBase,
+      cashImpact: cashBeforeIR,
+      fiscalImpact: irBase,
       socialImpact: 0,
       applicableStatuses: ['EURL IR'],
+      formula: [
+        `Revenu imposable = bénéfice − cotisations déductibles`,
+        `${e(benefice)} − ${e(tns.deductible)} = ${e(irBase)}`,
+        `(Cash avant IR : ${e(cashBeforeIR)} — écart CSG non-déd. + CRDS = ${e(tns.total - tns.deductible)})`,
+      ].join('\n'),
     },
     {
       id: 'eurl_ir_ir',
@@ -66,6 +80,7 @@ export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['EURL IR'],
+      formula: computeIRDetail(irBase + ctx.loyer + ctx.spouseIncome, ctx.taxParts),
     },
   ];
 }

@@ -1,6 +1,5 @@
 import type { FinancialLine } from '../../types';
-import { RATES_2026 } from '../../rates';
-import { computeIR } from '../../rates';
+import { RATES_2026, computeIR, computeIRDetail } from '../../rates';
 
 export interface StatutContext {
   ca: number;
@@ -69,8 +68,8 @@ export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
       socialImpact: 0,
       applicableStatuses: ['Micro'],
       formula: ctx.prelevementLiberatoire
-        ? `CA × ${(microRates.pl * 100).toFixed(1)}%`
-        : `Barème IR — base = CA × ${((1 - microRates.abattement) * 100).toFixed(0)}% — ${ctx.taxParts} parts`,
+        ? `Prélèvement libératoire\nCA : ${Math.round(ctx.ca).toLocaleString('fr-FR')} €  ×  ${(microRates.pl * 100).toFixed(1)} %  =  ${Math.round(ir).toLocaleString('fr-FR')} €`
+        : computeIRDetail(ctx.ca * (1 - microRates.abattement) + ctx.spouseIncome, ctx.taxParts),
     },
   ];
 }

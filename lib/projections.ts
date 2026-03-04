@@ -27,8 +27,8 @@ export interface FinancialContext {
   fraisGestionPortage: number;
   typeActiviteMicro: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE';
   prelevementLiberatoire: boolean;
-  remunerationDirigeantMensuelle: number; // EURL IS : % du résultat en salaire
-  repartitionRemuneration: number; // SASU : 0=100% salaire, 100=100% dividendes
+  remunerationDirigeantMensuelle: number; // EURL IS : part du résultat affectée au salaire (0–1)
+  repartitionRemuneration: number; // SASU : % du résultat après IS distribué en dividendes (0–100)
 }
 
 export interface ProjectionParams {
@@ -78,6 +78,8 @@ export interface RegimeResult {
   salaireNet?: number;
   dividendesNets?: number;
   tauxNet?: number;
+  /** Trésorerie qui reste en société après IS et distributions (EURL IS / SASU) */
+  cashInCompany?: number;
   /** Lignes financières pour traçabilité (Phase 3) */
   lines?: import('./financial/types').FinancialLine[];
 }
@@ -165,15 +167,31 @@ export function calculateRegimes(
     };
 
     if (r.id === 'EURL IS') {
-      res.resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
-      res.isSociete = getAmt('eurl_is_is');
-      res.salaireNet = beforeTax;
+      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      const isSociete = getAmt('eurl_is_is');
+      const salaireNet = getAmt('eurl_is_remuneration');
+      const cotisSoc = getAmt('eurl_is_cotis');
+      const enveloppeSalaire = salaireNet + cotisSoc;
+      const resteEnSociete = Math.max(0, resultatSociete - enveloppeSalaire - isSociete);
+
+      res.resultatSociete = resultatSociete;
+      res.isSociete = isSociete;
+      res.salaireNet = salaireNet;
       res.dividendesNets = 0;
+      res.cashInCompany = resteEnSociete;
     } else if (r.id === 'SASU') {
-      res.resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
-      res.isSociete = getAmt('sasu_is');
+      const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.cfe);
+      const isSociete = getAmt('sasu_is');
+      const apresIS = resultatSociete - isSociete;
+      const dividendesNets = getAmt('sasu_dividendes');
+      const dividendesBruts = dividendesNets > 0 ? dividendesNets / 0.70 : 0; // PFU 30 %
+      const resteEnSociete = Math.max(0, apresIS - dividendesBruts);
+
+      res.resultatSociete = resultatSociete;
+      res.isSociete = isSociete;
       res.salaireNet = 0;
-      res.dividendesNets = getAmt('sasu_dividendes');
+      res.dividendesNets = dividendesNets;
+      res.cashInCompany = resteEnSociete;
     }
 
     return res;

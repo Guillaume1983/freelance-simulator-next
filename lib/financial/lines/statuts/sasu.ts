@@ -11,15 +11,23 @@ export interface StatutContext {
   taxParts: number;
   spouseIncome: number;
   acreActive: boolean;
+  /** Pourcentage de résultat distribué en dividendes (0–100) */
+  repartitionRemuneration: number;
 }
 
 export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
   const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
   const fees = chargeFixes + ctx.cfe;
   const base = ctx.ca - fees;
+
   const isSociete = base * RATES_2026.isSasu.taux;
-  const beforeTax = base - isSociete;
-  const ir = beforeTax * RATES_2026.flatTaxDividendes;
+  const apresIS = base - isSociete;
+
+  // Part du résultat distribuée en dividendes (le reste reste en société)
+  const divPct = Math.min(100, Math.max(0, ctx.repartitionRemuneration ?? 70)) / 100;
+  const dividendesBruts = apresIS * divPct;
+  const ir = dividendesBruts * RATES_2026.flatTaxDividendes;
+  const dividendesNets = dividendesBruts - ir;
 
   return [
     {
@@ -47,22 +55,32 @@ export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
       id: 'sasu_dividendes',
       label: 'Dividendes nets',
       category: 'statut',
-      amount: beforeTax * 0.70,
-      cashImpact: beforeTax * 0.70,
-      fiscalImpact: beforeTax,
+      amount: dividendesNets,
+      cashImpact: dividendesNets,
+      fiscalImpact: dividendesBruts,
       socialImpact: 0,
       applicableStatuses: ['SASU'],
-      formula: 'Base après IS × 70%',
+      formula: [
+        `Résultat après IS : ${Math.round(apresIS).toLocaleString('fr-FR')} €`,
+        `${Math.round(divPct * 100)} % distribués en dividendes`,
+        `→ Dividendes bruts : ${Math.round(dividendesBruts).toLocaleString('fr-FR')} €`,
+        `→ Dividendes nets (après PFU 30 %) : ${Math.round(dividendesNets).toLocaleString('fr-FR')} €`,
+      ].join('\n'),
     },
     {
       id: 'sasu_ir',
       label: 'Flat tax (30%)',
       category: 'fiscalite',
       amount: ir,
-      cashImpact: -ir,
+      // Le PFU 30 % est déjà déduit dans les "dividendes nets" ci-dessus.
+      // On affiche ici le montant d'impôt pour information, sans l'impacter une seconde fois sur le cash.
+      cashImpact: 0,
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['SASU'],
+      formula: `Dividendes bruts distribués : ${Math.round(dividendesBruts).toLocaleString('fr-FR')} €\n` +
+        `× Flat Tax PFU 30 % (17,2 % prélèv. sociaux + 12,8 % IR)\n` +
+        `= ${Math.round(ir).toLocaleString('fr-FR')} €`,
     },
   ];
 }

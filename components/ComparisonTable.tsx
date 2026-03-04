@@ -151,13 +151,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const fmt      = (v: number) => Math.round(v).toLocaleString() + ' €';
 
   const rows = [
-    { label: 'CA Annuel Brut',               key: 'ca',        div: 1  },
-    { label: 'Dépenses pro',                 key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
-    { label: 'Commission de portage',        key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
-    { label: 'Cotisations Sociales',          key: 'cotis',     div: 1,  prefix: '-', color: 'text-amber-600' },
-    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', div: 12, highlight: true },
-    { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        div: 1,  prefix: '-', color: 'text-rose-600' },
-    { label: 'DISPONIBLE FINAL (Cash-out)',   key: 'net',       div: 12, isFinal: true },
+    { label: 'CA Annuel Brut',                key: 'ca',             div: 1  },
+    { label: 'Dépenses pro',                  key: 'fees',           div: 1,  prefix: '-', color: 'text-rose-500' },
+    { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
+    { label: 'Cotisations Sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
+    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax',      div: 1,  highlight: true },
+    { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',             div: 1,  prefix: '-', color: 'text-rose-600' },
+    { label: 'Reste en société (après IS)',   key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
+    { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false },
+    { label: 'MENSUEL',                       key: 'net',            div: 12, isFinal: true, bigAmount: true  },
   ];
 
   const getDisplayValue = (r: any, row: typeof rows[number]) => {
@@ -166,7 +168,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
       return commission / row.div;
     }
-    return (r[row.key] as number) / row.div;
+    // Micro : dépenses pro non déductibles → ne pas afficher "- 0 €"
+    if (row.key === 'fees' && r.id === 'Micro') return null;
+    // SASU : pas de cotisations sociales "classiques" dans ce modèle → ne pas afficher "- 0 €"
+    if (row.key === 'cotis' && r.id === 'SASU') return null;
+    const raw = r[row.key as keyof typeof r] as number | undefined;
+    if (raw == null) return null;
+    return raw / row.div;
   };
   const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
 
@@ -234,6 +242,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                           Dépassement plafond {plafondMicro.toLocaleString()} €
                         </span>
                       )}
+                      {r.cashInCompany != null && r.cashInCompany > 0 && (
+                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                          Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                        </span>
+                      )}
                     </div>
                     <div className="min-h-[32px] flex items-center justify-center gap-1.5">
                       <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion (1 simple → 5 expert)">🧠 {r.mental}/5</span>
@@ -257,7 +270,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   {regimes.map((r: any) => (
                     <td
                       key={r.id}
-                      className={`p-4 text-center font-bold ${(row as any).isFinal ? 'text-lg' : 'text-sm'} ${(row as any).color || ''}`}
+                      className={`p-4 text-center font-bold ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${(row as any).color || ''}`}
                     >
                       {(() => {
                         const val = getDisplayValue(r, row);
@@ -272,7 +285,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
                     {regimes.map((r: any) => (
                       <td key={r.id} className="px-4 py-1.5 text-center">
-                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key, row.div === 12)}</span>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.div === 12)}</span>
                       </td>
                     ))}
                   </tr>
@@ -433,6 +446,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       </span>
                     )}
                   </div>
+                  {r.cashInCompany != null && r.cashInCompany > 0 && (
+                    <div className="mb-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                      Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                    </div>
+                  )}
                   {isWinner && !isMicroPlafondExceeded(r) && (
                     <div className="mb-2 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                       <span>🏆</span> OPTIMUM
@@ -470,7 +488,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                         </span>
                       </div>
                       {showDetails && (
-                        <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
+                        <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
                           {getDetailText(r, row.key, row.div === 12)}
                         </p>
                       )}
@@ -526,51 +544,117 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
       {/* ── PDF Comparatif (masqué) ── */}
       <div style={{ display: 'none' }}>
-        <div ref={printRef} style={{ fontFamily: 'Arial, sans-serif', padding: '10mm', fontSize: 11 }}>
-          <div style={{ textAlign: 'center', marginBottom: 12 }}>
-            <h1 style={{ fontSize: 18, fontWeight: 900, margin: 0 }}>Comparatif statuts freelance 2026</h1>
-            <p style={{ fontSize: 10, color: '#666', margin: '4px 0 0' }}>
-              CA : {fmt(sim.state.tjm * sim.state.days)} · {sim.state.taxParts} parts fiscales · freelance-simulateur.fr
+        <div ref={printRef} style={{ fontFamily: 'Arial, sans-serif', padding: '10mm', fontSize: 10 }}>
+
+          {/* En-tête */}
+          <div style={{ textAlign: 'center', marginBottom: 14 }}>
+            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Comparatif statuts freelance 2026</h1>
+            <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0' }}>
+              CA : {fmt(sim.state.tjm * sim.state.days)} · TJM {sim.state.tjm} € · {sim.state.days} j · {sim.state.taxParts} parts fiscales · freelance-simulateur.fr
             </p>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+
+          {/* Tableau chiffres */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 9 }}>
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
+                <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
                 {regimes.map((r: any) => (
-                  <th key={r.id} style={{ padding: '6px 8px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
+                  <th key={r.id} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {[
-                { label: 'CA Annuel',      key: 'ca' },
-                { label: 'Dépenses pro',   key: 'fees' },
-                { label: 'Commission portage', key: 'portageCommission' },
-                { label: 'Cotisations',    key: 'cotis' },
-                { label: 'Net avant IR',   key: 'beforeTax', monthly: true },
-                { label: 'Impôts (IR/IS)', key: 'ir' },
-                { label: 'NET MENSUEL',    key: 'net',       monthly: true },
-              ].map((row, i) => (
-                <tr key={i} style={{ background: (row as any).monthly ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                  <td style={{ padding: '5px 8px', fontWeight: (row as any).monthly ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
-                  {regimes.map((r: any) => (
-                    <td key={r.id} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: (row as any).monthly ? 900 : 'normal', borderBottom: '1px solid #e2e8f0' }}>
-                      {(() => {
-                        if (row.key === 'portageCommission') {
-                          if (r.id !== 'Portage') return '—';
-                          const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
-                          return fmt(commission);
-                        }
-                        return (row as any).monthly ? fmt((r[row.key] as number) / 12) + '/mois' : fmt(r[row.key] as number);
-                      })()}
-                    </td>
-                  ))}
-                </tr>
+              {rows.map((row, i) => (
+                <React.Fragment key={i}>
+                  <tr style={{ background: (row as any).bigAmount ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                    <td style={{ padding: '4px 7px', fontWeight: (row as any).isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
+                    {regimes.map((r: any) => {
+                      const val = getDisplayValue(r, row);
+                      return (
+                        <td key={r.id} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: (row as any).isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: (row as any).isFinal ? '#4f46e5' : 'inherit' }}>
+                          {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/mois' : ''}`}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {showDetails && (
+                    <tr style={{ background: '#fafafa' }}>
+                      <td style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', fontStyle: 'italic' }}>Calcul</td>
+                      {regimes.map((r: any) => (
+                        <td key={r.id} style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'pre-line', fontStyle: 'italic', textAlign: 'center' }}>
+                          {getDetailText(r, row.key, row.div === 12)}
+                        </td>
+                      ))}
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
-          <p style={{ fontSize: 8, color: '#999', marginTop: 8 }}>Simulation estimative — barèmes 2026.</p>
+
+          {/* Histogrammes */}
+          {(() => {
+            const BAR_H = 80;
+            return (
+              <div style={{ marginTop: 18 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Répartition du CA par statut</h2>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  {regimes.map((r: any) => {
+                    const total = Math.max(r.ca, 1);
+                    const segs = [
+                      { pct: (r.fees  / total) * 100, color: '#fb7185', label: 'Charges' },
+                      { pct: (r.cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
+                      { pct: (r.ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
+                      { pct: (r.net   / total) * 100, color: '#34d399', label: 'Net'     },
+                    ];
+                    let top = 0;
+                    return (
+                      <div key={r.id} style={{ textAlign: 'center', flex: 1 }}>
+                        <p style={{ fontSize: 8, fontWeight: 900, margin: '0 0 4px', color: REGIME_COLORS[r.id] }}>{r.id}</p>
+                        <div style={{ position: 'relative', width: '100%', height: BAR_H, background: '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                          {segs.map((s, j) => {
+                            const h = Math.round((Math.max(0, s.pct) / 100) * BAR_H);
+                            const t = top;
+                            top += h;
+                            return <div key={j} style={{ position: 'absolute', top: t, left: 0, right: 0, height: h, background: s.color }} />;
+                          })}
+                        </div>
+                        <div style={{ marginTop: 4 }}>
+                          {segs.map(s => (
+                            <div key={s.label} style={{ fontSize: 7, color: s.color, fontWeight: 700 }}>{s.label} {Math.round(s.pct)}%</div>
+                          ))}
+                        </div>
+                        <p style={{ fontSize: 9, fontWeight: 900, color: '#34d399', margin: '4px 0 0' }}>{fmt(r.net / 12)}/mois</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Analyse */}
+          <div style={{ marginTop: 18 }}>
+            <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Analyse par statut</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {regimes.map((r: any) => {
+                const data = REGIME_ANALYSIS[r.id];
+                if (!data) return null;
+                return (
+                  <div key={r.id} style={{ padding: '6px 8px', background: '#f8fafc', borderLeft: `3px solid ${REGIME_COLORS[r.id] ?? '#6366f1'}`, borderRadius: 2 }}>
+                    <p style={{ fontSize: 9, fontWeight: 900, margin: '0 0 4px', color: REGIME_COLORS[r.id] }}>{r.id}</p>
+                    {data.forts.map((f: string, i: number) => (
+                      <p key={i} style={{ fontSize: 8, margin: '1px 0', color: '#16a34a' }}>✓ {f}</p>
+                    ))}
+                    <p style={{ fontSize: 8, margin: '4px 0 0', color: '#dc2626' }}>⚠ {data.vigilance}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <p style={{ fontSize: 7, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
 

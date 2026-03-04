@@ -134,9 +134,10 @@ export default function ProjectionSection({
     { label: 'Dépenses pro',                 key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Cotisations Sociales',          key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
-    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: true  },
+    { label: 'Rémunération Nette (Avant IR)', key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
     { label: 'Prélèvement Fiscal (IR/IS)',    key: 'ir',        prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
-    { label: 'DISPONIBLE FINAL (Cash-out)',   key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true  },
+    { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false },
+    { label: 'MENSUEL',                       key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true  },
   ];
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
@@ -231,12 +232,17 @@ export default function ProjectionSection({
                     <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
                     <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
                     <div className="text-[9px] font-bold mt-0.5 text-slate-400">
-                      {i === 0 && sim.state.acreEnabled ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
+                      {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
                     </div>
                     <div className="text-3xl font-black leading-none tracking-tighter mt-1" style={{ color: regimeColor }}>
                       {r ? fmt(r.net / 12) : '—'}
                       <span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
                     </div>
+                    {r && r.cashInCompany != null && r.cashInCompany > 0 && (
+                      <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                        Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                      </div>
+                    )}
                   </th>
                 );
               })}
@@ -250,30 +256,32 @@ export default function ProjectionSection({
                   <td className="p-4 border-r dark:border-slate-800">
                     <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
                   </td>
-                  {projections.map((yr, i) => {
-                    const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                    let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
-                    if (row.key === 'portageCommission') {
-                      if (activeRegime !== 'Portage') val = null;
-                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
-                    }
-                    return (
-                      <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${row.isFinal ? 'text-lg' : 'text-sm'} ${row.color}`}>
-                        {val === null ? (
-                          '—'
-                        ) : (
-                          <>
-                            {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
-                            {fmt(val)}
-                            {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                          </>
-                        )}
-                        {row.isFinal && (
-                          <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
-                        )}
-                      </td>
-                    );
-                  })}
+                {projections.map((yr, i) => {
+                  const r   = yr.find((x: any) => x.id === activeRegime) as any;
+                  let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                  if (row.key === 'portageCommission') {
+                    if (activeRegime !== 'Portage') val = null;
+                    else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                  }
+                  if (row.key === 'fees' && r.id === 'Micro') val = null;
+                  if (row.key === 'cotis' && r.id === 'SASU') val = null;
+                  return (
+                    <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${row.color}`}>
+                      {val === null ? (
+                        '—'
+                      ) : (
+                        <>
+                          {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
+                          {fmt(val)}
+                          {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
+                        </>
+                      )}
+                      {row.isFinal && (
+                        <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                      )}
+                    </td>
+                  );
+                })}
                 </tr>
                 {showDetails && (
                   <tr className="bg-slate-50/40 dark:bg-slate-800/20">
@@ -282,7 +290,7 @@ export default function ProjectionSection({
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
                       return (
                         <td key={i} className="px-4 py-1.5 text-center">
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium">{getDetailText(r, row.key, row.monthly)}</span>
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.monthly)}</span>
                         </td>
                       );
                     })}
@@ -404,7 +412,7 @@ export default function ProjectionSection({
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
-                  {i === 0 && sim.state.acreEnabled
+                  {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage'
                     ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE −50% cotis</span>
                     : <span className="text-[8px] text-slate-400 font-bold mt-0.5">+CFE</span>
                   }
@@ -413,6 +421,11 @@ export default function ProjectionSection({
                     <span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">{r ? fmt(r.net) : '—'} /an</div>
+                  {r && r.cashInCompany != null && r.cashInCompany > 0 && (
+                    <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                      Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                    </div>
+                  )}
                   <div className="mt-3">
                     {r && <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />}
                   </div>
@@ -426,6 +439,8 @@ export default function ProjectionSection({
                       if (activeRegime !== 'Portage') val = null;
                       else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
                     }
+                    if (r && row.key === 'fees' && r.id === 'Micro') val = null;
+                    if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
                     return (
                       <div key={row.key}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
@@ -444,7 +459,7 @@ export default function ProjectionSection({
                           </span>
                         </div>
                         {showDetails && r && (
-                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1">
+                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
                             {getDetailText(r, row.key, row.monthly)}
                           </p>
                         )}
@@ -465,44 +480,133 @@ export default function ProjectionSection({
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>
-        <div ref={printBizRef} style={{ fontFamily: 'Arial, sans-serif', padding: '12mm', fontSize: 11 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 4px' }}>Business Plan Freelance — Projection 5 ans</h1>
-          <p style={{ fontSize: 10, color: '#666', margin: '0 0 16px' }}>
-            Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm}€ · {sim.state.days} jours · +{sim.state.growthRate}%/an
+        <div ref={printBizRef} style={{ fontFamily: 'Arial, sans-serif', padding: '12mm', fontSize: 10 }}>
+
+          {/* En-tête */}
+          <h1 style={{ fontSize: 17, fontWeight: 900, margin: '0 0 4px' }}>Business Plan Freelance — Projection 5 ans</h1>
+          <p style={{ fontSize: 9, color: '#666', margin: '0 0 14px' }}>
+            Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · +{sim.state.growthRate} %/an · {sim.state.taxParts} parts fiscales
           </p>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10 }}>
+
+          {/* Tableau projections */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 9 }}>
             <thead>
               <tr style={{ background: '#eef2ff' }}>
-                <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '2px solid #c7d2fe' }}>Indicateur</th>
+                <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #c7d2fe' }}>Indicateur</th>
                 {projections.map((_, i) => (
-                  <th key={i} style={{ padding: '6px 8px', textAlign: 'center', borderBottom: '2px solid #c7d2fe', color: '#4f46e5' }}>
-                    Année {i + 1}{i === 0 && sim.state.acreEnabled ? ' (ACRE)' : i > 0 ? ' (+CFE)' : ''}
+                  <th key={i} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #c7d2fe', color: '#4f46e5' }}>
+                    Année {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? ' (ACRE)' : i > 0 ? ' (+CFE)' : ''}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={i} style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                  <td style={{ padding: '5px 8px', fontWeight: row.isFinal ? 900 : 600, borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
-                  {projections.map((yr, j) => {
-                    const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                    let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
-                    if (row.key === 'portageCommission') {
-                      if (activeRegime !== 'Portage') val = null;
-                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
-                    }
-                    return (
-                      <td key={j} style={{ padding: '5px 8px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: '1px solid #e2e8f0', color: row.isFinal && j === 4 ? '#4f46e5' : 'inherit' }}>
-                        {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
-                      </td>
-                    );
-                  })}
-                </tr>
+                <React.Fragment key={i}>
+                  <tr style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
+                    <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
+                    {projections.map((yr, j) => {
+                      const r = yr.find((x: any) => x.id === activeRegime) as any;
+                      let val: number | null = row.monthly ? r[row.key] / 12 : r[row.key];
+                      if (row.key === 'portageCommission') {
+                        if (activeRegime !== 'Portage') val = null;
+                        else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                      }
+                      if (row.key === 'fees' && r.id === 'Micro') val = null;
+                      if (row.key === 'cotis' && r.id === 'SASU') val = null;
+                      return (
+                        <td key={j} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: row.isFinal ? '#4f46e5' : 'inherit' }}>
+                          {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {showDetails && (
+                    <tr style={{ background: '#fafafa' }}>
+                      <td style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', fontStyle: 'italic' }}>Calcul</td>
+                      {projections.map((yr, j) => {
+                        const r = yr.find((x: any) => x.id === activeRegime) as any;
+                        return (
+                          <td key={j} style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'pre-line', fontStyle: 'italic', textAlign: 'center' }}>
+                            {getDetailText(r, row.key, row.monthly)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
-          <p style={{ fontSize: 8, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
+
+          {/* Histogrammes — évolution sur 5 ans */}
+          {(() => {
+            const BAR_H = 70;
+            return (
+              <div style={{ marginTop: 18 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Évolution du net disponible — {activeRegime}</h2>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  {projections.map((yr, i) => {
+                    const r = yr.find((x: any) => x.id === activeRegime) as any;
+                    const total = Math.max(r.ca, 1);
+                    const segs = [
+                      { pct: (r.fees  / total) * 100, color: '#fb7185' },
+                      { pct: (r.cotis / total) * 100, color: '#fbbf24' },
+                      { pct: (r.ir    / total) * 100, color: '#f87171' },
+                      { pct: (r.net   / total) * 100, color: '#34d399' },
+                    ];
+                    let top = 0;
+                    return (
+                      <div key={i} style={{ textAlign: 'center', flex: 1 }}>
+                        <div style={{ position: 'relative', width: '100%', height: BAR_H, background: '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
+                          {segs.map((s, j) => {
+                            const h = Math.round((Math.max(0, s.pct) / 100) * BAR_H);
+                            const t = top;
+                            top += h;
+                            return <div key={j} style={{ position: 'absolute', top: t, left: 0, right: 0, height: h, background: s.color }} />;
+                          })}
+                        </div>
+                        <p style={{ fontSize: 8, fontWeight: 900, color: '#34d399', margin: '3px 0 0' }}>{fmt(r.net / 12)}/m</p>
+                        <p style={{ fontSize: 7, color: '#64748b', margin: 0 }}>An {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? '*' : ''}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                  {[['#fb7185','Charges'],['#fbbf24','Cotis'],['#f87171','Impôts'],['#34d399','Net']].map(([c, l]) => (
+                    <span key={l} style={{ fontSize: 7, color: c as string, fontWeight: 700 }}>■ {l}</span>
+                  ))}
+                  {sim.state.acreEnabled && activeRegime !== 'Portage' && <span style={{ fontSize: 7, color: '#94a3b8' }}>* ACRE an 1</span>}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Analyse */}
+          {(() => {
+            const analysis: Record<string, { forts: string[]; vigilance: string }> = {
+              Portage:  { forts: ['Accès au chômage (ARE) en fin de mission','Protection sociale complète (régime salarié)','Zéro gestion administrative'], vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net." },
+              Micro:    { forts: ['Création instantanée, formalités nulles','Comptabilité ultra simplifiée','Charges proportionnelles au CA réel'], vigilance: "Plafond de CA à 77 700 € en BNC. Pas de déduction des charges réelles." },
+              'EURL IR':{ forts: ['Déduction des charges professionnelles réelles','IR progressif : avantageux si revenus modérés','Structure souple'], vigilance: "Cotisations TNS ~40 %. Comptabilité obligatoire." },
+              'EURL IS':{ forts: ["Bénéfice taxé à l'IS réduit (15–25 %)","Pilotage flexible de la rémunération","Optimisation par capitalisation"], vigilance: "Double imposition si distribution de dividendes. Comptabilité exigeante." },
+              SASU:     { forts: ['Protection assimilé-salarié','Dividendes au PFU 30 %','Statut reconnu pour missions premium'], vigilance: "Charges sociales élevées sur le salaire (~75 %). Pas d'ARE." },
+            };
+            const data = analysis[activeRegime];
+            if (!data) return null;
+            return (
+              <div style={{ marginTop: 18 }}>
+                <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Analyse — {activeRegime}</h2>
+                <div style={{ padding: '8px 10px', background: '#f8fafc', borderLeft: '3px solid #6366f1', borderRadius: 2 }}>
+                  {data.forts.map((f, i) => (
+                    <p key={i} style={{ fontSize: 9, margin: '2px 0', color: '#16a34a' }}>✓ {f}</p>
+                  ))}
+                  <p style={{ fontSize: 9, margin: '6px 0 0', color: '#dc2626' }}>⚠ {data.vigilance}</p>
+                </div>
+              </div>
+            );
+          })()}
+
+          <p style={{ fontSize: 7, color: '#999', marginTop: 14 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
 

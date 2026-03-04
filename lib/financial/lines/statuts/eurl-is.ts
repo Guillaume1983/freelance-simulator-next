@@ -1,6 +1,5 @@
 import type { FinancialLine } from '../../types';
-import { RATES_2026 } from '../../rates';
-import { computeIR } from '../../rates';
+import { RATES_2026, computeIR, computeIRDetail } from '../../rates';
 
 export interface StatutContext {
   ca: number;
@@ -12,18 +11,32 @@ export interface StatutContext {
   taxParts: number;
   spouseIncome: number;
   acreActive: boolean;
+  /** Part du résultat distribuée en salaire net (0–1) */
+  remunerationDirigeantMensuelle: number;
 }
 
 export function buildEurlIsLines(ctx: StatutContext): FinancialLine[] {
+  const ratioSalaire = Math.min(
+    1,
+    Math.max(0, ctx.remunerationDirigeantMensuelle ?? 1)
+  );
+
   const chargeFixes = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer;
   const fees = chargeFixes + ctx.cfe;
   const resultatSociete = ctx.ca - fees;
-  const beforeTax = resultatSociete / 1.45;
   const cotisRate = ctx.acreActive
     ? RATES_2026.eurlIs.cotis * RATES_2026.eurlIs.acre
     : RATES_2026.eurlIs.cotis;
+
+  // Enveloppe du résultat affectée au salaire (coût total : net + cotis)
+  const enveloppeSalaire = resultatSociete * ratioSalaire;
+  const beforeTax = enveloppeSalaire / (1 + cotisRate); // salaire net
   const cotis = beforeTax * cotisRate;
-  const isSociete = Math.max(0, resultatSociete - beforeTax) * RATES_2026.is.taux;
+
+  // Le reste du résultat reste en société et subit l'IS
+  const baseIS = Math.max(0, resultatSociete - enveloppeSalaire);
+  const isSociete = baseIS * RATES_2026.is.taux;
+
   const ir = computeIR(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts);
 
   return [
@@ -68,6 +81,9 @@ export function buildEurlIsLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: beforeTax,
       socialImpact: 0,
       applicableStatuses: ['EURL IS'],
+      formula: `Résultat affecté au salaire (${Math.round(ratioSalaire * 100)} %) :\n` +
+        `→ Enveloppe brute : ${Math.round(enveloppeSalaire).toLocaleString('fr-FR')} €\n` +
+        `→ Salaire net : ${Math.round(beforeTax).toLocaleString('fr-FR')} €`,
     },
     {
       id: 'eurl_is_ir',
@@ -78,6 +94,7 @@ export function buildEurlIsLines(ctx: StatutContext): FinancialLine[] {
       fiscalImpact: 0,
       socialImpact: 0,
       applicableStatuses: ['EURL IS'],
+      formula: computeIRDetail(beforeTax + ctx.loyer + ctx.spouseIncome, ctx.taxParts),
     },
   ];
 }
