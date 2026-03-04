@@ -145,15 +145,16 @@ export default function ProjectionSection({
   };
 
   const rows = [
-    { label: 'CA Annuel Brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
-    { label: 'Dépenses pro',                 key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
+    { label: 'CA annuel brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
+    { label: 'Charges (dépenses + optimisations)', key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
-    { label: 'Cotisations Sociales',         key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
-    { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '+', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Cotisations sociales',         key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Base avant impôt',             key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
     { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
-    { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false },
-    { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true  },
+    { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false, separatorAbove: true },
+    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '+', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Trésorerie société (après IS)', key: 'cashInCompany', prefix: '',  color: 'text-slate-500', highlight: false, isFinal: false, monthly: false },
+    { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
   ];
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
@@ -161,6 +162,28 @@ export default function ProjectionSection({
 
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
+
+  const getRowBgClass = (row: (typeof rows)[number]) => {
+    if (row.isFinal) return 'bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-black';
+    if (row.highlight) return 'bg-slate-100/90 dark:bg-slate-800/50 font-bold';
+    if (row.color === 'text-rose-500' || row.color === 'text-rose-600') return 'bg-rose-100/75 dark:bg-rose-900/30';
+    if (row.color === 'text-violet-600') return 'bg-violet-100/75 dark:bg-violet-900/30';
+    if (row.color === 'text-amber-600') return 'bg-amber-100/75 dark:bg-amber-900/30';
+    if (row.color === 'text-emerald-600') return 'bg-emerald-100/75 dark:bg-emerald-900/30';
+    if (row.color === 'text-slate-500') return 'bg-slate-100/75 dark:bg-slate-800/40';
+    return '';
+  };
+
+  const getRowBgClassCard = (row: (typeof rows)[number]) => {
+    if (row.isFinal) return 'bg-indigo-100/85 dark:bg-indigo-900/50';
+    if (row.highlight) return 'bg-slate-100/85 dark:bg-slate-800/50';
+    if (row.color === 'text-rose-500' || row.color === 'text-rose-600') return 'bg-rose-100/80 dark:bg-rose-900/35';
+    if (row.color === 'text-violet-600') return 'bg-violet-100/80 dark:bg-violet-900/35';
+    if (row.color === 'text-amber-600') return 'bg-amber-100/80 dark:bg-amber-900/35';
+    if (row.color === 'text-emerald-600') return 'bg-emerald-100/80 dark:bg-emerald-900/35';
+    if (row.color === 'text-slate-500') return 'bg-slate-100/80 dark:bg-slate-800/45';
+    return 'bg-slate-50/40 dark:bg-slate-900/20';
+  };
 
   return (
     <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
@@ -268,7 +291,7 @@ export default function ProjectionSection({
           <tbody className="text-slate-700 dark:text-slate-300">
             {rows.map((row, idx) => (
               <React.Fragment key={idx}>
-                <tr className={`transition-colors ${row.highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${row.isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
+                <tr className={`transition-colors ${getRowBgClass(row)}`}>
                   <td className="p-4 border-r dark:border-slate-800">
                     <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</div>
                   </td>
@@ -291,6 +314,7 @@ export default function ProjectionSection({
                   }
                   if (row.key === 'fees' && r.id === 'Micro') val = null;
                   if (row.key === 'cotis' && r.id === 'SASU') val = null;
+                  if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                   return (
                     <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${row.color}`}>
                       {val === null ? (
@@ -467,13 +491,10 @@ export default function ProjectionSection({
                     }
                     if (r && row.key === 'fees' && r.id === 'Micro') val = null;
                     if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
+                    if (r && row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                     return (
                       <div key={row.key}>
-                        <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
-                          row.isFinal   ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
-                          : row.highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
-                          : 'bg-slate-50/40 dark:bg-slate-900/20'
-                        }`}>
+                        <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
                             {val !== null ? (
@@ -552,6 +573,7 @@ export default function ProjectionSection({
                       }
                       if (row.key === 'fees' && r.id === 'Micro') val = null;
                       if (row.key === 'cotis' && r.id === 'SASU') val = null;
+                      if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                       return (
                         <td key={j} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: row.isFinal ? '#4f46e5' : 'inherit' }}>
                           {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}

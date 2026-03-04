@@ -166,17 +166,41 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   };
 
   const rows = [
-    { label: 'CA Annuel Brut',                key: 'ca',             div: 1  },
+    { label: 'CA annuel brut',                key: 'ca',             div: 1 },
     { label: 'Charges (dépenses + optimisations)', key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
     { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
-    { label: 'Cotisations Sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
-    { label: 'Optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
+    { label: 'Cotisations sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
     { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
+    { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true },
+    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
-    { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false },
-    { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true  },
+    { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true },
   ];
+
+  const getRowBgClass = (row: (typeof rows)[number]) => {
+    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; color?: string };
+    if (r.isFinal) return 'bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-black';
+    if (r.highlight) return 'bg-slate-100/90 dark:bg-slate-800/50 font-bold';
+    if (r.color === 'text-rose-500' || r.color === 'text-rose-600') return 'bg-rose-100/75 dark:bg-rose-900/30';
+    if (r.color === 'text-violet-600') return 'bg-violet-100/75 dark:bg-violet-900/30';
+    if (r.color === 'text-amber-600') return 'bg-amber-100/75 dark:bg-amber-900/30';
+    if (r.color === 'text-emerald-600') return 'bg-emerald-100/75 dark:bg-emerald-900/30';
+    if (r.color === 'text-slate-500') return 'bg-slate-100/75 dark:bg-slate-800/40';
+    return '';
+  };
+
+  const getRowBgClassCard = (row: (typeof rows)[number]) => {
+    const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; color?: string };
+    if (r.isFinal) return 'bg-indigo-100/85 dark:bg-indigo-900/50';
+    if (r.highlight) return 'bg-slate-100/85 dark:bg-slate-800/50';
+    if (r.color === 'text-rose-500' || r.color === 'text-rose-600') return 'bg-rose-100/80 dark:bg-rose-900/35';
+    if (r.color === 'text-violet-600') return 'bg-violet-100/80 dark:bg-violet-900/35';
+    if (r.color === 'text-amber-600') return 'bg-amber-100/80 dark:bg-amber-900/35';
+    if (r.color === 'text-emerald-600') return 'bg-emerald-100/80 dark:bg-emerald-900/35';
+    if (r.color === 'text-slate-500') return 'bg-slate-100/80 dark:bg-slate-800/45';
+    return 'bg-slate-50/40 dark:bg-slate-900/20';
+  };
 
   const getDisplayValue = (r: any, row: typeof rows[number]) => {
     if (row.key === 'portageCommission') {
@@ -288,7 +312,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <tbody className="text-slate-700 dark:text-slate-300">
             {rows.map((row, idx) => (
               <React.Fragment key={idx}>
-                <tr className={`transition-colors ${(row as any).highlight ? 'bg-slate-50/50 dark:bg-slate-900/30 font-bold' : ''} ${(row as any).isFinal ? 'bg-indigo-50/30 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-black' : ''}`}>
+                <tr className={`transition-colors ${getRowBgClass(row)}`}>
                   <td className="p-4 border-r dark:border-slate-800">
                     <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
                   </td>
@@ -501,11 +525,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <div className="px-4 pb-2 space-y-1.5">
                   {rows.map((row) => (
                     <div key={row.key}>
-                      <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${
-                        (row as any).isFinal ? 'bg-indigo-50/70 dark:bg-indigo-900/40'
-                        : (row as any).highlight ? 'bg-slate-50/70 dark:bg-slate-900/40'
-                        : 'bg-slate-50/40 dark:bg-slate-900/20'
-                      }`}>
+                      <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                         <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label}</p>
                         <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
                           {(() => {

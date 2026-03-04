@@ -141,6 +141,11 @@ export function getDetailTextFromLines(
 
       return monthly12(parts.join(' '));
     }
+    case 'cashInCompany': {
+      const cash = (r as { cashInCompany?: number }).cashInCompany;
+      if (cash == null || cash === 0) return 'Non applicable ou 0';
+      return `Trésorerie laissée en société après impôt sur les sociétés : ${fmt(cash)} /an`;
+    }
     default:
       return '';
   }
