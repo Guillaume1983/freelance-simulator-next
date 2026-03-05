@@ -23,6 +23,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const materielAnnuel = sim.state.materielAnnuel ?? 0;
   const kmAnnuel = sim.state.kmAnnuel ?? 0;
   const loyerPercu = sim.state.loyerPercu ?? 0;
+  const loyerAnnuel = loyerPercu * 12;
   const avantagesOptimises = sim.state.avantagesOptimises ?? 1500;
   const spouseIncome = sim.state.spouseIncome ?? 0;
   const cvFiscaux = Number(sim.state.cvFiscaux ?? '4') || 4;
@@ -37,6 +38,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const currentCity: string = sim.state.citySize ?? 'petite';
   const cityIndex = Math.max(0, CITY_ORDER.indexOf(currentCity as any));
   const cityLabel = CITY_LABEL[currentCity] ?? CITY_LABEL.petite;
+  const avantagesMensuel = avantagesOptimises / 12;
 
   const nonWarning = CHARGES_CATALOG.filter(c => !c.portageWarning);
   const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
@@ -387,48 +389,57 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="p-2 bg-white/10 rounded-xl text-blue-200"><Home size={20} /></div>
                 <h3 className="text-sm font-900 uppercase tracking-widest text-white">Location Bureau (Domicile)</h3>
               </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-white/75 uppercase">Loyer mensuel perçu (TTC)</label>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1">
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={loyerPercu}
-                          onChange={e => {
-                            const v = Number(e.target.value);
-                            sim.setters.setLoyerPercu(Number.isNaN(v) ? 0 : Math.max(0, v));
-                          }}
-                          onFocus={e => e.target.select()}
-                          className="tjm-days-input w-24 pr-5 py-1 text-[10px] font-bold text-right"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <button
-                          type="button"
-                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => sim.setters.setLoyerPercu(loyerPercu + 1)}
-                          aria-label="Augmenter le loyer perçu"
-                        >
-                          ▲
-                        </button>
-                        <button
-                          type="button"
-                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => sim.setters.setLoyerPercu(Math.max(0, loyerPercu - 1))}
-                          aria-label="Diminuer le loyer perçu"
-                        >
-                          ▼
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <span className="text-[9px] font-black text-white/70">EUR / MOIS</span>
+              <div className="space-y-2">
+                <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Loyer mensuel perçu (TTC)</span>
+                      <span className="text-[9px] text-white/65">
+                        {loyerPercu.toLocaleString()} EUR / MOIS
+                        {loyerPercu > 0 && (
+                          <span className="ml-1 text-white/55">
+                            · {loyerAnnuel.toLocaleString()} €/an
+                          </span>
+                        )}
+                      </span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-white/70 italic font-medium">Ce montant sera réinjecté en revenu net sans cotisations sociales.</p>
+                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={loyerPercu}
+                        onChange={e => {
+                          const v = Number(e.target.value);
+                          sim.setters.setLoyerPercu(Number.isNaN(v) ? 0 : Math.max(0, v));
+                        }}
+                        onFocus={e => e.target.select()}
+                        className="tjm-days-input w-24 pr-5 py-1 text-[10px] font-bold text-right"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                        onClick={() => sim.setters.setLoyerPercu(loyerPercu + 1)}
+                        aria-label="Augmenter le loyer perçu"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                        onClick={() => sim.setters.setLoyerPercu(Math.max(0, loyerPercu - 1))}
+                        aria-label="Diminuer le loyer perçu"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
 
             <div className="space-y-6">
@@ -437,44 +448,61 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <h3 className="text-sm font-900 uppercase tracking-widest text-white">Avantages optimisés</h3>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/75 uppercase">Montant annuel (CE, CSE, etc.)</label>
-                <div className="flex items-center gap-1">
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={avantagesOptimises}
-                      onChange={e => {
-                        const v = Number(e.target.value);
-                        sim.setters.setAvantagesOptimises(Number.isNaN(v) ? 0 : Math.max(0, v));
-                      }}
-                      onFocus={e => e.target.select()}
-                      className="tjm-days-input w-24 pr-8 py-1 text-[10px] font-bold text-right"
-                      placeholder="1500"
-                    />
-                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
+                <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Montant annuel (CE, CSE, etc.)</span>
+                      <span className="text-[9px] text-white/65">
+                        {avantagesOptimises.toLocaleString()} €/an
+                        {avantagesOptimises > 0 && (
+                          <span className="ml-1 text-white/55">
+                            · {Math.round(avantagesMensuel).toLocaleString()} EUR / MOIS
+                          </span>
+                        )}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onClick={() => sim.setters.setAvantagesOptimises(avantagesOptimises + 1)}
-                      aria-label="Augmenter les avantages optimisés"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onClick={() => sim.setters.setAvantagesOptimises(Math.max(0, avantagesOptimises - 1))}
-                      aria-label="Diminuer les avantages optimisés"
-                    >
-                      ▼
-                    </button>
+                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={avantagesOptimises}
+                        onChange={e => {
+                          const v = Number(e.target.value);
+                          sim.setters.setAvantagesOptimises(Number.isNaN(v) ? 0 : Math.max(0, v));
+                        }}
+                        onFocus={e => e.target.select()}
+                        className="tjm-days-input w-24 pr-8 py-1 text-[10px] font-bold text-right"
+                        placeholder="1500"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                        onClick={() => sim.setters.setAvantagesOptimises(avantagesOptimises + 1)}
+                        aria-label="Augmenter les avantages optimisés"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        type="button"
+                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                        onClick={() => sim.setters.setAvantagesOptimises(Math.max(0, avantagesOptimises - 1))}
+                        aria-label="Diminuer les avantages optimisés"
+                      >
+                        ▼
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          <p className="mt-3 text-[10px] text-white/70 italic font-medium text-center">
+            Les indemnités kilométriques, loyers perçus et avantages CE/CSE sont réinjectés en revenu net sans cotisations sociales.
+          </p>
         </div>
       )}
 

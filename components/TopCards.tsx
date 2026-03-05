@@ -1,10 +1,42 @@
 'use client';
+import { useRef } from 'react';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
   const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+
+  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startHold = (fn: () => void) => {
+    // Un clic simple déclenche une seule incrémentation immédiate
+    fn();
+    // Puis on ne commence la répétition qu'après un petit délai,
+    // pour laisser le temps de relâcher le bouton si on veut faire du 1 par 1.
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (holdDelayRef.current) {
+      clearTimeout(holdDelayRef.current);
+    }
+    holdDelayRef.current = setTimeout(() => {
+      holdTimerRef.current = setInterval(fn, 120);
+    }, 300);
+  };
+
+  const stopHold = () => {
+    if (holdDelayRef.current) {
+      clearTimeout(holdDelayRef.current);
+      holdDelayRef.current = null;
+    }
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
 
   const totalDepensesMensuelles = Math.round(
     CHARGES_CATALOG.reduce((sum, item) => {
@@ -59,7 +91,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setTjm((sim.state.tjm || 0) + 1)}
+                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Augmenter le TJM"
                 >
                   ▲
@@ -67,7 +104,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setTjm(Math.max(0, (sim.state.tjm || 0) - 1))}
+                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Diminuer le TJM"
                 >
                   ▼
@@ -91,7 +133,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setDays((sim.state.days || 0) + 1)}
+                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Augmenter les jours"
                 >
                   ▲
@@ -99,7 +146,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setDays(Math.max(0, (sim.state.days || 0) - 1))}
+                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Diminuer les jours"
                 >
                   ▼
@@ -110,68 +162,54 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
         </div>
 
         {/* Charges */}
-        <div className="card-pro px-2.5 py-2 border-l-4 border-l-rose-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 dark:bg-white/10 text-rose-100 p-1.5 rounded-xl">
-                <Receipt className="w-3.5 h-3.5" />
-              </div>
-              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Dépenses professionnelles</p>
+        <div className="card-pro px-2.5 py-2 pb-4 border-l-4 border-l-rose-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5 relative">
+          <div className="flex items-center gap-2">
+            <div className="bg-white/10 dark:bg-white/10 text-rose-100 p-1.5 rounded-xl">
+              <Receipt className="w-3.5 h-3.5" />
             </div>
-            <button
-              type="button"
-              className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25"
-              onClick={() => togglePanel('charges')}
-              aria-label="Ouvrir le détail des charges"
-            >
-              <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'charges' ? 'rotate-180' : ''}`} />
-            </button>
+            <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Dépenses professionnelles</p>
           </div>
           <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(totalDepensesMensuelles)}
           </p>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25 absolute right-1.5 bottom-1.5"
+            onClick={() => togglePanel('charges')}
+            aria-label="Ouvrir le détail des charges"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'charges' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
         {/* Optimisations */}
-        <div className="card-pro px-2.5 py-2 border-l-4 border-l-emerald-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Optimi-<br/>sations</p>
+        <div className="card-pro px-2.5 py-2 pb-4 border-l-4 border-l-emerald-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5 relative">
+          <div className="flex items-center gap-2">
+            <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
-            <button
-              type="button"
-              className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25"
-              onClick={() => togglePanel('opti')}
-              aria-label="Ouvrir le détail des optimisations"
-            >
-              <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'opti' ? 'rotate-180' : ''}`} />
-            </button>
+            <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Optimi-<br/>sations</p>
           </div>
           <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(totalOptMens)}
           </p>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25 absolute right-1.5 bottom-1.5"
+            onClick={() => togglePanel('opti')}
+            aria-label="Ouvrir le détail des optimisations"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'opti' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
         {/* Situation Fiscale */}
-        <div className="card-pro px-2.5 py-2 border-l-4 border-l-amber-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 dark:bg-white/10 text-amber-100 p-1.5 rounded-xl">
-                <Users className="w-3.5 h-3.5" />
-              </div>
-              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Situation<br/>fiscale</p>
+        <div className="card-pro px-2.5 py-2 pb-4 border-l-4 border-l-amber-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5 relative">
+          <div className="flex items-center gap-2">
+            <div className="bg-white/10 dark:bg-white/10 text-amber-100 p-1.5 rounded-xl">
+              <Users className="w-3.5 h-3.5" />
             </div>
-            <button
-              type="button"
-              className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25"
-              onClick={() => togglePanel('fiscal')}
-              aria-label="Ouvrir les paramètres fiscaux"
-            >
-              <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'fiscal' ? 'rotate-180' : ''}`} />
-            </button>
+            <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Situation<br/>fiscale</p>
           </div>
           <p className="font-900 text-white text-[12px] tracking-tight">
             {sim.state.taxParts} parts
@@ -179,6 +217,14 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <p className="text-[9px] text-slate-400 font-bold">
             {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enf.` : ''}
           </p>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25 absolute right-1.5 bottom-1.5"
+            onClick={() => togglePanel('fiscal')}
+            aria-label="Ouvrir les paramètres fiscaux"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'fiscal' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
       </div>
@@ -212,7 +258,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setTjm((sim.state.tjm || 0) + 1)}
+                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Augmenter le TJM"
                 >
                   ▲
@@ -220,7 +271,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setTjm(Math.max(0, (sim.state.tjm || 0) - 1))}
+                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Diminuer le TJM"
                 >
                   ▼
@@ -244,7 +300,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setDays((sim.state.days || 0) + 1)}
+                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Augmenter les jours"
                 >
                   ▲
@@ -252,7 +313,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
                 <button
                   type="button"
                   className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onClick={() => sim.setters.setDays(Math.max(0, (sim.state.days || 0) - 1))}
+                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onMouseUp={stopHold}
+                  onMouseLeave={stopHold}
+                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                  onTouchEnd={stopHold}
+                  onTouchCancel={stopHold}
                   aria-label="Diminuer les jours"
                 >
                   ▼
