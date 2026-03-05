@@ -530,16 +530,18 @@ export default function ProjectionSection({
 
       {/* Hypothèses principales (mêmes que le comparatif) */}
       <div className="px-4 md:px-6 pb-2">
-        <div className="mt-6 max-w-3xl mx-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 px-4 py-3">
-          <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-slate-500 text-center md:text-left">
-            Hypothèses principales
-          </span>
-          <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[9px] text-slate-600 dark:text-slate-300 list-disc pl-4">
+        <div className="mt-4 max-w-[1600px] mx-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 px-4 py-2">
+          <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
+            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
+              Hypothèses principales
+            </span>
+            <ul className="mt-1 md:mt-0 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 text-[9px] text-slate-600 dark:text-slate-300 list-disc md:list-none md:pl-0 pl-4">
             <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
             <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
             <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
             <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
-          </ul>
+            </ul>
+          </div>
         </div>
       </div>
 
