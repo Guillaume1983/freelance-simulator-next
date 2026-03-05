@@ -41,7 +41,10 @@ export default function ArticlesPage() {
                   <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
                     {article.category}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-semibold">
+                  <span
+                    className="text-[10px] text-slate-400 font-semibold"
+                    suppressHydrationWarning
+                  >
                     {new Date(article.date).toLocaleDateString('fr-FR', {
                       day: '2-digit',
                       month: 'short',

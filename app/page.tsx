@@ -184,7 +184,10 @@ export default function Home() {
                   <div className="flex flex-col gap-2 px-4 py-3">
                     <div className="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
                       <span>{article.category}</span>
-                      <span className="text-slate-400 dark:text-slate-500">
+                      <span
+                        className="text-slate-400 dark:text-slate-500"
+                        suppressHydrationWarning
+                      >
                         {new Date(article.date).toLocaleDateString('fr-FR', {
                           day: '2-digit',
                           month: 'short',

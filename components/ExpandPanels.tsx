@@ -835,7 +835,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       type="button"
                       className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
                       onMouseDown={() =>
-                        !sim.state.nbAdultes < 2 &&
+                        sim.state.nbAdultes >= 2 &&
                         startHold(() =>
                           sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
                         )
@@ -843,7 +843,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       onMouseUp={stopHold}
                       onMouseLeave={stopHold}
                       onTouchStart={() =>
-                        !sim.state.nbAdultes < 2 &&
+                        sim.state.nbAdultes >= 2 &&
                         startHold(() =>
                           sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
                         )
@@ -859,7 +859,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       type="button"
                       className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
                       onMouseDown={() =>
-                        !sim.state.nbAdultes < 2 &&
+                        sim.state.nbAdultes >= 2 &&
                         startHold(() =>
                           sim.setters.setSpouseIncome((prev: number) =>
                             Math.max(0, (prev || 0) - 1),
@@ -869,7 +869,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       onMouseUp={stopHold}
                       onMouseLeave={stopHold}
                       onTouchStart={() =>
-                        !sim.state.nbAdultes < 2 &&
+                        sim.state.nbAdultes >= 2 &&
                         startHold(() =>
                           sim.setters.setSpouseIncome((prev: number) =>
                             Math.max(0, (prev || 0) - 1),

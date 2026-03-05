@@ -72,7 +72,10 @@ export default function ResourcesPanel() {
                         <p className="mt-0.5 text-[10px] text-slate-600 dark:text-slate-300 leading-snug line-clamp-2">
                           {article.excerpt}
                         </p>
-                        <p className="mt-0.5 text-[9px] text-slate-400 dark:text-slate-500">
+                        <p
+                          className="mt-0.5 text-[9px] text-slate-400 dark:text-slate-500"
+                          suppressHydrationWarning
+                        >
                           {new Date(article.date).toLocaleDateString('fr-FR', {
                             day: '2-digit',
                             month: 'short',
