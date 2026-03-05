@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 import { X, LogIn, UserPlus } from 'lucide-react';
 
 export default function ConnectorModal({
@@ -13,15 +14,15 @@ export default function ConnectorModal({
   title?: string;
   message?: string;
 }) {
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-200 dark:border-slate-700"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-start mb-4">
@@ -52,6 +53,7 @@ export default function ConnectorModal({
           </Link>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

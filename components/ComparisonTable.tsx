@@ -591,9 +591,11 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
       {/* Hypothèses principales */}
       <div className="px-4 md:px-6 pb-2">
-        <div className="inline-flex flex-col gap-1 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-900/40 px-3 py-2">
-          <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-500">Hypothèses principales</span>
-          <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-500">
+        <div className="mt-6 max-w-3xl mx-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 px-4 py-3">
+          <span className="block text-[9px] font-black uppercase tracking-[0.16em] text-slate-500 text-center md:text-left">
+            Hypothèses principales
+          </span>
+          <ul className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[9px] text-slate-600 dark:text-slate-300 list-disc pl-4">
             <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
             <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
             <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
