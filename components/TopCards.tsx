@@ -30,23 +30,68 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             {fmt(sim.state.tjm * sim.state.days)}
           </p>
           <div className="flex gap-1.5">
-            <div className="relative flex-1">
-              <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/50">TJM</span>
-              <input
-                type="number"
-                value={sim.state.tjm}
-                onChange={(e) => sim.setters.setTjm(Number(e.target.value))}
-                className="w-full text-left! pl-1.5 text-xs font-bold h-6 bg-white/10 border border-white/25 text-white placeholder:text-white/40"
-              />
+            {/* TJM mobile */}
+            <div className="flex flex-1 items-center gap-1">
+              <div className="relative flex-1">
+                <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/70">TJM</span>
+                <input
+                  type="number"
+                  value={sim.state.tjm}
+                  onChange={(e) => sim.setters.setTjm(Number(e.target.value) || 0)}
+                  onFocus={(e) => e.target.select()}
+                  className="tjm-days-input w-full text-left! pl-1.5 text-xs font-bold h-6"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setTjm((sim.state.tjm || 0) + 1)}
+                  aria-label="Augmenter le TJM"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setTjm(Math.max(0, (sim.state.tjm || 0) - 1))}
+                  aria-label="Diminuer le TJM"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
-            <div className="relative w-10">
-              <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/50">J</span>
-              <input
-                type="number"
-                value={sim.state.days}
-                onChange={(e) => sim.setters.setDays(Number(e.target.value))}
-                className="w-full text-left! pl-1.5 text-xs font-bold h-6 bg-white/10 border border-white/25 text-white placeholder:text-white/40"
-              />
+
+            {/* Jours mobile */}
+            <div className="flex w-16 items-center gap-1">
+              <div className="relative flex-1">
+                <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/70">J</span>
+                <input
+                  type="number"
+                  value={sim.state.days}
+                  onChange={(e) => sim.setters.setDays(Number(e.target.value) || 0)}
+                  onFocus={(e) => e.target.select()}
+                  className="tjm-days-input w-full text-left! pl-1.5 text-xs font-bold h-6"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setDays((sim.state.days || 0) + 1)}
+                  aria-label="Augmenter les jours"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setDays(Math.max(0, (sim.state.days || 0) - 1))}
+                  aria-label="Diminuer les jours"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -135,24 +180,69 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <p className="font-900 text-white text-lg tracking-tight">{fmt(sim.state.tjm * sim.state.days)}</p>
             </div>
           </div>
-          <div className="flex flex-col gap-2 w-24">
-            <div className="relative">
-              <span className="absolute right-2 top-1 text-[8px] font-bold text-white/60">TJM</span>
-              <input
-                type="number"
-                value={sim.state.tjm}
-                onChange={(e) => sim.setters.setTjm(Number(e.target.value))}
-                className="w-full text-left! pl-2 text-xs font-bold h-7 bg-white/10 border border-white/25 text-white placeholder:text-white/40"
-              />
+          <div className="flex flex-col gap-1.5 w-28">
+            {/* TJM desktop */}
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <span className="absolute right-2 top-1 text-[8px] font-bold text-white/80">TJM</span>
+                <input
+                  type="number"
+                  value={sim.state.tjm}
+                  onChange={(e) => sim.setters.setTjm(Number(e.target.value) || 0)}
+                  onFocus={(e) => e.target.select()}
+                  className="tjm-days-input w-full text-left! pl-2 text-xs font-bold h-7"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setTjm((sim.state.tjm || 0) + 1)}
+                  aria-label="Augmenter le TJM"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setTjm(Math.max(0, (sim.state.tjm || 0) - 1))}
+                  aria-label="Diminuer le TJM"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
-            <div className="relative">
-              <span className="absolute right-2 top-1 text-[8px] font-bold text-white/60">JOURS</span>
-              <input
-                type="number"
-                value={sim.state.days}
-                onChange={(e) => sim.setters.setDays(Number(e.target.value))}
-                className="w-full text-left! pl-2 text-xs font-bold h-7 bg-white/10 border border-white/25 text-white placeholder:text-white/40"
-              />
+
+            {/* Jours desktop */}
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <span className="absolute right-2 top-1 text-[8px] font-bold text-white/80">JOURS</span>
+                <input
+                  type="number"
+                  value={sim.state.days}
+                  onChange={(e) => sim.setters.setDays(Number(e.target.value) || 0)}
+                  onFocus={(e) => e.target.select()}
+                  className="tjm-days-input w-full text-left! pl-2 text-xs font-bold h-7"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setDays((sim.state.days || 0) + 1)}
+                  aria-label="Augmenter les jours"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                  onClick={() => sim.setters.setDays(Math.max(0, (sim.state.days || 0) - 1))}
+                  aria-label="Diminuer les jours"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
           </div>
         </div>

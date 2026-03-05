@@ -288,6 +288,25 @@
     border-color: rgba(71,85,105,0.5);
     color: #e2e8f0;
   }
+
+  /* Inputs TJM / Jours : style spécifique (fond translucide + texte blanc) */
+  .tjm-days-input {
+    background: transparent !important;
+    border-color: rgba(255,255,255,0.25) !important;
+    color: #ffffff !important;
+  }
+  .tjm-days-input::placeholder {
+    color: rgba(255,255,255,0.4);
+  }
+  /* Suppression des flèches ↑↓ uniquement pour ces inputs */
+  input.tjm-days-input::-webkit-inner-spin-button,
+  input.tjm-days-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input.tjm-days-input {
+    -moz-appearance: textfield;
+  }
   input[type="number"]:focus,
   input[type="text"]:focus,
   input[type="email"]:focus,
