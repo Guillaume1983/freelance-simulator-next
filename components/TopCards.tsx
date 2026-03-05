@@ -188,7 +188,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
                 <Sparkles className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">
+              <p className="text-[9px] font-black text-white/80 uppercase tracking-wide leading-tight whitespace-nowrap">
                 Optimisations
               </p>
             </div>

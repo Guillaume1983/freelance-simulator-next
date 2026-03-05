@@ -1,9 +1,39 @@
 'use client';
+import { useRef } from 'react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt } from 'lucide-react';
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
+
+  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startHold = (fn: () => void) => {
+    fn();
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (holdDelayRef.current) {
+      clearTimeout(holdDelayRef.current);
+      holdDelayRef.current = null;
+    }
+    holdDelayRef.current = setTimeout(() => {
+      holdTimerRef.current = setInterval(fn, 120);
+    }, 300);
+  };
+
+  const stopHold = () => {
+    if (holdDelayRef.current) {
+      clearTimeout(holdDelayRef.current);
+      holdDelayRef.current = null;
+    }
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
 
   const totalDepensesMensuelles = Math.round(
     CHARGES_CATALOG.reduce((sum, item) => {
@@ -81,12 +111,30 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             <button
               type="button"
               className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-              onClick={() =>
-                sim.setters.setChargeAmounts({
-                  ...sim.state.chargeAmounts,
-                  [item.id]: safeAmount + 1,
+              onMouseDown={() =>
+                startHold(() => {
+                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
+                  const next = (typeof current === 'number' && !Number.isNaN(current) ? current : 0) + 1;
+                  sim.setters.setChargeAmounts({
+                    ...sim.state.chargeAmounts,
+                    [item.id]: next,
+                  });
                 })
               }
+              onMouseUp={stopHold}
+              onMouseLeave={stopHold}
+              onTouchStart={() =>
+                startHold(() => {
+                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
+                  const next = (typeof current === 'number' && !Number.isNaN(current) ? current : 0) + 1;
+                  sim.setters.setChargeAmounts({
+                    ...sim.state.chargeAmounts,
+                    [item.id]: next,
+                  });
+                })
+              }
+              onTouchEnd={stopHold}
+              onTouchCancel={stopHold}
               aria-label={`Augmenter ${item.name}`}
             >
               ▲
@@ -94,12 +142,32 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             <button
               type="button"
               className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-              onClick={() =>
-                sim.setters.setChargeAmounts({
-                  ...sim.state.chargeAmounts,
-                  [item.id]: Math.max(0, safeAmount - 1),
+              onMouseDown={() =>
+                startHold(() => {
+                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
+                  const base = typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                  const next = Math.max(0, base - 1);
+                  sim.setters.setChargeAmounts({
+                    ...sim.state.chargeAmounts,
+                    [item.id]: next,
+                  });
                 })
               }
+              onMouseUp={stopHold}
+              onMouseLeave={stopHold}
+              onTouchStart={() =>
+                startHold(() => {
+                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
+                  const base = typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                  const next = Math.max(0, base - 1);
+                  sim.setters.setChargeAmounts({
+                    ...sim.state.chargeAmounts,
+                    [item.id]: next,
+                  });
+                })
+              }
+              onTouchEnd={stopHold}
+              onTouchCancel={stopHold}
               aria-label={`Diminuer ${item.name}`}
             >
               ▼
@@ -177,40 +245,70 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   <span className="text-[9px] text-white/65">amorti 3 ans</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={materielAnnuel}
-                    onChange={e => {
-                      const v = Number(e.target.value);
-                      sim.setters.setMaterielAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
-                    }}
-                    onFocus={e => e.target.select()}
-                    className="tjm-days-input w-20 pr-8 py-1 text-[10px] font-bold text-right"
-                    placeholder="0"
-                  />
-                  <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
+                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={materielAnnuel}
+                      onChange={e => {
+                        const v = Number(e.target.value);
+                        sim.setters.setMaterielAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
+                      }}
+                      onFocus={e => e.target.select()}
+                      className="tjm-days-input w-20 pr-8 py-1 text-[10px] font-bold text-right"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                      onMouseDown={() =>
+                        startHold(() =>
+                          sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
+                        )
+                      }
+                      onMouseUp={stopHold}
+                      onMouseLeave={stopHold}
+                      onTouchStart={() =>
+                        startHold(() =>
+                          sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
+                        )
+                      }
+                      onTouchEnd={stopHold}
+                      onTouchCancel={stopHold}
+                      aria-label="Augmenter le matériel annuel"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      type="button"
+                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                      onMouseDown={() =>
+                        startHold(() =>
+                          sim.setters.setMaterielAnnuel((prev: number) =>
+                            Math.max(0, (prev || 0) - 1),
+                          )
+                        )
+                      }
+                      onMouseUp={stopHold}
+                      onMouseLeave={stopHold}
+                      onTouchStart={() =>
+                        startHold(() =>
+                          sim.setters.setMaterielAnnuel((prev: number) =>
+                            Math.max(0, (prev || 0) - 1),
+                          )
+                        )
+                      }
+                      onTouchEnd={stopHold}
+                      onTouchCancel={stopHold}
+                      aria-label="Diminuer le matériel annuel"
+                    >
+                      ▼
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    type="button"
-                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onClick={() => sim.setters.setMaterielAnnuel(materielAnnuel + 1)}
-                    aria-label="Augmenter le matériel annuel"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onClick={() => sim.setters.setMaterielAnnuel(Math.max(0, materielAnnuel - 1))}
-                    aria-label="Diminuer le matériel annuel"
-                  >
-                    ▼
-                  </button>
-                </div>
-              </div>
             </div>
             {renderChargeRow(warning[3])}
             {renderChargeRow(warning[4])}
@@ -250,7 +348,20 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   <button
                     type="button"
                     className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onClick={() => sim.setters.setMaterielAnnuel(materielAnnuel + 1)}
+                    onMouseDown={() =>
+                      startHold(() =>
+                        sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
+                      )
+                    }
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() =>
+                      startHold(() =>
+                        sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
+                      )
+                    }
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
                     aria-label="Augmenter le matériel annuel"
                   >
                     ▲
@@ -258,7 +369,24 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   <button
                     type="button"
                     className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onClick={() => sim.setters.setMaterielAnnuel(Math.max(0, materielAnnuel - 1))}
+                    onMouseDown={() =>
+                      startHold(() =>
+                        sim.setters.setMaterielAnnuel((prev: number) =>
+                          Math.max(0, (prev || 0) - 1),
+                        )
+                      )
+                    }
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() =>
+                      startHold(() =>
+                        sim.setters.setMaterielAnnuel((prev: number) =>
+                          Math.max(0, (prev || 0) - 1),
+                        )
+                      )
+                    }
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
                     aria-label="Diminuer le matériel annuel"
                   >
                     ▼
@@ -310,7 +438,20 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         <button
                           type="button"
                           className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => sim.setters.setKmAnnuel(kmAnnuel + 1)}
+                          onMouseDown={() =>
+                            startHold(() =>
+                              sim.setters.setKmAnnuel((prev: number) => (prev || 0) + 1),
+                            )
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            startHold(() =>
+                              sim.setters.setKmAnnuel((prev: number) => (prev || 0) + 1),
+                            )
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
                           aria-label="Augmenter la distance annuelle"
                         >
                           ▲
@@ -318,7 +459,24 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         <button
                           type="button"
                           className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => sim.setters.setKmAnnuel(Math.max(0, kmAnnuel - 1))}
+                          onMouseDown={() =>
+                            startHold(() =>
+                              sim.setters.setKmAnnuel((prev: number) =>
+                                Math.max(0, (prev || 0) - 1),
+                              ),
+                            )
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            startHold(() =>
+                              sim.setters.setKmAnnuel((prev: number) =>
+                                Math.max(0, (prev || 0) - 1),
+                              ),
+                            )
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
                           aria-label="Diminuer la distance annuelle"
                         >
                           ▼
@@ -358,10 +516,22 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         <button
                           type="button"
                           className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => {
-                            const next = Math.min(cvMax, cvFiscaux + 1);
-                            sim.setters.setCvFiscaux(String(next));
-                          }}
+                          onMouseDown={() =>
+                            startHold(() => {
+                              const next = Math.min(cvMax, cvFiscaux + 1);
+                              sim.setters.setCvFiscaux(String(next));
+                            })
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            startHold(() => {
+                              const next = Math.min(cvMax, cvFiscaux + 1);
+                              sim.setters.setCvFiscaux(String(next));
+                            })
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
                           aria-label="Augmenter la puissance fiscale"
                         >
                           ▲
@@ -369,10 +539,22 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         <button
                           type="button"
                           className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onClick={() => {
-                            const next = Math.max(cvMin, cvFiscaux - 1);
-                            sim.setters.setCvFiscaux(String(next));
-                          }}
+                          onMouseDown={() =>
+                            startHold(() => {
+                              const next = Math.max(cvMin, cvFiscaux - 1);
+                              sim.setters.setCvFiscaux(String(next));
+                            })
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            startHold(() => {
+                              const next = Math.max(cvMin, cvFiscaux - 1);
+                              sim.setters.setCvFiscaux(String(next));
+                            })
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
                           aria-label="Diminuer la puissance fiscale"
                         >
                           ▼
@@ -423,7 +605,20 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       <button
                         type="button"
                         className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setLoyerPercu(loyerPercu + 1)}
+                        onMouseDown={() =>
+                          startHold(() =>
+                            sim.setters.setLoyerPercu((prev: number) => (prev || 0) + 1),
+                          )
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() =>
+                            sim.setters.setLoyerPercu((prev: number) => (prev || 0) + 1),
+                          )
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Augmenter le loyer perçu"
                       >
                         ▲
@@ -431,7 +626,24 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       <button
                         type="button"
                         className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setLoyerPercu(Math.max(0, loyerPercu - 1))}
+                        onMouseDown={() =>
+                          startHold(() =>
+                            sim.setters.setLoyerPercu((prev: number) =>
+                              Math.max(0, (prev || 0) - 1),
+                            ),
+                          )
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() =>
+                            sim.setters.setLoyerPercu((prev: number) =>
+                              Math.max(0, (prev || 0) - 1),
+                            ),
+                          )
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Diminuer le loyer perçu"
                       >
                         ▼
@@ -481,15 +693,49 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       <button
                         type="button"
                         className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setAvantagesOptimises(avantagesOptimises + 1)}
+                        onMouseDown={() =>
+                          startHold(() =>
+                            sim.setters.setAvantagesOptimises(
+                              (prev: number) => (prev || 0) + 1,
+                            ),
+                          )
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() =>
+                            sim.setters.setAvantagesOptimises(
+                              (prev: number) => (prev || 0) + 1,
+                            ),
+                          )
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Augmenter les avantages optimisés"
                       >
                         ▲
                       </button>
                       <button
                         type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setAvantagesOptimises(Math.max(0, avantagesOptimises - 1))}
+                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify_center text-[7px] text-white"
+                        onMouseDown={() =>
+                          startHold(() =>
+                            sim.setters.setAvantagesOptimises((prev: number) =>
+                              Math.max(0, (prev || 0) - 1),
+                            ),
+                          )
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() =>
+                            sim.setters.setAvantagesOptimises((prev: number) =>
+                              Math.max(0, (prev || 0) - 1),
+                            ),
+                          )
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Diminuer les avantages optimisés"
                       >
                         ▼
@@ -587,8 +833,23 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   <div className="flex flex-col gap-0.5">
                     <button
                       type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onClick={() => sim.setters.setSpouseIncome(spouseIncome + 1)}
+                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                      onMouseDown={() =>
+                        !sim.state.nbAdultes < 2 &&
+                        startHold(() =>
+                          sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
+                        )
+                      }
+                      onMouseUp={stopHold}
+                      onMouseLeave={stopHold}
+                      onTouchStart={() =>
+                        !sim.state.nbAdultes < 2 &&
+                        startHold(() =>
+                          sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
+                        )
+                      }
+                      onTouchEnd={stopHold}
+                      onTouchCancel={stopHold}
                       aria-label="Augmenter le salaire du conjoint"
                       disabled={sim.state.nbAdultes < 2}
                     >
@@ -596,8 +857,27 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                     </button>
                     <button
                       type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onClick={() => sim.setters.setSpouseIncome(Math.max(0, spouseIncome - 1))}
+                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                      onMouseDown={() =>
+                        !sim.state.nbAdultes < 2 &&
+                        startHold(() =>
+                          sim.setters.setSpouseIncome((prev: number) =>
+                            Math.max(0, (prev || 0) - 1),
+                          ),
+                        )
+                      }
+                      onMouseUp={stopHold}
+                      onMouseLeave={stopHold}
+                      onTouchStart={() =>
+                        !sim.state.nbAdultes < 2 &&
+                        startHold(() =>
+                          sim.setters.setSpouseIncome((prev: number) =>
+                            Math.max(0, (prev || 0) - 1),
+                          ),
+                        )
+                      }
+                      onTouchEnd={stopHold}
+                      onTouchCancel={stopHold}
                       aria-label="Diminuer le salaire du conjoint"
                       disabled={sim.state.nbAdultes < 2}
                     >
@@ -634,10 +914,26 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       <button
                         type="button"
                         className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        onClick={() => {
-                          const nextIndex = Math.min(CITY_ORDER.length - 1, cityIndex + 1);
-                          sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                        }}
+                        onMouseDown={() =>
+                          startHold(() => {
+                            const nextIndex = Math.min(CITY_ORDER.length - 1, cityIndex + 1);
+                            if (nextIndex !== cityIndex) {
+                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
+                            }
+                          })
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() => {
+                            const nextIndex = Math.min(CITY_ORDER.length - 1, cityIndex + 1);
+                            if (nextIndex !== cityIndex) {
+                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
+                            }
+                          })
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Augmenter la taille de la ville"
                         disabled={cityIndex >= CITY_ORDER.length - 1}
                       >
@@ -646,10 +942,26 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       <button
                         type="button"
                         className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        onClick={() => {
-                          const nextIndex = Math.max(0, cityIndex - 1);
-                          sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                        }}
+                        onMouseDown={() =>
+                          startHold(() => {
+                            const nextIndex = Math.max(0, cityIndex - 1);
+                            if (nextIndex !== cityIndex) {
+                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
+                            }
+                          })
+                        }
+                        onMouseUp={stopHold}
+                        onMouseLeave={stopHold}
+                        onTouchStart={() =>
+                          startHold(() => {
+                            const nextIndex = Math.max(0, cityIndex - 1);
+                            if (nextIndex !== cityIndex) {
+                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
+                            }
+                          })
+                        }
+                        onTouchEnd={stopHold}
+                        onTouchCancel={stopHold}
                         aria-label="Diminuer la taille de la ville"
                         disabled={cityIndex <= 0}
                       >

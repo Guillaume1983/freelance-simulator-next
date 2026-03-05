@@ -5,6 +5,7 @@ export type Article = {
   date: string;
   readingTime: string;
   category: string;
+  imageUrl: string;
 };
 
 export const ARTICLES: Article[] = [
@@ -16,6 +17,8 @@ export const ARTICLES: Article[] = [
     date: '2026-02-10',
     readingTime: '6 min',
     category: 'Comparatif statuts',
+    imageUrl:
+      'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800&auto=format&fit=crop&q=80',
   },
   {
     slug: 'optimiser-indemnites-kilometriques',
@@ -25,6 +28,8 @@ export const ARTICLES: Article[] = [
     date: '2026-01-28',
     readingTime: '5 min',
     category: 'Optimisations',
+    imageUrl:
+      'https://images.unsplash.com/photo-1517940310602-135ac0435442?w=800&auto=format&fit=crop&q=80',
   },
   {
     slug: 'se-remunerer-en-sasu-vs-eurl',
@@ -34,6 +39,8 @@ export const ARTICLES: Article[] = [
     date: '2026-01-12',
     readingTime: '7 min',
     category: 'Sociétés',
+    imageUrl:
+      'https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=800&auto=format&fit=crop&q=80',
   },
   {
     slug: 'plan-de-tresorerie-freelance',
@@ -43,6 +50,8 @@ export const ARTICLES: Article[] = [
     date: '2025-12-15',
     readingTime: '8 min',
     category: 'Projection',
+    imageUrl:
+      'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80',
   },
 ];
 

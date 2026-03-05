@@ -368,6 +368,11 @@
     min-height: 320px;
     /* Fond de secours si l'image Unsplash n'est pas encore chargée */
     background-color: #0f172a;
+    /* Toujours pleine largeur écran, même dans un container centré */
+    width: 100vw;
+    margin-left: 50%;
+    margin-right: 50%;
+    transform: translateX(-50%);
   }
   .section-hero-bg {
     position: absolute;
