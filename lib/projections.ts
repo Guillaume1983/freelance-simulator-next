@@ -3,6 +3,7 @@ import {
   SEUIL_TRIMESTRE_RETRAITE,
 } from './constants';
 import { runPipeline, buildContextFromInput } from './financial/pipeline';
+import { RATES_2026 } from './financial/rates';
 
 export type { CitySize };
 
@@ -181,13 +182,15 @@ export function calculateRegimes(
       const salaireNet = getAmt('eurl_is_remuneration');
       const cotisSoc = getAmt('eurl_is_cotis');
       const enveloppeSalaire = salaireNet + cotisSoc;
-      const resteEnSociete = Math.max(0, resultatSociete - enveloppeSalaire - isSociete);
+      // Même formule que eurl-is.ts : baseIS puis trésorerie après IS, pour éviter des 0 dus aux arrondis en mise à jour rapide (ex. clic maintenu sur TJM)
+      const baseIS = Math.max(0, resultatSociete - enveloppeSalaire);
+      const resteEnSociete = baseIS * (1 - RATES_2026.is.taux);
 
       res.resultatSociete = resultatSociete;
       res.isSociete = isSociete;
       res.salaireNet = salaireNet;
       res.dividendesNets = 0;
-      res.cashInCompany = resteEnSociete;
+      res.cashInCompany = Math.round(resteEnSociete);
     } else if (r.id === 'SASU') {
       const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises + ctx.cfe);
       const isSociete = getAmt('sasu_is');
