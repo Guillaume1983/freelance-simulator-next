@@ -538,7 +538,9 @@ export default function ProjectionSection({
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
                   {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage'
                     ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE −50% cotis</span>
-                    : <span className="text-[8px] text-slate-400 font-bold mt-0.5">+CFE</span>
+                    : i > 0
+                      ? <span className="text-[8px] text-slate-400 font-bold mt-0.5">+CFE</span>
+                      : null
                   }
                   <div className="text-3xl font-black mt-2 leading-none tracking-tighter" style={{ color: regimeColor }}>
                     {r ? fmt(r.net / 12) : '—'}

@@ -36,7 +36,7 @@ export default function ChatBot() {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+        <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl md:w-full md:max-w-md">
           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
             <h2 className="font-semibold text-slate-800">Assistant Freelance Simulateur</h2>
             <p className="text-xs text-slate-500">Questions sur les statuts (Micro, EURL, SASU…)</p>
