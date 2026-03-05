@@ -23,7 +23,8 @@ export const RATES_2026 = {
   portage: { cotis: 0.45, acre: 0.5 },
   eurlIs: { cotis: 0.45, acre: 0.5 }, // ACRE : exonération 50 % cotisations an 1
   is: { taux: 0.25 },
-  isSasu: { taux: 0.20 },
+  /** SASU / PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
+  isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
   flatTaxDividendes: 0.30,
   ik: {
     '4': { a: 0.529, b: 0.316, c: 0.370 },

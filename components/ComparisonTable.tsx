@@ -74,7 +74,7 @@ const REGIME_ANALYSIS: Record<string, { forts: string[]; vigilance: string }> = 
       'Dividendes possibles au PFU 30 %',
       'Statut reconnu pour les missions premium',
     ],
-    vigilance: "Bénéfice taxé à l'IS 20 % puis dividendes imposés au PFU 30 % (dont 17,2 % prélèvements sociaux). Pas d'accès à l'ARE en fin d'activité de président.",
+    vigilance: "Bénéfice taxé à l'IS (15 % jusqu'à 42 500 €, 25 % au-delà) puis dividendes au PFU 30 %. Pas d'accès à l'ARE en fin d'activité de président.",
   },
 };
 

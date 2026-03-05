@@ -21,7 +21,10 @@ export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
   const fees = chargeFixes + ctx.cfe;
   const base = ctx.ca - fees;
 
-  const isSociete = base * RATES_2026.isSasu.taux;
+  const { tauxReduit, seuilTauxReduit, tauxNormal } = RATES_2026.isSasu;
+  const partTauxReduit = Math.min(base, seuilTauxReduit);
+  const partTauxNormal = Math.max(0, base - seuilTauxReduit);
+  const isSociete = partTauxReduit * tauxReduit + partTauxNormal * tauxNormal;
   const apresIS = base - isSociete;
 
   // Part du résultat distribuée en dividendes (le reste reste en société)
@@ -53,7 +56,7 @@ export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
       formula: [
         'Base IS = CA − (dépenses pro + IK + loyer + avantages exonérés + CFE)',
         `= ${Math.round(ctx.ca).toLocaleString('fr-FR')} € − ${Math.round(fees).toLocaleString('fr-FR')} € = ${Math.round(base).toLocaleString('fr-FR')} €`,
-        `IS = Base IS × ${(RATES_2026.isSasu.taux * 100).toFixed(0)}%`,
+        `IS PME : 15 % jusqu'à ${(seuilTauxReduit / 1000).toFixed(0)} k€, 25 % au-delà`,
       ].join('\n'),
     },
     {
