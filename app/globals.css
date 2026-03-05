@@ -140,6 +140,11 @@
     transform: translateY(-2px);
   }
 
+  /* Panneaux translucides (ExpandPanels) avec même niveau de flou que les TopCards */
+  .glass-panel {
+    backdrop-filter: blur(12px);
+  }
+
   /* ── Histogrammes (StackedBar) ── */
   .stacked-bar {
     align-items: stretch;

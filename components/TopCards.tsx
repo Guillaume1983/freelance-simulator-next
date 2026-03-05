@@ -7,8 +7,8 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
 
   const totalDepensesMensuelles = Math.round(
     CHARGES_CATALOG.reduce((sum, item) => {
-      if (!sim.state.activeCharges.includes(item.id)) return sum;
-      return sum + (sim.state.chargeAmounts?.[item.id] ?? item.amount);
+      const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
+      return sum + (amount || 0);
     }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
   );
 
@@ -103,7 +103,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <div className="bg-white/10 dark:bg-white/10 text-rose-100 p-1.5 rounded-xl">
                 <Receipt className="w-3.5 h-3.5" />
               </div>
-              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Dépenses<br/>pro</p>
+              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Dépenses professionnelles</p>
             </div>
             <button
               type="button"
@@ -254,7 +254,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <Receipt className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] font-black text-white/80 uppercase tracking-wider">Dépenses pro</p>
+              <p className="text-[10px] font-black text-white/80 uppercase tracking-wider">Dépenses professionnelles</p>
               <p className="font-900 text-white text-lg tracking-tight">{fmt(totalDepensesMensuelles)}</p>
             </div>
           </div>
