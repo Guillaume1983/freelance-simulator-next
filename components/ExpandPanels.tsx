@@ -126,7 +126,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   Dépenses professionnelles
                 </h3>
                 <p className="text-[10px] text-white/70 font-medium mt-1">
-                  Mensuelles · TVA 20% récupérée en société · Matériel amorti 3 ans · Micro : abattement forfaitaire, dépenses non déductibles
+                  TVA 20% récupérée en société · Matériel amorti 3 ans · Micro : abattement forfaitaire, dépenses non déductibles
                 </p>
               </div>
             </div>
@@ -284,7 +284,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/75 uppercase">Distance annuelle (km)</label>
                   <div className="flex items-center gap-1">
-                    <div className="relative flex-1">
+                    <div className="relative">
                       <input
                         type="number"
                         value={kmAnnuel}
@@ -293,7 +293,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                           sim.setters.setKmAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
                         }}
                         onFocus={e => e.target.select()}
-                        className="tjm-days-input w-full p-2.5 text-sm font-800 text-right"
+                        className="tjm-days-input w-24 pr-5 py-1 text-[10px] font-bold text-right"
                         placeholder="0"
                       />
                     </div>
@@ -320,7 +320,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/75 uppercase">Puissance Fiscale</label>
                   <div className="flex items-center gap-1">
-                    <div className="relative flex-1">
+                    <div className="relative">
                       <input
                         type="number"
                         value={cvFiscaux}
@@ -332,10 +332,10 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                           sim.setters.setCvFiscaux(String(next));
                         }}
                         onFocus={e => e.target.select()}
-                        className="tjm-days-input w-full p-2.5 pr-8 text-sm font-800 text-right"
+                        className="tjm-days-input w-16 pr-6 py-1 text-[10px] font-bold text-right"
                         placeholder="4"
                       />
-                      <span className="absolute right-2 top-2 text-[9px] font-black text-white/70">CV</span>
+                      <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">CV</span>
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <button
@@ -371,48 +371,48 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="p-2 bg-white/10 rounded-xl text-blue-200"><Home size={20} /></div>
                 <h3 className="text-sm font-900 uppercase tracking-widest text-white">Location Bureau (Domicile)</h3>
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-white/75 uppercase">Loyer mensuel perçu (TTC)</label>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1">
-                    <div className="relative flex-1">
-                      <input
-                        type="number"
-                        value={loyerPercu}
-                        onChange={e => {
-                          const v = Number(e.target.value);
-                          sim.setters.setLoyerPercu(Number.isNaN(v) ? 0 : Math.max(0, v));
-                        }}
-                        onFocus={e => e.target.select()}
-                        className="tjm-days-input w-full p-2.5 pr-10 text-sm font-800 text-right"
-                        placeholder="0"
-                      />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-white/75 uppercase">Loyer mensuel perçu (TTC)</label>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={loyerPercu}
+                          onChange={e => {
+                            const v = Number(e.target.value);
+                            sim.setters.setLoyerPercu(Number.isNaN(v) ? 0 : Math.max(0, v));
+                          }}
+                          onFocus={e => e.target.select()}
+                          className="tjm-days-input w-24 pr-5 py-1 text-[10px] font-bold text-right"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          type="button"
+                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                          onClick={() => sim.setters.setLoyerPercu(loyerPercu + 1)}
+                          aria-label="Augmenter le loyer perçu"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                          onClick={() => sim.setters.setLoyerPercu(Math.max(0, loyerPercu - 1))}
+                          aria-label="Diminuer le loyer perçu"
+                        >
+                          ▼
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setLoyerPercu(loyerPercu + 1)}
-                        aria-label="Augmenter le loyer perçu"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onClick={() => sim.setters.setLoyerPercu(Math.max(0, loyerPercu - 1))}
-                        aria-label="Diminuer le loyer perçu"
-                      >
-                        ▼
-                      </button>
+                    <div className="flex justify-end">
+                      <span className="text-[9px] font-black text-white/70">EUR / MOIS</span>
                     </div>
                   </div>
-                  <div className="flex justify-end">
-                    <span className="text-[9px] font-black text-white/70">EUR / MOIS</span>
-                  </div>
+                  <p className="text-[10px] text-white/70 italic font-medium">Ce montant sera réinjecté en revenu net sans cotisations sociales.</p>
                 </div>
-                <p className="text-[10px] text-white/70 italic font-medium">Ce montant sera réinjecté en revenu net sans cotisations sociales.</p>
-              </div>
             </div>
 
             <div className="space-y-6">
@@ -423,7 +423,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/75 uppercase">Montant annuel (CE, CSE, etc.)</label>
                 <div className="flex items-center gap-1">
-                  <div className="relative flex-1">
+                  <div className="relative">
                     <input
                       type="number"
                       value={avantagesOptimises}
@@ -432,10 +432,10 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         sim.setters.setAvantagesOptimises(Number.isNaN(v) ? 0 : Math.max(0, v));
                       }}
                       onFocus={e => e.target.select()}
-                      className="tjm-days-input w-full p-2.5 pr-10 text-sm font-800 text-right"
+                      className="tjm-days-input w-24 pr-8 py-1 text-[10px] font-bold text-right"
                       placeholder="1500"
                     />
-                    <span className="absolute right-3 top-2 text-[9px] font-black text-white/70">€/an</span>
+                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <button
@@ -525,7 +525,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-white/75 uppercase">Salaire annuel net du conjoint</label>
                 <div className="flex items-center gap-1">
-                  <div className="relative flex-1">
+                  <div className="relative">
                     <input
                       type="number"
                       value={spouseIncome}
@@ -534,11 +534,11 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                         sim.setters.setSpouseIncome(Number.isNaN(v) ? 0 : Math.max(0, v));
                       }}
                       onFocus={e => e.target.select()}
-                      className="tjm-days-input w-full p-2.5 pr-10 text-sm font-800 text-right"
+                      className="tjm-days-input w-28 pr-8 py-1 text-[10px] font-bold text-right"
                       placeholder="0"
                       disabled={sim.state.nbAdultes < 2}
                     />
-                    <span className="absolute right-3 top-2 text-[9px] font-black text-white/70">€/an</span>
+                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <button

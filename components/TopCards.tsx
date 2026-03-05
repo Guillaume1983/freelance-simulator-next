@@ -1,9 +1,10 @@
 'use client';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
 import { CHARGES_CATALOG } from '@/lib/constants';
+import { getIK } from '@/lib/financial/rates';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
-  const fmt = (v: number) => Math.round(v).toLocaleString() + " €";
+  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
 
   const totalDepensesMensuelles = Math.round(
     CHARGES_CATALOG.reduce((sum, item) => {
@@ -12,11 +13,23 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
     }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
   );
 
+  const vehiculeActive = sim.state.sectionsActive?.vehicule ?? true;
+  const loyerActive    = sim.state.sectionsActive?.loyer ?? true;
+
+  const kmAnnuel       = sim.state.kmAnnuel ?? 0;
+  const cvFiscaux      = sim.state.cvFiscaux ?? '6';
+  const loyerPercu     = sim.state.loyerPercu ?? 0;
+  const avantagesOptAn = sim.state.avantagesOptimises ?? 1500;
+
+  const indemnitesAnn  = vehiculeActive ? getIK(kmAnnuel, cvFiscaux) : 0;
+  const loyerAnn       = loyerActive ? loyerPercu * 12 : 0;
+  const totalOptMens   = (indemnitesAnn + loyerAnn + avantagesOptAn) / 12;
+
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-6 mb-4 mt-8">
 
-      {/* Grille 2×2 mobile */}
-      <div className="md:hidden grid grid-cols-2 gap-3">
+      {/* Grille 2×2 mobile (élargie en 1 colonne) */}
+      <div className="md:hidden grid grid-cols-1 gap-3">
 
         {/* Production */}
         <div className="card-pro px-3 py-2 border-l-4 border-l-indigo-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
@@ -137,7 +150,9 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'opti' ? 'rotate-180' : ''}`} />
             </button>
           </div>
-          <p className="font-900 text-white text-[13px] tracking-tight uppercase">IK & Loyer</p>
+          <p className="font-900 text-white text-[13px] tracking-tight">
+            {fmt(totalOptMens)}
+          </p>
         </div>
 
         {/* Situation Fiscale */}
@@ -276,7 +291,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             </div>
             <div>
               <p className="text-[10px] font-black text-white/80 uppercase tracking-wider">Optimisations</p>
-              <p className="font-900 text-white text-lg tracking-tight uppercase">IK & Loyer</p>
+              <p className="font-900 text-white text-lg tracking-tight">{fmt(totalOptMens)}</p>
             </div>
           </div>
           <button
