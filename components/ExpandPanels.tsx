@@ -52,15 +52,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         className="w-full flex items-center justify-between rounded-2xl px-3 py-2 text-left bg-white/10 dark:bg-slate-900/60 border border-white/15 text-white"
       >
         <div className="flex items-center gap-2">
-          <div
-            className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-              isAmber
-                ? 'border-amber-300/80 text-amber-300'
-                : 'border-emerald-300/80 text-emerald-300'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-          </div>
+          <CheckCircle2 className={`w-4 h-4 ${isAmber ? 'text-amber-300' : 'text-emerald-300'}`} />
           <div className="flex flex-col">
             <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">{item.name}</span>
             <span className="text-[9px] text-white/65">{safeAmount.toLocaleString()} €/mois</span>
@@ -292,9 +284,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="space-y-2">
                   <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full border border-emerald-300/80 flex items-center justify-center text-emerald-300">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                       <div className="flex flex-col">
                         <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Distance annuelle</span>
                         <span className="text-[9px] text-white/65">km / an</span>
@@ -338,9 +328,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="space-y-2">
                   <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full border border-emerald-300/80 flex items-center justify-center text-emerald-300">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      </div>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                       <div className="flex flex-col">
                         <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Puissance fiscale</span>
                         <span className="text-[9px] text-white/65">barème IK</span>
