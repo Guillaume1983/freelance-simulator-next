@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { useSimulation } from '@/hooks/useSimulation';
+import { ARTICLES } from '@/lib/articles';
 import Header from '@/components/Header';
 import TopCards from '@/components/TopCards';
 import ExpandPanels from '@/components/ExpandPanels';
@@ -104,6 +105,58 @@ export default function Home() {
             setActiveRegime={setProjectionRegime}
           />
         </div>
+
+        {/* ── Articles & ressources ── */}
+        <section className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 pb-10 md:pb-14">
+          <div className="card-pro bg-white/90 dark:bg-slate-950/90 border border-slate-200/70 dark:border-slate-800/80 px-4 md:px-6 py-5 md:py-6">
+            <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-3 md:gap-4 mb-4">
+              <div>
+                <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Articles & ressources
+                </p>
+                <h2 className="mt-1 text-lg md:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50">
+                  Aller plus loin sur le choix de statut
+                </h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+              {ARTICLES.slice(0, 3).map((article) => (
+                <article
+                  key={article.slug}
+                  className="group rounded-2xl border border-slate-200/70 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 px-4 py-3 flex flex-col justify-between hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+                      <span>{article.category}</span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        {new Date(article.date).toLocaleDateString('fr-FR', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}{' '}
+                        · {article.readingTime}
+                      </span>
+                    </div>
+                    <h3 className="text-[13px] md:text-sm font-900 tracking-tight text-slate-900 dark:text-slate-50">
+                      {article.title}
+                    </h3>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                      {article.excerpt}
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <a
+                      href="/articles"
+                      className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 dark:hover:text-indigo-200"
+                    >
+                      Lire les articles
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <Footer />
       </main>

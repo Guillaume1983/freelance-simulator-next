@@ -372,11 +372,8 @@
   .section-hero-bg {
     position: absolute;
     inset: 0;
-    /* Hauteur fixe de l'image pour éviter tout recentrage
-       quand la section grandit : le haut de l'image reste
-       toujours collé en haut, on découvre simplement plus
-       de contenu vers le bas. */
-    background-size: auto 520px;
+    /* Toujours couvrir toute la largeur de l’écran, en gardant le haut de l’image calé en haut. */
+    background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
     transform: scale(1.04);

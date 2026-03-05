@@ -184,12 +184,14 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
 
         {/* Optimisations */}
         <div className="card-pro px-2.5 py-2 pb-4 border-l-4 border-l-emerald-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5 relative">
-          <div className="flex items-center gap-2">
-            <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2">
+              <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">
+                Optimisations
+              </p>
             </div>
-            <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Optimi-<br/>sations</p>
-          </div>
           <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(totalOptMens)}
           </p>
