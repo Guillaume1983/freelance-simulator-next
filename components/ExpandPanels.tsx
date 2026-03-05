@@ -97,9 +97,13 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               value={safeAmount}
               onChange={e => {
                 const v = Number(e.target.value);
-                sim.setters.setChargeAmounts({
-                  ...sim.state.chargeAmounts,
-                  [item.id]: Number.isNaN(v) ? 0 : Math.max(0, v),
+                const normalized = Number.isNaN(v) ? 0 : Math.max(0, v);
+                sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
+                  const base = prev || {};
+                  return {
+                    ...base,
+                    [item.id]: normalized,
+                  };
                 });
               }}
               onFocus={e => e.target.select()}
@@ -112,26 +116,34 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               type="button"
               className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
               onMouseDown={() =>
-                startHold(() => {
-                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
-                  const next = (typeof current === 'number' && !Number.isNaN(current) ? current : 0) + 1;
-                  sim.setters.setChargeAmounts({
-                    ...sim.state.chargeAmounts,
-                    [item.id]: next,
-                  });
-                })
+                startHold(() =>
+                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
+                    const base = prev || {};
+                    const current = base[item.id] ?? item.amount ?? 0;
+                    const safeCurrent =
+                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                    return {
+                      ...base,
+                      [item.id]: safeCurrent + 1,
+                    };
+                  }),
+                )
               }
               onMouseUp={stopHold}
               onMouseLeave={stopHold}
               onTouchStart={() =>
-                startHold(() => {
-                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
-                  const next = (typeof current === 'number' && !Number.isNaN(current) ? current : 0) + 1;
-                  sim.setters.setChargeAmounts({
-                    ...sim.state.chargeAmounts,
-                    [item.id]: next,
-                  });
-                })
+                startHold(() =>
+                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
+                    const base = prev || {};
+                    const current = base[item.id] ?? item.amount ?? 0;
+                    const safeCurrent =
+                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                    return {
+                      ...base,
+                      [item.id]: safeCurrent + 1,
+                    };
+                  }),
+                )
               }
               onTouchEnd={stopHold}
               onTouchCancel={stopHold}
@@ -143,28 +155,34 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               type="button"
               className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
               onMouseDown={() =>
-                startHold(() => {
-                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
-                  const base = typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                  const next = Math.max(0, base - 1);
-                  sim.setters.setChargeAmounts({
-                    ...sim.state.chargeAmounts,
-                    [item.id]: next,
-                  });
-                })
+                startHold(() =>
+                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
+                    const base = prev || {};
+                    const current = base[item.id] ?? item.amount ?? 0;
+                    const safeCurrent =
+                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                    return {
+                      ...base,
+                      [item.id]: Math.max(0, safeCurrent - 1),
+                    };
+                  }),
+                )
               }
               onMouseUp={stopHold}
               onMouseLeave={stopHold}
               onTouchStart={() =>
-                startHold(() => {
-                  const current = sim.state.chargeAmounts?.[item.id] ?? item.amount ?? 0;
-                  const base = typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                  const next = Math.max(0, base - 1);
-                  sim.setters.setChargeAmounts({
-                    ...sim.state.chargeAmounts,
-                    [item.id]: next,
-                  });
-                })
+                startHold(() =>
+                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
+                    const base = prev || {};
+                    const current = base[item.id] ?? item.amount ?? 0;
+                    const safeCurrent =
+                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
+                    return {
+                      ...base,
+                      [item.id]: Math.max(0, safeCurrent - 1),
+                    };
+                  }),
+                )
               }
               onTouchEnd={stopHold}
               onTouchCancel={stopHold}
@@ -183,7 +201,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
 
       {/* PANNEAU CATALOGUE DES CHARGES */}
       {activePanel === 'charges' && (
-        <div className="card-pro mt-2 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-white/15 px-4 md:px-6 py-4 md:py-5">
+        <div className="card-pro mt-2 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-rose-300/60 dark:border-rose-500/70 px-4 md:px-6 py-4 md:py-5">
 
           {/* En-tête */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-0 mb-5">

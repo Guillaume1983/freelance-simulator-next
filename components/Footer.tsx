@@ -31,6 +31,7 @@ export default function Footer() {
             <Link href="/" className="footer-link">Simulateur</Link>
             <Link href="/connexion" className="footer-link">Se connecter</Link>
             <Link href="/inscription" className="footer-link">Créer un compte</Link>
+            <Link href="/articles" className="footer-link">Articles</Link>
             <Link href="/#about-us" className="footer-link">À propos de nous</Link>
             <Link href="/contact" className="footer-link">Contact</Link>
           </div>
