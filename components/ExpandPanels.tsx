@@ -1,7 +1,7 @@
 'use client';
 import { useRef } from 'react';
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt } from 'lucide-react';
+import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt, User } from 'lucide-react';
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
@@ -773,223 +773,221 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {/* PANNEAU SITUATION FISCALE */}
       {activePanel === 'fiscal' && (
         <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-amber-300/70 dark:border-amber-500/70 px-4 md:px-6 py-5 md:py-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
 
             {/* Situation familiale */}
             <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-xl text-amber-200"><Users size={20} /></div>
-                <h3 className="text-sm font-900 uppercase tracking-widest text-white">Situation fiscale</h3>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/10 rounded-xl text-amber-200">
+                    <Users size={20} />
+                  </div>
+                  <h3 className="text-sm font-900 uppercase tracking-widest text-white">
+                    Situation familiale
+                  </h3>
+                </div>
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/20 border border-amber-300/70 text-[9px] font-black uppercase tracking-[0.16em] text-amber-100">
+                  {sim.state.taxParts} parts
+                </span>
               </div>
 
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-white/75 uppercase">Situation</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {([1, 2] as const).map(n => (
-                      <button
-                        key={n}
-                        onClick={() => sim.setters.setNbAdultes(n)}
-                        className={`py-2 rounded-xl text-[10px] font-black uppercase transition-colors ${
-                          sim.state.nbAdultes === n
-                            ? 'bg-amber-500 text-white'
-                            : 'bg-white/10 text-white/70'
-                        }`}
-                      >
-                        {n === 1 ? 'Célibataire' : 'Couple'}
-                      </button>
-                    ))}
+              <div className="space-y-4">
+                {/* Célibataire / Couple + enfants sur une seule ligne */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/5 p-1 border border-white/15">
+                    <button
+                      type="button"
+                      onClick={() => sim.setters.setNbAdultes(1)}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                        sim.state.nbAdultes === 1
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-transparent text-white/70'
+                      }`}
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>Célibataire</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sim.setters.setNbAdultes(2)}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                        sim.state.nbAdultes === 2
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-transparent text-white/70'
+                      }`}
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>Couple</span>
+                    </button>
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-white/75 uppercase">Enfants à charge</label>
                   <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-black uppercase text-white/75">
+                      Enfants
+                    </span>
                     <button
+                      type="button"
                       onClick={() => sim.setters.setNbEnfants(Math.max(0, sim.state.nbEnfants - 1))}
-                      className="w-8 h-8 rounded-lg bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors"
-                    >−</button>
-                    <span className="flex-1 text-center font-900 text-lg text-white">{sim.state.nbEnfants}</span>
+                      className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
+                    >
+                      −
+                    </button>
                     <button
+                      type="button"
                       onClick={() => sim.setters.setNbEnfants(Math.min(6, sim.state.nbEnfants + 1))}
-                      className="w-8 h-8 rounded-lg bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors"
-                    >+</button>
+                      className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
+                    >
+                      +
+                    </button>
+                    <span className="min-w-[1.5rem] text-right font-900 text-lg text-white">
+                      {sim.state.nbEnfants}
+                    </span>
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-amber-500/15 px-3 py-2 border border-amber-300/60">
-                  <p className="text-[9px] font-black text-amber-200 uppercase">Parts fiscales calculées</p>
-                  <p className="text-xl font-900 text-amber-100">{sim.state.taxParts} parts</p>
+                {/* Revenus conjoint (regroupé avec situation familiale) */}
+                <div className="space-y-2">
+                  <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">
+                          Salaire annuel net du conjoint
+                        </span>
+                        <span className="text-[9px] text-white/65">
+                          {spouseIncome.toLocaleString()} €/an
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={spouseIncome}
+                          onChange={e => {
+                            const v = Number(e.target.value);
+                            sim.setters.setSpouseIncome(Number.isNaN(v) ? 0 : Math.max(0, v));
+                          }}
+                          onFocus={e => e.target.select()}
+                          className="tjm-days-input w-28 pr-8 py-1 text-[10px] font-bold text-right"
+                          placeholder="0"
+                          disabled={sim.state.nbAdultes < 2}
+                        />
+                        <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">
+                          €/an
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          type="button"
+                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                          onMouseDown={() =>
+                            sim.state.nbAdultes >= 2 &&
+                            startHold(() =>
+                              sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
+                            )
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            sim.state.nbAdultes >= 2 &&
+                            startHold(() =>
+                              sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
+                            )
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
+                          aria-label="Augmenter le salaire du conjoint"
+                          disabled={sim.state.nbAdultes < 2}
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                          onMouseDown={() =>
+                            sim.state.nbAdultes >= 2 &&
+                            startHold(() =>
+                              sim.setters.setSpouseIncome((prev: number) =>
+                                Math.max(0, (prev || 0) - 1),
+                              ),
+                            )
+                          }
+                          onMouseUp={stopHold}
+                          onMouseLeave={stopHold}
+                          onTouchStart={() =>
+                            sim.state.nbAdultes >= 2 &&
+                            startHold(() =>
+                              sim.setters.setSpouseIncome((prev: number) =>
+                                Math.max(0, (prev || 0) - 1),
+                              ),
+                            )
+                          }
+                          onTouchEnd={stopHold}
+                          onTouchCancel={stopHold}
+                          aria-label="Diminuer le salaire du conjoint"
+                          disabled={sim.state.nbAdultes < 2}
+                        >
+                          ▼
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {sim.state.nbAdultes < 2 && (
+                    <p className="text-[9px] text-white/70 italic">
+                      Activez le mode "Couple" pour saisir les revenus du conjoint.
+                    </p>
+                  )}
+                  <p className="text-[9px] text-white/70 italic">
+                    Impacte le calcul de l&apos;IR via la déclaration commune.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Revenus conjoint */}
+            {/* CFE */}
             <div className="space-y-5">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-xl text-indigo-200"><Zap size={20} /></div>
-                <h3 className="text-sm font-900 uppercase tracking-widest text-white">Revenus conjoint</h3>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-white/75 uppercase">Salaire annuel net du conjoint</label>
-                <div className="flex items-center gap-1">
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={spouseIncome}
-                      onChange={e => {
-                        const v = Number(e.target.value);
-                        sim.setters.setSpouseIncome(Number.isNaN(v) ? 0 : Math.max(0, v));
-                      }}
-                      onFocus={e => e.target.select()}
-                      className="tjm-days-input w-28 pr-8 py-1 text-[10px] font-bold text-right"
-                      placeholder="0"
-                      disabled={sim.state.nbAdultes < 2}
-                    />
-                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                      onMouseDown={() =>
-                        sim.state.nbAdultes >= 2 &&
-                        startHold(() =>
-                          sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
-                        )
-                      }
-                      onMouseUp={stopHold}
-                      onMouseLeave={stopHold}
-                      onTouchStart={() =>
-                        sim.state.nbAdultes >= 2 &&
-                        startHold(() =>
-                          sim.setters.setSpouseIncome((prev: number) => (prev || 0) + 1),
-                        )
-                      }
-                      onTouchEnd={stopHold}
-                      onTouchCancel={stopHold}
-                      aria-label="Augmenter le salaire du conjoint"
-                      disabled={sim.state.nbAdultes < 2}
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                      onMouseDown={() =>
-                        sim.state.nbAdultes >= 2 &&
-                        startHold(() =>
-                          sim.setters.setSpouseIncome((prev: number) =>
-                            Math.max(0, (prev || 0) - 1),
-                          ),
-                        )
-                      }
-                      onMouseUp={stopHold}
-                      onMouseLeave={stopHold}
-                      onTouchStart={() =>
-                        sim.state.nbAdultes >= 2 &&
-                        startHold(() =>
-                          sim.setters.setSpouseIncome((prev: number) =>
-                            Math.max(0, (prev || 0) - 1),
-                          ),
-                        )
-                      }
-                      onTouchEnd={stopHold}
-                      onTouchCancel={stopHold}
-                      aria-label="Diminuer le salaire du conjoint"
-                      disabled={sim.state.nbAdultes < 2}
-                    >
-                      ▼
-                    </button>
-                  </div>
+                <div className="p-2 bg-white/10 rounded-xl text-rose-200">
+                  <Building2 size={20} />
                 </div>
-                {sim.state.nbAdultes < 2 && (
-                  <p className="text-[9px] text-white/70 italic">Activez le mode "Couple" pour saisir les revenus du conjoint.</p>
-                )}
-                <p className="text-[9px] text-white/70 italic">Impacte le calcul de l&apos;IR via la déclaration commune.</p>
+                <h3 className="text-sm font-900 uppercase tracking-widest text-white">CFE</h3>
               </div>
-            </div>
-
-            {/* CFE & ACRE */}
-            <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/10 rounded-xl text-rose-200"><Building2 size={20} /></div>
-                <h3 className="text-sm font-900 uppercase tracking-widest text-white">CFE & ACRE</h3>
-              </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-white/75 uppercase">Taille de votre ville</label>
-                  <div className="flex items-center gap-1">
-                    <div className="relative flex-1">
-                      <input
-                        type="text"
-                        readOnly
-                        value={cityLabel}
-                        className="tjm-days-input w-full p-2.5 text-[11px] font-800"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        onMouseDown={() =>
-                          startHold(() => {
-                            const nextIndex = Math.min(CITY_ORDER.length - 1, cityIndex + 1);
-                            if (nextIndex !== cityIndex) {
-                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                            }
-                          })
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() => {
-                            const nextIndex = Math.min(CITY_ORDER.length - 1, cityIndex + 1);
-                            if (nextIndex !== cityIndex) {
-                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                            }
-                          })
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Augmenter la taille de la ville"
-                        disabled={cityIndex >= CITY_ORDER.length - 1}
+                  <label className="text-[10px] font-black text-white/75 uppercase">
+                    Taille de votre ville (CFE)
+                  </label>
+                  <select
+                    value={currentCity}
+                    onChange={e => sim.setters.setCitySize(e.target.value)}
+                    className="w-full p-2.5 text-[11px] font-800 rounded-xl border border-white/30 bg-white/10 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/70 focus:border-indigo-300/80"
+                  >
+                    {CITY_ORDER.map(key => (
+                      <option
+                        key={key}
+                        value={key}
+                        className="bg-white text-slate-900"
                       >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                        onMouseDown={() =>
-                          startHold(() => {
-                            const nextIndex = Math.max(0, cityIndex - 1);
-                            if (nextIndex !== cityIndex) {
-                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                            }
-                          })
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() => {
-                            const nextIndex = Math.max(0, cityIndex - 1);
-                            if (nextIndex !== cityIndex) {
-                              sim.setters.setCitySize(CITY_ORDER[nextIndex]);
-                            }
-                          })
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Diminuer la taille de la ville"
-                        disabled={cityIndex <= 0}
-                      >
-                        ▼
-                      </button>
-                    </div>
-                  </div>
+                        {CITY_LABEL[key]}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[9px] text-white/70 italic">
+                    CFE = 0 € la 1ère année (exonération création). S&apos;applique à partir de l&apos;an 2 sur la projection.
+                  </p>
                 </div>
-                <p className="text-[9px] text-white/70 italic">CFE = 0 € la 1ère année (exonération création). S&apos;applique à partir de l&apos;an 2 sur la projection.</p>
+              </div>
+            </div>
 
+            {/* ACRE */}
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/10 rounded-xl text-emerald-200">
+                  <Zap size={18} />
+                </div>
+                <h3 className="text-sm font-900 uppercase tracking-widest text-white">ACRE</h3>
+              </div>
+              <div className="space-y-2">
                 <div
                   onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
                   className={`flex items-center justify-between rounded-xl px-3 py-2.5 border cursor-pointer transition-colors ${
@@ -999,11 +997,23 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   }`}
                 >
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-wide text-white/80">ACRE activé</p>
-                    <p className="text-[9px] text-white/70">Cotisations sociales allégées la 1ʳᵉ année (≈ −50 % hors CSG/CRDS)</p>
+                    <p className="text-[10px] font-black uppercase tracking-wide text-white/80">
+                      ACRE activé
+                    </p>
+                    <p className="text-[9px] text-white/70">
+                      Cotisations sociales allégées la 1ʳᵉ année (≈ −50 % hors CSG/CRDS)
+                    </p>
                   </div>
-                  <div className={`w-9 h-5 rounded-full transition-colors flex items-center ${sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${sim.state.acreEnabled ? 'translate-x-4' : ''}`} />
+                  <div
+                    className={`w-9 h-5 rounded-full transition-colors flex items-center ${
+                      sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${
+                        sim.state.acreEnabled ? 'translate-x-4' : ''
+                      }`}
+                    />
                   </div>
                 </div>
               </div>
