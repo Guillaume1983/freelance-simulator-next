@@ -203,6 +203,122 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   return (
     <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
 
+      {/* PANNEAU ACTIVITÉ (TJM + Jours, utilisé sur mobile) */}
+      {activePanel === 'activite' && (
+        <div className="card-pro mt-2 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-indigo-300/60 dark:border-indigo-500/70 px-4 md:px-6 py-4 md:py-5">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-white/10 rounded-xl text-indigo-200">
+                <Zap size={18} />
+              </div>
+              <div>
+                <h3 className="text-xs md:text-sm font-900 uppercase tracking-[0.18em] text-white/85">Activité</h3>
+                <p className="text-[10px] text-white/70 font-medium mt-1">TJM × jours travaillés = chiffre d'affaires annuel</p>
+              </div>
+            </div>
+            <p className="text-lg font-900 text-white">{Math.round((sim.state.tjm || 0) * (sim.state.days || 0)).toLocaleString()} €</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">TJM</span>
+                  <span className="text-[9px] text-white/65">€ / jour</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={sim.state.tjm ?? ''}
+                    onChange={e => {
+                      const v = Number(e.target.value);
+                      sim.setters.setTjm(Number.isNaN(v) ? 0 : Math.max(0, v));
+                    }}
+                    onFocus={e => e.target.select()}
+                    className="tjm-days-input w-20 pr-5 py-1 text-[10px] font-bold text-right"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                    onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
+                    aria-label="Augmenter le TJM"
+                  >▲</button>
+                  <button
+                    type="button"
+                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                    onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
+                    aria-label="Diminuer le TJM"
+                  >▼</button>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Jours</span>
+                  <span className="text-[9px] text-white/65">travail / an</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={sim.state.days ?? ''}
+                    onChange={e => {
+                      const v = Number(e.target.value);
+                      sim.setters.setDays(Number.isNaN(v) ? 0 : Math.max(0, v));
+                    }}
+                    onFocus={e => e.target.select()}
+                    className="tjm-days-input w-20 pr-5 py-1 text-[10px] font-bold text-right"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                    onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
+                    aria-label="Augmenter les jours"
+                  >▲</button>
+                  <button
+                    type="button"
+                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                    onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                    onMouseUp={stopHold}
+                    onMouseLeave={stopHold}
+                    onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
+                    onTouchEnd={stopHold}
+                    onTouchCancel={stopHold}
+                    aria-label="Diminuer les jours"
+                  >▼</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PANNEAU CATALOGUE DES CHARGES */}
       {activePanel === 'charges' && (
         <div className="card-pro mt-2 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-rose-300/60 dark:border-rose-500/70 px-4 md:px-6 py-4 md:py-5">
@@ -474,13 +590,13 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <span className="text-[10px] font-bold text-white/90">Véhicule électrique</span>
                 <span className="text-[9px] text-white/60">(+20 % barème URSSAF)</span>
               </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Distance annuelle</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 min-w-0">
+                  <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-300" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85 truncate">Distance annuelle</span>
                         <span className="text-[9px] text-white/65">km / an</span>
                       </div>
                     </div>
@@ -550,12 +666,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   </div>
                 </div>
                 {typeVehicule !== 'cyclo50' && (
-                <div className="space-y-2">
-                  <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">
+                <div className="space-y-2 min-w-0">
+                  <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-300" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85 truncate">
                           {typeVehicule === 'voiture' ? 'Puissance fiscale' : 'Bande moto'}
                         </span>
                         <span className="text-[9px] text-white/65">barème IK</span>
@@ -856,53 +972,55 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               </div>
 
               <div className="space-y-4">
-                {/* Célibataire / Couple + enfants sur une seule ligne */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/5 p-1 border border-white/15">
+                {/* Célibataire / Couple + enfants : pleine largeur sur mobile, une ligne sur desktop */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex w-full sm:w-fit justify-center sm:justify-start">
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-white/5 p-1 border border-white/15">
                     <button
                       type="button"
                       onClick={() => sim.setters.setNbAdultes(1)}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors shrink-0 ${
                         sim.state.nbAdultes === 1
                           ? 'bg-amber-500 text-white'
                           : 'bg-transparent text-white/70'
                       }`}
                     >
-                      <User className="w-3.5 h-3.5" />
+                      <User className="w-3.5 h-3.5 shrink-0" />
                       <span>Célibataire</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => sim.setters.setNbAdultes(2)}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors ${
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.14em] transition-colors shrink-0 ${
                         sim.state.nbAdultes === 2
                           ? 'bg-amber-500 text-white'
                           : 'bg-transparent text-white/70'
                       }`}
                     >
-                      <Users className="w-4 h-4" />
+                      <Users className="w-4 h-4 shrink-0" />
                       <span>Couple</span>
                     </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black uppercase text-white/75">
+                  </div>
+                  <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end gap-2">
+                    <span className="text-[9px] font-black uppercase text-white/75 shrink-0">
                       Enfants
                     </span>
                     <button
                       type="button"
                       onClick={() => sim.setters.setNbEnfants(Math.max(0, sim.state.nbEnfants - 1))}
-                      className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
+                      className="w-7 h-7 shrink-0 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
                     >
                       −
                     </button>
                     <button
                       type="button"
                       onClick={() => sim.setters.setNbEnfants(Math.min(6, sim.state.nbEnfants + 1))}
-                      className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
+                      className="w-7 h-7 shrink-0 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 hover:text-white transition-colors flex items-center justify-center"
                     >
                       +
                     </button>
-                    <span className="min-w-[1.5rem] text-right font-900 text-lg text-white">
+                    <span className="min-w-6 text-right font-900 text-lg text-white tabular-nums">
                       {sim.state.nbEnfants}
                     </span>
                   </div>

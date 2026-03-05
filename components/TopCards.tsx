@@ -65,8 +65,8 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
       {/* Grille mobile 2×2 (cartes légèrement réduites) */}
       <div className="md:hidden grid grid-cols-2 gap-2.5">
 
-        {/* Production */}
-        <div className="card-pro px-2.5 py-2 border-l-4 border-l-indigo-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
+        {/* Activité (mobile : résumé + panneau dépliable) */}
+        <div className="card-pro px-2.5 py-2 pb-4 border-l-4 border-l-indigo-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5 relative">
           <div className="flex items-center gap-2">
             <div className="bg-white/10 dark:bg-white/10 text-indigo-100 p-1.5 rounded-xl">
               <Zap className="w-3.5 h-3.5" />
@@ -76,91 +76,14 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(sim.state.tjm * sim.state.days)}
           </p>
-          <div className="flex gap-1.5">
-            {/* TJM mobile */}
-            <div className="flex flex-1 items-center gap-1">
-              <div className="relative flex-1">
-                <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/70">TJM</span>
-                <input
-                  type="number"
-                  value={sim.state.tjm}
-                  onChange={(e) => sim.setters.setTjm(Number(e.target.value) || 0)}
-                  onFocus={(e) => e.target.select()}
-                  className="tjm-days-input w-full text-left! pl-1.5 text-xs font-bold h-6"
-                />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
-                  onMouseUp={stopHold}
-                  onMouseLeave={stopHold}
-                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => (prev || 0) + 1))}
-                  onTouchEnd={stopHold}
-                  onTouchCancel={stopHold}
-                  aria-label="Augmenter le TJM"
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onMouseDown={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
-                  onMouseUp={stopHold}
-                  onMouseLeave={stopHold}
-                  onTouchStart={() => startHold(() => sim.setters.setTjm((prev: number) => Math.max(0, (prev || 0) - 1)))}
-                  onTouchEnd={stopHold}
-                  onTouchCancel={stopHold}
-                  aria-label="Diminuer le TJM"
-                >
-                  ▼
-                </button>
-              </div>
-            </div>
-
-            {/* Jours mobile */}
-            <div className="flex w-16 items-center gap-1">
-              <div className="relative flex-1">
-                <span className="absolute right-1 top-0.5 text-[7px] font-bold text-white/70">J</span>
-                <input
-                  type="number"
-                  value={sim.state.days}
-                  onChange={(e) => sim.setters.setDays(Number(e.target.value) || 0)}
-                  onFocus={(e) => e.target.select()}
-                  className="tjm-days-input w-full text-left! pl-1.5 text-xs font-bold h-6"
-                />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
-                  onMouseUp={stopHold}
-                  onMouseLeave={stopHold}
-                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => (prev || 0) + 1))}
-                  onTouchEnd={stopHold}
-                  onTouchCancel={stopHold}
-                  aria-label="Augmenter les jours"
-                >
-                  ▲
-                </button>
-                <button
-                  type="button"
-                  className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                  onMouseDown={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
-                  onMouseUp={stopHold}
-                  onMouseLeave={stopHold}
-                  onTouchStart={() => startHold(() => sim.setters.setDays((prev: number) => Math.max(0, (prev || 0) - 1)))}
-                  onTouchEnd={stopHold}
-                  onTouchCancel={stopHold}
-                  aria-label="Diminuer les jours"
-                >
-                  ▼
-                </button>
-              </div>
-            </div>
-          </div>
+          <button
+            type="button"
+            className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25 absolute right-1.5 bottom-1.5"
+            onClick={() => togglePanel('activite')}
+            aria-label="Ouvrir TJM et jours travaillés"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'activite' ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
         {/* Charges */}
