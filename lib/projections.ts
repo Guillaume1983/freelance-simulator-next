@@ -120,7 +120,7 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
     typeActiviteMicro: params.typeActiviteMicro ?? 'BNC',
     prelevementLiberatoire: params.prelevementLiberatoire ?? false,
     remunerationDirigeantMensuelle: params.remunerationDirigeantMensuelle ?? 1,
-    repartitionRemuneration: params.repartitionRemuneration ?? 70,
+    repartitionRemuneration: params.repartitionRemuneration ?? 100,
   };
 }
 

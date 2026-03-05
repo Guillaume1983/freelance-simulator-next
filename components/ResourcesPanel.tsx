@@ -23,7 +23,7 @@ export default function ResourcesPanel() {
 
       {open && (
         <aside className="fixed left-0 top-[80px] h-[calc(100vh-96px)] w-[360px] z-[120] px-3">
-          <div className="panel-projection-bg card-pro h-full border border-white/15 flex flex-col overflow-hidden shadow-xl">
+          <div className="panel-projection-bg h-full rounded-2xl border border-white/20 flex flex-col overflow-hidden shadow-2xl">
             <div className="relative z-10 px-4 py-3 border-b border-white/15 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200/90">
@@ -43,19 +43,19 @@ export default function ResourcesPanel() {
               </button>
             </div>
 
-            <div className="relative z-10 flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            <div className="relative z-10 flex-1 overflow-y-auto px-4 py-3 space-y-4 text-indigo-100">
               {/* Articles */}
               <section>
-                <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-indigo-200/90 mb-2">
+                <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-indigo-200 mb-2">
                   Derniers articles
                 </h3>
                 <div className="space-y-2.5">
                   {ARTICLES.slice(0, 4).map((article) => (
                     <article
                       key={article.slug}
-                      className="rounded-xl border border-white/15 bg-white/10 backdrop-blur-sm px-2.5 py-2 flex gap-2.5 items-start hover:bg-white/15 transition-colors"
+                      className="rounded-xl border border-slate-200/80 bg-white px-2.5 py-2 flex gap-2.5 items-start hover:bg-slate-50 transition-colors text-slate-800 shadow-sm"
                     >
-                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-white/20 bg-white/5">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-slate-200/70 bg-slate-100">
                         <img
                           src={article.imageUrl}
                           alt={article.title}
@@ -63,17 +63,17 @@ export default function ResourcesPanel() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-indigo-200/80 mb-0.5">
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-indigo-600 mb-0.5">
                           {article.category}
                         </p>
-                        <h4 className="text-[11px] font-900 text-white leading-snug line-clamp-2">
+                        <h4 className="text-[11px] font-900 text-slate-900 leading-snug line-clamp-2">
                           {article.title}
                         </h4>
-                        <p className="mt-0.5 text-[10px] text-white/80 leading-snug line-clamp-2">
+                        <p className="mt-0.5 text-[10px] text-slate-600 leading-snug line-clamp-2">
                           {article.excerpt}
                         </p>
                         <p
-                          className="mt-0.5 text-[9px] text-white/60"
+                          className="mt-0.5 text-[9px] text-slate-500"
                           suppressHydrationWarning
                         >
                           {new Date(article.date).toLocaleDateString('fr-FR', {

@@ -338,16 +338,16 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 items-end">
-              <div className="text-right">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-center md:items-end md:justify-end">
+              <div className="flex flex-col items-center md:items-end text-center md:text-right">
                 <span className="text-[9px] font-black text-amber-300 uppercase italic">Portage</span>
-                <p className="text-lg font-900 text-amber-200 leading-none">
+                <p className="text-lg font-900 text-amber-200 leading-none mt-0.5">
                   {Math.round(totalPortageMensuel)} €<span className="text-[9px] font-normal text-white/60 ml-0.5">/mois</span>
                 </p>
               </div>
-              <div className="text-right">
+              <div className="flex flex-col items-center md:items-end text-center md:text-right">
                 <span className="text-[9px] font-black text-rose-300 uppercase italic">EURL · SASU</span>
-                <p className="text-xl font-900 text-white leading-none">
+                <p className="text-xl font-900 text-white leading-none mt-0.5">
                   {totalDepensesMensuelles} €<span className="text-[9px] font-normal text-white/60 ml-0.5">/mois</span>
                 </p>
               </div>
@@ -1002,7 +1002,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                     </button>
                   </div>
                   </div>
-                  <div className="flex w-full sm:w-auto items-center justify-between sm:justify-end gap-2">
+                  <div className="flex w-full sm:w-auto items-center justify-center sm:justify-end gap-2">
                     <span className="text-[9px] font-black uppercase text-white/75 shrink-0">
                       Enfants
                     </span>

@@ -28,7 +28,7 @@ export function buildSasuLines(ctx: StatutContext): FinancialLine[] {
   const apresIS = base - isSociete;
 
   // Part du résultat distribuée en dividendes (le reste reste en société)
-  const divPct = Math.min(100, Math.max(0, ctx.repartitionRemuneration ?? 70)) / 100;
+  const divPct = Math.min(100, Math.max(0, ctx.repartitionRemuneration ?? 100)) / 100;
   const dividendesBruts = apresIS * divPct;
   const ir = dividendesBruts * RATES_2026.flatTaxDividendes;
   const dividendesNets = dividendesBruts - ir;

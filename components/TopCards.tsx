@@ -141,9 +141,6 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
           <p className="font-900 text-white text-[12px] tracking-tight">
             {sim.state.taxParts} parts
           </p>
-          <p className="text-[9px] text-slate-400 font-bold">
-            {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enf.` : ''}
-          </p>
           <button
             type="button"
             className="expand-trigger shadow-sm rounded-full p-1 bg-white/10 hover:bg-white/20 text-white border border-white/25 absolute right-1.5 bottom-1.5"
@@ -304,9 +301,6 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
             <div>
               <p className="text-[10px] font-black text-white/80 uppercase tracking-wider">Situation fiscale</p>
               <p className="font-900 text-white text-lg tracking-tight">{sim.state.taxParts} parts</p>
-              <p className="text-[10px] text-white/75 font-bold mt-0.5">
-                {sim.state.nbAdultes === 2 ? 'Couple' : 'Célibataire'}{sim.state.nbEnfants > 0 ? ` · ${sim.state.nbEnfants} enfant${sim.state.nbEnfants > 1 ? 's' : ''}` : ''}
-              </p>
             </div>
           </div>
           <button

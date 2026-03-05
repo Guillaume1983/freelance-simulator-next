@@ -65,12 +65,12 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center' }: 
       <input
         type="range"
         min={0} max={100} step={5}
-        value={sim.state.repartitionRemuneration ?? 70}
+        value={sim.state.repartitionRemuneration ?? 100}
         onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
         className="w-full accent-indigo-600 h-1.5"
         onClick={e => e.stopPropagation()}
       />
-      <span className="text-[8px] font-bold text-slate-500">{sim.state.repartitionRemuneration ?? 70}% dividendes</span>
+      <span className="text-[8px] font-bold text-slate-500">{sim.state.repartitionRemuneration ?? 100}% dividendes</span>
     </div>
   );
   return <p className="text-[8px] text-slate-400 italic">—</p>;
