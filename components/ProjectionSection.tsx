@@ -3,7 +3,7 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, Rocket } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -32,6 +32,64 @@ const REGIME_COLORS: Record<string, string> = {
   'EURL IR':  '#10b981',
   'EURL IS':  '#3b82f6',
   'SASU':     '#8b5cf6',
+};
+
+const PROJECTION_ANALYSIS: Record<string, { forts: string[]; vigilance: string[] }> = {
+  Portage: {
+    forts: [
+      'Projection très lisible : net = CA – frais de gestion – cotisations classiques.',
+      'Stabilité forte du pouvoir d’achat sur 5 ans (peu de surprise fiscale).',
+      'Protection chômage (ARE) qui sécurise les années de croissance incertaine.',
+    ],
+    vigilance: [
+      'Les frais de gestion (5–10 % du CA) pèsent sur le net à long terme.',
+      'Peu de marge de manœuvre pour capitaliser de la trésorerie en société.',
+    ],
+  },
+  Micro: {
+    forts: [
+      'Croissance très simple à suivre : charges proportionnelles au CA.',
+      'Aucune complexité de gestion, même avec une forte hausse de CA.',
+      'Idéal pour tester l’activité sur 1 à 2 ans avant de basculer en société.',
+    ],
+    vigilance: [
+      'Plafond micro : au-delà, bascule obligatoire et changement complet de régime.',
+      'Les dépenses réelles ne sont jamais déductibles, même si elles augmentent avec le CA.',
+    ],
+  },
+  'EURL IR': {
+    forts: [
+      'Permet d’absorber une hausse de charges réelles (matériel, loyer, IK) sans exploser l’impôt.',
+      'Bonne lisibilité du couple revenu net / IR sur plusieurs années.',
+      'Structure prête pour l’embauche ou une éventuelle bascule en IS.',
+    ],
+    vigilance: [
+      'Cotisations TNS qui restent élevées même en cas de baisse ponctuelle de CA.',
+      'Nécessité d’anticiper la trésorerie pour payer les appels de cotisations et d’IR différés.',
+    ],
+  },
+  'EURL IS': {
+    forts: [
+      "Très bon outil pour lisser la rémunération dans le temps (salaire + trésorerie société).",
+      'Possibilité de lisser la croissance en laissant une partie du bénéfice en société.',
+      'Permet de financer des projets (achat matériel, croissance) sur plusieurs années.',
+    ],
+    vigilance: [
+      'Double niveau d’imposition (IS puis IR / PFU) à bien piloter sur la durée.',
+      'Demande un suivi rapproché avec un expert-comptable pour garder le cap sur 3–5 ans.',
+    ],
+  },
+  SASU: {
+    forts: [
+      'Statut “premium” qui se projette bien sur des TJM élevés et des missions longues.',
+      'Souplesse pour mixer salaire et dividendes en fonction des années.',
+      'Bonne protection sociale sur la durée (assimilé salarié).',
+    ],
+    vigilance: [
+      'Coût global charges + IS + PFU à surveiller dans les scénarios de forte croissance.',
+      'Pas d’ARE sur la fin de mandat : à intégrer dans la stratégie de sortie.',
+    ],
+  },
 };
 
 /* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
@@ -174,6 +232,14 @@ export default function ProjectionSection({
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
+
+  const getRegimePhrase = (id: string) => {
+    if (id === 'Portage') return 'au portage salarial';
+    if (id === 'Micro') return 'à la micro‑entreprise';
+    if (id === 'EURL IR' || id === 'EURL IS') return 'à l’EURL (IR ou IS)';
+    if (id === 'SASU') return 'à la SASU';
+    return 'à ce statut';
+  };
 
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
@@ -527,6 +593,65 @@ export default function ProjectionSection({
 
         <ScrollDots total={projections.length} active={activeYear} color={regimeColor} />
       </div>
+
+      {/* Bloc analyse + CTA Je me lance */}
+      {PROJECTION_ANALYSIS[activeRegime] && (
+        <div className="px-4 md:px-6 pt-2 pb-3">
+          <div className="max-w-[1600px] mx-auto mt-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-950/95 px-4 md:px-6 py-4 md:py-5">
+            <div className="space-y-2">
+              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                Analyse sur 5 ans
+              </p>
+              <h3 className="text-sm md:text-base font-black tracking-tight text-slate-900 dark:text-slate-50">
+                Points forts & vigilances pour {activeRegime}
+              </h3>
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                <div className="rounded-xl bg-emerald-50/70 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-900/30 px-3 py-2.5">
+                  <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
+                    <span className="text-emerald-500">●</span> Points forts
+                  </p>
+                  <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
+                    {PROJECTION_ANALYSIS[activeRegime]!.forts.map((f) => (
+                      <li key={f} className="flex gap-1.5">
+                        <span className="shrink-0 text-emerald-500">✓</span>
+                        <span className="font-medium">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-amber-50/70 dark:bg-amber-900/15 border border-amber-100 dark:border-amber-900/30 px-3 py-2.5">
+                  <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
+                    <span className="text-amber-500">●</span> Vigilances
+                  </p>
+                  <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
+                    {PROJECTION_ANALYSIS[activeRegime]!.vigilance.map((v) => (
+                      <li key={v} className="flex gap-1.5">
+                        <span className="shrink-0 text-amber-500">!</span>
+                        <span className="font-medium">{v}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                  Prêt à transformer cette projection en réalité ? Trouvez des partenaires adaptés {getRegimePhrase(activeRegime)} pour vous accompagner.
+                </p>
+              </div>
+              <div className="mt-2">
+                <a
+                  href={`/partenaires?regime=${encodeURIComponent(activeRegime)}`}
+                  className="inline-flex items-center justify-center gap-2 w-full px-4 md:px-6 py-3 md:py-3.5 rounded-xl text-white font-black text-[10px] md:text-[11px] uppercase tracking-[0.22em] shadow-lg shadow-slate-900/25 hover:opacity-90 transition-all"
+                  style={{ background: regimeColor }}
+                >
+                  <Rocket size={14} />
+                  Je me lance en {activeRegime}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hypothèses principales (mêmes que le comparatif) */}
       <div className="px-4 md:px-6 pb-2">
