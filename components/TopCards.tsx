@@ -28,18 +28,18 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-6 mb-4 mt-8">
 
-      {/* Grille 2×2 mobile (élargie en 1 colonne) */}
-      <div className="md:hidden grid grid-cols-1 gap-3">
+      {/* Grille mobile 2×2 (cartes légèrement réduites) */}
+      <div className="md:hidden grid grid-cols-2 gap-2.5">
 
         {/* Production */}
-        <div className="card-pro px-3 py-2 border-l-4 border-l-indigo-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
+        <div className="card-pro px-2.5 py-2 border-l-4 border-l-indigo-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
             <div className="bg-white/10 dark:bg-white/10 text-indigo-100 p-1.5 rounded-xl">
               <Zap className="w-3.5 h-3.5" />
             </div>
             <p className="text-[9px] font-black text-white/80 uppercase tracking-wider leading-tight">Activité</p>
           </div>
-          <p className="font-900 text-white text-[13px] tracking-tight">
+          <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(sim.state.tjm * sim.state.days)}
           </p>
           <div className="flex gap-1.5">
@@ -110,7 +110,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
         </div>
 
         {/* Charges */}
-        <div className="card-pro px-3 py-2 border-l-4 border-l-rose-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
+        <div className="card-pro px-2.5 py-2 border-l-4 border-l-rose-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="bg-white/10 dark:bg-white/10 text-rose-100 p-1.5 rounded-xl">
@@ -127,13 +127,13 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'charges' ? 'rotate-180' : ''}`} />
             </button>
           </div>
-          <p className="font-900 text-white text-[13px] tracking-tight">
+          <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(totalDepensesMensuelles)}
           </p>
         </div>
 
         {/* Optimisations */}
-        <div className="card-pro px-3 py-2 border-l-4 border-l-emerald-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
+        <div className="card-pro px-2.5 py-2 border-l-4 border-l-emerald-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="bg-white/10 dark:bg-white/10 text-emerald-100 p-1.5 rounded-xl">
@@ -150,13 +150,13 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'opti' ? 'rotate-180' : ''}`} />
             </button>
           </div>
-          <p className="font-900 text-white text-[13px] tracking-tight">
+          <p className="font-900 text-white text-[12px] tracking-tight">
             {fmt(totalOptMens)}
           </p>
         </div>
 
         {/* Situation Fiscale */}
-        <div className="card-pro px-3 py-2 border-l-4 border-l-amber-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
+        <div className="card-pro px-2.5 py-2 border-l-4 border-l-amber-400/80 bg-white/10 dark:bg-slate-900/40 text-white border border-white/20 flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="bg-white/10 dark:bg-white/10 text-amber-100 p-1.5 rounded-xl">
@@ -173,7 +173,7 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
               <ChevronDown className={`w-3 h-3 transition-transform ${activePanel === 'fiscal' ? 'rotate-180' : ''}`} />
             </button>
           </div>
-          <p className="font-900 text-white text-[13px] tracking-tight">
+          <p className="font-900 text-white text-[12px] tracking-tight">
             {sim.state.taxParts} parts
           </p>
           <p className="text-[9px] text-slate-400 font-bold">
