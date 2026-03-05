@@ -14,7 +14,7 @@ export default function ResourcesPanel() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="fixed left-0 top-[140px] z-120 bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700 rounded-r-2xl px-2.5 py-3.5 shadow-lg hover:bg-white hover:border-indigo-300 dark:hover:border-indigo-500 transition-all"
+          className="fixed left-0 top-[140px] z-[120] bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-700 rounded-r-2xl px-2.5 py-3.5 shadow-lg hover:bg-white hover:border-indigo-300 dark:hover:border-indigo-500 transition-all"
           aria-label="Ouvrir le panneau Ressources"
         >
           <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-300" />
@@ -22,15 +22,15 @@ export default function ResourcesPanel() {
       )}
 
       {open && (
-        <aside className="fixed left-0 top-[80px] h-[calc(100vh-96px)] w-[360px] z-120 px-3">
+        <aside className="fixed left-0 top-[80px] h-[calc(100vh-96px)] w-[360px] z-[120] px-3">
           <div className="card-pro h-full bg-white/95 dark:bg-slate-950/95 border border-slate-200/80 dark:border-slate-800/80 flex flex-col overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  À propos & articles
+                  Articles & ressources
                 </p>
                 <p className="text-[11px] font-bold text-slate-800 dark:text-slate-100">
-                  Comprendre vos résultats
+                  Aller plus loin
                 </p>
               </div>
               <button
@@ -44,21 +44,6 @@ export default function ResourcesPanel() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4 bg-slate-50/60 dark:bg-slate-900/40">
-              {/* À propos */}
-              <section>
-                <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1.5">
-                  À propos de nous
-                </h3>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                  Freelance-simulateur.fr est construit avec des experts-comptables indépendants pour
-                  vous donner une vision claire des écarts entre portage, micro, EURL et SASU.
-                </p>
-                <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                  Le simulateur est mis à jour chaque année avec les nouveaux barèmes pour rester aligné
-                  avec la Loi de Finances.
-                </p>
-              </section>
-
               {/* Articles */}
               <section>
                 <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-2">
