@@ -46,23 +46,23 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
     { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
   ];
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="stacked-bar flex items-center gap-3 py-1">
       {/* Barre */}
       <div
-        className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
+        className="stacked-bar-inner rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
         style={{ width: 56, height: 88 }}
       >
         {segs.map((s, i) => (
           <div
             key={i}
             style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
-            className="transition-all duration-500 w-full"
+            className="stacked-bar-segment transition-all duration-500 w-full"
             title={`${s.label} : ${Math.round(s.pct)}%`}
           />
         ))}
       </div>
       {/* Labels à droite */}
-      <div className="flex flex-col gap-1.5">
+      <div className="stacked-bar-legend flex flex-col gap-1.5">
         {segs.map(s => (
           <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
             <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
@@ -144,7 +144,7 @@ export default function ProjectionSection({
     return 'Rémunération nette (avant IR)';
   };
 
-  const rows = [
+  const baseRows = [
     { label: 'CA annuel brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
     { label: 'Charges (dépenses + optimisations)', key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
@@ -156,6 +156,21 @@ export default function ProjectionSection({
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany', prefix: '',  color: 'text-slate-500', highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
   ];
+
+  // Masquer la ligne trésorerie si aucune trésorerie positive sur 5 ans pour le régime actif
+  const hasAnyCashInCompany = projections.some(yr => {
+    const r = yr.find((x: any) => x.id === activeRegime) as any;
+    return r && r.cashInCompany != null && r.cashInCompany > 0;
+  });
+  const rows = baseRows.filter(row => {
+    if (row.key === 'cashInCompany') return hasAnyCashInCompany;
+    if (row.key === 'portageCommission') return activeRegime === 'Portage';
+    // Micro : optimisations non déductibles → masquer totalement la ligne
+    if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
+    // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les projections
+    if (row.key === 'fees' && activeRegime === 'Micro') return false;
+    return true;
+  });
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
@@ -180,7 +195,7 @@ export default function ProjectionSection({
   };
 
   return (
-    <div className="card-pro overflow-visible border-none shadow-2xl bg-white dark:bg-[#0f172a]">
+    <div className="card-pro overflow-visible mt-6 md:mt-8 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
       {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
       <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
@@ -487,7 +502,7 @@ export default function ProjectionSection({
                     if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
                     if (r && row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                     return (
-                      <div key={row.key}>
+                      <div key={row.label}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>

@@ -90,23 +90,23 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
     { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
   ];
   return (
-    <div className="flex items-center gap-3 py-1">
+    <div className="stacked-bar flex items-center gap-3 py-1">
       {/* Barre */}
       <div
-        className="rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
+        className="stacked-bar-inner rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
         style={{ width: 56, height: 88 }}
       >
         {segs.map((s, i) => (
           <div
             key={i}
             style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
-            className="transition-all duration-500 w-full"
+            className="stacked-bar-segment transition-all duration-500 w-full"
             title={`${s.label} : ${Math.round(s.pct)}%`}
           />
         ))}
       </div>
       {/* Labels à droite */}
-      <div className="flex flex-col gap-1.5">
+      <div className="stacked-bar-legend flex flex-col gap-1.5">
         {segs.map(s => (
           <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
             <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
@@ -178,6 +178,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true },
   ];
 
+  // Masquer complètement la ligne "Trésorerie société" s'il n'y a aucune trésorerie positive
+  const hasAnyCashInCompany = regimes.some((r: any) => r.cashInCompany != null && r.cashInCompany > 0);
+  const visibleRows = hasAnyCashInCompany ? rows : rows.filter(r => r.key !== 'cashInCompany');
+
   const getRowBgClass = (row: (typeof rows)[number]) => {
     const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
     if (r.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
@@ -231,7 +235,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   );
 
   return (
-    <div className="card-pro overflow-visible mt-6 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
+    <div className="card-pro overflow-visible mt-6 md:mt-8 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">
@@ -304,7 +308,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </tr>
           </thead>
           <tbody className="text-slate-700 dark:text-slate-300">
-            {rows.map((row, idx) => (
+            {visibleRows.map((row, idx) => (
               <React.Fragment key={idx}>
                 <tr className={`transition-colors ${getRowBgClass(row)}`}>
                   <td className="p-4 border-r dark:border-slate-800">
@@ -362,7 +366,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   ))}
                 </div>
               </td>
-              {regimes.map((r: any) => (
+                  {regimes.map((r: any) => (
                 <td key={r.id} className="px-4 py-3">
                   <div className="flex justify-center">
                     <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
@@ -517,8 +521,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   </div>
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">
-                  {rows.map((row) => (
-                    <div key={row.key}>
+                  {visibleRows.map((row) => (
+                    <div key={row.label}>
                       <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                         <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label}</p>
                         <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
@@ -619,13 +623,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
                 <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
-                {regimes.map((r: any) => (
+                  {regimes.map((r: any) => (
                   <th key={r.id} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => (
+              {visibleRows.map((row, i) => (
                 <React.Fragment key={i}>
                   <tr style={{ background: (row as any).bigAmount ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
                     <td style={{ padding: '4px 7px', fontWeight: (row as any).isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
