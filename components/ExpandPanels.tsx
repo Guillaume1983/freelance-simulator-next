@@ -1,7 +1,7 @@
 'use client';
 import { useRef } from 'react';
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { Car, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt, User } from 'lucide-react';
+import { Car, Bike, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt, User } from 'lucide-react';
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
@@ -56,9 +56,13 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const loyerAnnuel = loyerPercu * 12;
   const avantagesOptimises = sim.state.avantagesOptimises ?? 1500;
   const spouseIncome = sim.state.spouseIncome ?? 0;
-  const cvFiscaux = Number(sim.state.cvFiscaux ?? '4') || 4;
-  const cvMin = 4;
-  const cvMax = 7;
+  const typeVehicule = sim.state.typeVehicule ?? 'voiture';
+  const cvFiscauxRaw = sim.state.cvFiscaux ?? '6';
+  const cvFiscaux = typeVehicule === 'voiture' ? (Number(cvFiscauxRaw) || 6) : cvFiscauxRaw;
+  const cvMin = typeVehicule === 'voiture' ? 3 : 0;
+  const cvMax = typeVehicule === 'voiture' ? 7 : 0;
+  const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
+  const BANDE_MOTO_LABEL: Record<string, string> = { '1-2': '1–2 cv', '3-5': '3–5 cv', '5+': '5+ cv' };
   const CITY_ORDER = ['petite', 'moyenne', 'grande'] as const;
   const CITY_LABEL: Record<string, string> = {
     petite: 'Petite ville ≈ 300 €/an',
@@ -428,6 +432,48 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 <div className="p-2 bg-white/10 rounded-xl text-emerald-200"><Car size={20} /></div>
                 <h3 className="text-sm font-900 uppercase tracking-widest text-white">Indemnités Kilométriques</h3>
               </div>
+              <div className="space-y-2">
+                <span className="text-[9px] font-bold text-white/70 uppercase">Type de véhicule</span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
+                    const isVoiture = t === 'voiture';
+                    const isMoto = t === 'moto';
+                    const isCyclo = t === 'cyclo50';
+                    const label = isVoiture ? 'Voiture' : isMoto ? 'Moto' : 'Cyclo 50';
+                    const Icon = isVoiture ? Car : isMoto ? Bike : Circle;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          sim.setters.setTypeVehicule(t);
+                          if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any)) sim.setters.setCvFiscaux('3-5');
+                          if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any)) sim.setters.setCvFiscaux('6');
+                        }}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition ${
+                          typeVehicule === t
+                            ? 'bg-emerald-500/30 border-emerald-400 text-white'
+                            : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer rounded-xl px-3 py-2 bg-white/5 border border-white/15 hover:bg-white/10 transition">
+                <input
+                  type="checkbox"
+                  checked={sim.state.vehiculeElectrique ?? false}
+                  onChange={e => sim.setters.setVehiculeElectrique(e.target.checked)}
+                  className="rounded accent-emerald-500"
+                  onClick={e => e.stopPropagation()}
+                />
+                <span className="text-[10px] font-bold text-white/90">Véhicule électrique</span>
+                <span className="text-[9px] text-white/60">(+20 % barème URSSAF)</span>
+              </label>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
@@ -503,84 +549,102 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                     </div>
                   </div>
                 </div>
+                {typeVehicule !== 'cyclo50' && (
                 <div className="space-y-2">
                   <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-300" />
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Puissance fiscale</span>
+                        <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">
+                          {typeVehicule === 'voiture' ? 'Puissance fiscale' : 'Bande moto'}
+                        </span>
                         <span className="text-[9px] text-white/65">barème IK</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={cvFiscaux}
-                          min={cvMin}
-                          max={cvMax}
-                          onChange={e => {
-                            const v = Number(e.target.value);
-                            const next = Math.min(cvMax, Math.max(cvMin, Number.isNaN(v) ? cvMin : v));
-                            sim.setters.setCvFiscaux(String(next));
-                          }}
-                          onFocus={e => e.target.select()}
-                          className="tjm-days-input w-16 pr-6 py-1 text-[10px] font-bold text-right"
-                          placeholder="4"
-                        />
-                        <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">CV</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <button
-                          type="button"
-                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onMouseDown={() =>
-                            startHold(() => {
-                              const next = Math.min(cvMax, cvFiscaux + 1);
-                              sim.setters.setCvFiscaux(String(next));
-                            })
-                          }
-                          onMouseUp={stopHold}
-                          onMouseLeave={stopHold}
-                          onTouchStart={() =>
-                            startHold(() => {
-                              const next = Math.min(cvMax, cvFiscaux + 1);
-                              sim.setters.setCvFiscaux(String(next));
-                            })
-                          }
-                          onTouchEnd={stopHold}
-                          onTouchCancel={stopHold}
-                          aria-label="Augmenter la puissance fiscale"
+                      {typeVehicule === 'moto' ? (
+                        <select
+                          value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
+                          onChange={e => sim.setters.setCvFiscaux(e.target.value)}
+                          className="tjm-days-input w-full min-w-[72px] px-2 py-1 text-[10px] font-bold rounded-lg bg-white/10 border border-white/25 text-white"
                         >
-                          ▲
-                        </button>
-                        <button
-                          type="button"
-                          className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                          onMouseDown={() =>
-                            startHold(() => {
-                              const next = Math.max(cvMin, cvFiscaux - 1);
-                              sim.setters.setCvFiscaux(String(next));
-                            })
-                          }
-                          onMouseUp={stopHold}
-                          onMouseLeave={stopHold}
-                          onTouchStart={() =>
-                            startHold(() => {
-                              const next = Math.max(cvMin, cvFiscaux - 1);
-                              sim.setters.setCvFiscaux(String(next));
-                            })
-                          }
-                          onTouchEnd={stopHold}
-                          onTouchCancel={stopHold}
-                          aria-label="Diminuer la puissance fiscale"
-                        >
-                          ▼
-                        </button>
-                      </div>
+                          {BANDES_MOTO.map((b) => (
+                            <option key={b} value={b} className="text-slate-800">{BANDE_MOTO_LABEL[b]}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={cvFiscaux}
+                              min={cvMin}
+                              max={cvMax}
+                              onChange={e => {
+                                const v = Number(e.target.value);
+                                const next = Math.min(cvMax, Math.max(cvMin, Number.isNaN(v) ? cvMin : v));
+                                sim.setters.setCvFiscaux(String(next));
+                              }}
+                              onFocus={e => e.target.select()}
+                              className="tjm-days-input w-16 pr-6 py-1 text-[10px] font-bold text-right"
+                              placeholder="6"
+                            />
+                            <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">CV</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <button
+                              type="button"
+                              className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                              onMouseDown={() =>
+                                startHold(() => {
+                                  const next = Math.min(cvMax, (Number(sim.state.cvFiscaux) || 6) + 1);
+                                  sim.setters.setCvFiscaux(String(next));
+                                })
+                              }
+                              onMouseUp={stopHold}
+                              onMouseLeave={stopHold}
+                              onTouchStart={() =>
+                                startHold(() => {
+                                  const next = Math.min(cvMax, (Number(sim.state.cvFiscaux) || 6) + 1);
+                                  sim.setters.setCvFiscaux(String(next));
+                                })
+                              }
+                              onTouchEnd={stopHold}
+                              onTouchCancel={stopHold}
+                              aria-label="Augmenter la puissance fiscale"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              type="button"
+                              className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
+                              onMouseDown={() =>
+                                startHold(() => {
+                                  const next = Math.max(cvMin, (Number(sim.state.cvFiscaux) || 6) - 1);
+                                  sim.setters.setCvFiscaux(String(next));
+                                })
+                              }
+                              onMouseUp={stopHold}
+                              onMouseLeave={stopHold}
+                              onTouchStart={() =>
+                                startHold(() => {
+                                  const next = Math.max(cvMin, (Number(sim.state.cvFiscaux) || 6) - 1);
+                                  sim.setters.setCvFiscaux(String(next));
+                                })
+                              }
+                              onTouchEnd={stopHold}
+                              onTouchCancel={stopHold}
+                              aria-label="Diminuer la puissance fiscale"
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             </div>
 

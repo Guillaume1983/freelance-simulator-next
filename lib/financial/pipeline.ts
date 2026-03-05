@@ -1,7 +1,7 @@
 import type { StatusId } from './types';
 import { ALL_STATUSES, sumCashImpact, appliesTo } from './types';
 import type { FinancialLine } from './types';
-import { getIK } from './rates';
+import { getIK, type TypeVehiculeIK } from './rates';
 import { buildProductionLines } from './lines/production';
 import { buildDepensesLines } from './lines/depenses';
 import { buildOptimisationsLines } from './lines/optimisations';
@@ -23,6 +23,8 @@ export interface PipelineInput {
   materielActive: boolean;
   kmAnnuel: number;
   cvFiscaux: string;
+  typeVehicule?: TypeVehiculeIK;
+  vehiculeElectrique?: boolean;
   vehiculeActive: boolean;
   loyerPercu: number;
   loyerActive: boolean;
@@ -83,7 +85,7 @@ function buildStatutContext(input: PipelineInput): {
 } {
   const annee = input.annee ?? 1;
   const ca = input.tjm * input.days * Math.pow(1 + input.growthRate, annee - 1);
-  const indemnitesKm = input.vehiculeActive ? getIK(input.kmAnnuel, input.cvFiscaux) : 0;
+  const indemnitesKm = input.vehiculeActive ? getIK(input.kmAnnuel, input.typeVehicule ?? 'voiture', input.cvFiscaux) : 0;
   const loyer = input.loyerActive ? input.loyerPercu * 12 : 0;
   const cfe = annee === 1 ? 0 : CFE_PAR_VILLE[input.citySize];
 
@@ -141,6 +143,8 @@ export function runPipeline(input: PipelineInput): PipelineResult[] {
   const optimisationsLines = buildOptimisationsLines(
     input.kmAnnuel,
     input.cvFiscaux,
+    input.typeVehicule ?? 'voiture',
+    input.vehiculeElectrique ?? false,
     input.vehiculeActive,
     input.loyerPercu,
     input.loyerActive,

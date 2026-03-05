@@ -50,10 +50,12 @@ export default function TopCards({ sim, activePanel, togglePanel }: any) {
 
   const kmAnnuel       = sim.state.kmAnnuel ?? 0;
   const cvFiscaux      = sim.state.cvFiscaux ?? '6';
+  const typeVehicule   = sim.state.typeVehicule ?? 'voiture';
+  const vehiculeElectrique = sim.state.vehiculeElectrique ?? false;
   const loyerPercu     = sim.state.loyerPercu ?? 0;
   const avantagesOptAn = sim.state.avantagesOptimises ?? 1500;
 
-  const indemnitesAnn  = vehiculeActive ? getIK(kmAnnuel, cvFiscaux) : 0;
+  const indemnitesAnn  = vehiculeActive ? getIK(kmAnnuel, typeVehicule, cvFiscaux, vehiculeElectrique) : 0;
   const loyerAnn       = loyerActive ? loyerPercu * 12 : 0;
   const totalOptMens   = (indemnitesAnn + loyerAnn + avantagesOptAn) / 12;
 

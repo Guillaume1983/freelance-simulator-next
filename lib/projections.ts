@@ -39,6 +39,8 @@ export interface ProjectionParams {
   spouseIncome: number;
   kmAnnuel: number;
   cvFiscaux: string;
+  typeVehicule?: 'voiture' | 'moto' | 'cyclo50';
+  vehiculeElectrique?: boolean;
   loyerPercu: number;
   activeCharges: string[];
   sectionsActive: { vehicule: boolean; loyer: boolean };
@@ -104,6 +106,8 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
     materielActive: (params.materielAnnuel ?? 0) > 0,
     kmAnnuel: params.kmAnnuel,
     cvFiscaux: params.cvFiscaux,
+    typeVehicule: params.typeVehicule ?? 'voiture',
+    vehiculeElectrique: params.vehiculeElectrique ?? false,
     vehiculeActive: params.sectionsActive.vehicule,
     loyerPercu: params.loyerPercu,
     loyerActive: params.sectionsActive.loyer,

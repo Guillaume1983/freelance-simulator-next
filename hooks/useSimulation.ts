@@ -19,6 +19,8 @@ export const useSimulation = () => {
   // --- Paramètres optimisations ---
   const [kmAnnuel, setKmAnnuel] = useState(10000);
   const [cvFiscaux, setCvFiscaux] = useState('6');
+  const [typeVehicule, setTypeVehicule] = useState<'voiture' | 'moto' | 'cyclo50'>('voiture');
+  const [vehiculeElectrique, setVehiculeElectrique] = useState(false);
   const [loyerPercu, setLoyerPercu] = useState(350);
   const [sectionsActive, setSectionsActive] = useState({ vehicule: true, loyer: true });
 
@@ -205,7 +207,7 @@ export const useSimulation = () => {
 
   const resultats = useMemo(() => calculateRegimes({
     tjm, days, taxParts, spouseIncome,
-    kmAnnuel, cvFiscaux, loyerPercu,
+    kmAnnuel, cvFiscaux, typeVehicule, vehiculeElectrique, loyerPercu,
     activeCharges, sectionsActive, portageComm, chargeAmounts,
     acreEnabled, citySize,
     growthRate: growthRate / 100,
@@ -218,7 +220,7 @@ export const useSimulation = () => {
     repartitionRemuneration,
   }), [
     tjm, days, taxParts, spouseIncome,
-    kmAnnuel, cvFiscaux, loyerPercu,
+    kmAnnuel, cvFiscaux, typeVehicule, vehiculeElectrique, loyerPercu,
     activeCharges, sectionsActive, portageComm, chargeAmounts,
     acreEnabled, citySize, growthRate,
     materielAnnuel, avantagesOptimises, typeActiviteMicro,
@@ -228,7 +230,7 @@ export const useSimulation = () => {
   return {
     state: {
       tjm, days, taxParts, nbAdultes, nbEnfants, spouseIncome,
-      kmAnnuel, cvFiscaux, loyerPercu, activeCharges, sectionsActive,
+      kmAnnuel, cvFiscaux, typeVehicule, vehiculeElectrique, loyerPercu, activeCharges, sectionsActive,
       portageComm, chargeAmounts, materielAnnuel, userId,
       acreEnabled, citySize, growthRate,
       avantagesOptimises, typeActiviteMicro, prelevementLiberatoire,
@@ -236,7 +238,7 @@ export const useSimulation = () => {
     },
     setters: {
       setTjm, setDays, setNbAdultes, setNbEnfants, setSpouseIncome,
-      setKmAnnuel, setCvFiscaux, setLoyerPercu, setActiveCharges,
+      setKmAnnuel, setCvFiscaux, setTypeVehicule, setVehiculeElectrique, setLoyerPercu, setActiveCharges,
       setSectionsActive, setPortageComm, setChargeAmounts, setMaterielAnnuel,
       setAcreEnabled, setCitySize, setGrowthRate,
       setAvantagesOptimises, setTypeActiviteMicro, setPrelevementLiberatoire,

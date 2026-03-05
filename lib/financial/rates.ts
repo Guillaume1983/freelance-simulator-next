@@ -27,7 +27,7 @@ export const RATES_2026 = {
   /** SASU / PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
   isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
   flatTaxDividendes: 0.30,
-  /** Barème kilométrique voiture (URSSAF, arr. 27 mars 2023). Clé = puissance fiscale (3 = 3 cv et moins). */
+  /** Barème kilométrique voiture (URSSAF, arr. 27 mars 2023). Tranches : 0–5k, 5k–20k, >20k km. */
   ik: {
     '3': { a: 0.529, b: 0.316, c: 0.370, midConst: 1065 }, // 3 cv et moins
     '4': { a: 0.606, b: 0.340, c: 0.407, midConst: 1330 }, // 4 cv
@@ -35,6 +35,14 @@ export const RATES_2026 = {
     '6': { a: 0.665, b: 0.374, c: 0.447, midConst: 1457 }, // 6 cv
     '7': { a: 0.697, b: 0.394, c: 0.470, midConst: 1515 }, // 7 cv et plus
   } as Record<string, { a: number; b: number; c: number; midConst: number }>,
+  /** Barème IK moto (URSSAF). Tranches : 0–3k, 3k–6k, >6k km. Clé = bande : 1-2 cv, 3-5 cv, 5+ cv. */
+  ikMoto: {
+    '1-2': { a: 0.395, b: 0.099, c: 0.248, midConst: 891, s1: 3000, s2: 6000 },
+    '3-5': { a: 0.468, b: 0.082, c: 0.275, midConst: 1158, s1: 3000, s2: 6000 },
+    '5+': { a: 0.606, b: 0.079, c: 0.343, midConst: 1583, s1: 3000, s2: 6000 },
+  } as Record<string, { a: number; b: number; c: number; midConst: number; s1: number; s2: number }>,
+  /** Barème IK deux-roues &lt; 50 cm³ (URSSAF). Tranches : 0–3k, 3k–6k, >6k km. */
+  ikCyclo50: { a: 0.315, b: 0.079, c: 0.198, midConst: 711, s1: 3000, s2: 6000 },
 };
 
 /* ── Cotisations TNS (gérant EURL IR, professions libérales – SSI) ── */
@@ -172,9 +180,33 @@ export function computeIR(base: number, parts: number): number {
   return Math.max(0, r * parts);
 }
 
-/** Indemnités kilométriques (barème URSSAF) : tranches 0–5k, 5k–20k, >20k km */
-export function getIK(km: number, cv: string): number {
-  const r = RATES_2026.ik[cv] ?? RATES_2026.ik['6'];
-  const mid = 'midConst' in r ? (r as { midConst: number }).midConst : 1457;
-  return km <= 5000 ? km * r.a : km <= 20000 ? km * r.b + mid : km * r.c;
+export type TypeVehiculeIK = 'voiture' | 'moto' | 'cyclo50';
+
+/**
+ * Indemnités kilométriques (barème URSSAF, arr. 27 mars 2023).
+ * - Voiture : tranches 0–5k, 5k–20k, >20k km ; cvOrBande = '3'|'4'|'5'|'6'|'7'.
+ * - Moto : tranches 0–3k, 3k–6k, >6k km ; cvOrBande = '1-2'|'3-5'|'5+'.
+ * - Cyclo 50 : tranches 0–3k, 3k–6k, >6k km ; cvOrBande ignoré.
+ * - Véhicule électrique : majoration de 20 % (URSSAF, tous types).
+ */
+export function getIK(
+  km: number,
+  typeVehicule: TypeVehiculeIK = 'voiture',
+  cvOrBande?: string,
+  vehiculeElectrique = false
+): number {
+  let base: number;
+  if (typeVehicule === 'cyclo50') {
+    const r = RATES_2026.ikCyclo50;
+    base = km <= r.s1 ? km * r.a : km <= r.s2 ? km * r.b + r.midConst : km * r.c;
+  } else if (typeVehicule === 'moto') {
+    const band = cvOrBande === '1-2' || cvOrBande === '3-5' || cvOrBande === '5+' ? cvOrBande : '3-5';
+    const r = RATES_2026.ikMoto[band];
+    base = km <= r.s1 ? km * r.a : km <= r.s2 ? km * r.b + r.midConst : km * r.c;
+  } else {
+    const r = RATES_2026.ik[cvOrBande ?? '6'] ?? RATES_2026.ik['6'];
+    const mid = 'midConst' in r ? (r as { midConst: number }).midConst : 1457;
+    base = km <= 5000 ? km * r.a : km <= 20000 ? km * r.b + mid : km * r.c;
+  }
+  return vehiculeElectrique ? base * 1.2 : base;
 }

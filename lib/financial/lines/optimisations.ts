@@ -1,9 +1,17 @@
 import type { FinancialLine } from '../types';
-import { getIK } from '../rates';
+import { getIK, type TypeVehiculeIK } from '../rates';
+
+const IK_LABEL: Record<TypeVehiculeIK, string> = {
+  voiture: 'cv',
+  moto: 'moto',
+  cyclo50: 'cyclo 50 cm³',
+};
 
 export function buildOptimisationsLines(
   kmAnnuel: number,
   cvFiscaux: string,
+  typeVehicule: TypeVehiculeIK,
+  vehiculeElectrique: boolean,
   vehiculeActive: boolean,
   loyerPercu: number,
   loyerActive: boolean,
@@ -12,7 +20,9 @@ export function buildOptimisationsLines(
   const lines: FinancialLine[] = [];
 
   if (vehiculeActive && kmAnnuel > 0) {
-    const ik = getIK(kmAnnuel, cvFiscaux);
+    const ik = getIK(kmAnnuel, typeVehicule, cvFiscaux, vehiculeElectrique);
+    const detail = typeVehicule === 'voiture' ? `${cvFiscaux} cv` : typeVehicule === 'moto' ? cvFiscaux : '';
+    const electriqueSuffix = vehiculeElectrique ? ' (électrique +20 %)' : '';
     lines.push({
       id: 'indemnites_km',
       label: 'Indemnités kilométriques',
@@ -23,7 +33,7 @@ export function buildOptimisationsLines(
       fiscalImpact: -ik,
       socialImpact: 0,
       applicableStatuses: ['EURL IR', 'EURL IS', 'SASU'],
-      formula: `${kmAnnuel} km × barème ${cvFiscaux} cv`,
+      formula: `${kmAnnuel} km × barème ${IK_LABEL[typeVehicule]}${detail ? ` ${detail}` : ''}${electriqueSuffix}`,
     });
   }
 

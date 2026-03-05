@@ -170,6 +170,8 @@ export default function ProjectionSection({
     spouseIncome: sim.state.spouseIncome,
     kmAnnuel: sim.state.kmAnnuel,
     cvFiscaux: sim.state.cvFiscaux,
+    typeVehicule: sim.state.typeVehicule ?? 'voiture',
+    vehiculeElectrique: sim.state.vehiculeElectrique ?? false,
     loyerPercu: sim.state.loyerPercu,
     activeCharges: sim.state.activeCharges,
     sectionsActive: sim.state.sectionsActive,
