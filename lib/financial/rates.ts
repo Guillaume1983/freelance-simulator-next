@@ -4,6 +4,7 @@
 export const PASS = 47_100;
 
 export const RATES_2026 = {
+  /** Barème IR par part (seuils 2025 ; 2026 revalorisés ~+1 à 2 %, à mettre à jour si besoin) */
   ir: {
     abattement: 0.10,
     tranches: [
@@ -26,12 +27,14 @@ export const RATES_2026 = {
   /** SASU / PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
   isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
   flatTaxDividendes: 0.30,
+  /** Barème kilométrique voiture (URSSAF, arr. 27 mars 2023). Clé = puissance fiscale (3 = 3 cv et moins). */
   ik: {
-    '4': { a: 0.529, b: 0.316, c: 0.370 },
-    '5': { a: 0.606, b: 0.340, c: 0.407 },
-    '6': { a: 0.665, b: 0.386, c: 0.455 },
-    '7': { a: 0.697, b: 0.415, c: 0.486 },
-  } as Record<string, { a: number; b: number; c: number }>,
+    '3': { a: 0.529, b: 0.316, c: 0.370, midConst: 1065 }, // 3 cv et moins
+    '4': { a: 0.606, b: 0.340, c: 0.407, midConst: 1330 }, // 4 cv
+    '5': { a: 0.636, b: 0.357, c: 0.427, midConst: 1395 }, // 5 cv
+    '6': { a: 0.665, b: 0.374, c: 0.447, midConst: 1457 }, // 6 cv
+    '7': { a: 0.697, b: 0.394, c: 0.470, midConst: 1515 }, // 7 cv et plus
+  } as Record<string, { a: number; b: number; c: number; midConst: number }>,
 };
 
 /* ── Cotisations TNS (gérant EURL IR, professions libérales – SSI) ── */
@@ -169,7 +172,9 @@ export function computeIR(base: number, parts: number): number {
   return Math.max(0, r * parts);
 }
 
+/** Indemnités kilométriques (barème URSSAF) : tranches 0–5k, 5k–20k, >20k km */
 export function getIK(km: number, cv: string): number {
   const r = RATES_2026.ik[cv] ?? RATES_2026.ik['6'];
-  return km <= 5000 ? km * r.a : km <= 20000 ? km * r.b + 1500 : km * r.c;
+  const mid = 'midConst' in r ? (r as { midConst: number }).midConst : 1457;
+  return km <= 5000 ? km * r.a : km <= 20000 ? km * r.b + mid : km * r.c;
 }

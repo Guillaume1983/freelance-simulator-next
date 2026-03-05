@@ -203,7 +203,7 @@ export function calculateRegimes(
       res.isSociete = isSociete;
       res.salaireNet = 0;
       res.dividendesNets = dividendesNets;
-      res.cashInCompany = resteEnSociete;
+      res.cashInCompany = Math.round(resteEnSociete);
     }
 
     return res;
