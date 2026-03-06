@@ -2,10 +2,18 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader } from 'lucide-react';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, Settings, BarChart3, TrendingUp, BookOpen } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { SaveStatus } from '@/hooks/useSimulation';
+
+const SIMULATEUR_LINKS = [
+  { href: '/simulateur/portage', label: 'Portage' },
+  { href: '/simulateur/micro', label: 'Micro' },
+  { href: '/simulateur/eurl-ir', label: 'EURL IR' },
+  { href: '/simulateur/eurl-is', label: 'EURL IS' },
+  { href: '/simulateur/sasu', label: 'SASU' },
+] as const;
 
 export default function Header({ isDark, setIsDark, saveStatus }: {
   isDark: boolean;
@@ -16,7 +24,9 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [simulateurOpen, setSimulateurOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const simulateurRef = useRef<HTMLDivElement>(null);
 
   // Détecter l'utilisateur connecté et écouter les changements d'auth
   useEffect(() => {
@@ -31,12 +41,12 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fermer le menu utilisateur en cliquant en dehors
+  // Fermer les dropdowns en cliquant en dehors
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
+      const target = e.target as Node;
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) setUserMenuOpen(false);
+      if (simulateurRef.current && !simulateurRef.current.contains(target)) setSimulateurOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -88,14 +98,52 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
           </h1>
         </Link>
 
-        {/* TITRE CENTRAL — desktop uniquement */}
-        <div className="hidden md:block text-center">
-          <h2 className="text-base font-800 text-slate-900 dark:text-white leading-tight">
-            Moteur de simulation <span className="text-indigo-600">Expert</span>
-          </h2>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">
-            Données certifiées Loi de Finances 2026
-          </p>
+        {/* NAV desktop */}
+        <div className="hidden lg:flex items-center gap-1">
+          <Link href="/" className="px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors">
+            Accueil
+          </Link>
+          <Link href="/comparateur" className="px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+            <BarChart3 size={14} />
+            Comparer
+          </Link>
+          <div className="relative" ref={simulateurRef}>
+            <button
+              type="button"
+              onClick={() => setSimulateurOpen((o) => !o)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+            >
+              <TrendingUp size={14} />
+              Simuler
+              <ChevronDown size={12} className={simulateurOpen ? 'rotate-180' : ''} />
+            </button>
+            {simulateurOpen && (
+              <div className="absolute left-0 top-full mt-1 w-44 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50">
+                {SIMULATEUR_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block px-4 py-2 text-[12px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600"
+                    onClick={() => setSimulateurOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <Link href="/articles" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors">
+            <BookOpen size={14} />
+            Guides
+          </Link>
+          <Link
+            href="/reglages"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+            aria-label="Page paramètres"
+          >
+            <Settings size={14} />
+            Paramètres
+          </Link>
         </div>
 
         {/* ACTIONS */}
@@ -204,7 +252,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
             </>
           )}
 
-          {/* Hamburger — mobile uniquement */}
+          {/* Hamburger — mobile / tablette */}
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all text-slate-500 dark:text-white"
@@ -215,10 +263,33 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
         </div>
       </div>
 
-      {/* Drawer mobile */}
+      {/* Drawer mobile / panneau gauche */}
       {menuOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+        <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md max-h-[80vh] overflow-y-auto">
           <div className="max-w-[1600px] mx-auto px-4 py-4 flex flex-col gap-1">
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1 px-1">Navigation</p>
+            <Link href="/" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors" onClick={() => setMenuOpen(false)}>
+              Accueil
+            </Link>
+            <Link href="/comparateur" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors" onClick={() => setMenuOpen(false)}>
+              <BarChart3 size={16} />
+              Comparer les statuts
+            </Link>
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2 mb-1 px-1">Simuler un statut</p>
+            {SIMULATEUR_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors pl-5" onClick={() => setMenuOpen(false)}>
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/articles" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors mt-1" onClick={() => setMenuOpen(false)}>
+              <BookOpen size={16} />
+              Guides & articles
+            </Link>
+            <Link href="/reglages" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors mt-2 w-full text-left" onClick={() => setMenuOpen(false)}>
+              <Settings size={16} />
+              Paramètres
+            </Link>
+            <div className="border-t border-slate-200 dark:border-slate-700 my-3 pt-3" />
             {user && (
               <div className="flex items-center gap-3 px-3 py-3 mb-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
                 <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-[12px] font-black shrink-0">

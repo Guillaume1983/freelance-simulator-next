@@ -5,6 +5,7 @@ import { Car, Bike, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Rec
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
+  if (!sim?.state) return null;
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

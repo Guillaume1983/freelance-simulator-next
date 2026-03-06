@@ -136,10 +136,13 @@ export default function ProjectionSection({
   sim,
   activeRegime,
   setActiveRegime,
+  singleRegime = false,
 }: {
   sim: any;
   activeRegime: string;
   setActiveRegime: (id: string) => void;
+  /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc PROJECTIONS / nom / +% */
+  singleRegime?: boolean;
 }) {
   const printBizRef    = useRef<HTMLDivElement>(null);
   const yearScrollRef  = useRef<HTMLDivElement>(null);
@@ -268,27 +271,29 @@ export default function ProjectionSection({
       {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
       <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
 
-        {/* Sélecteur de régime — desktop uniquement (mobile a le sien plus bas) */}
-        <div className="hidden md:flex gap-1 flex-wrap">
-          {allRegimes.map((id: string) => (
-            <button
-              key={id}
-              onClick={() => setActiveRegime(id)}
-              className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
-                activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-              }`}
-              style={{
-                background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
-                borderColor: REGIME_COLORS[id],
-              }}
-            >
-              {id}
-            </button>
-          ))}
-        </div>
+        {/* Sélecteur de régime — desktop (masqué sur page simulateur single statut) */}
+        {!singleRegime && (
+          <div className="hidden md:flex gap-1 flex-wrap">
+            {allRegimes.map((id: string) => (
+              <button
+                key={id}
+                onClick={() => setActiveRegime(id)}
+                className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
+                  activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
+                }`}
+                style={{
+                  background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
+                  borderColor: REGIME_COLORS[id],
+                }}
+              >
+                {id}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Croissance CA — desktop uniquement */}
-        <div className="hidden md:block space-y-0.5 min-w-[180px] ml-4">
+        <div className={`hidden md:block space-y-0.5 min-w-[180px] ${singleRegime ? '' : 'ml-4'}`}>
           <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
             Croissance CA / an
             <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>
@@ -312,18 +317,27 @@ export default function ProjectionSection({
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
 
-              {/* Cellule haut-gauche : PROJECTIONS */}
+              {/* Cellule haut-gauche : PROJECTIONS (ou minimal sur page simulateur) */}
               <th className="p-6 text-left border-b dark:border-slate-800 min-w-[200px]">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">Projections</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="w-2 h-6 rounded-full shrink-0" style={{ background: regimeColor }} />
-                  <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
-                </div>
-                <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
-                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                  <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
-                </div>
-                <div className="flex flex-wrap gap-2 mt-3">
+                {!singleRegime && (
+                  <>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">Projections</h3>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-2 h-6 rounded-full shrink-0" style={{ background: regimeColor }} />
+                      <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
+                    </div>
+                    <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
+                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                      <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+                    </div>
+                  </>
+                )}
+                {singleRegime && (
+                  <div className="pt-0">
+                    <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+                  </div>
+                )}
+                <div className={`flex flex-wrap gap-2 ${singleRegime ? 'mt-2' : 'mt-3'}`}>
                   <button
                     onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
                     className={PDF_BTN}
@@ -462,27 +476,29 @@ export default function ProjectionSection({
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden">
 
-        {/* Contrôle mobile : sélecteur régime + slider croissance + export */}
+        {/* Contrôle mobile : sélecteur régime (masqué si singleRegime) + slider croissance + export */}
         <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800 space-y-3">
-          <div className="flex gap-1 flex-wrap">
-            {allRegimes.map((id: string) => (
-              <button
-                key={id}
-                onClick={() => setActiveRegime(id)}
-                className={`px-2 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
-                  activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-                }`}
-                style={{
-                  background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
-                  borderColor: REGIME_COLORS[id],
-                }}
-              >
-                {id}
-              </button>
-            ))}
-          </div>
+          {!singleRegime && (
+            <div className="flex gap-1 flex-wrap">
+              {allRegimes.map((id: string) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveRegime(id)}
+                  className={`px-2 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
+                    activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
+                  }`}
+                  style={{
+                    background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
+                    borderColor: REGIME_COLORS[id],
+                  }}
+                >
+                  {id}
+                </button>
+              ))}
+            </div>
+          )}
           {/* Paramètres spécifiques du statut sélectionné */}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+          <div className={`pt-2 ${singleRegime ? '' : 'border-t border-slate-200 dark:border-slate-700'}`}>
             <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
           </div>
           {/* Slider croissance CA */}

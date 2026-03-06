@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="bg-white dark:bg-[#0f172a] border-t border-slate-200 dark:border-slate-800 py-8 md:py-10 px-4 md:px-6 mt-12">
       <div className="max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-10 md:items-end">
 
           {/* Logo & Description */}
           <div className="col-span-1 md:col-span-2 space-y-4">
@@ -25,15 +25,19 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Liens */}
-          <div className="flex flex-col gap-4">
-            <h4 className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.2em] mb-2">Accès rapide</h4>
-            <Link href="/" className="footer-link">Simulateur</Link>
-            <Link href="/connexion" className="footer-link">Se connecter</Link>
-            <Link href="/inscription" className="footer-link">Créer un compte</Link>
-            <Link href="/articles" className="footer-link">Articles</Link>
-            <Link href="/#about-us" className="footer-link">À propos de nous</Link>
-            <Link href="/contact" className="footer-link">Contact</Link>
+          {/* Accès rapide — 2 colonnes, aligné en bas (md:items-end sur la grille) */}
+          <div className="flex flex-col gap-4 pt-4 md:pt-0">
+            <div>
+              <h4 className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.2em] mb-2">Accès rapide</h4>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <Link href="/comparateur" className="footer-link">Comparateur</Link>
+                <Link href="/simulateur/sasu" className="footer-link">Simulateur</Link>
+                <Link href="/articles" className="footer-link">Articles</Link>
+                <Link href="/contact" className="footer-link">Contact</Link>
+                <Link href="/connexion" className="footer-link">Se connecter</Link>
+                <Link href="/inscription" className="footer-link">Créer un compte</Link>
+              </div>
+            </div>
           </div>
 
         </div>
