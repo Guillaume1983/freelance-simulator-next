@@ -268,8 +268,8 @@ export default function ProjectionSection({
   return (
     <div className="card-pro overflow-visible mt-6 md:mt-8 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
 
-      {/* ── Barre de contrôle (commune desktop + mobile pour le titre) ── */}
-      <div className="px-4 md:px-6 py-4 flex flex-wrap items-center gap-3 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
+      {/* ── Barre de contrôle : une ligne (croissance + paramètres statut) ── */}
+      <div className="px-4 md:px-6 py-3 flex flex-wrap items-center gap-4 md:gap-6 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
 
         {/* Sélecteur de régime — desktop (masqué sur page simulateur single statut) */}
         {!singleRegime && (
@@ -292,23 +292,12 @@ export default function ProjectionSection({
           </div>
         )}
 
-        {/* Croissance CA — desktop uniquement */}
-        <div className={`hidden md:block space-y-0.5 min-w-[180px] ${singleRegime ? '' : 'ml-4'}`}>
-          <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
-            Croissance CA / an
-            <span className="text-indigo-500 font-black">{sim.state.growthRate}%</span>
-          </label>
-          <input
-            type="range"
-            min={0} max={50} step={1}
-            value={sim.state.growthRate}
-            onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
-            className="w-full accent-indigo-600"
-          />
-          <div className="flex justify-between text-[8px] text-slate-400 font-bold">
-            <span>0%</span><span>25%</span><span>50%</span>
+        {/* Paramètres propres au statut — en bandeau sur page simulateur, ici uniquement sur comparateur */}
+        {!singleRegime && (
+          <div className="shrink-0">
+            <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Tableau Projections (desktop) ── */}
@@ -317,36 +306,18 @@ export default function ProjectionSection({
           <thead>
             <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
 
-              {/* Cellule haut-gauche : PROJECTIONS (ou minimal sur page simulateur) */}
-              <th className="p-6 text-left border-b dark:border-slate-800 min-w-[200px]">
-                {!singleRegime && (
-                  <>
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">Projections</h3>
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="w-2 h-6 rounded-full shrink-0" style={{ background: regimeColor }} />
-                      <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter leading-none">{activeRegime}</span>
-                    </div>
-                    <p className="text-[9px] text-slate-400 font-bold mt-1.5">+{sim.state.growthRate}%/an</p>
-                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                      <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
-                    </div>
-                  </>
-                )}
-                {singleRegime && (
-                  <div className="pt-0">
-                    <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
-                  </div>
-                )}
-                <div className={`flex flex-wrap gap-2 ${singleRegime ? 'mt-2' : 'mt-3'}`}>
+              {/* Cellule haut-gauche : boutons PDF / Détails sur la même ligne que les montants €/m */}
+              <th className="p-4 pr-6 pt-6 border-b dark:border-slate-800 w-px align-bottom">
+                <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
-                    className={PDF_BTN}
+                    className={`${PDF_BTN} min-w-[88px] justify-center`}
                   >
                     <FileBarChart2 size={12} /> PDF
                   </button>
                   <button
                     onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-                    className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
+                    className={`${PDF_BTN} min-w-[88px] justify-center ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
                   >
                     {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
                     {showDetails ? 'Masquer' : 'Détails'}
@@ -358,7 +329,7 @@ export default function ProjectionSection({
               {projections.map((yr, i) => {
                 const r = yr.find((x: any) => x.id === activeRegime);
                 return (
-                  <th key={i} className="p-4 relative pt-12 border-b dark:border-slate-800 min-w-[130px]">
+                  <th key={i} className="p-4 relative pt-6 border-b dark:border-slate-800 min-w-[130px]">
                     <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
                     <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
                     <div className="text-[9px] font-bold mt-0.5 text-slate-400">
@@ -476,48 +447,8 @@ export default function ProjectionSection({
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden">
 
-        {/* Contrôle mobile : sélecteur régime (masqué si singleRegime) + slider croissance + export */}
-        <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800 space-y-3">
-          {!singleRegime && (
-            <div className="flex gap-1 flex-wrap">
-              {allRegimes.map((id: string) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveRegime(id)}
-                  className={`px-2 py-1 rounded-full text-[9px] font-black uppercase border transition-colors ${
-                    activeRegime === id ? 'text-white' : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                  style={{
-                    background:  activeRegime === id ? REGIME_COLORS[id] : 'transparent',
-                    borderColor: REGIME_COLORS[id],
-                  }}
-                >
-                  {id}
-                </button>
-              ))}
-            </div>
-          )}
-          {/* Paramètres spécifiques du statut sélectionné */}
-          <div className={`pt-2 ${singleRegime ? '' : 'border-t border-slate-200 dark:border-slate-700'}`}>
-            <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
-          </div>
-          {/* Slider croissance CA */}
-          <div className="space-y-1">
-            <label className="text-[9px] font-black text-slate-400 uppercase flex items-center gap-1">
-              Croissance CA / an
-              <span className="font-black" style={{ color: regimeColor }}>{sim.state.growthRate}%</span>
-            </label>
-            <input
-              type="range"
-              min={0} max={50} step={1}
-              value={sim.state.growthRate}
-              onChange={e => sim.setters.setGrowthRate(Number(e.target.value))}
-              className="w-full accent-indigo-600"
-            />
-            <div className="flex justify-between text-[8px] text-slate-400 font-bold">
-              <span>0%</span><span>25%</span><span>50%</span>
-            </div>
-          </div>
+        {/* Contrôle mobile : boutons export (croissance + paramètres statut sont dans la barre du haut) */}
+        <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800">
           <div className="flex gap-2">
             <button
               onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}

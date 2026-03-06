@@ -1,74 +1,88 @@
 'use client';
 
 import { useRef } from 'react';
-import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
-import TjmDaysBlock from '@/components/TjmDaysBlock';
 import ComparisonTable from '@/components/ComparisonTable';
 import Footer from '@/components/Footer';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
-  const heroRef = useRef<HTMLDivElement>(null);
+
+  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startHold = (fn: () => void) => {
+    fn();
+    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
+    holdDelayRef.current = setTimeout(() => { holdTimerRef.current = setInterval(fn, 120); }, 300);
+  };
+  const stopHold = () => {
+    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
+    holdDelayRef.current = null;
+    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    holdTimerRef.current = null;
+  };
 
   return (
     <>
       <div className="page-blob-1" aria-hidden />
       <div className="page-blob-2" aria-hidden />
-      <div className="page-blob-3" aria-hidden />
       <div className="bg-page-grid" aria-hidden />
 
       <main className="relative z-10 min-h-screen">
         <div className="top-accent-bar" aria-hidden />
 
         <section
-          ref={heroRef}
           id="parametres"
-          className="section-hero section-comparatif-hero w-full pt-8 pb-10 md:pt-10 md:pb-10 animate-fade-up"
+          className="section-projection-hero w-full pt-6 pb-4 md:pt-8 md:pb-6"
           aria-label="Comparatif des statuts freelance"
         >
-          <div
-            className="section-hero-bg"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1600')" }}
-            aria-hidden
-          />
-          <div className="section-hero-overlay" aria-hidden />
-
-          <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6">
-            <p className="text-sm md:text-base text-white/90 font-medium leading-snug mb-4">
-              Ajustez votre TJM et vos jours travaillés — le comparatif se met à jour en temps réel.
-            </p>
-
-            <TjmDaysBlock sim={sim} />
-
-            <p className="mt-4 text-sm text-white/80">
-              <Link href="/reglages" className="font-bold text-white underline hover:text-indigo-200">
-                Tous les paramètres →
-              </Link>
-              {' '}(charges, optimisations, situation fiscale, CFE…)
-            </p>
-
-            <div className="mt-10 md:mt-12">
-              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight drop-shadow-xl leading-tight">
-                Comparatif stratégique
-              </h2>
-              <p className="text-base md:text-lg text-white/90 font-medium mt-2 leading-snug drop-shadow-md">
-                Comparez les 5 statuts freelance sur l&apos;ensemble des indicateurs clés — la colonne 🏆 correspond au plus avantageux pour votre profil.
+          <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
+            <div className="flex-1 min-w-0 flex flex-col items-start justify-end">
+              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                Comparatif des statuts
+              </h1>
+              <p className="text-[10px] text-indigo-200 font-bold mt-0.5">
+                Ajustez TJM et jours — le tableau se met à jour en temps réel
               </p>
             </div>
+            <div className="flex-1 flex justify-center items-end">
+              <div className="flex flex-wrap items-center justify-center gap-4 text-white">
+                <div className="flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-white/90 uppercase">TJM</label>
+                  <input
+                    type="number"
+                    value={sim.state.tjm ?? ''}
+                    onChange={(e) => sim.setters.setTjm(Math.max(0, Number(e.target.value) || 0))}
+                    onFocus={(e) => (e.target as HTMLInputElement).select()}
+                    className="tjm-days-input w-16 py-1 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+TJM">▲</button>
+                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-TJM">▼</button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-white/90 uppercase">Jours</label>
+                  <input
+                    type="number"
+                    value={sim.state.days ?? ''}
+                    onChange={(e) => sim.setters.setDays(Math.max(0, Number(e.target.value) || 0))}
+                    onFocus={(e) => (e.target as HTMLInputElement).select()}
+                    className="tjm-days-input w-16 py-1 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+Jours">▲</button>
+                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-Jours">▼</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 hidden sm:block" aria-hidden />
           </div>
         </section>
 
-        <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6">
-          <div className="flex justify-end mb-2">
-            <button
-              type="button"
-              onClick={() => heroRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              className="text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              TJM & jours ↑
-            </button>
-          </div>
+        <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 pb-8">
           <ComparisonTable sim={sim} />
         </div>
 
