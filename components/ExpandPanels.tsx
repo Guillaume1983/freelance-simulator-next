@@ -1,8 +1,175 @@
 'use client';
+
 import { useRef } from 'react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import Link from 'next/link';
-import { Car, Bike, Home, CheckCircle2, Circle, Users, Zap, Building2, Gift, Receipt, User, ShieldCheck, Calculator } from 'lucide-react';
+import {
+  Car,
+  Bike,
+  Home,
+  CheckCircle2,
+  Circle,
+  Users,
+  Zap,
+  Building2,
+  Gift,
+  Receipt,
+  User,
+  ShieldCheck,
+  Calculator,
+  Plus,
+  Minus,
+  Info,
+  Sparkles,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { getIK } from '@/lib/financial/rates';
+
+// Input numérique avec boutons +/-
+function NumberInput({
+  value,
+  onChange,
+  onIncrement,
+  onDecrement,
+  suffix = '',
+  min = 0,
+  label,
+  disabled = false,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  onIncrement: () => void;
+  onDecrement: () => void;
+  suffix?: string;
+  min?: number;
+  label?: string;
+  disabled?: boolean;
+}) {
+  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startHold = (fn: () => void) => {
+    fn();
+    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
+    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    holdDelayRef.current = null;
+    holdTimerRef.current = null;
+    holdDelayRef.current = setTimeout(() => {
+      holdTimerRef.current = setInterval(fn, 80);
+    }, 300);
+  };
+  const stopHold = () => {
+    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
+    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    holdDelayRef.current = null;
+    holdTimerRef.current = null;
+  };
+  return (
+    <div className={cn('flex items-center gap-2', disabled && 'opacity-60 pointer-events-none')}>
+      <button
+        type="button"
+        disabled={disabled}
+        onMouseDown={() => !disabled && startHold(onDecrement)}
+        onMouseUp={stopHold}
+        onMouseLeave={stopHold}
+        onTouchStart={() => !disabled && startHold(onDecrement)}
+        onTouchEnd={stopHold}
+        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
+        aria-label={label ? `Diminuer ${label}` : 'Diminuer'}
+      >
+        <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+      </button>
+      <div className="relative">
+        <input
+          type="number"
+          value={value}
+          disabled={disabled}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            onChange(Number.isNaN(v) ? min : Math.max(min, v));
+          }}
+          onFocus={(e) => e.target.select()}
+          className={cn(
+            'w-24 px-3 py-2 text-center font-semibold text-slate-900 dark:text-white',
+            'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-lg',
+            'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600 transition-all',
+            'disabled:opacity-60 disabled:cursor-not-allowed'
+          )}
+        />
+        {suffix && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">
+            {suffix}
+          </span>
+        )}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onMouseDown={() => !disabled && startHold(onIncrement)}
+        onMouseUp={stopHold}
+        onMouseLeave={stopHold}
+        onTouchStart={() => !disabled && startHold(onIncrement)}
+        onTouchEnd={stopHold}
+        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
+        aria-label={label ? `Augmenter ${label}` : 'Augmenter'}
+      >
+        <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+      </button>
+    </div>
+  );
+}
+
+function FieldCard({
+  icon: Icon,
+  label,
+  description,
+  children,
+}: {
+  icon: React.ElementType;
+  label: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="p-5 rounded-xl border-2 transition-all bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-700">
+            <Icon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 dark:text-white">{label}</p>
+            {description && (
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>
+            )}
+          </div>
+        </div>
+        <div className="shrink-0">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function InfoBox({
+  children,
+  variant = 'info',
+}: {
+  children: React.ReactNode;
+  variant?: 'info' | 'warning' | 'success';
+}) {
+  const styles = {
+    info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
+    warning:
+      'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300',
+    success:
+      'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300',
+  };
+  return (
+    <div className={cn('p-4 rounded-xl border-2 flex items-start gap-3', styles[variant])}>
+      <Info className="w-5 h-5 shrink-0 mt-0.5" />
+      <p className="text-sm">{children}</p>
+    </div>
+  );
+}
 
 export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
@@ -10,7 +177,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const startHold = (fn: () => void) => {
     fn();
     if (holdTimerRef.current) {
@@ -25,32 +191,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       holdTimerRef.current = setInterval(fn, 120);
     }, 300);
   };
-
   const stopHold = () => {
-    if (holdDelayRef.current) {
-      clearTimeout(holdDelayRef.current);
-      holdDelayRef.current = null;
-    }
-    if (holdTimerRef.current) {
-      clearInterval(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
+    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
+    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    holdDelayRef.current = null;
+    holdTimerRef.current = null;
   };
-
-  const totalDepensesMensuelles = Math.round(
-    CHARGES_CATALOG.reduce((sum, item) => {
-      const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
-      return sum + (amount || 0);
-    }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
-  );
-
-  const totalPortageMensuel = Math.round(
-    CHARGES_CATALOG.reduce((sum, item) => {
-      if (item.portageWarning) return sum;
-      const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
-      return sum + (amount || 0);
-    }, 0) + ((sim.state.materielAnnuel ?? 0) / 36)
-  );
 
   const materielAnnuel = sim.state.materielAnnuel ?? 0;
   const kmAnnuel = sim.state.kmAnnuel ?? 0;
@@ -66,875 +212,499 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
   const BANDE_MOTO_LABEL: Record<string, string> = { '1-2': '1–2 cv', '3-5': '3–5 cv', '5+': '5+ cv' };
   const CITY_ORDER = ['petite', 'moyenne', 'grande'] as const;
-  const CITY_LABEL: Record<string, string> = {
-    petite: 'Petite ville ≈ 300 €/an',
-    moyenne: 'Ville moyenne ≈ 550 €/an',
-    grande: 'Grande ville ≈ 900 €/an',
-  };
+  const CITY_OPTIONS: { key: (typeof CITY_ORDER)[number]; label: string; amount: string }[] = [
+    { key: 'petite', label: 'Petite ville', amount: '~300 €/an' },
+    { key: 'moyenne', label: 'Ville moyenne', amount: '~550 €/an' },
+    { key: 'grande', label: 'Grande ville', amount: '~900 €/an' },
+  ];
   const currentCity: string = sim.state.citySize ?? 'petite';
-  const cityIndex = Math.max(0, CITY_ORDER.indexOf(currentCity as any));
-  const cityLabel = CITY_LABEL[currentCity] ?? CITY_LABEL.petite;
   const avantagesMensuel = avantagesOptimises / 12;
 
   const nonWarning = CHARGES_CATALOG.filter(c => !c.portageWarning);
   const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
 
-  const renderChargeRow = (item: typeof CHARGES_CATALOG[number] | undefined) => {
-    if (!item) return null;
-    const isAmber  = item.portageWarning;
-    const amount   = sim.state.chargeAmounts?.[item.id] ?? item.amount;
+  const renderChargeRow = (item: (typeof CHARGES_CATALOG)[number]) => {
+    const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
     const safeAmount = typeof amount === 'number' && !Number.isNaN(amount) ? amount : 0;
     return (
       <div
         key={item.id}
-        className="w-full flex items-center justify-between rounded-2xl px-3 py-2 text-left bg-white/10 dark:bg-slate-900/60 border border-white/15 text-white"
+        className="flex items-center justify-between p-4 rounded-xl border-2 transition-colors bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
       >
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className={`w-4 h-4 ${isAmber ? 'text-amber-300' : 'text-emerald-300'}`} />
-          <div className="flex flex-col">
-            <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">{item.name}</span>
-            <span className="text-[9px] text-white/65">{safeAmount.toLocaleString()} €/mois</span>
-          </div>
+        <div>
+          <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {safeAmount} €/mois
+          </p>
         </div>
-        <div className="flex items-center gap-1 ml-2" onClick={e => e.stopPropagation()}>
-          <div className="relative">
-            <input
-              type="number"
-              value={safeAmount}
-              onChange={e => {
-                const v = Number(e.target.value);
-                const normalized = Number.isNaN(v) ? 0 : Math.max(0, v);
-                sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
-                  const base = prev || {};
-                  return {
-                    ...base,
-                    [item.id]: normalized,
-                  };
-                });
-              }}
-              onFocus={e => e.target.select()}
-              className="tjm-days-input w-16 pr-5 py-1 text-[10px] font-bold text-right"
-            />
-            <span className="absolute right-1 top-1 text-[8px] font-black text-white/70">€/m</span>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <button
-              type="button"
-              className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-              onMouseDown={() =>
-                startHold(() =>
-                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
-                    const base = prev || {};
-                    const current = base[item.id] ?? item.amount ?? 0;
-                    const safeCurrent =
-                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                    return {
-                      ...base,
-                      [item.id]: safeCurrent + 1,
-                    };
-                  }),
-                )
-              }
-              onMouseUp={stopHold}
-              onMouseLeave={stopHold}
-              onTouchStart={() =>
-                startHold(() =>
-                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
-                    const base = prev || {};
-                    const current = base[item.id] ?? item.amount ?? 0;
-                    const safeCurrent =
-                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                    return {
-                      ...base,
-                      [item.id]: safeCurrent + 1,
-                    };
-                  }),
-                )
-              }
-              onTouchEnd={stopHold}
-              onTouchCancel={stopHold}
-              aria-label={`Augmenter ${item.name}`}
-            >
-              ▲
-            </button>
-            <button
-              type="button"
-              className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-              onMouseDown={() =>
-                startHold(() =>
-                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
-                    const base = prev || {};
-                    const current = base[item.id] ?? item.amount ?? 0;
-                    const safeCurrent =
-                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                    return {
-                      ...base,
-                      [item.id]: Math.max(0, safeCurrent - 1),
-                    };
-                  }),
-                )
-              }
-              onMouseUp={stopHold}
-              onMouseLeave={stopHold}
-              onTouchStart={() =>
-                startHold(() =>
-                  sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => {
-                    const base = prev || {};
-                    const current = base[item.id] ?? item.amount ?? 0;
-                    const safeCurrent =
-                      typeof current === 'number' && !Number.isNaN(current) ? current : 0;
-                    return {
-                      ...base,
-                      [item.id]: Math.max(0, safeCurrent - 1),
-                    };
-                  }),
-                )
-              }
-              onTouchEnd={stopHold}
-              onTouchCancel={stopHold}
-              aria-label={`Diminuer ${item.name}`}
-            >
-              ▼
-            </button>
-          </div>
-        </div>
+        <NumberInput
+          value={safeAmount}
+          onChange={(v) =>
+            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+              ...(prev || {}),
+              [item.id]: v,
+            }))
+          }
+          onIncrement={() =>
+            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+              ...(prev || {}),
+              [item.id]: (prev?.[item.id] ?? item.amount ?? 0) + 5,
+            }))
+          }
+          onDecrement={() =>
+            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+              ...(prev || {}),
+              [item.id]: Math.max(0, (prev?.[item.id] ?? item.amount ?? 0) - 5),
+            }))
+          }
+          label={item.name}
+        />
       </div>
     );
   };
 
-  return (
-    <div className="mb-6 px-4 md:px-0 animate-in fade-in slide-in-from-top-4 duration-500">
+  const annualRevenue = (sim.state.tjm || 0) * (sim.state.days || 0);
 
+  return (
+    <div className="space-y-4 animate-in fade-in duration-300">
       {/* PANNEAU ACTIVITÉ */}
       {activePanel === 'activite' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-indigo-300/60 dark:border-indigo-500/70 px-4 md:px-6 py-5">
-          <div className="flex items-end justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-white/10 rounded-xl text-indigo-200"><Zap size={18} /></div>
-              <h3 className="text-xs font-900 uppercase tracking-widest text-white">Activité</h3>
-            </div>
-            <span className="text-lg font-black text-white tabular-nums">{Math.round((sim.state.tjm || 0) * (sim.state.days || 0)).toLocaleString()} €/an</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
-            <div className="rounded-xl px-3 py-2.5 bg-white/10 border border-white/15 flex items-center justify-between gap-2 text-white">
-              <span className="text-[10px] font-bold uppercase text-white/85">TJM (€/jour)</span>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <input type="number" value={sim.state.tjm ?? ''} onChange={e => { const v = Number(e.target.value); sim.setters.setTjm(Number.isNaN(v) ? 0 : Math.max(0, v)); }} onFocus={e => e.target.select()} className="tjm-days-input w-20 py-1.5 px-2 text-[11px] font-bold rounded-lg bg-white/10 border border-white/20 text-right" placeholder="0" />
-                <div className="flex flex-col gap-0.5">
-                  <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+TJM">▲</button>
-                  <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-TJM">▼</button>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl px-3 py-2.5 bg-white/10 border border-white/15 flex items-center justify-between gap-2 text-white">
-              <span className="text-[10px] font-bold uppercase text-white/85">Jours / an</span>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <input type="number" value={sim.state.days ?? ''} onChange={e => { const v = Number(e.target.value); sim.setters.setDays(Number.isNaN(v) ? 0 : Math.max(0, v)); }} onFocus={e => e.target.select()} className="tjm-days-input w-20 py-1.5 px-2 text-[11px] font-bold rounded-lg bg-white/10 border border-white/20 text-right" placeholder="0" />
-                <div className="flex flex-col gap-0.5">
-                  <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+Jours">▲</button>
-                  <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-Jours">▼</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <>
+          <FieldCard
+            icon={Zap}
+            label="Taux Journalier Moyen (TJM)"
+            description="Votre tarif journalier facturé"
+          >
+            <NumberInput
+              value={sim.state.tjm ?? 0}
+              onChange={(v) => sim.setters.setTjm(v)}
+              onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
+              onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
+              suffix="€"
+              label="TJM"
+            />
+          </FieldCard>
+          <FieldCard
+            icon={Receipt}
+            label="Jours travaillés par an"
+            description="Nombre de jours facturés annuellement"
+          >
+            <NumberInput
+              value={sim.state.days ?? 0}
+              onChange={(v) => sim.setters.setDays(v)}
+              onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
+              onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
+              suffix="j"
+              label="Jours"
+            />
+          </FieldCard>
+          <InfoBox variant="info">
+            Avec un TJM de {sim.state.tjm} € sur {sim.state.days} jours, vous générez un CA annuel de{' '}
+            {annualRevenue.toLocaleString('fr-FR')} €. En micro-entreprise, le plafond est de 77 700 € pour les
+            services.
+          </InfoBox>
+        </>
       )}
 
       {/* PANNEAU CHARGES */}
       {activePanel === 'charges' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-rose-300/60 dark:border-rose-500/70 px-4 md:px-6 py-5">
-
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-white/10 rounded-xl text-emerald-200"><Receipt size={18} /></div>
-              <h3 className="text-xs font-900 uppercase tracking-widest text-white">Charges pro</h3>
-            </div>
-            <div className="flex gap-6">
-              <div className="text-right">
-                <span className="text-[9px] font-bold text-amber-300 uppercase">Portage</span>
-                <p className="text-base font-black text-amber-200 tabular-nums">{Math.round(totalPortageMensuel)} €/mois</p>
-              </div>
-              <div className="text-right">
-                <span className="text-[9px] font-bold text-rose-300 uppercase">EURL · SASU</span>
-                <p className="text-base font-black text-white tabular-nums">{totalDepensesMensuelles} €/mois</p>
-              </div>
+        <>
+          <div>
+            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              Charges déductibles (toutes structures)
+            </h3>
+            <div className="grid gap-3">
+              {nonWarning.map(renderChargeRow)}
             </div>
           </div>
-
-          {/* Grille 5 colonnes — mobile : 1 col, desktop : 5 cols */}
-          <div className="hidden md:grid md:grid-cols-5 md:gap-3">
-
-            {/* Ligne d'en-têtes des groupes */}
-            <div className="col-span-2 pb-1 border-b border-emerald-300/60 mb-1">
-              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-300">Portage · EURL · SASU</span>
-            </div>
-            <div className="col-span-3 pb-1 border-b border-amber-300/60 mb-1">
-              <span className="text-[9px] font-black uppercase tracking-widest text-amber-200">EURL · SASU uniquement</span>
-            </div>
-
-            {/* Ligne 1 : nonWarning[0..1], warning[0..2] */}
-            {renderChargeRow(nonWarning[0])}
-            {renderChargeRow(nonWarning[1])}
-            {renderChargeRow(warning[0])}
-            {renderChargeRow(warning[1])}
-            {renderChargeRow(warning[2])}
-
-            {/* Ligne 2 : nonWarning[2], matériel, warning[3..5] */}
-            {renderChargeRow(nonWarning[2])}
-            {/* Matériel annuel — col 2, ligne 2, même puce que les autres dépenses */}
-            <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Matériel annuel</span>
-                  <span className="text-[9px] text-white/65">amorti 3 ans</span>
-                </div>
-              </div>
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={materielAnnuel}
-                      onChange={e => {
-                        const v = Number(e.target.value);
-                        sim.setters.setMaterielAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
-                      }}
-                      onFocus={e => e.target.select()}
-                      className="tjm-days-input w-20 pr-8 py-1 text-[10px] font-bold text-right"
-                      placeholder="0"
-                    />
-                    <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onMouseDown={() =>
-                        startHold(() =>
-                          sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
-                        )
-                      }
-                      onMouseUp={stopHold}
-                      onMouseLeave={stopHold}
-                      onTouchStart={() =>
-                        startHold(() =>
-                          sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
-                        )
-                      }
-                      onTouchEnd={stopHold}
-                      onTouchCancel={stopHold}
-                      aria-label="Augmenter le matériel annuel"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                      onMouseDown={() =>
-                        startHold(() =>
-                          sim.setters.setMaterielAnnuel((prev: number) =>
-                            Math.max(0, (prev || 0) - 1),
-                          )
-                        )
-                      }
-                      onMouseUp={stopHold}
-                      onMouseLeave={stopHold}
-                      onTouchStart={() =>
-                        startHold(() =>
-                          sim.setters.setMaterielAnnuel((prev: number) =>
-                            Math.max(0, (prev || 0) - 1),
-                          )
-                        )
-                      }
-                      onTouchEnd={stopHold}
-                      onTouchCancel={stopHold}
-                      aria-label="Diminuer le matériel annuel"
-                    >
-                      ▼
-                    </button>
-                  </div>
-                </div>
-            </div>
-            {renderChargeRow(warning[3])}
-            {renderChargeRow(warning[4])}
-            {renderChargeRow(warning[5])}
-
-          </div>
-
-            {/* Mobile : liste verticale avec séparateur entre les groupes */}
-          <div className="md:hidden space-y-2">
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/70">Portage · EURL · SASU</p>
-            {nonWarning.map(renderChargeRow)}
-            {/* Matériel */}
-            <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-800 uppercase tracking-tight text-white/85">Matériel annuel</span>
-                  <span className="text-[9px] text-white/65">amorti 3 ans</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={materielAnnuel}
-                    onChange={e => {
-                      const v = Number(e.target.value);
-                      sim.setters.setMaterielAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
-                    }}
-                    onFocus={e => e.target.select()}
-                    className="tjm-days-input w-20 pr-8 py-1 text-[10px] font-bold text-right"
-                    placeholder="0"
-                  />
-                  <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">€/an</span>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <button
-                    type="button"
-                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onMouseDown={() =>
-                      startHold(() =>
-                        sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
-                      )
-                    }
-                    onMouseUp={stopHold}
-                    onMouseLeave={stopHold}
-                    onTouchStart={() =>
-                      startHold(() =>
-                        sim.setters.setMaterielAnnuel((prev: number) => (prev || 0) + 1)
-                      )
-                    }
-                    onTouchEnd={stopHold}
-                    onTouchCancel={stopHold}
-                    aria-label="Augmenter le matériel annuel"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                    onMouseDown={() =>
-                      startHold(() =>
-                        sim.setters.setMaterielAnnuel((prev: number) =>
-                          Math.max(0, (prev || 0) - 1),
-                        )
-                      )
-                    }
-                    onMouseUp={stopHold}
-                    onMouseLeave={stopHold}
-                    onTouchStart={() =>
-                      startHold(() =>
-                        sim.setters.setMaterielAnnuel((prev: number) =>
-                          Math.max(0, (prev || 0) - 1),
-                        )
-                      )
-                    }
-                    onTouchEnd={stopHold}
-                    onTouchCancel={stopHold}
-                    aria-label="Diminuer le matériel annuel"
-                  >
-                    ▼
-                  </button>
-                </div>
+          {warning.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <Info className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                EURL / SASU uniquement (non déductible en portage)
+              </h3>
+              <div className="grid gap-3">
+                {warning.map(renderChargeRow)}
               </div>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-amber-200 pt-2">EURL · SASU uniquement</p>
-            {warning.map(renderChargeRow)}
-          </div>
+          )}
+        </>
+      )}
 
-        </div>
+      {/* PANNEAU AMORTISSEMENT */}
+      {activePanel === 'amortissement' && (
+        <>
+          <FieldCard
+            icon={Calculator}
+            label="Achat matériel (année 1)"
+            description="Ordinateur, équipement… amorti sur 3 ans (EURL/SASU)"
+          >
+            <NumberInput
+              value={materielAnnuel}
+              onChange={(v) => sim.setters.setMaterielAnnuel(v)}
+              onIncrement={() => sim.setters.setMaterielAnnuel((p: number) => (p || 0) + 100)}
+              onDecrement={() => sim.setters.setMaterielAnnuel((p: number) => Math.max(0, (p || 0) - 100))}
+              suffix="€"
+              label="Achat matériel"
+            />
+          </FieldCard>
+          <InfoBox variant="info">
+            L’achat de matériel (PC, écran, téléphone pro…) peut être amorti sur 3 ans en EURL ou SASU.
+            La déduction est répartie sur 3 exercices. En micro-entreprise et en portage, ce poste n’est pas déductible.
+          </InfoBox>
+        </>
       )}
 
       {/* PANNEAU VÉHICULE */}
-      {activePanel === 'vehicule' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-emerald-300/60 dark:border-emerald-500/70 px-4 md:px-6 py-5">
-          <div className="max-w-xl space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-white/10 rounded-xl text-emerald-200"><Car size={18} /></div>
-              <h3 className="text-xs font-900 uppercase tracking-widest text-white">Indemnités kilométriques</h3>
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-[9px] font-bold text-white/70 uppercase">Type</span>
-              <div className="flex gap-1.5 flex-wrap">
+      {activePanel === 'vehicule' && (() => {
+        const ikEstimate = getIK(
+          kmAnnuel,
+          typeVehicule,
+          typeVehicule === 'cyclo50' ? undefined : cvFiscauxRaw,
+          sim.state.vehiculeElectrique ?? false
+        );
+        return (
+          <>
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
+              <div className="flex gap-3 flex-wrap">
                 {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
-                  const isVoiture = t === 'voiture';
-                  const isMoto = t === 'moto';
-                  const isCyclo = t === 'cyclo50';
-                  const label = isVoiture ? 'Voiture' : isMoto ? 'Moto' : 'Cyclo 50';
-                  const Icon = isVoiture ? Car : isMoto ? Bike : Circle;
+                  const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
+                  const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
                   return (
                     <button
                       key={t}
                       type="button"
                       onClick={() => {
                         sim.setters.setTypeVehicule(t);
-                        if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any)) sim.setters.setCvFiscaux('3-5');
-                        if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any)) sim.setters.setCvFiscaux('6');
+                        if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any))
+                          sim.setters.setCvFiscaux('3-5');
+                        if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any))
+                          sim.setters.setCvFiscaux('6');
                       }}
-                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition ${
+                      className={cn(
+                        'flex-1 min-w-[100px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
                         typeVehicule === t
-                          ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                          : 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10'
-                      }`}
+                          ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                      )}
                     >
-                      <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                      {label}
+                      <Icon className="w-6 h-6" />
+                      <span className="font-medium text-sm">{label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer rounded-xl px-3 py-2 bg-white/5 border border-white/15 hover:bg-white/10 transition">
-              <input
-                type="checkbox"
-                checked={sim.state.vehiculeElectrique ?? false}
-                onChange={e => sim.setters.setVehiculeElectrique(e.target.checked)}
-                className="rounded accent-emerald-500"
-                onClick={e => e.stopPropagation()}
+            <FieldCard
+              icon={Car}
+              label="Kilomètres professionnels annuels"
+              description="Trajets clients, réunions, etc."
+            >
+              <NumberInput
+                value={kmAnnuel}
+                onChange={(v) => sim.setters.setKmAnnuel(v)}
+                onIncrement={() => sim.setters.setKmAnnuel((p: number) => (p || 0) + 500)}
+                onDecrement={() => sim.setters.setKmAnnuel((p: number) => Math.max(0, (p || 0) - 500))}
+                suffix="km"
+                label="Km"
               />
-              <span className="text-[10px] font-bold text-white/90">Véhicule électrique</span>
-              <span className="text-[9px] text-white/60">(+20 % barème URSSAF)</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2 min-w-0">
-                <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-300" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-800 uppercase tracking-tight text-white/85 truncate">Distance annuelle</span>
-                      <span className="text-[9px] text-white/65">km / an</span>
-                    </div>
+            </FieldCard>
+            {typeVehicule === 'voiture' && (
+              <FieldCard
+                icon={Car}
+                label="Puissance fiscale"
+                description="Chevaux fiscaux (barème IK)"
+              >
+                <select
+                  value={cvFiscauxRaw}
+                  onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
+                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30"
+                >
+                  {[3, 4, 5, 6, 7].map((cv) => (
+                    <option key={cv} value={cv}>
+                      {cv} CV
+                    </option>
+                  ))}
+                </select>
+              </FieldCard>
+            )}
+            {typeVehicule === 'moto' && (
+              <FieldCard
+                icon={Bike}
+                label="Bande moto"
+                description="Barème IK"
+              >
+                <select
+                  value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
+                  onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
+                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500"
+                >
+                  {BANDES_MOTO.map((b) => (
+                    <option key={b} value={b}>
+                      {BANDE_MOTO_LABEL[b]}
+                    </option>
+                  ))}
+                </select>
+              </FieldCard>
+            )}
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                    <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={kmAnnuel}
-                        onChange={e => {
-                          const v = Number(e.target.value);
-                          sim.setters.setKmAnnuel(Number.isNaN(v) ? 0 : Math.max(0, v));
-                        }}
-                        onFocus={e => e.target.select()}
-                        className="tjm-days-input w-20 pr-5 py-1 text-[10px] font-bold text-right"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setKmAnnuel((prev: number) => (prev || 0) + 1),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setKmAnnuel((prev: number) => (prev || 0) + 1),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Augmenter la distance annuelle"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setKmAnnuel((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setKmAnnuel((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Diminuer la distance annuelle"
-                      >
-                        ▼
-                      </button>
-                    </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
                   </div>
                 </div>
-              </div>
-              {typeVehicule !== 'cyclo50' && (
-              <div className="space-y-2 min-w-0">
-                <div className="rounded-2xl px-3 py-2 bg-white/10 dark:bg-slate-900/60 border border-white/15 flex items-center justify-between gap-2 text-white min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-300" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-800 uppercase tracking-tight text-white/85 truncate">
-                        {typeVehicule === 'voiture' ? 'Puissance fiscale' : 'Bande moto'}
-                      </span>
-                      <span className="text-[9px] text-white/65">barème IK</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                    {typeVehicule === 'moto' ? (
-                      <select
-                        value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
-                        onChange={e => sim.setters.setCvFiscaux(e.target.value)}
-                        className="tjm-days-input w-full min-w-[72px] px-2 py-1 text-[10px] font-bold rounded-lg bg-white/10 border border-white/25 text-white"
-                      >
-                        {BANDES_MOTO.map((b) => (
-                          <option key={b} value={b} className="text-slate-800">{BANDE_MOTO_LABEL[b]}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={cvFiscaux}
-                            min={cvMin}
-                            max={cvMax}
-                            onChange={e => {
-                              const v = Number(e.target.value);
-                              const next = Math.min(cvMax, Math.max(cvMin, Number.isNaN(v) ? cvMin : v));
-                              sim.setters.setCvFiscaux(String(next));
-                            }}
-                            onFocus={e => e.target.select()}
-                            className="tjm-days-input w-16 pr-6 py-1 text-[10px] font-bold text-right"
-                            placeholder="6"
-                          />
-                          <span className="absolute right-1.5 top-1 text-[8px] font-black text-white/70">CV</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <button
-                            type="button"
-                            className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                            onMouseDown={() =>
-                              startHold(() => {
-                                const next = Math.min(cvMax, (Number(sim.state.cvFiscaux) || 6) + 1);
-                                sim.setters.setCvFiscaux(String(next));
-                              })
-                            }
-                            onMouseUp={stopHold}
-                            onMouseLeave={stopHold}
-                            onTouchStart={() =>
-                              startHold(() => {
-                                const next = Math.min(cvMax, (Number(sim.state.cvFiscaux) || 6) + 1);
-                                sim.setters.setCvFiscaux(String(next));
-                              })
-                            }
-                            onTouchEnd={stopHold}
-                            onTouchCancel={stopHold}
-                            aria-label="Augmenter la puissance fiscale"
-                          >
-                            ▲
-                          </button>
-                          <button
-                            type="button"
-                            className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                            onMouseDown={() =>
-                              startHold(() => {
-                                const next = Math.max(cvMin, (Number(sim.state.cvFiscaux) || 6) - 1);
-                                sim.setters.setCvFiscaux(String(next));
-                              })
-                            }
-                            onMouseUp={stopHold}
-                            onMouseLeave={stopHold}
-                            onTouchStart={() =>
-                              startHold(() => {
-                                const next = Math.max(cvMin, (Number(sim.state.cvFiscaux) || 6) - 1);
-                                sim.setters.setCvFiscaux(String(next));
-                              })
-                            }
-                            onTouchEnd={stopHold}
-                            onTouchCancel={stopHold}
-                            aria-label="Diminuer la puissance fiscale"
-                          >
-                            ▼
-                          </button>
-                        </div>
-                      </>
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
+                  className={cn(
+                    'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
+                    sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                      sim.state.vehiculeElectrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
                     )}
-                  </div>
-                </div>
+                  />
+                </button>
               </div>
-              )}
             </div>
-          </div>
-          <Link
-            href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
-            className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-200 hover:text-white transition-colors"
-          >
-            <Calculator className="w-3.5 h-3.5" />
-            Simuler le barème en détail
-          </Link>
-          <p className="mt-2 text-[9px] text-white/60">Barème URSSAF · charge entreprise, net pour vous (exonéré cotis. et IR).</p>
-        </div>
-      )}
+            <Link
+              href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            >
+              <Calculator className="w-4 h-4" />
+              Simuler le barème en détail
+            </Link>
+            <InfoBox variant="info">
+              Les indemnités kilométriques suivent le barème URSSAF : déductibles pour l&apos;entreprise (EURL/SASU) et
+              exonérées de cotisations et d&apos;impôt sur le revenu pour vous.
+            </InfoBox>
+          </>
+        );
+      })()}
 
       {/* PANNEAU OPTIMISATIONS */}
       {activePanel === 'opti' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-emerald-300/60 dark:border-emerald-500/70 px-4 md:px-6 py-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/10 rounded-xl text-blue-200"><Home size={18} /></div>
-                <h3 className="text-xs font-900 uppercase tracking-widest text-white">Loyer perçu</h3>
-              </div>
-              <div className="rounded-xl px-3 py-2.5 bg-white/10 border border-white/15 flex items-center justify-between gap-2 text-white">
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-white/85">Mensuel TTC</span>
-                  <span className="text-[9px] text-white/60 block">{loyerPercu > 0 ? `${loyerAnnuel.toLocaleString()} €/an` : '—'}</span>
-                </div>
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  <input
-                    type="number"
-                    value={loyerPercu}
-                    onChange={e => { const v = Number(e.target.value); sim.setters.setLoyerPercu(Number.isNaN(v) ? 0 : Math.max(0, v)); }}
-                    onFocus={e => e.target.select()}
-                    className="tjm-days-input w-20 py-1.5 px-2 text-[11px] font-bold rounded-lg bg-white/10 border border-white/20 text-right"
-                    placeholder="0"
-                  />
-                    <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setLoyerPercu((prev: number) => (prev || 0) + 1),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setLoyerPercu((prev: number) => (prev || 0) + 1),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Augmenter le loyer perçu"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setLoyerPercu((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setLoyerPercu((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Diminuer le loyer perçu"
-                      >
-                        ▼
-                      </button>
-                    </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/10 rounded-xl text-violet-200"><Gift size={18} /></div>
-                <h3 className="text-xs font-900 uppercase tracking-widest text-white">Avantages</h3>
-              </div>
-              <div className="rounded-xl px-3 py-2.5 bg-white/10 border border-white/15 flex items-center justify-between gap-2 text-white">
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-white/85">Annuel (CE, chèques vacances…)</span>
-                  <span className="text-[9px] text-white/60 block">{avantagesOptimises > 0 ? `${Math.round(avantagesMensuel)} €/mois` : '—'}</span>
-                </div>
-                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                  <input
-                    type="number"
-                    value={avantagesOptimises}
-                    onChange={e => { const v = Number(e.target.value); sim.setters.setAvantagesOptimises(Number.isNaN(v) ? 0 : Math.max(0, v)); }}
-                    onFocus={e => e.target.select()}
-                    className="tjm-days-input w-20 py-1.5 px-2 text-[11px] font-bold rounded-lg bg-white/10 border border-white/20 text-right"
-                    placeholder="1500"
-                  />
-                  <div className="flex flex-col gap-0.5">
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setAvantagesOptimises(
-                              (prev: number) => (prev || 0) + 1,
-                            ),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setAvantagesOptimises(
-                              (prev: number) => (prev || 0) + 1,
-                            ),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Augmenter les avantages optimisés"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        className="w-5 h-3 rounded-sm bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white"
-                        onMouseDown={() =>
-                          startHold(() =>
-                            sim.setters.setAvantagesOptimises((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onMouseUp={stopHold}
-                        onMouseLeave={stopHold}
-                        onTouchStart={() =>
-                          startHold(() =>
-                            sim.setters.setAvantagesOptimises((prev: number) =>
-                              Math.max(0, (prev || 0) - 1),
-                            ),
-                          )
-                        }
-                        onTouchEnd={stopHold}
-                        onTouchCancel={stopHold}
-                        aria-label="Diminuer les avantages optimisés"
-                      >
-                        ▼
-                      </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p className="mt-3 text-[10px] text-white/70 italic font-medium text-center">
-            Loyer perçu (location à son entreprise) et avantages CE/CSE (chèques vacances, etc.) sont des leviers d&apos;optimisation — réinjectés en revenu net dans les plafonds légaux.
-          </p>
-        </div>
+        <>
+          <FieldCard
+            icon={Home}
+            label="Loyer perçu (sous-location bureau)"
+            description="Si vous louez une partie de votre domicile à votre société"
+          >
+            <NumberInput
+              value={loyerPercu}
+              onChange={(v) => sim.setters.setLoyerPercu(v)}
+              onIncrement={() => sim.setters.setLoyerPercu((p: number) => (p || 0) + 50)}
+              onDecrement={() => sim.setters.setLoyerPercu((p: number) => Math.max(0, (p || 0) - 50))}
+              suffix="€"
+              label="Loyer"
+            />
+          </FieldCard>
+          <FieldCard
+            icon={Gift}
+            label="Avantages optimisés"
+            description="CE, CSE, chèques vacances…"
+          >
+            <NumberInput
+              value={avantagesOptimises}
+              onChange={(v) => sim.setters.setAvantagesOptimises(v)}
+              onIncrement={() => sim.setters.setAvantagesOptimises((p: number) => (p || 0) + 100)}
+              onDecrement={() =>
+                sim.setters.setAvantagesOptimises((p: number) => Math.max(0, (p || 0) - 100))
+              }
+              suffix="€"
+              label="Avantages"
+            />
+          </FieldCard>
+          <InfoBox variant="info">
+            Loyer perçu (location à son entreprise) et avantages CE/CSE (chèques vacances, etc.) sont
+            des leviers d&apos;optimisation — réinjectés en revenu net dans les plafonds légaux.
+          </InfoBox>
+        </>
       )}
 
       {/* PANNEAU COTISATIONS (ACRE + CFE) */}
       {activePanel === 'cotisations' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-indigo-300/60 dark:border-indigo-500/70 px-4 md:px-6 py-5 md:py-6">
-          <div className="max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/10 rounded-xl text-emerald-200"><ShieldCheck size={18} /></div>
-                <h3 className="text-xs font-900 uppercase tracking-widest text-white">ACRE</h3>
+        <>
+          {/* Ligne ACRE */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               </div>
+              <h3 className="font-semibold text-slate-900 dark:text-white">ACRE</h3>
+            </div>
+            <div
+              onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
+              className="flex items-center justify-between rounded-xl px-4 py-3 border-2 cursor-pointer transition-colors bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600"
+            >
+              <p className="font-semibold text-slate-900 dark:text-white">Allègement an 1</p>
               <div
-                onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
-                className={`flex items-center justify-between rounded-xl px-3 py-2.5 border cursor-pointer transition-colors ${
-                  sim.state.acreEnabled ? 'bg-emerald-500/20 border-emerald-300/70' : 'bg-white/5 border-white/15'
-                }`}
+                className={cn(
+                  'w-12 h-7 rounded-full flex items-center transition-colors',
+                  sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                )}
               >
-                <p className="text-[10px] font-black uppercase text-white/90">Allègement an 1</p>
-                <div className={`w-9 h-5 rounded-full flex items-center transition-colors ${sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}>
-                  <div className={`w-4 h-4 bg-white rounded-full shadow mx-0.5 transition-transform ${sim.state.acreEnabled ? 'translate-x-4' : ''}`} />
-                </div>
+                <div
+                  className={cn(
+                    'w-5 h-5 bg-white rounded-full shadow mx-0.5 transition-transform',
+                    sim.state.acreEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                  )}
+                />
               </div>
-              <p className="text-[9px] text-white/60">≈ −50 % cotis. an 1 (hors CSG/CRDS)</p>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/10 rounded-xl text-rose-200"><Building2 size={18} /></div>
-                <h3 className="text-xs font-900 uppercase tracking-widest text-white">CFE</h3>
-              </div>
-              <label className="block text-[9px] font-bold text-white/75 uppercase">Taille de la ville</label>
-              <select
-                value={currentCity}
-                onChange={e => sim.setters.setCitySize(e.target.value)}
-                className="w-full max-w-[200px] p-2 text-[11px] font-bold rounded-lg border border-white/30 bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400/70"
-              >
-                {CITY_ORDER.map(key => (
-                  <option key={key} value={key} className="bg-white text-slate-900">{CITY_LABEL[key]}</option>
-                ))}
-              </select>
-              <p className="text-[9px] text-white/60">0 € an 1 (création), puis selon ville.</p>
-            </div>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              ≈ −50 % cotis. an 1 (hors CSG/CRDS)
+            </p>
           </div>
-        </div>
+
+          {/* Ligne CFE */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+              </div>
+              <h3 className="font-semibold text-slate-900 dark:text-white">CFE</h3>
+            </div>
+            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
+              Taille de la ville (CFE)
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {CITY_OPTIONS.map(({ key, label, amount }) => {
+                const isSelected = currentCity === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => sim.setters.setCitySize(key)}
+                    className={cn(
+                      'flex-1 min-w-[100px] p-4 rounded-xl border-2 text-left transition-all',
+                      isSelected
+                        ? 'bg-violet-50 dark:bg-violet-950/30 border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
+                    )}
+                  >
+                    <p className="font-semibold">{label}</p>
+                    <p className={cn(
+                      'text-sm mt-0.5',
+                      isSelected ? 'text-violet-600 dark:text-violet-400' : 'text-slate-500 dark:text-slate-400'
+                    )}>
+                      {amount}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+              0 € an 1 (création), puis selon ville.
+            </p>
+          </div>
+          <InfoBox variant="info">
+            Les cotisations sociales sont calculées selon la structure choisie. ACRE et CFE
+            s&apos;appliquent aux créations et reprises d&apos;entreprise.
+          </InfoBox>
+        </>
       )}
 
       {/* PANNEAU FOYER (Situation familiale — IR) */}
       {activePanel === 'foyer' && (
-        <div className="card-pro mt-3 md:mt-4 bg-white/10 dark:bg-slate-900/60 text-white border border-amber-300/70 dark:border-amber-500/70 px-4 md:px-6 py-5 md:py-6">
-          <div className="max-w-xl space-y-5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-white/10 rounded-xl text-amber-200"><Users size={18} /></div>
-                <h3 className="text-xs font-900 uppercase tracking-widest text-white">Situation familiale</h3>
-              </div>
-              <span className="px-2 py-1 rounded-full bg-amber-500/20 text-[9px] font-black uppercase">{sim.state.taxParts} parts</span>
+        <>
+          <div className="w-full p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <p className="font-semibold text-slate-900 dark:text-white">Situation familiale</p>
+              <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold">
+                {sim.state.taxParts} parts
+              </span>
             </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="inline-flex rounded-lg bg-white/5 p-1 border border-white/15">
-                <button
-                  type="button"
-                  onClick={() => sim.setters.setNbAdultes(1)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-[10px] font-bold uppercase transition-colors ${sim.state.nbAdultes === 1 ? 'bg-amber-500 text-white' : 'text-white/70 hover:bg-white/10'}`}
-                >
-                  <User className="w-3.5 h-3.5" /> Célibataire
-                </button>
-                <button
-                  type="button"
-                  onClick={() => sim.setters.setNbAdultes(2)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-[10px] font-bold uppercase transition-colors ${sim.state.nbAdultes === 2 ? 'bg-amber-500 text-white' : 'text-white/70 hover:bg-white/10'}`}
-                >
-                  <Users className="w-3.5 h-3.5" /> Couple
-                </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Composition du foyer</span>
+                <div className="inline-flex w-fit rounded-xl bg-slate-100 dark:bg-slate-700 p-1 gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => sim.setters.setNbAdultes(1)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors',
+                      sim.state.nbAdultes === 1
+                        ? 'bg-slate-700 dark:bg-slate-600 text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    )}
+                  >
+                    <User className="w-4 h-4" /> Célibataire
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => sim.setters.setNbAdultes(2)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors',
+                      sim.state.nbAdultes === 2
+                        ? 'bg-slate-700 dark:bg-slate-600 text-white'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    )}
+                  >
+                    <Users className="w-4 h-4" /> Couple
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-white/75 uppercase">Enfants</span>
-                <button type="button" onClick={() => sim.setters.setNbEnfants(Math.max(0, sim.state.nbEnfants - 1))} className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 flex items-center justify-center" aria-label="Moins">−</button>
-                <span className="min-w-6 text-center font-900 text-white tabular-nums">{sim.state.nbEnfants}</span>
-                <button type="button" onClick={() => sim.setters.setNbEnfants(Math.min(6, sim.state.nbEnfants + 1))} className="w-7 h-7 rounded-full bg-white/10 font-black text-white hover:bg-amber-500/90 flex items-center justify-center" aria-label="Plus">+</button>
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Enfants</span>
+                <div className="flex items-center gap-2 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => sim.setters.setNbEnfants(Math.max(0, (sim.state.nbEnfants ?? 0) - 1))}
+                    className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                    aria-label="Moins d’enfants"
+                  >
+                    <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                  </button>
+                  <span className="min-w-8 text-center font-semibold text-slate-900 dark:text-white tabular-nums">
+                    {sim.state.nbEnfants ?? 0}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => sim.setters.setNbEnfants(Math.min(6, (sim.state.nbEnfants ?? 0) + 1))}
+                    className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                    aria-label="Plus d’enfants"
+                  >
+                    <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="rounded-xl px-3 py-2.5 bg-white/10 border border-white/15 flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-bold uppercase text-white/85">Revenus conjoint</span>
-                <span className="text-[9px] text-white/60 block">{spouseIncome.toLocaleString()} €/an</span>
-              </div>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <input
-                  type="number"
-                  value={spouseIncome}
-                  onChange={e => { const v = Number(e.target.value); sim.setters.setSpouseIncome(Number.isNaN(v) ? 0 : Math.max(0, v)); }}
-                  onFocus={e => e.target.select()}
-                  className="tjm-days-input w-24 py-1.5 px-2 text-[11px] font-bold rounded-lg bg-white/10 border border-white/20 text-right"
-                  placeholder="0"
-                  disabled={sim.state.nbAdultes < 2}
-                />
-                <span className="text-[8px] text-white/60">€/an</span>
-              </div>
-            </div>
-            {sim.state.nbAdultes < 2 && <p className="text-[9px] text-white/60 italic">Mode Couple pour saisir le conjoint.</p>}
+            {sim.state.nbAdultes < 2 && (
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400 italic">
+                Passez en mode Couple pour saisir les revenus du conjoint.
+              </p>
+            )}
           </div>
-        </div>
+          <FieldCard
+            icon={Users}
+            label="Revenus du conjoint"
+            description="Pour le calcul du quotient familial"
+          >
+            <NumberInput
+              value={spouseIncome}
+              onChange={(v) => sim.setters.setSpouseIncome(v)}
+              onIncrement={() => sim.setters.setSpouseIncome((p: number) => (p || 0) + 1000)}
+              onDecrement={() => sim.setters.setSpouseIncome((p: number) => Math.max(0, (p || 0) - 1000))}
+              suffix="€"
+              label="Revenus conjoint"
+              disabled={sim.state.nbAdultes < 2}
+            />
+          </FieldCard>
+          <InfoBox variant="info">
+            Le quotient familial impacte le calcul de l&apos;impôt sur le revenu.
+          </InfoBox>
+        </>
       )}
     </div>
   );

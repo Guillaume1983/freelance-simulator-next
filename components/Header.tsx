@@ -93,7 +93,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
   };
 
   return (
-    <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-100">
+    <nav className="bg-white dark:bg-slate-900/90 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 sticky top-0 z-[100]">
       {/* Barre principale */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-4">
         {/* LOGO */}
@@ -126,7 +126,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               <ChevronDown size={12} className={simulateurOpen ? 'rotate-180' : ''} />
             </button>
             {simulateurOpen && (
-              <div className="absolute left-0 top-full mt-1 w-44 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50">
+              <div className="absolute left-0 top-full mt-1 w-44 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50">
                 {SIMULATEUR_LINKS.map((link) => (
                   <Link
                     key={link.href}
@@ -155,7 +155,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               <ChevronDown size={12} className={outilsOpen ? 'rotate-180' : ''} />
             </button>
             {outilsOpen && (
-              <div className="absolute left-0 top-full mt-1 w-52 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50">
+              <div className="absolute left-0 top-full mt-1 w-52 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50">
                 {OUTILS_LINKS.map((link) => (
                   <Link
                     key={link.href}
@@ -234,7 +234,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-[#0f172a] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden z-50">
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                     <p className="text-[11px] font-black text-slate-800 dark:text-white truncate">
                       {user && getDisplayName(user)}

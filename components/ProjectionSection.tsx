@@ -24,7 +24,7 @@ function ScrollDots({ total, active, color }: { total: number; active: number; c
 }
 
 /* ── Style unifié pour tous les boutons export PDF ── */
-const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
+const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage':  '#6366f1',
@@ -266,7 +266,7 @@ export default function ProjectionSection({
   };
 
   return (
-    <div className="card-pro overflow-visible mt-6 md:mt-8 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
+    <div className="overflow-visible mt-6 md:mt-8 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
 
       {/* ── Barre de contrôle : une ligne (croissance + paramètres statut) ── */}
       <div className="px-4 md:px-6 py-3 flex flex-wrap items-center gap-4 md:gap-6 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
@@ -497,7 +497,7 @@ export default function ProjectionSection({
             return (
               <div
                 key={i}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-2xl bg-white dark:bg-[#020617] border shadow-lg"
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-lg"
               >
                 {/* Bande couleur + header */}
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
@@ -585,7 +585,7 @@ export default function ProjectionSection({
       {/* Bloc analyse + CTA Je me lance */}
       {PROJECTION_ANALYSIS[activeRegime] && (
         <div className="px-4 md:px-6 pt-2 pb-3">
-          <div className="max-w-[1600px] mx-auto mt-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-950/95 px-4 md:px-6 py-4 md:py-5">
+          <div className="max-w-[1600px] mx-auto mt-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 md:px-6 py-4 md:py-5">
             <div className="space-y-2">
               <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
                 Analyse sur 5 ans
@@ -643,7 +643,7 @@ export default function ProjectionSection({
 
       {/* Hypothèses principales (mêmes que le comparatif) */}
       <div className="px-4 md:px-6 pb-2">
-        <div className="mt-4 max-w-[1600px] mx-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 px-4 py-2">
+        <div className="mt-4 max-w-[1600px] mx-auto rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2">
           <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
             <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
               Hypothèses principales

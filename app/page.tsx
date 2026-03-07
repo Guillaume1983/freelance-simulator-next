@@ -86,35 +86,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Bénéfices en 3 points */}
-        <section className="relative z-10 max-w-[1000px] mx-auto px-4 md:px-6 py-12 md:py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-5 md:p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
-                <BarChart3 className="w-6 h-6" />
+        {/* Bénéfices en 3 points — fond pastel, cartes design system */}
+        <section className="relative z-10 bg-page-settings py-12 md:py-16">
+          <div className="max-w-[1000px] mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              <div className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
+                  <BarChart3 className="w-6 h-6" />
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Comparateur</h3>
+                <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
+                  Comparez les 5 statuts sur un même profil et voyez le net annuel ou mensuel.
+                </p>
               </div>
-              <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Comparateur</h3>
-              <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                Comparez les 5 statuts sur un même profil et voyez le net annuel ou mensuel.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-5 md:p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
-                <TrendingUp className="w-6 h-6" />
+              <div className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors">
+                <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Projection 5 ans</h3>
+                <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
+                  Simulez un statut sur 5 ans avec ACRE, CFE et taux de croissance du CA.
+                </p>
               </div>
-              <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Projection 5 ans</h3>
-              <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                Simulez un statut sur 5 ans avec ACRE, CFE et taux de croissance du CA.
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 p-5 md:p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
-                <BookOpen className="w-6 h-6" />
+              <div className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                <div className="w-12 h-12 mx-auto rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Guides</h3>
+                <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
+                  Articles pour comprendre les statuts et tirer parti du simulateur.
+                </p>
               </div>
-              <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Guides</h3>
-              <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                Articles pour comprendre les statuts et tirer parti du simulateur.
-              </p>
             </div>
           </div>
         </section>

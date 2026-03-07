@@ -235,7 +235,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   );
 
   return (
-    <div className="card-pro overflow-visible mt-6 md:mt-8 border-none shadow-2xl bg-white dark:bg-[#0f172a]">
+    <div className="overflow-visible mt-6 md:mt-8 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
 
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">

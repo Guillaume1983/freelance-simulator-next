@@ -1,92 +1,79 @@
 'use client';
 
-import { useRef } from 'react';
+import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ComparisonTable from '@/components/ComparisonTable';
 import Footer from '@/components/Footer';
+import NumberInput from '@/components/NumberInput';
+import { BarChart3, Settings } from 'lucide-react';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
 
-  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startHold = (fn: () => void) => {
-    fn();
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    holdDelayRef.current = setTimeout(() => { holdTimerRef.current = setInterval(fn, 120); }, 300);
-  };
-  const stopHold = () => {
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    holdDelayRef.current = null;
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    holdTimerRef.current = null;
-  };
-
   return (
     <>
-      <div className="page-blob-1" aria-hidden />
-      <div className="page-blob-2" aria-hidden />
-      <div className="bg-page-grid" aria-hidden />
+      <div className="top-accent-bar" aria-hidden />
 
-      <main className="relative z-10 min-h-screen">
-        <div className="top-accent-bar" aria-hidden />
-
-        <section
-          id="parametres"
-          className="section-projection-hero w-full pt-6 pb-4 md:pt-8 md:pb-6"
-          aria-label="Comparatif des statuts freelance"
-        >
-          <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
-            <div className="flex-1 min-w-0 flex flex-col items-start justify-end">
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-                Comparatif des statuts
-              </h1>
-              <p className="text-[10px] text-indigo-200 font-bold mt-0.5">
-                Ajustez TJM et jours — le tableau se met à jour en temps réel
-              </p>
-            </div>
-            <div className="flex-1 flex justify-center items-end">
-              <div className="flex flex-wrap items-center justify-center gap-4 text-white">
-                <div className="flex items-center gap-1.5">
-                  <label className="text-[10px] font-bold text-white/90 uppercase">TJM</label>
-                  <input
-                    type="number"
-                    value={sim.state.tjm ?? ''}
-                    onChange={(e) => sim.setters.setTjm(Math.max(0, Number(e.target.value) || 0))}
-                    onFocus={(e) => (e.target as HTMLInputElement).select()}
-                    className="tjm-days-input w-16 py-1 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white"
+      <main className="min-h-screen bg-page-settings">
+        {/* En-tête + paramètres dans une carte blanche */}
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6 pt-6 pb-4 md:pt-8 md:pb-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                  <BarChart3 className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                  Comparatif des statuts
+                </h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Ajustez TJM et jours — le tableau se met à jour en temps réel
+                </p>
+                <Link
+                  href="/reglages"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                >
+                  <Settings size={16} />
+                  Paramètres
+                </Link>
+              </div>
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
+                    TJM (€/jour)
+                  </label>
+                  <NumberInput
+                    value={sim.state.tjm ?? 0}
+                    onChange={(v) => sim.setters.setTjm(v)}
+                    onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
+                    onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
+                    suffix="€"
+                    label="TJM"
                   />
-                  <div className="flex flex-col gap-0.5">
-                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+TJM">▲</button>
-                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-TJM">▼</button>
-                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <label className="text-[10px] font-bold text-white/90 uppercase">Jours</label>
-                  <input
-                    type="number"
-                    value={sim.state.days ?? ''}
-                    onChange={(e) => sim.setters.setDays(Math.max(0, Number(e.target.value) || 0))}
-                    onFocus={(e) => (e.target as HTMLInputElement).select()}
-                    className="tjm-days-input w-16 py-1 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white"
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
+                    Jours / an
+                  </label>
+                  <NumberInput
+                    value={sim.state.days ?? 0}
+                    onChange={(v) => sim.setters.setDays(v)}
+                    onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
+                    onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
+                    suffix="j"
+                    label="Jours"
                   />
-                  <div className="flex flex-col gap-0.5">
-                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => (p || 0) + 1))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+Jours">▲</button>
-                    <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-Jours">▼</button>
-                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex-1 min-w-0 hidden sm:block" aria-hidden />
           </div>
-        </section>
+        </div>
 
         <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 pb-8">
           <ComparisonTable sim={sim} />
         </div>
 
-        <Footer />
+        <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+          <Footer />
+        </div>
       </main>
     </>
   );

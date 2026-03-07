@@ -3,10 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Car, Bike, Circle, ArrowLeft, ExternalLink, CheckCircle2 } from 'lucide-react';
-import { getIKDetail, type TypeVehiculeIK } from '@/lib/financial/rates';
+import { Car, Bike, Circle, ArrowLeft, ExternalLink } from 'lucide-react';
+import { getIK, getIKDetail, type TypeVehiculeIK } from '@/lib/financial/rates';
 import { useSimulationContext } from '@/context/SimulationContext';
+import NumberInput from '@/components/NumberInput';
 import Footer from '@/components/Footer';
+import { cn } from '@/lib/utils';
 
 const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
 const BANDE_MOTO_LABEL: Record<string, string> = { '1-2': '1–2 cv', '3-5': '3–5 cv', '5+': '5+ cv' };
@@ -31,7 +33,6 @@ export default function IndemnitesKmPage() {
   const [cvOrBande, setCvOrBande] = useState('6');
   const [electrique, setElectrique] = useState(false);
 
-  // Préremplir depuis l’URL
   useEffect(() => {
     const ikKm = searchParams.get('ik_km');
     const ikType = searchParams.get('ik_type');
@@ -43,7 +44,6 @@ export default function IndemnitesKmPage() {
     if (ikElec === '1' || ikElec === 'true') setElectrique(true);
   }, [searchParams]);
 
-  // Préremplir depuis les paramètres de simulation (si pas d’params URL)
   useEffect(() => {
     if (searchParams.get('ik_km') != null) return;
     setKm(sim?.state?.kmAnnuel ?? 10000);
@@ -52,6 +52,10 @@ export default function IndemnitesKmPage() {
     setElectrique(!!sim?.state?.vehiculeElectrique);
   }, [searchParams.get('ik_km'), sim?.state?.kmAnnuel, sim?.state?.typeVehicule, sim?.state?.cvFiscaux, sim?.state?.vehiculeElectrique]);
 
+  const ikEstimate = useMemo(
+    () => getIK(km, type, type === 'cyclo50' ? undefined : cvOrBande, electrique),
+    [km, type, cvOrBande, electrique]
+  );
   const detail = useMemo(
     () => getIKDetail(km, type, type === 'cyclo50' ? undefined : cvOrBande, electrique),
     [km, type, cvOrBande, electrique]
@@ -68,138 +72,207 @@ export default function IndemnitesKmPage() {
   };
 
   return (
-    <>
-      <main className="relative z-10 min-h-screen bg-white dark:bg-slate-950">
-        <div className="top-accent-bar" aria-hidden />
+    <main className="min-h-screen bg-page-settings">
+      <div className="top-accent-bar" aria-hidden />
 
-        <div className="max-w-[640px] mx-auto px-4 md:px-6 py-8 md:py-10">
-          <Link
-            href="/reglages"
-            className="inline-flex items-center gap-2 text-[13px] font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-6"
-          >
-            <ArrowLeft size={16} />
-            Retour aux paramètres
-          </Link>
+      <div className="max-w-[900px] mx-auto px-4 md:px-6 py-8 md:py-10">
+        <Link
+          href="/reglages"
+          className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-6"
+        >
+          <ArrowLeft size={16} />
+          Retour aux paramètres
+        </Link>
 
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Simulateur d’indemnités kilométriques
-          </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Barème URSSAF (arr. 27 mars 2023). Ces montants sont déductibles dans le cadre de votre activité.
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          Indemnités kilométriques
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023).
+        </p>
+
+        {/* Contenu calqué sur l’onglet Véhicule des paramètres */}
+        <div className="mt-6 space-y-4">
+          {/* Type de véhicule */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
+            <div className="flex gap-3 flex-wrap">
+              {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
+                const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
+                const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      setType(t);
+                      if (t === 'moto' && !BANDES_MOTO.includes(cvOrBande as any)) setCvOrBande('3-5');
+                      if (t === 'voiture' && BANDES_MOTO.includes(cvOrBande as any)) setCvOrBande('6');
+                    }}
+                    className={cn(
+                      'flex-1 min-w-[100px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                      type === t
+                        ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+                    )}
+                  >
+                    <Icon className="w-6 h-6" />
+                    <span className="font-medium text-sm">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Kilomètres annuels — FieldCard style */}
+          <div className="p-5 rounded-xl border-2 transition-all bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                  <Car className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-white">Kilomètres professionnels annuels</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Trajets clients, réunions, etc.</p>
+                </div>
+              </div>
+              <div className="shrink-0">
+                <NumberInput
+                  value={km}
+                  onChange={setKm}
+                  onIncrement={() => setKm((p) => p + 500)}
+                  onDecrement={() => setKm((p) => Math.max(0, p - 500))}
+                  suffix="km"
+                  label="Km"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Puissance fiscale (voiture) */}
+          {type === 'voiture' && (
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                    <Car className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">Puissance fiscale</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Chevaux fiscaux (barème IK)</p>
+                  </div>
+                </div>
+                <select
+                  value={cvOrBande}
+                  onChange={(e) => setCvOrBande(e.target.value)}
+                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 shrink-0"
+                >
+                  {[3, 4, 5, 6, 7].map((cv) => (
+                    <option key={cv} value={cv}>{cv} CV</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Bande moto */}
+          {type === 'moto' && (
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0">
+                    <Bike className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">Bande moto</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Barème IK</p>
+                  </div>
+                </div>
+                <select
+                  value={BANDES_MOTO.includes(cvOrBande as any) ? cvOrBande : '3-5'}
+                  onChange={(e) => setCvOrBande(e.target.value)}
+                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500 shrink-0"
+                >
+                  {BANDES_MOTO.map((b) => (
+                    <option key={b} value={b}>{BANDE_MOTO_LABEL[b]}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Véhicule électrique — même bloc que l’onglet Véhicule */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                  <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setElectrique(!electrique)}
+                className={cn(
+                  'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
+                  electrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
+                )}
+              >
+                <span
+                  className={cn(
+                    'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                    electrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Carte récap — même gradient que l’onglet Véhicule */}
+          <div className="p-5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sky-100 text-sm font-medium">Indemnités kilométriques estimées</p>
+                <p className="text-3xl font-bold mt-1 tabular-nums">
+                  {Math.round(ikEstimate).toLocaleString('fr-FR')} €/an
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sky-100 text-sm font-medium">Mensuel</p>
+                <p className="text-xl font-bold mt-1 tabular-nums">
+                  {Math.round(ikEstimate / 12).toLocaleString('fr-FR')} €
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Détail par tranche (spécifique à cette page) */}
+          {detail.tranches.some((t) => t.montant > 0) && (
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Détail par tranche</p>
+              <div className="space-y-1.5">
+                {detail.tranches.filter((t) => t.montant > 0).map((t, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="text-slate-600 dark:text-slate-400">{t.label}</span>
+                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">{t.montant.toLocaleString('fr-FR')} €</span>
+                  </div>
+                ))}
+              </div>
+              {electrique && (
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Dont majoration +20 % véhicule électrique.</p>
+              )}
+            </div>
+          )}
+
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Barème URSSAF · charge entreprise, net pour vous (exonéré cotis. et IR).
           </p>
 
-          <div className="mt-8 p-5 md:p-6 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-5">
-            <div>
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Type de véhicule</span>
-              <div className="flex gap-2 mt-1.5 flex-wrap">
-                {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
-                  const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
-                  const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        setType(t);
-                        if (t === 'moto' && !BANDES_MOTO.includes(cvOrBande as any)) setCvOrBande('3-5');
-                        if (t === 'voiture' && BANDES_MOTO.includes(cvOrBande as any)) setCvOrBande('6');
-                      }}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold border transition ${
-                        type === t
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {type !== 'cyclo50' && (
-              <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
-                  {type === 'voiture' ? 'Puissance fiscale' : 'Bande moto'}
-                </label>
-                {type === 'voiture' ? (
-                  <div className="flex gap-2 mt-1.5 flex-wrap">
-                    {['3', '4', '5', '6', '7'].map((cv) => (
-                      <button
-                        key={cv}
-                        type="button"
-                        onClick={() => setCvOrBande(cv)}
-                        className={`px-3 py-2 rounded-xl text-[12px] font-bold border transition ${
-                          cvOrBande === cv
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {cv} cv
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <select
-                    value={cvOrBande}
-                    onChange={(e) => setCvOrBande(e.target.value)}
-                    className="mt-1.5 w-full max-w-[160px] px-3 py-2 rounded-xl text-[13px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white"
-                  >
-                    {BANDES_MOTO.map((b) => (
-                      <option key={b} value={b}>{BANDE_MOTO_LABEL[b]}</option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            )}
-
-            <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Distance annuelle (km)</label>
-              <input
-                type="number"
-                value={km}
-                onChange={(e) => setKm(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                onFocus={(e) => e.target.select()}
-                className="mt-1.5 w-full max-w-[140px] px-3 py-2 rounded-xl text-[14px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white"
-                min={0}
-              />
-            </div>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={electrique}
-                onChange={(e) => setElectrique(e.target.checked)}
-                className="rounded accent-indigo-600"
-              />
-              <span className="text-[13px] font-bold text-slate-700 dark:text-slate-300">Véhicule électrique</span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">(+20 % barème)</span>
-            </label>
-          </div>
-
-          <div className="mt-6 p-5 md:p-6 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              <h2 className="text-sm font-black uppercase tracking-wide text-indigo-900 dark:text-indigo-100">Résultat</h2>
-            </div>
-            <p className="text-2xl md:text-3xl font-black text-indigo-700 dark:text-indigo-300">
-              {Math.round(detail.total).toLocaleString('fr-FR')} € <span className="text-base font-bold text-indigo-600 dark:text-indigo-400">/ an</span>
-            </p>
-            {detail.majorationElectrique && (
-              <p className="mt-1 text-[12px] text-indigo-600 dark:text-indigo-400">Dont majoration +20 % véhicule électrique</p>
-            )}
-            <div className="mt-4 pt-4 border-t border-indigo-200 dark:border-indigo-800 space-y-2">
-              {detail.tranches.filter((t) => t.montant > 0).map((t, i) => (
-                <div key={i} className="flex justify-between text-[12px]">
-                  <span className="text-slate-600 dark:text-slate-400">{t.label}</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{t.montant.toLocaleString('fr-FR')} €</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <button
               type="button"
               onClick={applyToReglages}
@@ -215,16 +288,12 @@ export default function IndemnitesKmPage() {
               Modifier les paramètres
             </Link>
           </div>
-
-          <p className="mt-6 text-[11px] text-slate-500 dark:text-slate-400">
-            Ces paramètres (véhicule, km, puissance) sont les mêmes que dans l’onglet <strong>Véhicule</strong> des paramètres de simulation. En cliquant sur « Appliquer », ils seront recopiés dans vos réglages et utilisés pour le comparateur et les projections 5 ans.
-          </p>
         </div>
+      </div>
 
-        <div className="bg-white dark:bg-slate-950 mt-12">
-          <Footer />
-        </div>
-      </main>
-    </>
+      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 mt-12">
+        <Footer />
+      </div>
+    </main>
   );
 }
