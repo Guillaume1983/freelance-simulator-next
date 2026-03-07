@@ -277,6 +277,34 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 })}
               </div>
             </div>
+            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                    <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
+                  className={cn(
+                    'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
+                    sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                      sim.state.vehiculeElectrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
             <FieldCard
               icon={Car}
               label="Kilomètres professionnels annuels"
@@ -329,34 +357,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </select>
               </FieldCard>
             )}
-            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                    <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
-                  className={cn(
-                    'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
-                    sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
-                      sim.state.vehiculeElectrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
-                    )}
-                  />
-                </button>
-              </div>
-            </div>
             <Link
               href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
               className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"

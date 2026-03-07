@@ -13,7 +13,6 @@ export default function Home() {
       <div className="bg-page-grid" aria-hidden />
 
       <main className="relative z-10 min-h-screen">
-        <div className="top-accent-bar" aria-hidden />
 
         {/* Hero épuré */}
         <section

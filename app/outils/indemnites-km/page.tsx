@@ -74,26 +74,57 @@ export default function IndemnitesKmPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
-      <div className="top-accent-bar" aria-hidden />
 
-      <div className="max-w-[900px] mx-auto px-4 md:px-6 py-8 md:py-10">
-        <Link
-          href="/reglages"
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-6"
-        >
-          <ArrowLeft size={16} />
-          Retour aux paramètres
-        </Link>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+          <Link
+            href="/reglages"
+            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Retour aux paramètres
+          </Link>
+          <div className="mt-6 flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center shadow-lg shadow-sky-200 dark:shadow-none shrink-0">
+              <Car className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Indemnités kilométriques
+              </h1>
+              <p className="mt-1 text-slate-500 dark:text-slate-400">
+                Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023).
+              </p>
+            </div>
+          </div>
+        </div>
+      </header>
 
-        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Indemnités kilométriques
-        </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023).
-        </p>
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">
+          {/* Bandeau header comme onglet Véhicule des paramètres */}
+          <div className="px-6 py-5 bg-gradient-to-r from-sky-500 to-blue-500 text-white">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 shrink-0">
+                  <Car className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold leading-tight">Véhicule</h2>
+                  <p className="text-sm text-white/75 mt-0.5">IK, frais réels</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl md:text-3xl font-bold tabular-nums">
+                  {Math.round(ikEstimate).toLocaleString('fr-FR')} €/an
+                </p>
+                <p className="text-sm text-white/80 mt-0.5">Indemnités kilométriques estimées</p>
+              </div>
+            </div>
+          </div>
 
-        {/* Contenu calqué sur l’onglet Véhicule des paramètres */}
-        <div className="mt-6 space-y-4">
+          {/* Contenu */}
+          <div className="p-6 space-y-4">
           {/* Type de véhicule */}
           <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
             <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
@@ -122,6 +153,36 @@ export default function IndemnitesKmPage() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Véhicule électrique — juste sous le type de véhicule */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                  <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setElectrique(!electrique)}
+                className={cn(
+                  'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
+                  electrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
+                )}
+              >
+                <span
+                  className={cn(
+                    'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                    electrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
+                  )}
+                />
+              </button>
             </div>
           </div>
 
@@ -202,53 +263,6 @@ export default function IndemnitesKmPage() {
             </div>
           )}
 
-          {/* Véhicule électrique — même bloc que l’onglet Véhicule */}
-          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                  <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setElectrique(!electrique)}
-                className={cn(
-                  'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
-                  electrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
-                )}
-              >
-                <span
-                  className={cn(
-                    'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
-                    electrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
-                  )}
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Carte récap — même gradient que l’onglet Véhicule */}
-          <div className="p-5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sky-100 text-sm font-medium">Indemnités kilométriques estimées</p>
-                <p className="text-3xl font-bold mt-1 tabular-nums">
-                  {Math.round(ikEstimate).toLocaleString('fr-FR')} €/an
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sky-100 text-sm font-medium">Mensuel</p>
-                <p className="text-xl font-bold mt-1 tabular-nums">
-                  {Math.round(ikEstimate / 12).toLocaleString('fr-FR')} €
-                </p>
-              </div>
-            </div>
-          </div>
 
           {/* Détail par tranche (spécifique à cette page) */}
           {detail.tranches.some((t) => t.montant > 0) && (
@@ -291,8 +305,9 @@ export default function IndemnitesKmPage() {
           </div>
         </div>
       </div>
+      </div>
 
-      <div className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 mt-12">
+      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <Footer />
       </div>
     </main>

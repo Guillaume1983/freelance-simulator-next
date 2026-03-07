@@ -7,7 +7,7 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import ProjectionSection from '@/components/ProjectionSection';
 import Footer from '@/components/Footer';
 import NumberInput from '@/components/NumberInput';
-import { TrendingUp, Settings } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Settings } from 'lucide-react';
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
   portage: 'Portage',
@@ -47,24 +47,40 @@ export default function SimulateurStatutPage() {
   const sim = ctx.sim ?? ctx;
 
   return (
-    <>
-      <div className="top-accent-bar" aria-hidden />
-
-      <main className="min-h-screen bg-page-settings">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 pt-6 pb-4 md:pt-8 md:pb-6">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 flex-wrap">
+    <main className="min-h-screen bg-page-settings">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+          <Link
+              href="/comparateur"
+              className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              Retour au comparateur
+            </Link>
+            <div className="mt-6 flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200 dark:shadow-none">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                  <TrendingUp className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Projection sur 5 ans — {statutId}
                 </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                <p className="mt-1 text-slate-500 dark:text-slate-400">
                   ACRE an 1{ctx.state?.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
                 </p>
+              </div>
+            </div>
+          </div>
+      </header>
+
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">
+          <div className="p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 flex-wrap">
+              <div>
                 <Link
                   href="/reglages"
-                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                 >
                   <Settings size={16} />
                   Paramètres
@@ -122,7 +138,7 @@ export default function SimulateurStatutPage() {
           </div>
         </div>
 
-        <div className="relative z-10 max-w-[1600px] mx-auto px-4 md:px-6 pb-8">
+        <div className="relative z-10 mt-8">
           <ProjectionSection
             sim={ctx}
             activeRegime={activeRegime}
@@ -130,11 +146,11 @@ export default function SimulateurStatutPage() {
             singleRegime
           />
         </div>
+      </div>
 
-        <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-          <Footer />
-        </div>
-      </main>
-    </>
+      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+        <Footer />
+      </div>
+    </main>
   );
 }

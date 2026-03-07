@@ -3,6 +3,7 @@ node_modules/
 .next/
 out/
 build/
+v0/
 
 # Ne pas indexer les assets lourds
 public/assets/

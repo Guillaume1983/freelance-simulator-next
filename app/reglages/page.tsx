@@ -218,7 +218,6 @@ export default function ReglagesPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
-      <div className="top-accent-bar" aria-hidden />
 
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
