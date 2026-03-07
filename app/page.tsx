@@ -60,6 +60,25 @@ export default function Home() {
                 Guides & articles
               </Link>
             </div>
+            <p className="mt-5 text-[11px] text-white/60 font-medium">
+              Simuler une projection 5 ans pour un autre statut :{' '}
+              {[
+                { slug: 'portage', label: 'Portage' },
+                { slug: 'micro', label: 'Micro' },
+                { slug: 'eurl-ir', label: 'EURL IR' },
+                { slug: 'eurl-is', label: 'EURL IS' },
+              ].map(({ slug, label }, i) => (
+                <span key={slug}>
+                  {i > 0 && <span className="text-white/40 mx-1.5">·</span>}
+                  <Link
+                    href={`/simulateur/${slug}`}
+                    className="text-white/85 hover:text-white underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </span>
+              ))}
+            </p>
 
             <p className="mt-8 text-[11px] text-white/70 font-bold uppercase tracking-widest">
               Réglages communs : modifiez vos paramètres depuis le menu Paramètres, puis comparez ou simulez.

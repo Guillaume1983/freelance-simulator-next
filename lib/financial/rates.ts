@@ -210,3 +210,76 @@ export function getIK(
   }
   return vehiculeElectrique ? base * 1.2 : base;
 }
+
+/** Détail d’une tranche du barème IK (pour affichage simulateur) */
+export interface IKTranche {
+  label: string;
+  kmFrom: number;
+  kmTo: number;
+  taux: number; // €/km
+  montant: number;
+}
+
+export interface IKDetailResult {
+  total: number;
+  majorationElectrique: boolean;
+  tranches: IKTranche[];
+}
+
+/**
+ * Détail des indemnités kilométriques par tranche (barème URSSAF).
+ * Permet d’afficher un simulateur avec décomposition.
+ */
+export function getIKDetail(
+  km: number,
+  typeVehicule: TypeVehiculeIK = 'voiture',
+  cvOrBande?: string,
+  vehiculeElectrique = false
+): IKDetailResult {
+  const total = getIK(km, typeVehicule, cvOrBande, vehiculeElectrique);
+  const tranches: IKTranche[] = [];
+  let baseSansMajoration: number;
+
+  if (typeVehicule === 'cyclo50') {
+    const r = RATES_2026.ikCyclo50;
+    baseSansMajoration = km <= r.s1 ? km * r.a : km <= r.s2 ? km * r.b + r.midConst : km * r.c;
+    const t1 = Math.min(km, r.s1) * r.a;
+    const t2 = Math.max(0, Math.min(km, r.s2) - r.s1) * r.b;
+    const t3 = Math.max(0, km - r.s2) * r.c;
+    tranches.push(
+      { label: `0 – ${r.s1.toLocaleString('fr-FR')} km`, kmFrom: 0, kmTo: r.s1, taux: r.a, montant: Math.round(t1) },
+      { label: `${(r.s1 + 1).toLocaleString('fr-FR')} – ${r.s2.toLocaleString('fr-FR')} km`, kmFrom: r.s1 + 1, kmTo: r.s2, taux: r.b, montant: Math.round(t2) },
+      { label: `> ${r.s2.toLocaleString('fr-FR')} km`, kmFrom: r.s2 + 1, kmTo: Infinity, taux: r.c, montant: Math.round(t3) },
+    );
+  } else if (typeVehicule === 'moto') {
+    const band = cvOrBande === '1-2' || cvOrBande === '3-5' || cvOrBande === '5+' ? cvOrBande : '3-5';
+    const r = RATES_2026.ikMoto[band];
+    baseSansMajoration = km <= r.s1 ? km * r.a : km <= r.s2 ? km * r.b + r.midConst : km * r.c;
+    const t1 = Math.min(km, r.s1) * r.a;
+    const t2 = Math.max(0, Math.min(km, r.s2) - r.s1) * r.b;
+    const t3 = Math.max(0, km - r.s2) * r.c;
+    tranches.push(
+      { label: `0 – ${r.s1.toLocaleString('fr-FR')} km`, kmFrom: 0, kmTo: r.s1, taux: r.a, montant: Math.round(t1) },
+      { label: `${(r.s1 + 1).toLocaleString('fr-FR')} – ${r.s2.toLocaleString('fr-FR')} km`, kmFrom: r.s1 + 1, kmTo: r.s2, taux: r.b, montant: Math.round(t2) },
+      { label: `> ${r.s2.toLocaleString('fr-FR')} km`, kmFrom: r.s2 + 1, kmTo: Infinity, taux: r.c, montant: Math.round(t3) },
+    );
+  } else {
+    const r = RATES_2026.ik[cvOrBande ?? '6'] ?? RATES_2026.ik['6'];
+    const s1 = 5000, s2 = 20000;
+    baseSansMajoration = km <= s1 ? km * r.a : km <= s2 ? km * r.b + (r as { midConst: number }).midConst : km * r.c;
+    const t1 = Math.min(km, s1) * r.a;
+    const t2 = Math.max(0, Math.min(km, s2) - s1) * r.b;
+    const t3 = Math.max(0, km - s2) * r.c;
+    tranches.push(
+      { label: '0 – 5 000 km', kmFrom: 0, kmTo: s1, taux: r.a, montant: Math.round(t1) },
+      { label: '5 001 – 20 000 km', kmFrom: s1 + 1, kmTo: s2, taux: r.b, montant: Math.round(t2) },
+      { label: '> 20 000 km', kmFrom: s2 + 1, kmTo: Infinity, taux: r.c, montant: Math.round(t3) },
+    );
+  }
+
+  return {
+    total,
+    majorationElectrique: vehiculeElectrique,
+    tranches,
+  };
+}

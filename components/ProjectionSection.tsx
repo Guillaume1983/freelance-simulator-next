@@ -3,7 +3,7 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, Rocket } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -348,6 +348,26 @@ export default function ProjectionSection({
                 );
               })}
             </tr>
+            {singleRegime && (
+              <tr className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
+                <th className="p-2 w-px align-middle" />
+                <th colSpan={5} className="p-4 align-middle">
+                  <div className="flex items-center justify-center gap-6 md:gap-10">
+                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      <ChevronLeft className="w-4 h-4" aria-hidden />
+                      Année 1
+                    </div>
+                    <div className="flex-1 flex justify-center min-w-0 px-2 py-2 border-t border-b border-slate-200 dark:border-slate-700">
+                      <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
+                      Année 5
+                      <ChevronRight className="w-4 h-4" aria-hidden />
+                    </div>
+                  </div>
+                </th>
+              </tr>
+            )}
           </thead>
 
           <tbody className="text-slate-700 dark:text-slate-300">
@@ -502,6 +522,23 @@ export default function ProjectionSection({
                   <div className="mt-3">
                     {r && <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />}
                   </div>
+                  {singleRegime && i === 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                          <ChevronLeft className="w-3.5 h-3.5" aria-hidden />
+                          An 1
+                        </span>
+                        <div className="flex-1 min-w-0 flex justify-center">
+                          <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
+                        </div>
+                        <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                          An 5
+                          <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Métriques */}

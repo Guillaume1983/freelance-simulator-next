@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ProjectionSection from '@/components/ProjectionSection';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
 import Footer from '@/components/Footer';
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
@@ -108,24 +107,23 @@ export default function SimulateurStatutPage() {
                     <button type="button" className="w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20" onMouseDown={() => startHold(() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 1)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-Jours">▼</button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <label className="text-[10px] font-bold text-white/90 uppercase">Croissance</label>
-                  <span className="text-[10px] font-bold text-white/90 w-5">{sim.state.growthRate}%</span>
-                  <input
-                    type="range"
-                    min={0}
-                    max={50}
-                    step={1}
-                    value={sim.state.growthRate}
-                    onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                    className="w-20 accent-indigo-400 h-1.5"
-                    aria-label="Croissance CA par an"
-                  />
-                </div>
               </div>
             </div>
-            <div className="shrink-0 flex justify-center sm:justify-end">
-              <RegimeParamsInline sim={sim} regimeId={statutId} align="left" variant="dark" />
+            <div className="shrink-0 flex justify-center sm:justify-end items-end">
+              <div className="flex items-center gap-1.5 text-white">
+                <label className="text-[10px] font-bold text-white/90 uppercase">Croissance</label>
+                <span className="text-[10px] font-bold text-white/90 w-5">{sim.state.growthRate}%</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={50}
+                  step={1}
+                  value={sim.state.growthRate}
+                  onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
+                  className="w-20 accent-indigo-400 h-1.5"
+                  aria-label="Croissance CA par an"
+                />
+              </div>
             </div>
           </div>
         </section>
