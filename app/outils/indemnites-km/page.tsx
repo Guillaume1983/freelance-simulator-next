@@ -21,7 +21,8 @@ function parseCv(s: string | null, type: TypeVehiculeIK): string {
     if (n >= 3 && n <= 7) return String(n);
     return '6';
   }
-  return type === 'voiture' ? '6' : '3-5';
+  /* type est moto ou cyclo50 : défaut 3-5 (moto) ou valeur invalide ignorée */
+  return '3-5';
 }
 
 export default function IndemnitesKmPage() {
