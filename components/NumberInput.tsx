@@ -71,7 +71,7 @@ export default function NumberInput({
           className={cn(
             'w-24 px-3 py-2 text-center font-semibold text-slate-900 dark:text-white',
             'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-lg',
-            'focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all',
+            'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600 transition-all',
             'disabled:opacity-60 disabled:cursor-not-allowed',
             inputClassName
           )}
@@ -90,10 +90,10 @@ export default function NumberInput({
         onMouseLeave={stopHold}
         onTouchStart={() => !disabled && startHold(onIncrement)}
         onTouchEnd={stopHold}
-        className="w-9 h-9 rounded-lg bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 flex items-center justify-center transition-colors disabled:opacity-50"
+        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
         aria-label={label ? `Augmenter ${label}` : 'Augmenter'}
       >
-        <Plus className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
+        <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
       </button>
     </div>
   );

@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef } from 'react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import Link from 'next/link';
 import {
@@ -20,103 +19,10 @@ import {
   Plus,
   Minus,
   Info,
-  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getIK } from '@/lib/financial/rates';
-
-// Input numérique avec boutons +/-
-function NumberInput({
-  value,
-  onChange,
-  onIncrement,
-  onDecrement,
-  suffix = '',
-  min = 0,
-  label,
-  disabled = false,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-  onIncrement: () => void;
-  onDecrement: () => void;
-  suffix?: string;
-  min?: number;
-  label?: string;
-  disabled?: boolean;
-}) {
-  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startHold = (fn: () => void) => {
-    fn();
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    holdDelayRef.current = null;
-    holdTimerRef.current = null;
-    holdDelayRef.current = setTimeout(() => {
-      holdTimerRef.current = setInterval(fn, 80);
-    }, 300);
-  };
-  const stopHold = () => {
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    holdDelayRef.current = null;
-    holdTimerRef.current = null;
-  };
-  return (
-    <div className={cn('flex items-center gap-2', disabled && 'opacity-60 pointer-events-none')}>
-      <button
-        type="button"
-        disabled={disabled}
-        onMouseDown={() => !disabled && startHold(onDecrement)}
-        onMouseUp={stopHold}
-        onMouseLeave={stopHold}
-        onTouchStart={() => !disabled && startHold(onDecrement)}
-        onTouchEnd={stopHold}
-        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
-        aria-label={label ? `Diminuer ${label}` : 'Diminuer'}
-      >
-        <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-      </button>
-      <div className="relative">
-        <input
-          type="number"
-          value={value}
-          disabled={disabled}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            onChange(Number.isNaN(v) ? min : Math.max(min, v));
-          }}
-          onFocus={(e) => e.target.select()}
-          className={cn(
-            'w-24 px-3 py-2 text-center font-semibold text-slate-900 dark:text-white',
-            'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-lg',
-            'focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600 transition-all',
-            'disabled:opacity-60 disabled:cursor-not-allowed'
-          )}
-        />
-        {suffix && (
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none">
-            {suffix}
-          </span>
-        )}
-      </div>
-      <button
-        type="button"
-        disabled={disabled}
-        onMouseDown={() => !disabled && startHold(onIncrement)}
-        onMouseUp={stopHold}
-        onMouseLeave={stopHold}
-        onTouchStart={() => !disabled && startHold(onIncrement)}
-        onTouchEnd={stopHold}
-        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
-        aria-label={label ? `Augmenter ${label}` : 'Augmenter'}
-      >
-        <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-      </button>
-    </div>
-  );
-}
+import NumberInput from '@/components/NumberInput';
 
 function FieldCard({
   icon: Icon,
@@ -175,29 +81,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   if (!activePanel) return null;
   if (!sim?.state) return null;
 
-  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startHold = (fn: () => void) => {
-    fn();
-    if (holdTimerRef.current) {
-      clearInterval(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-    if (holdDelayRef.current) {
-      clearTimeout(holdDelayRef.current);
-      holdDelayRef.current = null;
-    }
-    holdDelayRef.current = setTimeout(() => {
-      holdTimerRef.current = setInterval(fn, 120);
-    }, 300);
-  };
-  const stopHold = () => {
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    holdDelayRef.current = null;
-    holdTimerRef.current = null;
-  };
-
   const materielAnnuel = sim.state.materielAnnuel ?? 0;
   const kmAnnuel = sim.state.kmAnnuel ?? 0;
   const loyerPercu = sim.state.loyerPercu ?? 0;
@@ -206,9 +89,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const spouseIncome = sim.state.spouseIncome ?? 0;
   const typeVehicule = sim.state.typeVehicule ?? 'voiture';
   const cvFiscauxRaw = sim.state.cvFiscaux ?? '6';
-  const cvFiscaux = typeVehicule === 'voiture' ? (Number(cvFiscauxRaw) || 6) : cvFiscauxRaw;
-  const cvMin = typeVehicule === 'voiture' ? 3 : 0;
-  const cvMax = typeVehicule === 'voiture' ? 7 : 0;
   const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
   const BANDE_MOTO_LABEL: Record<string, string> = { '1-2': '1–2 cv', '3-5': '3–5 cv', '5+': '5+ cv' };
   const CITY_ORDER = ['petite', 'moyenne', 'grande'] as const;
@@ -218,7 +98,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
     { key: 'grande', label: 'Grande ville', amount: '~900 €/an' },
   ];
   const currentCity: string = sim.state.citySize ?? 'petite';
-  const avantagesMensuel = avantagesOptimises / 12;
 
   const nonWarning = CHARGES_CATALOG.filter(c => !c.portageWarning);
   const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
@@ -257,6 +136,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               [item.id]: Math.max(0, (prev?.[item.id] ?? item.amount ?? 0) - 5),
             }))
           }
+          suffix="€"
           label={item.name}
         />
       </div>
