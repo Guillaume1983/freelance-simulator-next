@@ -39,17 +39,17 @@ export default function ComparateurPage() {
       </header>
 
       {/* Barre de controle TJM / Jours intégrée */}
-      <div className="sticky top-0 z-40 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-indigo-500/20 shadow-lg shadow-indigo-900/20">
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-md shadow-slate-200/30 dark:shadow-slate-900/20">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
             {/* Inputs TJM et Jours */}
             <div className="flex flex-wrap items-center gap-4 md:gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                  <Calculator size={16} className="text-indigo-300" />
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                  <Calculator size={16} className="text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-indigo-300/70 uppercase tracking-wider">TJM</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TJM</span>
                   <NumberInput
                     value={sim.state.tjm ?? 0}
                     onChange={(v) => sim.setters.setTjm(v)}
@@ -57,19 +57,19 @@ export default function ComparateurPage() {
                     onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
                     suffix="€"
                     label="TJM"
-                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
+                    inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-20"
                   />
                 </div>
               </div>
 
-              <div className="hidden md:block w-px h-10 bg-indigo-500/30" />
+              <div className="hidden md:block w-px h-10 bg-slate-200 dark:bg-slate-700" />
 
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <TrendingUp size={16} className="text-amber-300" />
+                <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                  <TrendingUp size={16} className="text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-amber-300/70 uppercase tracking-wider">Jours / an</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jours / an</span>
                   <NumberInput
                     value={sim.state.days ?? 0}
                     onChange={(v) => sim.setters.setDays(v)}
@@ -77,7 +77,7 @@ export default function ComparateurPage() {
                     onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
                     suffix="j"
                     label="Jours"
-                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
+                    inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-20"
                   />
                 </div>
               </div>
@@ -86,17 +86,17 @@ export default function ComparateurPage() {
             {/* CA calculé + lien paramètres */}
             <div className="flex items-center gap-4 md:gap-6">
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider">CA annuel</span>
-                <span className="text-xl md:text-2xl font-black text-white tabular-nums">
-                  {ca.toLocaleString('fr-FR')} <span className="text-emerald-400 text-base">€</span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
+                <span className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                  {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(ca)}
                 </span>
               </div>
 
-              <div className="hidden md:block w-px h-10 bg-indigo-500/30" />
+              <div className="hidden md:block w-px h-10 bg-slate-200 dark:bg-slate-700" />
 
               <Link
                 href="/reglages"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold transition-all"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white text-sm font-semibold transition-all"
               >
                 <Settings size={16} />
                 <span className="hidden sm:inline">Paramètres</span>
