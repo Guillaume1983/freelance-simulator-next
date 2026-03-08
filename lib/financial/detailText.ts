@@ -22,7 +22,7 @@ export function getDetailTextFromLines(
   sim: { state: { tjm: number; days: number; taxParts: number; portageComm: number; typeActiviteMicro?: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE' } },
   monthly = false
 ): string {
-  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
   const monthly12 = (formula: string) => monthly ? `(${formula}) ÷ 12` : formula;
   const lines = r.lines ?? [];
 

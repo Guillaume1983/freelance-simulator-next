@@ -5,7 +5,7 @@ import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
-  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

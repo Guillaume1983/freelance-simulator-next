@@ -158,7 +158,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const winnerId = eligibleForWinner.length > 0
     ? [...eligibleForWinner].sort((a: any, b: any) => b.net - a.net)[0].id
     : null;
-  const fmt      = (v: number) => Math.round(v).toLocaleString() + ' €';
+  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
     if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
@@ -307,7 +307,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       {isMicroPlafondExceeded(r) && (
                         <span className="mt-1.5 text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
                           <AlertTriangle size={10} className="shrink-0" />
-                          Plafond {plafondMicro.toLocaleString()} € dépassé
+                          Plafond {plafondMicro.toLocaleString('fr-FR')} € dépassé
                         </span>
                       )}
                       {r.cashInCompany != null && r.cashInCompany > 0 && (
@@ -546,7 +546,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     {isMicroPlafondExceeded(r) && (
                       <span className="text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
                         <AlertTriangle size={10} className="shrink-0" />
-                        Dépassement plafond {plafondMicro.toLocaleString()} €
+                        Dépassement plafond {plafondMicro.toLocaleString('fr-FR')} €
                       </span>
                     )}
                   </div>

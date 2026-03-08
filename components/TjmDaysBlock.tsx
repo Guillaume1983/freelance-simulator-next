@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { Zap, CheckCircle2 } from 'lucide-react';
 
 export default function TjmDaysBlock({ sim }: { sim: any }) {
-  const fmt = (v: number) => Math.round((v || 0)).toLocaleString() + ' €';
+  const fmt = (v: number) => Math.round((v || 0)).toLocaleString('fr-FR') + ' €';
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

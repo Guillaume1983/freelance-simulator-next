@@ -193,7 +193,7 @@ export default function SimulationSection({
     repartitionRemuneration: sim.state.repartitionRemuneration,
   }), [sim.state]);
 
-  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
 
   const onYearScroll = () => {
     const el = yearScrollRef.current;
