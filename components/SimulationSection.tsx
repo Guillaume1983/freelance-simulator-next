@@ -1,10 +1,10 @@
 'use client';
 import React, { useRef, useMemo, useState } from 'react';
-import Link from 'next/link';
+
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, Rocket, ChevronLeft, ChevronRight, Sliders, Settings } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -675,48 +675,28 @@ export default function SimulationSection({
         </div>
       )}
 
-      {/* Bandeau réglages rapides */}
-      <div className="px-4 md:px-6 pt-4">
-        <div className="max-w-[1600px] mx-auto rounded-xl bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-2">
-              <Sliders size={14} className="text-indigo-500 flex-shrink-0" />
-              <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
-                Modifiez TJM, jours, croissance CA et paramètres {activeRegime} directement sur cette page.
-              </p>
+      {/* Hypothèses et disclaimer */}
+      <div className="px-4 md:px-6 py-4">
+        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
+                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
+                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année</li>
+                  <li>CFE : ajoutée dès la 2e année d'activité</li>
+                  <li>Croissance CA : appliquée année après année</li>
+                  <li>EURL IS : IS 25% sur bénéfice. SASU : PFU 30% sur dividendes</li>
+                </ul>
+              </div>
             </div>
-            <Link
-              href={`/reglages?from=simulateur&statut=${activeRegime.toLowerCase().replace(' ', '-')}`}
-              className="inline-flex items-center gap-1.5 text-[9px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 uppercase tracking-wider transition-colors whitespace-nowrap"
-            >
-              <Settings size={12} />
-              Paramètres complets
-            </Link>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 italic border-t border-slate-200/80 dark:border-slate-700/50 pt-3">
+              Simulation estimative basée sur les barèmes 2026. Consultez un expert-comptable pour votre situation personnelle.
+            </p>
           </div>
         </div>
       </div>
-
-      {/* Hypothèses principales (mêmes que le comparatif) */}
-      <div className="px-4 md:px-6 pb-2">
-        <div className="mt-4 max-w-[1600px] mx-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-2">
-          <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
-              Hypothèses principales
-            </span>
-            <ul className="mt-1 md:mt-0 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 text-[9px] text-slate-600 dark:text-slate-300 list-disc md:list-none md:pl-0 pl-4">
-            <li>ACRE : allègement d'environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
-            <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
-            <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
-            <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Disclaimer identique au tableau comparatif */}
-      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
-        <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
-      </p>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>

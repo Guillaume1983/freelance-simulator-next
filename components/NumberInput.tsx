@@ -53,10 +53,15 @@ export default function NumberInput({
         onMouseLeave={stopHold}
         onTouchStart={() => !disabled && startHold(onDecrement)}
         onTouchEnd={stopHold}
-        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
+        className={cn(
+          'w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-50',
+          inputClassName?.includes('!bg-white/10')
+            ? 'bg-white/10 hover:bg-white/20 text-white/70 hover:text-white'
+            : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600'
+        )}
         aria-label={label ? `Diminuer ${label}` : 'Diminuer'}
       >
-        <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+        <Minus className={cn('w-4 h-4', inputClassName?.includes('!bg-white/10') ? 'text-current' : 'text-slate-600 dark:text-slate-300')} />
       </button>
       <div className="relative">
         <input
@@ -90,10 +95,15 @@ export default function NumberInput({
         onMouseLeave={stopHold}
         onTouchStart={() => !disabled && startHold(onIncrement)}
         onTouchEnd={stopHold}
-        className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors disabled:opacity-50"
+        className={cn(
+          'w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-50',
+          inputClassName?.includes('!bg-white/10')
+            ? 'bg-white/10 hover:bg-white/20 text-white/70 hover:text-white'
+            : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600'
+        )}
         aria-label={label ? `Augmenter ${label}` : 'Augmenter'}
       >
-        <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+        <Plus className={cn('w-4 h-4', inputClassName?.includes('!bg-white/10') ? 'text-current' : 'text-slate-600 dark:text-slate-300')} />
       </button>
     </div>
   );

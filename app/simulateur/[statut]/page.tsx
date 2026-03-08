@@ -7,7 +7,7 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import SimulationSection from '@/components/SimulationSection';
 import Footer from '@/components/Footer';
 import NumberInput from '@/components/NumberInput';
-import { ArrowLeft, Settings, Briefcase, Store, Building2, Building } from 'lucide-react';
+import { ArrowLeft, Settings, Briefcase, Store, Building2, Building, Calculator, TrendingUp, Percent } from 'lucide-react';
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
   portage: 'Portage',
@@ -23,6 +23,14 @@ const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: st
   'EURL IR': { Icon: Building2, iconClass: 'bg-emerald-500 text-white' },
   'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
   'SASU': { Icon: Building, iconClass: 'bg-violet-500 text-white' },
+};
+
+const STATUT_COLORS: Record<string, { bg: string; accent: string }> = {
+  'Portage': { bg: 'from-indigo-950 via-indigo-900 to-slate-900', accent: 'indigo' },
+  'Micro': { bg: 'from-amber-950 via-amber-900 to-slate-900', accent: 'amber' },
+  'EURL IR': { bg: 'from-emerald-950 via-emerald-900 to-slate-900', accent: 'emerald' },
+  'EURL IS': { bg: 'from-blue-950 via-blue-900 to-slate-900', accent: 'blue' },
+  'SASU': { bg: 'from-violet-950 via-violet-900 to-slate-900', accent: 'violet' },
 };
 
 const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
@@ -61,6 +69,8 @@ export default function SimulateurStatutPage() {
   if (!statutId && params?.statut) return null;
 
   const sim = ctx.sim ?? ctx;
+  const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
+  const colors = STATUT_COLORS[statutId] ?? STATUT_COLORS['Portage'];
 
   return (
     <main className="min-h-screen bg-page-settings">
@@ -94,24 +104,18 @@ export default function SimulateurStatutPage() {
           </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 flex-wrap">
-              <div>
-                <Link
-                  href={`/reglages?from=simulateur&statut=${slug}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                >
-                  <Settings size={16} />
-                  Paramètres
-                </Link>
-              </div>
-              <div className="flex flex-wrap items-end gap-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    TJM (€/jour)
-                  </label>
+      {/* Barre de controle sticky */}
+      <div className={`sticky top-0 z-40 bg-gradient-to-r ${colors.bg} border-b border-white/10 shadow-lg`}>
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
+            {/* Inputs TJM, Jours et Croissance */}
+            <div className="flex flex-wrap items-center gap-4 md:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Calculator size={16} className="text-white/70" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">TJM</span>
                   <NumberInput
                     value={sim.state.tjm ?? 0}
                     onChange={(v) => sim.setters.setTjm(v)}
@@ -119,12 +123,19 @@ export default function SimulateurStatutPage() {
                     onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
                     suffix="€"
                     label="TJM"
+                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    Jours / an
-                  </label>
+              </div>
+
+              <div className="hidden md:block w-px h-10 bg-white/20" />
+
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                  <TrendingUp size={16} className="text-white/70" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Jours / an</span>
                   <NumberInput
                     value={sim.state.days ?? 0}
                     onChange={(v) => sim.setters.setDays(v)}
@@ -132,12 +143,19 @@ export default function SimulateurStatutPage() {
                     onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
                     suffix="j"
                     label="Jours"
+                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    Croissance CA (%/an)
-                  </label>
+              </div>
+
+              <div className="hidden md:block w-px h-10 bg-white/20" />
+
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Percent size={16} className="text-white/70" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">Croissance / an</span>
                   <div className="flex items-center gap-2">
                     <input
                       type="range"
@@ -146,27 +164,48 @@ export default function SimulateurStatutPage() {
                       step={1}
                       value={sim.state.growthRate ?? 2}
                       onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                      className="w-24 h-2 rounded-full accent-indigo-500 bg-slate-200 dark:bg-slate-600"
+                      className="w-20 h-2 rounded-full accent-white bg-white/20"
                       aria-label="Croissance CA par an"
                     />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums w-8">
+                    <span className="text-sm font-bold text-white tabular-nums w-8">
                       {sim.state.growthRate ?? 2}%
                     </span>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* CA calculé + lien paramètres */}
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider">CA an 1</span>
+                <span className="text-xl md:text-2xl font-black text-white tabular-nums">
+                  {ca.toLocaleString('fr-FR')} <span className="text-emerald-400 text-base">€</span>
+                </span>
+              </div>
+
+              <div className="hidden md:block w-px h-10 bg-white/20" />
+
+              <Link
+                href={`/reglages?from=simulateur&statut=${slug}`}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold transition-all"
+              >
+                <Settings size={16} />
+                <span className="hidden sm:inline">Paramètres</span>
+              </Link>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="relative z-10 mt-8">
-          <SimulationSection
-            sim={ctx}
-            activeRegime={activeRegime}
-            setActiveRegime={setActiveRegime}
-            singleRegime
-          />
-        </div>
+      {/* Section simulation */}
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+        <SimulationSection
+          sim={ctx}
+          activeRegime={activeRegime}
+          setActiveRegime={setActiveRegime}
+          singleRegime
+        />
       </div>
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">

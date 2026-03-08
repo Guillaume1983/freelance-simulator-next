@@ -5,10 +5,11 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import ComparisonTable from '@/components/ComparisonTable';
 import Footer from '@/components/Footer';
 import NumberInput from '@/components/NumberInput';
-import { ArrowLeft, BarChart3, Settings } from 'lucide-react';
+import { ArrowLeft, BarChart3, Settings, TrendingUp, Calculator } from 'lucide-react';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
+  const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
 
   return (
     <main className="min-h-screen bg-page-settings">
@@ -30,31 +31,25 @@ export default function ComparateurPage() {
                   Comparatif des statuts
                 </h1>
                 <p className="mt-1 text-slate-500 dark:text-slate-400">
-                  Ajustez TJM et jours — le tableau se met à jour en temps réel.
+                  Comparez les 5 statuts freelance en temps réel
                 </p>
               </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-              <div>
-                <Link
-                  href="/reglages"
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                >
-                  <Settings size={16} />
-                  Paramètres
-                </Link>
-              </div>
-              <div className="flex flex-wrap items-center gap-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    TJM (€/jour)
-                  </label>
+      {/* Barre de controle TJM / Jours intégrée */}
+      <div className="sticky top-0 z-40 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-indigo-500/20 shadow-lg shadow-indigo-900/20">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
+            {/* Inputs TJM et Jours */}
+            <div className="flex flex-wrap items-center gap-4 md:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                  <Calculator size={16} className="text-indigo-300" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-indigo-300/70 uppercase tracking-wider">TJM</span>
                   <NumberInput
                     value={sim.state.tjm ?? 0}
                     onChange={(v) => sim.setters.setTjm(v)}
@@ -62,12 +57,19 @@ export default function ComparateurPage() {
                     onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
                     suffix="€"
                     label="TJM"
+                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    Jours / an
-                  </label>
+              </div>
+
+              <div className="hidden md:block w-px h-10 bg-indigo-500/30" />
+
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                  <TrendingUp size={16} className="text-amber-300" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-amber-300/70 uppercase tracking-wider">Jours / an</span>
                   <NumberInput
                     value={sim.state.days ?? 0}
                     onChange={(v) => sim.setters.setDays(v)}
@@ -75,16 +77,38 @@ export default function ComparateurPage() {
                     onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
                     suffix="j"
                     label="Jours"
+                    inputClassName="!bg-white/10 !border-white/20 !text-white !w-20"
                   />
                 </div>
               </div>
             </div>
+
+            {/* CA calculé + lien paramètres */}
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider">CA annuel</span>
+                <span className="text-xl md:text-2xl font-black text-white tabular-nums">
+                  {ca.toLocaleString('fr-FR')} <span className="text-emerald-400 text-base">€</span>
+                </span>
+              </div>
+
+              <div className="hidden md:block w-px h-10 bg-indigo-500/30" />
+
+              <Link
+                href="/reglages"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold transition-all"
+              >
+                <Settings size={16} />
+                <span className="hidden sm:inline">Paramètres</span>
+              </Link>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="relative z-10 mt-8">
-          <ComparisonTable sim={sim} />
-        </div>
+      {/* Tableau comparatif */}
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+        <ComparisonTable sim={sim} />
       </div>
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
