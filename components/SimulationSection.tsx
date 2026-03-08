@@ -4,7 +4,7 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2 } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
