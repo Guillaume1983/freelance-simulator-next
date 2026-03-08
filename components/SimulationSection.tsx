@@ -1,12 +1,14 @@
 'use client';
 import React, { useRef, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, Rocket, ChevronLeft, ChevronRight, Sliders, Settings } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
+import AmountTooltip from '@/components/AmountTooltip';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -249,6 +251,21 @@ export default function SimulationSection({
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
 
+  const getTooltipColor = (key: string): string => {
+    switch (key) {
+      case 'ca': return '#6366f1';
+      case 'fees': return '#fb7185';
+      case 'portageCommission': return '#8b5cf6';
+      case 'cotis': return '#fbbf24';
+      case 'beforeTax': return '#64748b';
+      case 'ir': return '#f87171';
+      case 'net': return '#34d399';
+      case 'optimisations': return '#10b981';
+      case 'cashInCompany': return '#3b82f6';
+      default: return '#6366f1';
+    }
+  };
+
   const getRowBgClass = (row: (typeof rows)[number]) => {
     if (row.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
     if (row.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30 font-bold';
@@ -397,19 +414,27 @@ export default function SimulationSection({
                   if (row.key === 'fees' && r.id === 'Micro') val = null;
                   if (row.key === 'cotis' && r.id === 'SASU') val = null;
                   if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
+                  const detailText = getDetailText(r, row.key, row.monthly);
+                  const tooltipColor = getTooltipColor(row.key);
                   return (
                     <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${row.color}`}>
                       {val === null ? (
                         '—'
                       ) : (
-                        <>
+                        <AmountTooltip
+                          amount={val}
+                          ca={r.ca}
+                          detailText={detailText}
+                          label={row.label}
+                          color={tooltipColor}
+                        >
                           {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
                           {fmt(val)}
                           {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                        </>
-                      )}
-                      {row.isFinal && (
-                        <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                          {row.isFinal && (
+                            <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                          )}
+                        </AmountTooltip>
                       )}
                     </td>
                   );
@@ -552,22 +577,31 @@ export default function SimulationSection({
                     if (r && row.key === 'fees' && r.id === 'Micro') val = null;
                     if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
                     if (r && row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
+                    const detailText = r ? getDetailText(r, row.key, row.monthly) : '';
+                    const tooltipColor = getTooltipColor(row.key);
                     return (
                       <div key={row.label}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
-                            {val !== null ? (
-                              <>
+                            {val !== null && r ? (
+                              <AmountTooltip
+                                amount={val}
+                                ca={r.ca}
+                                detailText={detailText}
+                                label={row.label}
+                                color={tooltipColor}
+                                position="bottom"
+                              >
                                 {row.prefix}{fmt(val)}
                                 {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
-                              </>
+                              </AmountTooltip>
                             ) : '—'}
                           </span>
                         </div>
                         {showDetails && r && (
                           <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
-                            {getDetailText(r, row.key, row.monthly)}
+                            {detailText}
                           </p>
                         )}
                       </div>
@@ -641,20 +675,43 @@ export default function SimulationSection({
         </div>
       )}
 
+      {/* Bandeau réglages rapides */}
+      <div className="px-4 md:px-6 pt-4">
+        <div className="max-w-[1600px] mx-auto rounded-xl bg-indigo-50/80 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/40 px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2">
+              <Sliders size={14} className="text-indigo-500 flex-shrink-0" />
+              <p className="text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
+                Modifiez TJM, jours, croissance CA et paramètres {activeRegime} directement sur cette page.
+              </p>
+            </div>
+            <Link
+              href={`/reglages?from=simulateur&statut=${activeRegime.toLowerCase().replace(' ', '-')}`}
+              className="inline-flex items-center gap-1.5 text-[9px] font-black text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 uppercase tracking-wider transition-colors whitespace-nowrap"
+            >
+              <Settings size={12} />
+              Paramètres complets
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Hypothèses principales (mêmes que le comparatif) */}
       <div className="px-4 md:px-6 pb-2">
-        <div className="mt-4 max-w-[1600px] mx-auto rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2">
+        <div className="mt-4 max-w-[1600px] mx-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-2">
           <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
             <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
               Hypothèses principales
             </span>
             <ul className="mt-1 md:mt-0 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 text-[9px] text-slate-600 dark:text-slate-300 list-disc md:list-none md:pl-0 pl-4">
-            <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
+            <li>ACRE : allègement d'environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
             <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
             <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
             <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
             </ul>
           </div>
+        </div>
+      </div>
         </div>
       </div>
 
