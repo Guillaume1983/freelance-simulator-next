@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Car } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench } from 'lucide-react';
 import Footer from '@/components/Footer';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600';
@@ -46,11 +46,11 @@ export default function Home() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/simulateur/sasu"
+                href="/simulateur"
                 className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-6 py-4 rounded-2xl bg-indigo-500 text-white font-black text-sm shadow-xl hover:bg-indigo-600 transition-all hover:scale-[1.02] border-2 border-white/20"
               >
                 <TrendingUp className="w-5 h-5" />
-                Simuler une SASU
+                Projection 5 ans
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
@@ -61,26 +61,6 @@ export default function Home() {
                 Guides & articles
               </Link>
             </div>
-            <p className="mt-5 text-[11px] text-white/60 font-medium">
-              Simuler une projection 5 ans pour un autre statut :{' '}
-              {[
-                { slug: 'portage', label: 'Portage' },
-                { slug: 'micro', label: 'Micro' },
-                { slug: 'eurl-ir', label: 'EURL IR' },
-                { slug: 'eurl-is', label: 'EURL IS' },
-              ].map(({ slug, label }, i) => (
-                <span key={slug}>
-                  {i > 0 && <span className="text-white/40 mx-1.5">·</span>}
-                  <Link
-                    href={`/simulateur/${slug}`}
-                    className="text-white/85 hover:text-white underline underline-offset-2 decoration-white/40 hover:decoration-white transition-colors"
-                  >
-                    {label}
-                  </Link>
-                </span>
-              ))}
-            </p>
-
             <p className="mt-8 text-[11px] text-white/70 font-bold uppercase tracking-widest">
               Réglages communs : modifiez vos paramètres depuis le menu Paramètres, puis comparez ou simulez.
             </p>
@@ -105,7 +85,7 @@ export default function Home() {
                 </p>
               </Link>
               <Link
-                href="/simulateur/sasu"
+                href="/simulateur"
                 className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 hover:shadow-md transition-all block"
               >
                 <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
@@ -113,7 +93,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Projection 5 ans</h3>
                 <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                  Simulez un statut sur 5 ans avec ACRE, CFE et taux de croissance du CA.
+                  Choisissez un statut (Portage, Micro, EURL, SASU) et simulez sur 5 ans avec ACRE et CFE.
                 </p>
               </Link>
               <Link
@@ -121,7 +101,7 @@ export default function Home() {
                 className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-md transition-all block sm:col-span-2 md:col-span-1"
               >
                 <div className="w-12 h-12 mx-auto rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-3">
-                  <Car className="w-6 h-6" />
+                  <Wrench className="w-6 h-6" />
                 </div>
                 <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Outils</h3>
                 <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">

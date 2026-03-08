@@ -7,7 +7,7 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import ProjectionSection from '@/components/ProjectionSection';
 import Footer from '@/components/Footer';
 import NumberInput from '@/components/NumberInput';
-import { ArrowLeft, TrendingUp, Settings } from 'lucide-react';
+import { ArrowLeft, Settings, Briefcase, Store, Building2, Building } from 'lucide-react';
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
   portage: 'Portage',
@@ -15,6 +15,14 @@ const STATUT_SLUG_TO_ID: Record<string, string> = {
   'eurl-ir': 'EURL IR',
   'eurl-is': 'EURL IS',
   sasu: 'SASU',
+};
+
+const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
+  'Portage': { Icon: Briefcase, iconClass: 'bg-indigo-500 text-white' },
+  'Micro': { Icon: Store, iconClass: 'bg-amber-500 text-white' },
+  'EURL IR': { Icon: Building2, iconClass: 'bg-emerald-500 text-white' },
+  'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
+  'SASU': { Icon: Building, iconClass: 'bg-violet-500 text-white' },
 };
 
 const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
@@ -32,7 +40,7 @@ export default function SimulateurStatutPage() {
     if (searchParams.get('from') === 'comparateur') {
       return { href: '/comparateur', label: 'Retour au comparateur' };
     }
-    return { href: '/', label: "Retour à l'accueil" };
+    return { href: '/simulateur', label: 'Retour à la projection 5 ans' };
   }, [searchParams]);
 
   useEffect(() => {
@@ -41,7 +49,7 @@ export default function SimulateurStatutPage() {
 
   useEffect(() => {
     if (params?.statut && !VALID_SLUGS.includes(slug)) {
-      router.replace('/simulateur/sasu');
+      router.replace('/simulateur');
     }
   }, [params?.statut, slug, router]);
 
@@ -66,9 +74,14 @@ export default function SimulateurStatutPage() {
               {backLink.label}
             </Link>
             <div className="mt-6 flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200 dark:shadow-none">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
+              {statutId && STATUT_HEADER_ICON[statutId] && (() => {
+                const { Icon, iconClass } = STATUT_HEADER_ICON[statutId];
+                return (
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${iconClass}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                );
+              })()}
               <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Projection sur 5 ans — {statutId}

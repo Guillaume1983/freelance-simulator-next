@@ -106,7 +106,7 @@ export default function TJMRevenuNetPage() {
               </div>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Résultats avec un profil type (charges, véhicule, loyer, 1 part, ACRE an 1). Pour personnaliser, utilisez le <Link href="/reglages" className="text-indigo-600 dark:text-indigo-400 hover:underline">comparateur</Link> ou le <Link href="/simulateur/sasu" className="text-indigo-600 dark:text-indigo-400 hover:underline">simulateur</Link>.
+              Résultats avec un profil type (charges, véhicule, loyer, 1 part, ACRE an 1). Pour personnaliser, utilisez le <Link href="/reglages" className="text-indigo-600 dark:text-indigo-400 hover:underline">comparateur</Link> ou le <Link href="/simulateur" className="text-indigo-600 dark:text-indigo-400 hover:underline">simulateur</Link>.
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">
