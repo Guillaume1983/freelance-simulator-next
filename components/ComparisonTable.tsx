@@ -664,8 +664,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           </div>
         </div>
       </div>
-        </div>
-      </div>
 
       <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
         <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
