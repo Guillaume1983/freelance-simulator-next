@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Info, Eye, EyeOff, Rocket, Settings2 } from 'lucide-react';
+import { FileText, Info, Eye, EyeOff, Rocket, Settings2, CheckCircle } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { useUser } from '@/hooks/useUser';
