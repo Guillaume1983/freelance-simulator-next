@@ -1,7 +1,7 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ProjectionSection from '@/components/ProjectionSection';
@@ -22,10 +22,18 @@ const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
 export default function SimulateurStatutPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const ctx = useSimulationContext();
   const slug = (params?.statut as string)?.toLowerCase() ?? '';
   const statutId = STATUT_SLUG_TO_ID[slug];
   const [activeRegime, setActiveRegimeState] = useState(statutId ?? 'Portage');
+
+  const backLink = useMemo(() => {
+    if (searchParams.get('from') === 'comparateur') {
+      return { href: '/comparateur', label: 'Retour au comparateur' };
+    }
+    return { href: '/', label: "Retour à l'accueil" };
+  }, [searchParams]);
 
   useEffect(() => {
     if (statutId) setActiveRegimeState(statutId);
@@ -51,11 +59,11 @@ export default function SimulateurStatutPage() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
           <Link
-              href="/comparateur"
+              href={backLink.href}
               className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
             >
               <ArrowLeft size={16} />
-              Retour au comparateur
+              {backLink.label}
             </Link>
             <div className="mt-6 flex items-start gap-4">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200 dark:shadow-none">
@@ -79,7 +87,7 @@ export default function SimulateurStatutPage() {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 flex-wrap">
               <div>
                 <Link
-                  href="/reglages"
+                  href={`/reglages?from=simulateur&statut=${slug}`}
                   className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                 >
                   <Settings size={16} />

@@ -64,6 +64,7 @@ export default function IndemnitesKmPage() {
 
   const applyToReglages = () => {
     const params = new URLSearchParams();
+    params.set('from', 'outils');
     params.set('panel', 'vehicule');
     params.set('ik_km', String(km));
     params.set('ik_type', type);
@@ -78,11 +79,11 @@ export default function IndemnitesKmPage() {
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
           <Link
-            href="/reglages"
+            href="/reglages?from=outils"
             className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
           >
             <ArrowLeft size={16} />
-            Retour aux paramètres
+            Paramètres
           </Link>
           <div className="mt-6 flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center shadow-lg shadow-sky-200 dark:shadow-none shrink-0">
@@ -297,7 +298,7 @@ export default function IndemnitesKmPage() {
               Appliquer à mes paramètres (onglet Véhicule)
             </button>
             <Link
-              href="/reglages"
+              href="/reglages?from=outils"
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
             >
               Modifier les paramètres
