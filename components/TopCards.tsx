@@ -3,14 +3,10 @@ import { useRef } from 'react';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
+import { fmtEur } from '@/lib/utils';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
-  // Formatage manuel pour éviter les différences d'hydratation serveur/client
-  const fmt = (v: number) => {
-    const rounded = Math.round(v);
-    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return formatted + ' €';
-  };
+  const fmt = fmtEur;
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

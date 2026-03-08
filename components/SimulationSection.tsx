@@ -4,7 +4,8 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket } from 'lucide-react';
+import { fmtEur } from '@/lib/utils';
+import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -194,12 +195,8 @@ export default function SimulationSection({
     repartitionRemuneration: sim.state.repartitionRemuneration,
   }), [sim.state]);
 
-  // Formatage manuel pour éviter les différences d'hydratation serveur/client
-  const fmt = (v: number) => {
-    const rounded = Math.round(v);
-    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return formatted + ' €';
-  };
+  // Alias vers fmtEur — formatage identique partout, sans hydratation mismatch
+  const fmt = fmtEur;
 
   const onYearScroll = () => {
     const el = yearScrollRef.current;
@@ -360,6 +357,36 @@ export default function SimulationSection({
                 return (
                   <th key={i} className="p-4 relative pt-6 border-b dark:border-slate-800 min-w-[130px]">
                     <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
+
+                    {/* Icône paramètres — coin haut-droit */}
+                    {i === 0 ? (
+                      <button
+                        onClick={() => setParamsOpen(true)}
+                        title={`Paramètres spécifiques ${activeRegime}`}
+                        className="absolute top-1.5 right-1.5 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                      >
+                        <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          const cur = sim.state.growthRate ?? 0;
+                          const next = cur === 0 ? 5 : cur === 5 ? 10 : cur === 10 ? 20 : cur === 20 ? 30 : 0;
+                          sim.setters.setGrowthRate(next);
+                        }}
+                        title={`Croissance annuelle : ${sim.state.growthRate ?? 0}% (cliquer pour changer)`}
+                        className="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
+                        style={{
+                          background: (sim.state.growthRate ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
+                          color: (sim.state.growthRate ?? 0) > 0 ? regimeColor : '#94a3b8',
+                          border: `1px solid ${(sim.state.growthRate ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
+                        }}
+                      >
+                        <Percent size={8} />
+                        {sim.state.growthRate ?? 0}
+                      </button>
+                    )}
+
                     <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
                     <div className="text-[9px] font-bold mt-0.5 text-slate-400">
                       {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
@@ -370,39 +397,13 @@ export default function SimulationSection({
                     </div>
                     {r && r.cashInCompany != null && r.cashInCompany > 0 && (
                       <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                        Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                        Trésorerie&nbsp;: {fmt(r.cashInCompany)} /an
                       </div>
                     )}
                   </th>
                 );
               })}
             </tr>
-            {singleRegime && (
-              <tr className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
-                <th className="p-2 w-px align-middle" />
-                <th colSpan={5} className="p-4 align-middle">
-                  <div className="flex items-center justify-center gap-6 md:gap-10">
-                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      <ChevronLeft className="w-4 h-4" aria-hidden />
-                      Année 1
-                    </div>
-                    <div className="flex-1 flex justify-center min-w-0 px-2 py-2 border-t border-b border-slate-200 dark:border-slate-700">
-                      <button
-                        onClick={() => setParamsOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                      >
-                        <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" />
-                        Paramètres {activeRegime}
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      Année 5
-                      <ChevronRight className="w-4 h-4" aria-hidden />
-                    </div>
-                  </div>
-                </th>
-              </tr>
-            )}
           </thead>
 
           <tbody className="text-slate-700 dark:text-slate-300">

@@ -5,6 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { FileText, Info, Eye, EyeOff, Rocket, Settings2, CheckCircle, AlertCircle } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
+import { fmtEur } from '@/lib/utils';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -159,12 +160,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const winnerId = eligibleForWinner.length > 0
     ? [...eligibleForWinner].sort((a: any, b: any) => b.net - a.net)[0].id
     : null;
-  // Formatage manuel pour éviter les différences d'hydratation serveur/client
-  const fmt = (v: number) => {
-    const rounded = Math.round(v);
-    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return formatted + ' €';
-  };
+  // Alias vers fmtEur (lib/utils) — formatage identique partout, sans hydratation mismatch
+  const fmt = fmtEur;
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
     if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
