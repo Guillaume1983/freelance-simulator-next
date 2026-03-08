@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { ArrowLeft, TrendingUp, Briefcase, Store, Building2, Building } from 'lucide-react';
 import Footer from '@/components/Footer';
 
-/* Couleurs alignées sur ProjectionSection (REGIME_COLORS) */
+/* Couleurs alignées sur SimulationSection (REGIME_COLORS) */
 const STATUTS = [
   { href: '/simulateur/portage', slug: 'portage', label: 'Portage salarial', desc: 'Salarié du cabinet de portage, cotisations et net sur 5 ans', icon: Briefcase, iconClass: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' },
   { href: '/simulateur/micro', slug: 'micro', label: 'Micro-entreprise', desc: 'BNC / BIC, plafonds, ACRE et CFE sur 5 ans', icon: Store, iconClass: 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400' },
-  { href: '/simulateur/eurl-ir', slug: 'eurl-ir', label: 'EURL à l’IR', desc: 'Société à l’impôt sur le revenu, gérant TNS, projection 5 ans', icon: Building2, iconClass: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' },
-  { href: '/simulateur/eurl-is', slug: 'eurl-is', label: 'EURL à l’IS', desc: 'Société à l’IS, rémunération + résultat, projection 5 ans', icon: Building2, iconClass: 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' },
-  { href: '/simulateur/sasu', slug: 'sasu', label: 'SASU', desc: 'Société à l’IS, dividendes (PFU), ACRE an 1, projection 5 ans', icon: Building, iconClass: 'bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400' },
+  { href: '/simulateur/eurl-ir', slug: 'eurl-ir', label: 'EURL à l’IR', desc: 'Société à l’impôt sur le revenu, gérant TNS, simulation 5 ans', icon: Building2, iconClass: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' },
+  { href: '/simulateur/eurl-is', slug: 'eurl-is', label: 'EURL à l’IS', desc: 'Société à l’IS, rémunération + résultat, simulation 5 ans', icon: Building2, iconClass: 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' },
+  { href: '/simulateur/sasu', slug: 'sasu', label: 'SASU', desc: 'Société à l’IS, dividendes (PFU), ACRE an 1, simulation 5 ans', icon: Building, iconClass: 'bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400' },
 ] as const;
 
 export default function SimulateurHubPage() {
@@ -31,10 +31,10 @@ export default function SimulateurHubPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Projection 5 ans
+                Simulation 5 ans
               </h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Choisissez un statut pour simuler votre revenu net sur 5 ans (ACRE, CFE, croissance du CA).
+                Choisissez un statut pour lancer une simulation sur 5 ans (ACRE, CFE, croissance du CA).
               </p>
             </div>
           </div>

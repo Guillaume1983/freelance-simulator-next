@@ -49,7 +49,7 @@ export const ARTICLES: Article[] = [
       'Comment projeter son activité, lisser les charges et anticiper les creux pour dormir tranquille sans sacrifier son niveau de vie.',
     date: '2025-12-15',
     readingTime: '8 min',
-    category: 'Projection',
+    category: 'Simulation',
     imageUrl:
       'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=80',
   },

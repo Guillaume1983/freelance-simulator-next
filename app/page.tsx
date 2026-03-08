@@ -50,7 +50,7 @@ export default function Home() {
                 className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-6 py-4 rounded-2xl bg-indigo-500 text-white font-black text-sm shadow-xl hover:bg-indigo-600 transition-all hover:scale-[1.02] border-2 border-white/20"
               >
                 <TrendingUp className="w-5 h-5" />
-                Projection 5 ans
+                Simulation 5 ans
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
@@ -91,7 +91,7 @@ export default function Home() {
                 <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
                   <TrendingUp className="w-6 h-6" />
                 </div>
-                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Projection 5 ans</h3>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Simulation 5 ans</h3>
                 <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
                   Choisissez un statut (Portage, Micro, EURL, SASU) et simulez sur 5 ans avec ACRE et CFE.
                 </p>

@@ -37,7 +37,7 @@ const REGIME_COLORS: Record<string, string> = {
 const PROJECTION_ANALYSIS: Record<string, { forts: string[]; vigilance: string[] }> = {
   Portage: {
     forts: [
-      'Projection très lisible : net = CA – frais de gestion – cotisations classiques.',
+      'Simulation très lisible : net = CA – frais de gestion – cotisations classiques.',
       'Stabilité forte du pouvoir d’achat sur 5 ans (peu de surprise fiscale).',
       'Protection chômage (ARE) qui sécurise les années de croissance incertaine.',
     ],
@@ -132,7 +132,7 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
   );
 }
 
-export default function ProjectionSection({
+export default function SimulationSection({
   sim,
   activeRegime,
   setActiveRegime,
@@ -141,7 +141,7 @@ export default function ProjectionSection({
   sim: any;
   activeRegime: string;
   setActiveRegime: (id: string) => void;
-  /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc PROJECTIONS / nom / +% */
+  /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc SIMULATIONS / nom / +% */
   singleRegime?: boolean;
 }) {
   const printBizRef    = useRef<HTMLDivElement>(null);
@@ -153,7 +153,7 @@ export default function ProjectionSection({
 
   const handlePrintBiz = useReactToPrint({
     contentRef: printBizRef,
-    documentTitle: 'BusinessPlan-Projection5ans-FreelanceSimulateur',
+    documentTitle: 'BusinessPlan-Simulation5ans-FreelanceSimulateur',
     pageStyle: `
       @page {
         size: A4 portrait;
@@ -166,7 +166,7 @@ export default function ProjectionSection({
     `,
   });
 
-  const projections = useMemo(() => projeterSurNAns({
+  const simulations = useMemo(() => projeterSurNAns({
     tjm: sim.state.tjm,
     days: sim.state.days,
     taxParts: sim.state.taxParts,
@@ -196,7 +196,7 @@ export default function ProjectionSection({
   const onYearScroll = () => {
     const el = yearScrollRef.current;
     if (!el) return;
-    const count = projections.length;
+    const count = simulations.length;
     const idx = Math.round(el.scrollLeft / (el.scrollWidth / count));
     setActiveYear(Math.min(idx, count - 1));
   };
@@ -221,7 +221,7 @@ export default function ProjectionSection({
   ];
 
   // Masquer la ligne trésorerie si aucune trésorerie positive sur 5 ans pour le régime actif
-  const hasAnyCashInCompany = projections.some(yr => {
+  const hasAnyCashInCompany = simulations.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     return r && r.cashInCompany != null && r.cashInCompany > 0;
   });
@@ -230,7 +230,7 @@ export default function ProjectionSection({
     if (row.key === 'portageCommission') return activeRegime === 'Portage';
     // Micro : optimisations non déductibles → masquer totalement la ligne
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
-    // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les projections
+    // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
     if (row.key === 'fees' && activeRegime === 'Micro') return false;
     return true;
   });
@@ -300,7 +300,7 @@ export default function ProjectionSection({
         )}
       </div>
 
-      {/* ── Tableau Projections (desktop) ── */}
+      {/* ── Tableau Simulations (desktop) ── */}
       <div className="hidden md:block overflow-x-auto mt-4">
         <table className="w-full border-separate border-spacing-0">
           <thead>
@@ -326,7 +326,7 @@ export default function ProjectionSection({
               </th>
 
               {/* Colonnes années (5 ans) */}
-              {projections.map((yr, i) => {
+              {simulations.map((yr, i) => {
                 const r = yr.find((x: any) => x.id === activeRegime);
                 return (
                   <th key={i} className="p-4 relative pt-6 border-b dark:border-slate-800 min-w-[130px]">
@@ -377,7 +377,7 @@ export default function ProjectionSection({
                   <td className="p-4 border-r dark:border-slate-800">
                     <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</div>
                   </td>
-                {projections.map((yr, i) => {
+                {simulations.map((yr, i) => {
                   const r   = yr.find((x: any) => x.id === activeRegime) as any;
                   let val: number | null = null;
                   if (row.key === 'optimisations') {
@@ -418,7 +418,7 @@ export default function ProjectionSection({
                 {showDetails && (
                   <tr className="bg-slate-50/40 dark:bg-slate-800/20">
                     <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
-                    {projections.map((yr, i) => {
+                    {simulations.map((yr, i) => {
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
                       return (
                         <td key={i} className="px-4 py-1.5 text-center">
@@ -449,7 +449,7 @@ export default function ProjectionSection({
                   ))}
                 </div>
               </td>
-              {projections.map((yr, i) => {
+              {simulations.map((yr, i) => {
                 const r = yr.find((x: any) => x.id === activeRegime) as any;
                 return (
                   <td key={i} className="px-4 py-3">
@@ -492,7 +492,7 @@ export default function ProjectionSection({
           onScroll={onYearScroll}
           className="px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 pt-4"
         >
-          {projections.map((yr, i) => {
+          {simulations.map((yr, i) => {
             const r = yr.find((x: any) => x.id === activeRegime) as any;
             return (
               <div
@@ -579,7 +579,7 @@ export default function ProjectionSection({
           })}
         </div>
 
-        <ScrollDots total={projections.length} active={activeYear} color={regimeColor} />
+        <ScrollDots total={simulations.length} active={activeYear} color={regimeColor} />
       </div>
 
       {/* Bloc analyse + CTA Je me lance */}
@@ -623,7 +623,7 @@ export default function ProjectionSection({
               </div>
               <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  Prêt à transformer cette projection en réalité ? Trouvez des partenaires adaptés {getRegimePhrase(activeRegime)} pour vous accompagner.
+                  Prêt à transformer cette simulation en réalité ? Trouvez des partenaires adaptés {getRegimePhrase(activeRegime)} pour vous accompagner.
                 </p>
               </div>
               <div className="mt-2">
@@ -669,18 +669,18 @@ export default function ProjectionSection({
 
           {/* En-tête */}
           <div style={{ textAlign: 'center', margin: '0 0 14px' }}>
-            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Projections 5 ans — Freelance</h1>
+            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Simulations 5 ans — Freelance</h1>
             <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0' }}>
               Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · +{sim.state.growthRate} %/an · {sim.state.taxParts} parts fiscales
             </p>
           </div>
 
-          {/* Tableau projections */}
+          {/* Tableau simulations */}
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 9 }}>
             <thead>
               <tr style={{ background: '#eef2ff' }}>
                 <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #c7d2fe' }}>Indicateur</th>
-                {projections.map((_, i) => (
+                {simulations.map((_, i) => (
                   <th key={i} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #c7d2fe', color: '#4f46e5' }}>
                     Année {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? ' (ACRE)' : i > 0 ? ' (+CFE)' : ''}
                   </th>
@@ -692,7 +692,7 @@ export default function ProjectionSection({
                 <React.Fragment key={i}>
                   <tr style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
                     <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</td>
-                    {projections.map((yr, j) => {
+                    {simulations.map((yr, j) => {
                       const r = yr.find((x: any) => x.id === activeRegime) as any;
                       let val: number | null = null;
                       if (row.key === 'optimisations') {
@@ -722,7 +722,7 @@ export default function ProjectionSection({
                   {showDetails && (
                     <tr style={{ background: '#fafafa' }}>
                       <td style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', fontStyle: 'italic' }}>Calcul</td>
-                      {projections.map((yr, j) => {
+                      {simulations.map((yr, j) => {
                         const r = yr.find((x: any) => x.id === activeRegime) as any;
                         return (
                           <td key={j} style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'pre-line', fontStyle: 'italic', textAlign: 'center' }}>
@@ -743,7 +743,7 @@ export default function ProjectionSection({
               <div style={{ marginTop: 16 }}>
                 <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Évolution du net disponible — {activeRegime}</h2>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  {projections.map((yr, i) => {
+                  {simulations.map((yr, i) => {
                     const r = yr.find((x: any) => x.id === activeRegime) as any;
                     const total = Math.max(r.ca, 1);
                     const segs = [
@@ -805,7 +805,7 @@ export default function ProjectionSection({
             );
           })()}
 
-          <p style={{ fontSize: 7, color: '#999', marginTop: 14 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
+          <p style={{ fontSize: 7, color: '#999', marginTop: 14 }}>Simulation estimative — barèmes 2026. Ces simulations ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
 
@@ -813,7 +813,7 @@ export default function ProjectionSection({
         open={showConnectorModal}
         onClose={() => setShowConnectorModal(false)}
         title="Connectez-vous pour débloquer"
-        message="Connectez-vous ou créez un compte pour exporter la projection en PDF et accéder aux détails de calcul."
+        message="Connectez-vous ou créez un compte pour exporter la simulation en PDF et accéder aux détails de calcul."
       />
     </div>
   );

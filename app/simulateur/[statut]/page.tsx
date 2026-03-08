@@ -4,7 +4,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
-import ProjectionSection from '@/components/ProjectionSection';
+import SimulationSection from '@/components/SimulationSection';
 import Footer from '@/components/Footer';
 import NumberInput from '@/components/NumberInput';
 import { ArrowLeft, Settings, Briefcase, Store, Building2, Building } from 'lucide-react';
@@ -40,7 +40,7 @@ export default function SimulateurStatutPage() {
     if (searchParams.get('from') === 'comparateur') {
       return { href: '/comparateur', label: 'Retour au comparateur' };
     }
-    return { href: '/simulateur', label: 'Retour à la projection 5 ans' };
+    return { href: '/simulateur', label: 'Retour à la simulation 5 ans' };
   }, [searchParams]);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function SimulateurStatutPage() {
               })()}
               <div>
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  Projection sur 5 ans — {statutId}
+                  Simulation sur 5 ans — {statutId}
                 </h1>
                 <p className="mt-1 text-slate-500 dark:text-slate-400">
                   ACRE an 1{ctx.state?.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
@@ -160,7 +160,7 @@ export default function SimulateurStatutPage() {
         </div>
 
         <div className="relative z-10 mt-8">
-          <ProjectionSection
+          <SimulationSection
             sim={ctx}
             activeRegime={activeRegime}
             setActiveRegime={setActiveRegime}

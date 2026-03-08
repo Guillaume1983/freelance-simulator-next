@@ -725,7 +725,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </div>
           </div>
 
-          <p style={{ fontSize: 7, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces projections ne constituent pas un conseil fiscal.</p>
+          <p style={{ fontSize: 7, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces simulations ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
 
