@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { Info } from 'lucide-react';
+import { fmtEur } from '@/lib/utils';
 
 interface AmountTooltipProps {
   /** Montant affiché */
@@ -157,7 +158,7 @@ export default function AmountTooltip({
                 {label}
               </p>
               <p className="text-lg font-black text-slate-900 dark:text-white mt-0.5">
-                {Math.round(Math.abs(amount)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €
+                {fmtEur(Math.abs(amount))}
               </p>
               <p className="text-[11px] font-bold mt-1" style={{ color }}>
                 {percentage.toFixed(1)} % du CA

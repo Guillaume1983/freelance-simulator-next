@@ -3,6 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Calculator, TrendingUp, Percent, Settings } from 'lucide-react';
 import NumberInput from './NumberInput';
+import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
 
 export interface ControlsBarProps {
@@ -92,7 +93,7 @@ export default function ControlsBar({ sim, ca, showGrowth = false, pageSlug }: C
             <div className="flex flex-col items-end">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
               <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
-                {Math.round(ca).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €
+                {fmtEur(ca)}
               </span>
             </div>
 
