@@ -22,7 +22,7 @@ export default function Home() {
           aria-label="Accueil"
         >
           <div
-            className="section-hero-bg transition-[background-image] duration-500"
+            className="section-hero-bg"
             style={{ backgroundImage: `url('${HERO_IMAGE}')` }}
             aria-hidden
           />

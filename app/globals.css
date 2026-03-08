@@ -382,11 +382,8 @@
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
-    transform: scale(1.04);
-    transition: transform 8s ease-out;
-  }
-  .section-hero:hover .section-hero-bg {
-    transform: scale(1.0);
+    transform: none;
+    transition: none;
   }
   .section-hero-overlay {
     position: absolute;
