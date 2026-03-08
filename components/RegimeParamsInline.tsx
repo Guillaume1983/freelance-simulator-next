@@ -2,16 +2,16 @@
 
 import { useRef, useState, useEffect } from 'react';
 
-const labelLight = 'text-[8px] font-black text-slate-400 uppercase';
-const labelDark = 'text-[8px] font-black text-white/90 uppercase';
-const inputLight = 'w-12 text-center text-[10px] font-bold p-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600';
-const inputDark = 'tjm-days-input w-16 py-1 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white text-center';
-const selectLight = 'w-auto min-w-[88px] text-[9px] p-1 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-600 shrink-0';
-const selectDark = 'w-auto min-w-[88px] text-[9px] p-1 rounded-lg bg-white/10 border border-white/20 text-white shrink-0 [&_option]:text-slate-900';
-const spanLight = 'text-[8px] text-slate-400';
+const labelLight = 'text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide';
+const labelDark = 'text-[8px] font-black text-white/90 uppercase tracking-wide';
+const inputLight = 'w-14 text-center text-[10px] font-bold py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50 transition-all';
+const inputDark = 'tjm-days-input w-16 py-1.5 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white text-center focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition-all';
+const selectLight = 'w-auto min-w-[96px] text-[9px] py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shrink-0 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50 transition-all';
+const selectDark = 'w-auto min-w-[96px] text-[9px] py-1.5 px-2 rounded-lg bg-white/10 border border-white/20 text-white shrink-0 [&_option]:text-slate-900 cursor-pointer hover:border-white/40 transition-all';
+const spanLight = 'text-[8px] text-slate-400 dark:text-slate-500';
 const spanDark = 'text-[8px] text-white/80';
-const spanValueLight = 'text-[8px] font-bold text-slate-500';
-const spanValueDark = 'text-[8px] font-bold text-white/85';
+const spanValueLight = 'text-[9px] font-bold text-slate-600 dark:text-slate-300 tabular-nums';
+const spanValueDark = 'text-[9px] font-bold text-white/85 tabular-nums';
 
 const arrowBtn = 'w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20';
 
@@ -120,31 +120,37 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
     </div>
   );
   if (regimeId === 'EURL IS') return (
-    <div className="space-y-1 min-w-[100px]">
-      <label className={`${lbl} block`}>Rémunération</label>
-      <input
-        type="range"
-        min={0} max={100} step={5}
-        value={(sim.state.remunerationDirigeantMensuelle ?? 1) * 100}
-        onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
-        className={`w-full h-1.5 ${isDark ? 'accent-indigo-400' : 'accent-indigo-600'}`}
-        onClick={e => e.stopPropagation()}
-      />
-      <span className={spVal}>{Math.round((sim.state.remunerationDirigeantMensuelle ?? 1) * 100)}% salaire</span>
+    <div className="space-y-1.5 min-w-[120px]">
+      <label className={`${lbl} block`}>Rémunération TNS</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min={0} max={100} step={5}
+          value={(sim.state.remunerationDirigeantMensuelle ?? 1) * 100}
+          onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
+          className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-blue-400' : 'accent-blue-500'}`}
+          onClick={e => e.stopPropagation()}
+        />
+        <span className={`${spVal} w-12 text-right`}>{Math.round((sim.state.remunerationDirigeantMensuelle ?? 1) * 100)}%</span>
+      </div>
+      <p className={`${sp} text-[7px]`}>Reste en trésorerie société</p>
     </div>
   );
   if (regimeId === 'SASU') return (
-    <div className="space-y-1 min-w-[100px]">
-      <label className={`${lbl} block`}>Répartition</label>
-      <input
-        type="range"
-        min={0} max={100} step={5}
-        value={sim.state.repartitionRemuneration ?? 100}
-        onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
-        className={`w-full h-1.5 ${isDark ? 'accent-indigo-400' : 'accent-indigo-600'}`}
-        onClick={e => e.stopPropagation()}
-      />
-      <span className={spVal}>{sim.state.repartitionRemuneration ?? 100}% dividendes</span>
+    <div className="space-y-1.5 min-w-[120px]">
+      <label className={`${lbl} block`}>Dividendes</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min={0} max={100} step={5}
+          value={sim.state.repartitionRemuneration ?? 100}
+          onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
+          className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-violet-400' : 'accent-violet-500'}`}
+          onClick={e => e.stopPropagation()}
+        />
+        <span className={`${spVal} w-12 text-right`}>{sim.state.repartitionRemuneration ?? 100}%</span>
+      </div>
+      <p className={`${sp} text-[7px]`}>Part du bénéfice en dividendes</p>
     </div>
   );
   return <p className={`text-[8px] italic ${isDark ? 'text-white/70' : 'text-slate-400'}`}>—</p>;

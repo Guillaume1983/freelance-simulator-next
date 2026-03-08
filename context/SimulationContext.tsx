@@ -7,6 +7,9 @@ type SimulationContextValue = ReturnType<typeof useSimulation> & {
   sim: ReturnType<typeof useSimulation>;
 };
 
+export type SimulationState = SimulationContextValue['state'];
+export type SimulationSetters = SimulationContextValue['setters'];
+
 const SimulationContext = createContext<SimulationContextValue | null>(null);
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {

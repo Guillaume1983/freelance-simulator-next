@@ -5,9 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
 import SimulationSection from '@/components/SimulationSection';
+import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
-import NumberInput from '@/components/NumberInput';
-import { ArrowLeft, Settings, Briefcase, Store, Building2, Building } from 'lucide-react';
+import { ArrowLeft, Briefcase, Store, Building2, Building } from 'lucide-react';
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
   portage: 'Portage',
@@ -61,112 +61,53 @@ export default function SimulateurStatutPage() {
   if (!statutId && params?.statut) return null;
 
   const sim = ctx.sim ?? ctx;
+  const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
 
   return (
     <main className="min-h-screen bg-page-settings">
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
           <Link
-              href={backLink.href}
-              className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-            >
-              <ArrowLeft size={16} />
-              {backLink.label}
-            </Link>
-            <div className="mt-6 flex items-start gap-4">
-              {statutId && STATUT_HEADER_ICON[statutId] && (() => {
-                const { Icon, iconClass } = STATUT_HEADER_ICON[statutId];
-                return (
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${iconClass}`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                );
-              })()}
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                  Simulation sur 5 ans — {statutId}
-                </h1>
-                <p className="mt-1 text-slate-500 dark:text-slate-400">
-                  ACRE an 1{ctx.state?.acreEnabled ? ' ✅' : ' ✗'} · CFE dès an 2
-                </p>
-              </div>
+            href={backLink.href}
+            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            {backLink.label}
+          </Link>
+          <div className="mt-6 flex items-start gap-4">
+            {statutId && STATUT_HEADER_ICON[statutId] && (() => {
+              const { Icon, iconClass } = STATUT_HEADER_ICON[statutId];
+              return (
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${iconClass}`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+              );
+            })()}
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Simulation sur 5 ans — {statutId}
+              </h1>
+              <p className="mt-1 text-slate-500 dark:text-slate-400">
+                ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Icône % sur an 2-5 pour ajuster la croissance
+              </p>
             </div>
           </div>
+        </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 flex-wrap">
-              <div>
-                <Link
-                  href={`/reglages?from=simulateur&statut=${slug}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                >
-                  <Settings size={16} />
-                  Paramètres
-                </Link>
-              </div>
-              <div className="flex flex-wrap items-end gap-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    TJM (€/jour)
-                  </label>
-                  <NumberInput
-                    value={sim.state.tjm ?? 0}
-                    onChange={(v) => sim.setters.setTjm(v)}
-                    onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
-                    onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
-                    suffix="€"
-                    label="TJM"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    Jours / an
-                  </label>
-                  <NumberInput
-                    value={sim.state.days ?? 0}
-                    onChange={(v) => sim.setters.setDays(v)}
-                    onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
-                    onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
-                    suffix="j"
-                    label="Jours"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    Croissance CA (%/an)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={50}
-                      step={1}
-                      value={sim.state.growthRate ?? 2}
-                      onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                      className="w-24 h-2 rounded-full accent-indigo-500 bg-slate-200 dark:bg-slate-600"
-                      aria-label="Croissance CA par an"
-                    />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums w-8">
-                      {sim.state.growthRate ?? 2}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Barre de contrôle sticky — identique au comparateur */}
+      <div className="sticky top-0 z-40">
+        <ControlsBar sim={sim} ca={ca} pageSlug={`simulateur/${slug}`} />
+      </div>
 
-        <div className="relative z-10 mt-8">
-          <SimulationSection
-            sim={ctx}
-            activeRegime={activeRegime}
-            setActiveRegime={setActiveRegime}
-            singleRegime
-          />
-        </div>
+      {/* Section simulation */}
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+        <SimulationSection
+          sim={ctx}
+          activeRegime={activeRegime}
+          setActiveRegime={setActiveRegime}
+          singleRegime
+        />
       </div>
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">

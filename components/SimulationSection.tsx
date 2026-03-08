@@ -1,12 +1,15 @@
 'use client';
 import React, { useRef, useMemo, useState } from 'react';
+
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, Rocket, ChevronLeft, ChevronRight } from 'lucide-react';
+import { fmtEur } from '@/lib/utils';
+import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
+import AmountTooltip from '@/components/AmountTooltip';
+import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -149,6 +152,7 @@ export default function SimulationSection({
   const [activeYear, setActiveYear]     = useState(0);
   const [showDetails, setShowDetails]   = useState(false);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [paramsOpen, setParamsOpen] = useState(false);
   const { isConnected } = useUser();
 
   const handlePrintBiz = useReactToPrint({
@@ -191,7 +195,8 @@ export default function SimulationSection({
     repartitionRemuneration: sim.state.repartitionRemuneration,
   }), [sim.state]);
 
-  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+  // Alias vers fmtEur — formatage identique partout, sans hydratation mismatch
+  const fmt = fmtEur;
 
   const onYearScroll = () => {
     const el = yearScrollRef.current;
@@ -249,6 +254,21 @@ export default function SimulationSection({
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
 
+  const getTooltipColor = (key: string): string => {
+    switch (key) {
+      case 'ca': return '#6366f1';
+      case 'fees': return '#fb7185';
+      case 'portageCommission': return '#8b5cf6';
+      case 'cotis': return '#fbbf24';
+      case 'beforeTax': return '#64748b';
+      case 'ir': return '#f87171';
+      case 'net': return '#34d399';
+      case 'optimisations': return '#10b981';
+      case 'cashInCompany': return '#3b82f6';
+      default: return '#6366f1';
+    }
+  };
+
   const getRowBgClass = (row: (typeof rows)[number]) => {
     if (row.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
     if (row.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30 font-bold';
@@ -292,10 +312,16 @@ export default function SimulationSection({
           </div>
         )}
 
-        {/* Paramètres propres au statut — en bandeau sur page simulateur, ici uniquement sur comparateur */}
+        {/* Bouton paramètres statut */}
         {!singleRegime && (
           <div className="shrink-0">
-            <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+            <button
+              onClick={() => setParamsOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+            >
+              <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
+              Paramètres {activeRegime}
+            </button>
           </div>
         )}
       </div>
@@ -331,6 +357,36 @@ export default function SimulationSection({
                 return (
                   <th key={i} className="p-4 relative pt-6 border-b dark:border-slate-800 min-w-[130px]">
                     <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
+
+                    {/* Icône paramètres — coin haut-droit */}
+                    {i === 0 ? (
+                      <button
+                        onClick={() => setParamsOpen(true)}
+                        title={`Paramètres spécifiques ${activeRegime}`}
+                        className="absolute top-1.5 right-1.5 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                      >
+                        <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          const cur = sim.state.growthRate ?? 0;
+                          const next = cur === 0 ? 5 : cur === 5 ? 10 : cur === 10 ? 20 : cur === 20 ? 30 : 0;
+                          sim.setters.setGrowthRate(next);
+                        }}
+                        title={`Croissance annuelle : ${sim.state.growthRate ?? 0}% (cliquer pour changer)`}
+                        className="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
+                        style={{
+                          background: (sim.state.growthRate ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
+                          color: (sim.state.growthRate ?? 0) > 0 ? regimeColor : '#94a3b8',
+                          border: `1px solid ${(sim.state.growthRate ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
+                        }}
+                      >
+                        <Percent size={8} />
+                        {sim.state.growthRate ?? 0}
+                      </button>
+                    )}
+
                     <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
                     <div className="text-[9px] font-bold mt-0.5 text-slate-400">
                       {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
@@ -341,33 +397,13 @@ export default function SimulationSection({
                     </div>
                     {r && r.cashInCompany != null && r.cashInCompany > 0 && (
                       <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                        Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
+                        Trésorerie&nbsp;: {fmt(r.cashInCompany)} /an
                       </div>
                     )}
                   </th>
                 );
               })}
             </tr>
-            {singleRegime && (
-              <tr className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
-                <th className="p-2 w-px align-middle" />
-                <th colSpan={5} className="p-4 align-middle">
-                  <div className="flex items-center justify-center gap-6 md:gap-10">
-                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      <ChevronLeft className="w-4 h-4" aria-hidden />
-                      Année 1
-                    </div>
-                    <div className="flex-1 flex justify-center min-w-0 px-2 py-2 border-t border-b border-slate-200 dark:border-slate-700">
-                      <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
-                      Année 5
-                      <ChevronRight className="w-4 h-4" aria-hidden />
-                    </div>
-                  </div>
-                </th>
-              </tr>
-            )}
           </thead>
 
           <tbody className="text-slate-700 dark:text-slate-300">
@@ -397,19 +433,27 @@ export default function SimulationSection({
                   if (row.key === 'fees' && r.id === 'Micro') val = null;
                   if (row.key === 'cotis' && r.id === 'SASU') val = null;
                   if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
+                  const detailText = getDetailText(r, row.key, row.monthly);
+                  const tooltipColor = getTooltipColor(row.key);
                   return (
                     <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${row.color}`}>
                       {val === null ? (
                         '—'
                       ) : (
-                        <>
+                        <AmountTooltip
+                          amount={val}
+                          ca={r.ca}
+                          detailText={detailText}
+                          label={row.label}
+                          color={tooltipColor}
+                        >
                           {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
                           {fmt(val)}
                           {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                        </>
-                      )}
-                      {row.isFinal && (
-                        <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                          {row.isFinal && (
+                            <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
+                          )}
+                        </AmountTooltip>
                       )}
                     </td>
                   );
@@ -530,7 +574,13 @@ export default function SimulationSection({
                           An 1
                         </span>
                         <div className="flex-1 min-w-0 flex justify-center">
-                          <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
+                          <button
+                            onClick={() => setParamsOpen(true)}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                          >
+                            <Settings2 size={11} className="group-hover:rotate-45 transition-transform duration-200" />
+                            Paramètres
+                          </button>
                         </div>
                         <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
                           An 5
@@ -552,22 +602,31 @@ export default function SimulationSection({
                     if (r && row.key === 'fees' && r.id === 'Micro') val = null;
                     if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
                     if (r && row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
+                    const detailText = r ? getDetailText(r, row.key, row.monthly) : '';
+                    const tooltipColor = getTooltipColor(row.key);
                     return (
                       <div key={row.label}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
                           <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
-                            {val !== null ? (
-                              <>
+                            {val !== null && r ? (
+                              <AmountTooltip
+                                amount={val}
+                                ca={r.ca}
+                                detailText={detailText}
+                                label={row.label}
+                                color={tooltipColor}
+                                position="bottom"
+                              >
                                 {row.prefix}{fmt(val)}
                                 {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
-                              </>
+                              </AmountTooltip>
                             ) : '—'}
                           </span>
                         </div>
                         {showDetails && r && (
                           <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
-                            {getDetailText(r, row.key, row.monthly)}
+                            {detailText}
                           </p>
                         )}
                       </div>
@@ -641,27 +700,28 @@ export default function SimulationSection({
         </div>
       )}
 
-      {/* Hypothèses principales (mêmes que le comparatif) */}
-      <div className="px-4 md:px-6 pb-2">
-        <div className="mt-4 max-w-[1600px] mx-auto rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-2">
-          <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
-              Hypothèses principales
-            </span>
-            <ul className="mt-1 md:mt-0 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 text-[9px] text-slate-600 dark:text-slate-300 list-disc md:list-none md:pl-0 pl-4">
-            <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
-            <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
-            <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
-            <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
-            </ul>
+      {/* Hypothèses et disclaimer */}
+      <div className="px-4 md:px-6 py-4">
+        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
+                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
+                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année</li>
+                  <li>CFE : ajoutée dès la 2e année d'activité</li>
+                  <li>Croissance CA : appliquée année après année</li>
+                  <li>EURL IS : IS 25% sur bénéfice. SASU : PFU 30% sur dividendes</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 italic border-t border-slate-200/80 dark:border-slate-700/50 pt-3">
+              Simulation estimative basée sur les barèmes 2026. Consultez un expert-comptable pour votre situation personnelle.
+            </p>
           </div>
         </div>
       </div>
-
-      {/* Disclaimer identique au tableau comparatif */}
-      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
-        <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
-      </p>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>
@@ -814,6 +874,13 @@ export default function SimulationSection({
         onClose={() => setShowConnectorModal(false)}
         title="Connectez-vous pour débloquer"
         message="Connectez-vous ou créez un compte pour exporter la simulation en PDF et accéder aux détails de calcul."
+      />
+
+      <RegimeParamsModal
+        sim={sim}
+        regimeId={activeRegime}
+        isOpen={paramsOpen}
+        onClose={() => setParamsOpen(false)}
       />
     </div>
   );

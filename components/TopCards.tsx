@@ -3,9 +3,10 @@ import { useRef } from 'react';
 import { Zap, Receipt, Sparkles, Users, ChevronDown } from 'lucide-react';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
+import { fmtEur } from '@/lib/utils';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
-  const fmt = (v: number) => Math.round(v).toLocaleString() + ' €';
+  const fmt = fmtEur;
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -2,12 +2,14 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { AlertCircle, AlertTriangle, CheckCircle, FileText, Rocket, Info, Eye, EyeOff } from 'lucide-react';
+import { FileText, Info, Eye, EyeOff, Rocket, Settings2, CheckCircle, AlertCircle } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
+import { fmtEur } from '@/lib/utils';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
+import AmountTooltip from '@/components/AmountTooltip';
+import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -122,6 +124,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const [showDetails, setShowDetails] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [openParamsFor, setOpenParamsFor] = useState<string | null>(null);
   const { isConnected } = useUser();
 
   const printRef      = useRef<HTMLDivElement>(null);
@@ -157,7 +160,8 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const winnerId = eligibleForWinner.length > 0
     ? [...eligibleForWinner].sort((a: any, b: any) => b.net - a.net)[0].id
     : null;
-  const fmt      = (v: number) => Math.round(v).toLocaleString() + ' €';
+  // Alias vers fmtEur (lib/utils) — formatage identique partout, sans hydratation mismatch
+  const fmt = fmtEur;
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
     if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
@@ -171,7 +175,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
-    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
+    { label: 'Prél��vement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
     { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true },
     { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
@@ -228,79 +232,121 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
 
-  const RetirementBadge = ({ quarters }: { quarters: number }) => (
-    <span title={quarters >= 4 ? '4 trimestres retraite validés' : `~${quarters}/4 trimestres`} className="text-[10px]">
-      {quarters >= 4 ? '✅' : '⚠️'}
-    </span>
-  );
+  const getTooltipColor = (key: string): string => {
+    switch (key) {
+      case 'ca': return '#6366f1';
+      case 'fees': return '#fb7185';
+      case 'portageCommission': return '#8b5cf6';
+      case 'cotis': return '#fbbf24';
+      case 'beforeTax': return '#64748b';
+      case 'ir': return '#f87171';
+      case 'net': return '#34d399';
+      case 'optimisations': return '#10b981';
+      case 'cashInCompany': return '#3b82f6';
+      default: return '#6366f1';
+    }
+  };
+
+  const RetirementBadge = ({ quarters, regimeId }: { quarters: number; regimeId: string }) => {
+    const validated = quarters >= 4;
+    const label = validated ? '4 trim. retraite validés' : `~${quarters}/4 trim. retraite`;
+    return (
+      <span
+        title={label}
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold cursor-default select-none ${
+          validated
+            ? 'bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400'
+            : 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400'
+        }`}
+      >
+        <span className={`w-1.5 h-1.5 rounded-full ${validated ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        {label}
+      </span>
+    );
+  };
 
   return (
-    <div className="overflow-visible mt-6 md:mt-8 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none">
 
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">
-        <div className="flex justify-end items-center px-4 py-2 bg-slate-50/50 dark:bg-slate-900/50 rounded-t-2xl border-b border-slate-200 dark:border-slate-800">
-          <p className="text-[8px] text-slate-400">
-            🧠 = complexité gestion (1 simple → 5 expert) · Niveau = sécurité statut
+        {/* Header bar */}
+        <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
+              className={PDF_BTN}
+            >
+              <FileText size={11} /> Exporter PDF
+            </button>
+            <button
+              onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
+              className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
+            >
+              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+              {showDetails ? 'Masquer détails' : 'Voir détails'}
+            </button>
+            <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
+              <Settings2 size={10} className="shrink-0" />
+              Icone en haut à droite = paramètres spécifiques au statut
+            </span>
+          </div>
+          <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-[8px] font-bold text-emerald-700 dark:text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              4 trim.
+            </span>
+            = trimestres retraite validés · badge rouge si plafond micro dépassé
           </p>
         </div>
         <table className="w-full border-separate border-spacing-0 table-fixed">
           <thead>
-            <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
+            <tr className="bg-white dark:bg-slate-900">
 
-              {/* Cellule haut-gauche avec bouton Export PDF */}
-              <th className="p-6 text-left border-b dark:border-slate-800 w-[220px]">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
-                  Comparatif<br />Stratégique
+              {/* Cellule haut-gauche */}
+              <th className="p-5 text-left border-b border-slate-100 dark:border-slate-800 w-[200px] align-bottom">
+                <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Métriques
                 </h3>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <button
-                    onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
-                    className={PDF_BTN}
-                  >
-                    <FileText size={11} /> PDF
-                  </button>
-                  <button
-                    onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-                    className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
-                  >
-                    {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-                    {showDetails ? 'Masquer' : 'Détails'}
-                  </button>
-                </div>
               </th>
 
               {regimes.map((r: any) => (
-                <th key={r.id} className="p-4 relative pt-12 border-b dark:border-slate-800 align-top">
+                <th key={r.id} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
                   <div className={`header-band band-${r.class}`} />
-                  {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">🏆 OPTIMUM</div>}
-                  <div className="grid grid-cols-1 gap-0">
-                    <div className="min-h-[28px] flex items-center justify-center gap-2">
-                      <span className="text-[13px] font-black dark:text-white uppercase tracking-tighter">{r.id}</span>
-                      <RetirementBadge quarters={r.retirementQuarters} />
-                    </div>
-                    <div className="min-h-[36px] flex flex-col items-center justify-center gap-0.5">
-                      <span className="text-3xl font-black dark:text-white leading-none tracking-tighter">
-                        {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
+                  {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
+                  {isMicroPlafondExceeded(r) && <div className="plafond-badge">PLAFOND DÉPASSÉ</div>}
+
+                  {/* Icône paramètres — coin haut-droit */}
+                  <button
+                    onClick={() => setOpenParamsFor(r.id)}
+                    title={`Paramètres spécifiques ${r.id}`}
+                    className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                  >
+                    <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
+                  </button>
+
+                  <div className="flex flex-col items-center gap-2">
+                    {/* Nom */}
+                    <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">{r.id}</span>
+
+                    {/* Montant net mensuel — hauteur fixe pour alignement */}
+                    <div className="flex flex-col items-center min-h-[52px] justify-center">
+                      <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                        {fmt(r.net / 12)}
                       </span>
-                      {isMicroPlafondExceeded(r) && (
-                        <span className="text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                          <AlertTriangle size={10} className="shrink-0" />
-                          Dépassement plafond {plafondMicro.toLocaleString()} €
+                      <span className="text-[10px] font-bold text-slate-400 mt-0.5">net / mois</span>
+                      {r.cashInCompany != null && r.cashInCompany > 0 ? (
+                        <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                          + {fmt(r.cashInCompany)} trésorerie
                         </span>
-                      )}
-                      {r.cashInCompany != null && r.cashInCompany > 0 && (
-                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                          Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
-                        </span>
+                      ) : (
+                        <span className="mt-1.5 invisible text-[8px]">—</span>
                       )}
                     </div>
-                    <div className="min-h-[32px] flex items-center justify-center gap-1.5">
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion (1 simple → 5 expert)">🧠 {r.mental}/5</span>
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Niveau de sécurité du statut">{r.safety}</span>
-                    </div>
-                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                      <RegimeParamsInline sim={sim} regimeId={r.id} />
+
+                    {/* Badge retraite — hauteur fixe pour alignement */}
+                    <div className="h-[22px] flex items-center justify-center">
+                      <RetirementBadge quarters={r.retirementQuarters} regimeId={r.id} />
                     </div>
                   </div>
                 </th>
@@ -308,45 +354,65 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </tr>
           </thead>
           <tbody className="text-slate-700 dark:text-slate-300">
-            {visibleRows.map((row, idx) => (
-              <React.Fragment key={idx}>
-                <tr className={`transition-colors ${getRowBgClass(row)}`}>
-                  <td className="p-4 border-r dark:border-slate-800">
-                    <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.label}</div>
-                  </td>
-                  {regimes.map((r: any) => (
-                    <td
-                      key={r.id}
-                      className={`p-4 text-center font-bold ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${(row as any).color || ''}`}
-                    >
-                      {(() => {
-                        const val = getDisplayValue(r, row);
-                        if (val === null) return '—';
-                        if (row.key === 'beforeTax') {
-                          return (
-                            <>
-                              <div className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(r.id)}</div>
-                              {(row as any).prefix} {fmt(val)}
-                            </>
-                          );
-                        }
-                        return <>{(row as any).prefix} {fmt(val)}</>;
-                      })()}
+            {visibleRows.map((row, idx) => {
+              const isLast = idx === visibleRows.length - 1;
+              const isFinal = (row as any).isFinal;
+              return (
+                <React.Fragment key={idx}>
+                  <tr className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''}`}>
+                    <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
+                      <div className="font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wide leading-tight">{row.label}</div>
                     </td>
-                  ))}
-                </tr>
-                {showDetails && (
-                  <tr className="bg-slate-50/40 dark:bg-slate-800/20">
-                    <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
-                    {regimes.map((r: any) => (
-                      <td key={r.id} className="px-4 py-1.5 text-center">
-                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.div === 12)}</span>
-                      </td>
-                    ))}
+                    {regimes.map((r: any) => {
+                      const val = getDisplayValue(r, row);
+                      const detailText = getDetailText(r, row.key, row.div === 12);
+                      const tooltipColor = getTooltipColor(row.key);
+                      return (
+                        <td
+                          key={r.id}
+                          className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${(row as any).color || ''}`}
+                        >
+                          {(() => {
+                            if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
+                            const content = (
+                              <>
+                                {row.key === 'beforeTax' && (
+                                  <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(r.id)}</div>
+                                )}
+                                <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                  {(row as any).prefix} {fmt(val)}
+                                </span>
+                              </>
+                            );
+                            return (
+                              <AmountTooltip
+                                amount={val}
+                                ca={r.ca}
+                                detailText={detailText}
+                                label={row.label}
+                                color={tooltipColor}
+                              >
+                                {content}
+                              </AmountTooltip>
+                            );
+                          })()}
+                        </td>
+                      );
+                    })}
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
+                  {showDetails && (
+                    <tr className="bg-slate-50/60 dark:bg-slate-800/30">
+                      <td className="px-5 py-1.5 border-r border-slate-100 dark:border-slate-800 text-[8px] text-slate-400 font-medium italic">Calcul</td>
+                      {regimes.map((r: any) => (
+                        <td key={r.id} className="px-3 py-1.5 text-center">
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.div === 12)}</span>
+                        </td>
+                      ))}
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
 
             {/* ── Ligne Répartitions ── */}
             <tr className="bg-slate-50/20 dark:bg-slate-900/10">
@@ -455,7 +521,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
               Comparatif stratégique
             </h3>
-            <p className="text-[8px] text-slate-400 mt-0.5">🧠 complexité · Niveau = sécurité</p>
+                  <p className="text-[8px] text-slate-400 mt-0.5">Swipe pour comparer</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -486,65 +552,86 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 key={r.id}
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
+                {/* Icône paramètres — coin haut-droit */}
+                <button
+                  onClick={() => setOpenParamsFor(r.id)}
+                  title={`Paramètres spécifiques ${r.id}`}
+                  className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                >
+                  <Settings2 size={14} className="group-hover:rotate-45 transition-transform duration-200" />
+                </button>
+
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
-                  <div className="mb-1 flex items-center justify-center gap-2">
-                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">{r.id}</span>
-                    <RetirementBadge quarters={r.retirementQuarters} />
+                  <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300 mb-2">{r.id}</span>
+
+                  {/* Montant net */}
+                  <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-1">
+                    <span className={isMicroPlafondExceeded(r) ? 'text-rose-500 dark:text-rose-400 line-through decoration-2' : ''}>
+                      {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
+                    </span>
                   </div>
-                  <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-1 flex flex-col items-center gap-0.5">
-                    <span>{fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span></span>
-                    {isMicroPlafondExceeded(r) && (
-                      <span className="text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                        <AlertTriangle size={10} className="shrink-0" />
-                        Dépassement plafond {plafondMicro.toLocaleString()} €
+
+                  {/* Badges statut — hauteur fixe pour alignement */}
+                  <div className="h-[24px] flex items-center justify-center gap-2 mb-1">
+                    {isMicroPlafondExceeded(r) ? (
+                      <span className="inline-flex items-center gap-1 bg-rose-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow-md">
+                        PLAFOND DÉPASSÉ
                       </span>
+                    ) : isWinner ? (
+                      <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow-md">
+                        OPTIMUM
+                      </span>
+                    ) : (
+                      <span className="invisible text-[9px]">—</span>
                     )}
                   </div>
+
+                  {/* Badge retraite */}
+                  <div className="mb-2">
+                    <RetirementBadge quarters={r.retirementQuarters} regimeId={r.id} />
+                  </div>
+
                   {r.cashInCompany != null && r.cashInCompany > 0 && (
                     <div className="mb-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                      Trésorerie société&nbsp;: {fmt(r.cashInCompany)} /an
-                    </div>
-                  )}
-                  {isWinner && !isMicroPlafondExceeded(r) && (
-                    <div className="mb-2 bg-indigo-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                      <span>🏆</span> OPTIMUM
+                      Trésorerie&nbsp;: {fmt(r.cashInCompany)} /an
                     </div>
                   )}
                   <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
-                  <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion">🧠 {r.mental}/5</span>
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Sécurité statut">{r.safety}</span>
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 w-full px-2">
-                    <RegimeParamsInline sim={sim} regimeId={r.id} />
-                  </div>
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">
-                  {visibleRows.map((row) => (
-                    <div key={row.label}>
-                      <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
-                        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label}</p>
-                        <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
-                          {(() => {
-                            const val = getDisplayValue(r, row);
-                            if (val === null) return '—';
-                            return (
-                              <>
+                  {visibleRows.map((row) => {
+                    const val = getDisplayValue(r, row);
+                    const detailText = getDetailText(r, row.key, row.div === 12);
+                    const tooltipColor = getTooltipColor(row.key);
+                    return (
+                      <div key={row.label}>
+                        <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
+                          <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label}</p>
+                          <span className={`text-[11px] font-black ${(row as any).isFinal ? 'text-indigo-700 dark:text-indigo-300' : (row as any).color || 'text-slate-800 dark:text-slate-100'}`}>
+                            {val === null ? '—' : (
+                              <AmountTooltip
+                                amount={val}
+                                ca={r.ca}
+                                detailText={detailText}
+                                label={row.label}
+                                color={tooltipColor}
+                                position="bottom"
+                              >
                                 {(row as any).prefix} {fmt(val)}
                                 <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
-                              </>
-                            );
-                          })()}
-                        </span>
+                              </AmountTooltip>
+                            )}
+                          </span>
+                        </div>
+                        {showDetails && (
+                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
+                            {detailText}
+                          </p>
+                        )}
                       </div>
-                      {showDetails && (
-                        <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
-                          {getDetailText(r, row.key, row.div === 12)}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {/* Analyse statutaire mobile */}
                 {(() => {
@@ -589,26 +676,28 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>
 
-      {/* Hypothèses principales */}
-      <div className="px-4 md:px-6 pb-2">
-        <div className="mt-4 max-w-[1600px] mx-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 px-4 py-2">
-          <div className="flex flex-col md:flex-row md:items-baseline md:gap-4">
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 whitespace-nowrap">
-              Hypothèses principales
-            </span>
-            <ul className="mt-1 md:mt-0 grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-1 text-[9px] text-slate-600 dark:text-slate-300 list-disc md:list-none md:pl-0 pl-4">
-            <li>ACRE : allègement d’environ 50 % des cotisations TNS/Micro la 1ʳᵉ année (hors CSG/CRDS), hors Portage et SASU.</li>
-            <li>IK : barème fiscal annuel, remboursés en net et déductibles pour la société.</li>
-            <li>Loyer perçu : charge pour la société, mais revenu imposable ajouté au foyer.</li>
-            <li>EURL IS : IS 25 % sur le bénéfice non versé en salaire. SASU : IS 20 % puis PFU 30 % (17,2 % PS + 12,8 % IR) sur les dividendes.</li>
-            </ul>
+      {/* Hypothèses et disclaimer */}
+      <div className="px-4 md:px-6 py-4">
+        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
+                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
+                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année (hors CSG/CRDS)</li>
+                  <li>IK : barème fiscal annuel, remboursés net et déductibles</li>
+                  <li>Loyer perçu : charge société, revenu imposable pour le foyer</li>
+                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 italic border-t border-slate-200/80 dark:border-slate-700/50 pt-3">
+              Simulation estimative basée sur les barèmes 2026. Consultez un expert-comptable pour votre situation personnelle.
+            </p>
           </div>
         </div>
       </div>
-
-      <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
-        <Info size={10} /> Simulation estimative. Consultez un expert-comptable pour votre situation personnelle.
-      </p>
 
       {/* ── PDF Comparatif (masqué) ── */}
       <div style={{ display: 'none' }}>
@@ -735,6 +824,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         title="Connectez-vous pour débloquer"
         message="Connectez-vous ou créez un compte pour exporter en PDF et accéder aux détails de calcul."
       />
+
+      {openParamsFor && (
+        <RegimeParamsModal
+          sim={sim}
+          regimeId={openParamsFor}
+          isOpen={!!openParamsFor}
+          onClose={() => setOpenParamsFor(null)}
+        />
+      )}
     </div>
   );
 }
