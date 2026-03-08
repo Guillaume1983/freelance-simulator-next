@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useRef } from 'react';
-
+import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { AlertTriangle, FileText, Info, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, AlertTriangle, FileText, Info, Eye, EyeOff, Rocket } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { useUser } from '@/hooks/useUser';
@@ -322,7 +322,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-slate-500" title="Complexité gestion">
                         🧠 {r.mental}/5
                       </span>
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold uppercase text-slate-500" title="Sécurité statut">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold uppercase text-slate-500" title="S��curité statut">
                         {r.safety}
                       </span>
                     </div>
