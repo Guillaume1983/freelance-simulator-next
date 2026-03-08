@@ -2,13 +2,13 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { AlertCircle, AlertTriangle, CheckCircle, FileText, Info, Eye, EyeOff, Rocket } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle, FileText, Info, Eye, EyeOff, Rocket, Settings2 } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
 import AmountTooltip from '@/components/AmountTooltip';
+import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -123,6 +123,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const [showDetails, setShowDetails] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [openParamsFor, setOpenParamsFor] = useState<string | null>(null);
   const { isConnected } = useUser();
 
   const printRef      = useRef<HTMLDivElement>(null);
@@ -327,9 +328,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       </span>
                     </div>
 
-                    {/* Paramètres inline */}
+                    {/* Bouton paramètres */}
                     <div className="w-full mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                      <RegimeParamsInline sim={sim} regimeId={r.id} />
+                      <button
+                        onClick={() => setOpenParamsFor(r.id)}
+                        className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all group"
+                      >
+                        <Settings2 size={11} className="group-hover:rotate-45 transition-transform duration-200" />
+                        Paramètres
+                      </button>
                     </div>
                   </div>
                 </th>
@@ -566,7 +573,14 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Sécurité statut">{r.safety}</span>
                   </div>
                   <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 w-full px-2">
-                    <RegimeParamsInline sim={sim} regimeId={r.id} />
+                    <button
+                      onClick={() => setOpenParamsFor(r.id)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all group"
+                      style={{ borderColor: `${REGIME_COLORS[r.id]}40` }}
+                    >
+                      <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" style={{ color: REGIME_COLORS[r.id] }} />
+                      Paramètres {r.id}
+                    </button>
                   </div>
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">
@@ -794,6 +808,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         title="Connectez-vous pour débloquer"
         message="Connectez-vous ou créez un compte pour exporter en PDF et accéder aux détails de calcul."
       />
+
+      {openParamsFor && (
+        <RegimeParamsModal
+          sim={sim}
+          regimeId={openParamsFor}
+          isOpen={!!openParamsFor}
+          onClose={() => setOpenParamsFor(null)}
+        />
+      )}
     </div>
   );
 }

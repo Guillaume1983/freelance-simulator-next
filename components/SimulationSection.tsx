@@ -4,11 +4,11 @@ import React, { useRef, useMemo, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
-import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2 } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
 import AmountTooltip from '@/components/AmountTooltip';
+import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -151,6 +151,7 @@ export default function SimulationSection({
   const [activeYear, setActiveYear]     = useState(0);
   const [showDetails, setShowDetails]   = useState(false);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [paramsOpen, setParamsOpen] = useState(false);
   const { isConnected } = useUser();
 
   const handlePrintBiz = useReactToPrint({
@@ -309,10 +310,16 @@ export default function SimulationSection({
           </div>
         )}
 
-        {/* Paramètres propres au statut — en bandeau sur page simulateur, ici uniquement sur comparateur */}
+        {/* Bouton paramètres statut */}
         {!singleRegime && (
           <div className="shrink-0">
-            <RegimeParamsInline sim={sim} regimeId={activeRegime} align="left" />
+            <button
+              onClick={() => setParamsOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+            >
+              <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
+              Paramètres {activeRegime}
+            </button>
           </div>
         )}
       </div>
@@ -375,7 +382,13 @@ export default function SimulationSection({
                       Année 1
                     </div>
                     <div className="flex-1 flex justify-center min-w-0 px-2 py-2 border-t border-b border-slate-200 dark:border-slate-700">
-                      <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
+                      <button
+                        onClick={() => setParamsOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                      >
+                        <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" />
+                        Paramètres {activeRegime}
+                      </button>
                     </div>
                     <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider shrink-0">
                       Année 5
@@ -555,7 +568,13 @@ export default function SimulationSection({
                           An 1
                         </span>
                         <div className="flex-1 min-w-0 flex justify-center">
-                          <RegimeParamsInline sim={sim} regimeId={activeRegime} align="center" />
+                          <button
+                            onClick={() => setParamsOpen(true)}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                          >
+                            <Settings2 size={11} className="group-hover:rotate-45 transition-transform duration-200" />
+                            Paramètres
+                          </button>
                         </div>
                         <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
                           An 5
@@ -849,6 +868,13 @@ export default function SimulationSection({
         onClose={() => setShowConnectorModal(false)}
         title="Connectez-vous pour débloquer"
         message="Connectez-vous ou créez un compte pour exporter la simulation en PDF et accéder aux détails de calcul."
+      />
+
+      <RegimeParamsModal
+        sim={sim}
+        regimeId={activeRegime}
+        isOpen={paramsOpen}
+        onClose={() => setParamsOpen(false)}
       />
     </div>
   );
