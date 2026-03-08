@@ -17,7 +17,13 @@ const SIMULATEUR_LINKS = [
 
 const OUTILS_LINKS = [
   { href: '/outils/indemnites-km', label: 'Indemnités kilométriques' },
-  // À étendre : autres outils (CFE, ACRE, etc.)
+  { href: '/outils/cfe', label: 'CFE' },
+  { href: '/outils/acre', label: 'ACRE' },
+  { href: '/outils/plafonds-micro', label: 'Plafonds Micro' },
+  { href: '/outils/franchise-tva', label: 'Franchise TVA' },
+  { href: '/outils/tjm-revenu-net', label: 'TJM → Revenu net' },
+  { href: '/outils/taux-effectif-ir', label: 'Taux effectif IR' },
+  { href: '/outils/cotisations-tns', label: 'Cotisations TNS' },
 ] as const;
 
 export default function Header({ isDark, setIsDark, saveStatus }: {

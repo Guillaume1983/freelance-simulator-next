@@ -223,7 +223,7 @@ export default function ReglagesPage() {
       return { href: `/simulateur/${statutSlug}`, label: 'Retour au simulateur' };
     }
     if (from === 'outils') {
-      return { href: '/outils/indemnites-km', label: 'Retour aux indemnités km' };
+      return { href: '/outils', label: 'Retour aux outils' };
     }
     return { href: '/comparateur', label: 'Retour au comparateur' };
   }, [searchParams]);

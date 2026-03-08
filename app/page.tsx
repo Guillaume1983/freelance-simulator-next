@@ -117,15 +117,15 @@ export default function Home() {
                 </p>
               </Link>
               <Link
-                href="/outils/indemnites-km"
+                href="/outils"
                 className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-teal-300 dark:hover:border-teal-600 hover:shadow-md transition-all block sm:col-span-2 md:col-span-1"
               >
                 <div className="w-12 h-12 mx-auto rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-3">
                   <Car className="w-6 h-6" />
                 </div>
-                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Indemnités km</h3>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Outils</h3>
                 <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                  Simulez le barème URSSAF (voiture, moto, électrique) et appliquez à vos paramètres.
+                  Indemnités km, CFE, ACRE, plafonds Micro, TVA, TJM, IR, cotisations TNS.
                 </p>
               </Link>
             </div>
