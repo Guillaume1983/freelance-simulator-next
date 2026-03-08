@@ -5,7 +5,12 @@ import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
 
 export default function TopCards({ sim, activePanel, togglePanel }: any) {
-  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
+  // Formatage manuel pour éviter les différences d'hydratation serveur/client
+  const fmt = (v: number) => {
+    const rounded = Math.round(v);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return formatted + ' €';
+  };
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

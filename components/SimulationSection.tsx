@@ -194,7 +194,12 @@ export default function SimulationSection({
     repartitionRemuneration: sim.state.repartitionRemuneration,
   }), [sim.state]);
 
-  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
+  // Formatage manuel pour éviter les différences d'hydratation serveur/client
+  const fmt = (v: number) => {
+    const rounded = Math.round(v);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return formatted + ' €';
+  };
 
   const onYearScroll = () => {
     const el = yearScrollRef.current;

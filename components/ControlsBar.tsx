@@ -92,7 +92,7 @@ export default function ControlsBar({ sim, ca, showGrowth = false, pageSlug }: C
             <div className="flex flex-col items-end">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
               <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
-                {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(ca)}
+                {Math.round(ca).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €
               </span>
             </div>
 

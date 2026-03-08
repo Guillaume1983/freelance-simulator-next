@@ -159,7 +159,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   const winnerId = eligibleForWinner.length > 0
     ? [...eligibleForWinner].sort((a: any, b: any) => b.net - a.net)[0].id
     : null;
-  const fmt = (v: number) => Math.round(v).toLocaleString('fr-FR') + ' €';
+  // Formatage manuel pour éviter les différences d'hydratation serveur/client
+  const fmt = (v: number) => {
+    const rounded = Math.round(v);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return formatted + ' €';
+  };
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
     if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';

@@ -4,7 +4,12 @@ import { useRef } from 'react';
 import { Zap, CheckCircle2 } from 'lucide-react';
 
 export default function TjmDaysBlock({ sim }: { sim: any }) {
-  const fmt = (v: number) => Math.round((v || 0)).toLocaleString('fr-FR') + ' €';
+  // Formatage manuel pour éviter les différences d'hydratation serveur/client
+  const fmt = (v: number) => {
+    const rounded = Math.round(v || 0);
+    const formatted = rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return formatted + ' €';
+  };
 
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);

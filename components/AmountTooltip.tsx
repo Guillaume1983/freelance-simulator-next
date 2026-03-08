@@ -157,7 +157,7 @@ export default function AmountTooltip({
                 {label}
               </p>
               <p className="text-lg font-black text-slate-900 dark:text-white mt-0.5">
-                {Math.round(Math.abs(amount)).toLocaleString('fr-FR')} €
+                {Math.round(Math.abs(amount)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €
               </p>
               <p className="text-[11px] font-bold mt-1" style={{ color }}>
                 {percentage.toFixed(1)} % du CA

@@ -180,7 +180,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           </FieldCard>
           <InfoBox variant="info">
             Avec un TJM de {sim.state.tjm} € sur {sim.state.days} jours, vous générez un CA annuel de{' '}
-            {annualRevenue.toLocaleString('fr-FR')} €. En micro-entreprise, le plafond est de 77 700 € pour les
+            {annualRevenue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} €. En micro-entreprise, le plafond est de 77 700 € pour les
             services.
           </InfoBox>
         </>
