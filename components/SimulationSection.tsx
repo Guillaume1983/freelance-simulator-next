@@ -712,8 +712,6 @@ export default function SimulationSection({
           </div>
         </div>
       </div>
-        </div>
-      </div>
 
       {/* Disclaimer identique au tableau comparatif */}
       <p className="text-[9px] text-slate-400 italic px-4 md:px-6 pb-3 flex items-center gap-1">
