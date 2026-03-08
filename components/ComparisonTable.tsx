@@ -273,9 +273,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               {showDetails ? 'Masquer détails' : 'Voir détails'}
             </button>
           </div>
-          <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500">
-            🧠 Complexité gestion · Niveau = sécurité statut
-          </p>
         </div>
         <table className="w-full border-separate border-spacing-0 table-fixed">
           <thead>
@@ -292,44 +289,58 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <th key={r.id} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
                   <div className={`header-band band-${r.class}`} />
                   {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
+
+                  {/* Bandeau plafond dépassé — superposé, ne perturbe pas le layout */}
+                  {isMicroPlafondExceeded(r) && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-t-none z-10">
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-rose-500/60" />
+                      <div
+                        className="absolute top-2 right-2 flex items-center gap-1 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-[8px] font-bold px-1.5 py-0.5 rounded-md"
+                      >
+                        <AlertTriangle size={9} className="shrink-0" />
+                        Plafond dépassé
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-col items-center gap-2">
                     {/* Nom + retraite badge */}
                     <div className="flex items-center justify-center gap-2">
                       <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">{r.id}</span>
                       <RetirementBadge quarters={r.retirementQuarters} />
                     </div>
-                    
-                    {/* Montant net mensuel */}
-                    <div className="flex flex-col items-center">
+
+                    {/* Montant net mensuel — hauteur fixe pour alignement */}
+                    <div className="flex flex-col items-center min-h-[52px] justify-center">
                       <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
                         {fmt(r.net / 12)}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400 mt-0.5">net / mois</span>
-                      {isMicroPlafondExceeded(r) && (
-                        <span className="mt-1.5 text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                          <AlertTriangle size={10} className="shrink-0" />
-                          Plafond {plafondMicro.toLocaleString('fr-FR')} € dépassé
-                        </span>
-                      )}
-                      {r.cashInCompany != null && r.cashInCompany > 0 && (
+                      {r.cashInCompany != null && r.cashInCompany > 0 ? (
                         <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
-                          + {fmt(r.cashInCompany)} en trésorerie
+                          + {fmt(r.cashInCompany)} trésorerie
                         </span>
+                      ) : (
+                        <span className="mt-1.5 invisible text-[8px]">—</span>
                       )}
                     </div>
 
-                    {/* Badges mental + safety */}
-                    <div className="flex items-center justify-center gap-1.5 mt-1">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold text-slate-500" title="Complexité gestion">
-                        🧠 {r.mental}/5
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[9px] font-bold uppercase text-slate-500" title="S��curité statut">
-                        {r.safety}
-                      </span>
+                    {/* Badge ACRE — hauteur fixe, vide si non éligible */}
+                    <div className="h-[22px] flex items-center justify-center">
+                      {r.hasAcre ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
+                          <CheckCircle size={9} className="shrink-0" />
+                          ACRE an 1
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-transparent text-[9px] text-slate-300 dark:text-slate-700">
+                          Pas d&apos;ACRE
+                        </span>
+                      )}
                     </div>
 
                     {/* Bouton paramètres */}
-                    <div className="w-full mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                    <div className="w-full mt-1 pt-2 border-t border-slate-100 dark:border-slate-700/50">
                       <button
                         onClick={() => setOpenParamsFor(r.id)}
                         className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all group"
@@ -511,7 +522,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
               Comparatif stratégique
             </h3>
-            <p className="text-[8px] text-slate-400 mt-0.5">🧠 complexité · Niveau = sécurité</p>
+                  <p className="text-[8px] text-slate-400 mt-0.5">Swipe pour comparer</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -549,11 +560,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     <RetirementBadge quarters={r.retirementQuarters} />
                   </div>
                   <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-1 flex flex-col items-center gap-0.5">
-                    <span>{fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span></span>
+                    <span className={isMicroPlafondExceeded(r) ? 'text-rose-500 dark:text-rose-400 line-through decoration-2' : ''}>
+                      {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
+                    </span>
                     {isMicroPlafondExceeded(r) && (
-                      <span className="text-[9px] font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                      <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1 no-underline mt-0.5">
                         <AlertTriangle size={10} className="shrink-0" />
-                        Dépassement plafond {plafondMicro.toLocaleString('fr-FR')} €
+                        Plafond {plafondMicro.toLocaleString('fr-FR')} € depassé
                       </span>
                     )}
                   </div>
@@ -568,9 +581,16 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     </div>
                   )}
                   <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
-                  <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black flex items-center gap-1" title="Complexité gestion">🧠 {r.mental}/5</span>
-                    <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[9px] font-black uppercase text-slate-500 tracking-tighter" title="Sécurité statut">{r.safety}</span>
+                  {/* Badge ACRE mobile */}
+                  <div className="h-[22px] flex items-center justify-center mt-1">
+                    {r.hasAcre ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
+                        <CheckCircle size={9} className="shrink-0" />
+                        ACRE an 1
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-slate-300 dark:text-slate-700">Pas d&apos;ACRE</span>
+                    )}
                   </div>
                   <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 w-full px-2">
                     <button
