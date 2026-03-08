@@ -284,6 +284,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
               {showDetails ? 'Masquer détails' : 'Voir détails'}
             </button>
+            <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
+              <Settings2 size={10} className="shrink-0" />
+              Icone en haut à droite = paramètres spécifiques au statut
+            </span>
           </div>
           <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-[8px] font-bold text-emerald-700 dark:text-emerald-400">
@@ -310,6 +314,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
                   {isMicroPlafondExceeded(r) && <div className="plafond-badge">PLAFOND DÉPASSÉ</div>}
 
+                  {/* Icône paramètres — coin haut-droit */}
+                  <button
+                    onClick={() => setOpenParamsFor(r.id)}
+                    title={`Paramètres spécifiques ${r.id}`}
+                    className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                  >
+                    <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
+                  </button>
+
                   <div className="flex flex-col items-center gap-2">
                     {/* Nom */}
                     <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">{r.id}</span>
@@ -332,17 +345,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     {/* Badge retraite — hauteur fixe pour alignement */}
                     <div className="h-[22px] flex items-center justify-center">
                       <RetirementBadge quarters={r.retirementQuarters} regimeId={r.id} />
-                    </div>
-
-                    {/* Bouton paramètres */}
-                    <div className="w-full mt-1 pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                      <button
-                        onClick={() => setOpenParamsFor(r.id)}
-                        className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all group"
-                      >
-                        <Settings2 size={11} className="group-hover:rotate-45 transition-transform duration-200" />
-                        Paramètres
-                      </button>
                     </div>
                   </div>
                 </th>
@@ -548,6 +550,15 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 key={r.id}
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
+                {/* Icône paramètres — coin haut-droit */}
+                <button
+                  onClick={() => setOpenParamsFor(r.id)}
+                  title={`Paramètres spécifiques ${r.id}`}
+                  className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                >
+                  <Settings2 size={14} className="group-hover:rotate-45 transition-transform duration-200" />
+                </button>
+
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
                   <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300 mb-2">{r.id}</span>
@@ -585,16 +596,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     </div>
                   )}
                   <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
-                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 w-full px-2">
-                    <button
-                      onClick={() => setOpenParamsFor(r.id)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all group"
-                      style={{ borderColor: `${REGIME_COLORS[r.id]}40` }}
-                    >
-                      <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" style={{ color: REGIME_COLORS[r.id] }} />
-                      Paramètres {r.id}
-                    </button>
-                  </div>
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">
                   {visibleRows.map((row) => {
