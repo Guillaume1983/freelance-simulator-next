@@ -7,7 +7,16 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import SimulationSection from '@/components/SimulationSection';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
-import { ArrowLeft, Briefcase, Store, Building2, Building } from 'lucide-react';
+import PdfIcon from '@/components/PdfIcon';
+import { ArrowLeft, Briefcase, Store, Building2, Building, Rocket } from 'lucide-react';
+
+const REGIME_COLORS: Record<string, string> = {
+  'Portage': '#6366f1',
+  'Micro': '#f59e0b',
+  'EURL IR': '#10b981',
+  'EURL IS': '#3b82f6',
+  'SASU': '#8b5cf6',
+};
 
 const STATUT_SLUG_TO_ID: Record<string, string> = {
   portage: 'Portage',
@@ -74,6 +83,11 @@ export default function SimulateurStatutPage() {
     );
   };
 
+  const handleExportPdf = () => {
+    if (typeof document === 'undefined') return;
+    document.getElementById('simulateur-pdf-btn')?.click();
+  };
+
   return (
     <main className="min-h-screen bg-page-settings">
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
@@ -94,13 +108,35 @@ export default function SimulateurStatutPage() {
                 </div>
               );
             })()}
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Simulation sur 5 ans — {statutId}
-              </h1>
-              <p className="mt-1 text-slate-500 dark:text-slate-400">
-                ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Croissance du CA ajustable dans le panneau de paramétrage sous le bandeau
-              </p>
+            <div className="flex-1 flex items-start justify-between gap-4 min-w-0">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                    Simulation sur 5 ans — {statutId}
+                  </h1>
+                  <button
+                    type="button"
+                    onClick={handleExportPdf}
+                    className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-600 dark:hover:text-red-400 transition-colors border border-slate-200 dark:border-slate-600"
+                    title="Exporter en PDF"
+                    aria-label="Exporter la simulation en PDF"
+                  >
+                    <PdfIcon size={24} className="shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wide">PDF</span>
+                  </button>
+                </div>
+                <p className="mt-1 text-slate-500 dark:text-slate-400">
+                  ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Croissance du CA ajustable dans le panneau de paramétrage sous le bandeau
+                </p>
+              </div>
+              <Link
+                href={`/partenaires?regime=${encodeURIComponent(statutId ?? '')}`}
+                className="shrink-0 inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-black text-base text-white shadow-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: REGIME_COLORS[statutId ?? ''] ?? '#6366f1' }}
+              >
+                <Rocket size={20} />
+                Je me lance en {statutId}
+              </Link>
             </div>
           </div>
         </div>

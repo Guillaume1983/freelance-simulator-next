@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Rocket, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -290,14 +290,6 @@ export default function SimulationSection({
         {label}
       </span>
     );
-  };
-
-  const getRegimePhrase = (id: string) => {
-    if (id === 'Portage') return 'au portage salarial';
-    if (id === 'Micro') return 'à la micro‑entreprise';
-    if (id === 'EURL IR' || id === 'EURL IS') return 'à l’EURL (IR ou IS)';
-    if (id === 'SASU') return 'à la SASU';
-    return 'à ce statut';
   };
 
   const getDetailText = (r: any, key: string, monthly = false): string =>
@@ -675,21 +667,6 @@ export default function SimulationSection({
                     ))}
                   </ul>
                 </div>
-              </div>
-              <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <p className="text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  Prêt à transformer cette simulation en réalité ? Trouvez des partenaires adaptés {getRegimePhrase(activeRegime)} pour vous accompagner.
-                </p>
-              </div>
-              <div className="mt-2">
-                <a
-                  href={`/partenaires?regime=${encodeURIComponent(activeRegime)}`}
-                  className="inline-flex items-center justify-center gap-2 w-full px-4 md:px-6 py-3 md:py-3.5 rounded-xl text-white font-black text-[10px] md:text-[11px] uppercase tracking-[0.22em] shadow-lg shadow-slate-900/25 hover:opacity-90 transition-all"
-                  style={{ background: regimeColor }}
-                >
-                  <Rocket size={14} />
-                  Je me lance en {activeRegime}
-                </a>
               </div>
             </div>
           </div>

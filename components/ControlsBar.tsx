@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Percent, Settings, FileText } from 'lucide-react';
+import { Percent, Settings } from 'lucide-react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
@@ -29,18 +29,6 @@ export default function ControlsBar({
   onChangeGrowthYear,
 }: ControlsBarProps) {
   const [showStatusPanel, setShowStatusPanel] = useState(false);
-  const handleExportPdf = () => {
-    if (!pageSlug) return;
-    if (pageSlug === 'comparateur') {
-      if (typeof document !== 'undefined') {
-        document.getElementById('comparateur-pdf-btn')?.click();
-      }
-    } else if (pageSlug.startsWith('simulateur/')) {
-      if (typeof document !== 'undefined') {
-        document.getElementById('simulateur-pdf-btn')?.click();
-      }
-    }
-  };
   return (
     <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -109,7 +97,7 @@ export default function ControlsBar({
             )}
           </div>
 
-          {/* CA calculé + export PDF éventuel + lien paramètres */}
+          {/* CA calculé + lien paramètres */}
           <div className="flex items-center gap-3 md:gap-4">
             <div className="flex flex-col items-end">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
@@ -119,23 +107,6 @@ export default function ControlsBar({
             </div>
 
             <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
-
-            {/* Bouton Export PDF (comparateur / simulateur uniquement) */}
-            {pageSlug && (pageSlug === 'comparateur' || pageSlug.startsWith('simulateur/')) && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleExportPdf}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm"
-                >
-                  <FileText size={12} />
-                  <span className="hidden sm:inline">Exporter PDF</span>
-                  <span className="sm:hidden">PDF</span>
-                </button>
-
-                <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
-              </>
-            )}
 
             <Link
               href={pageSlug ? `/reglages?from=${pageSlug}` : '/reglages'}

@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Info, Rocket, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Info } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
@@ -36,48 +35,6 @@ const REGIME_COLORS: Record<string, string> = {
   'SASU':     '#8b5cf6',
 };
 
-const REGIME_ANALYSIS: Record<string, { forts: string[]; vigilance: string }> = {
-  Portage: {
-    forts: [
-      'Accès au chômage (ARE) en fin de mission',
-      'Protection sociale complète (régime salarié)',
-      'Zéro gestion administrative',
-    ],
-    vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net. À comparer avec le gain en tranquillité administrative.",
-  },
-  Micro: {
-    forts: [
-      'Création instantanée, formalités nulles',
-      'Comptabilité ultra simplifiée',
-      'Charges proportionnelles au CA réel',
-    ],
-    vigilance: "Plafond de CA à 77 700 € en BNC. Au-delà, passage obligatoire en société. Pas de déduction des charges réelles.",
-  },
-  'EURL IR': {
-    forts: [
-      'Déduction des charges professionnelles réelles',
-      'IR progressif : avantageux si revenus modérés',
-      'Structure souple et personnalisable',
-    ],
-    vigilance: "Cotisations TNS d'environ 40 % de la base. Comptabilité obligatoire (expert-comptable recommandé).",
-  },
-  'EURL IS': {
-    forts: [
-      "Bénéfice non versé en salaire taxé à l'IS 25 %",
-      'Pilotage précis de la part en salaire TNS vs capitalisation en société',
-      'Création d’une trésorerie de société mobilisable plus tard',
-    ],
-    vigilance: "Impôt sur le revenu calculé sur le salaire net TNS et IS 25 % sur le bénéfice restant. Comptabilité exigeante.",
-  },
-  SASU: {
-    forts: [
-      'Protection assimilé-salarié (retraite, prévoyance)',
-      'Dividendes possibles au PFU 30 %',
-      'Statut reconnu pour les missions premium',
-    ],
-    vigilance: "Bénéfice taxé à l'IS (15 % jusqu'à 42 500 €, 25 % au-delà) puis dividendes au PFU 30 %. Pas d'accès à l'ARE en fin d'activité de président.",
-  },
-};
 
 /* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
 function StackedBar({ ca, fees, cotis, ir, net }: {
@@ -449,76 +406,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 </td>
               ))}
             </tr>
-
-            {/* ── Ligne Points Forts ── */}
-            <tr className="bg-white dark:bg-[#0f172a]">
-              <td className="px-4 pt-4 pb-2 align-top">
-                <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Analyse<br />Statutaire</div>
-              </td>
-              {regimes.map((r: any) => {
-                const data = REGIME_ANALYSIS[r.id];
-                return (
-                  <td key={r.id} className="px-3 pt-3 pb-1" style={{ height: '1px' }}>
-                    {data && (
-                      <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20 h-full">
-                        <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
-                          <CheckCircle size={10} /> Points Forts
-                        </h4>
-                        <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
-                          {data.forts.map(f => (
-                            <li key={f} className="flex gap-1.5">
-                              <span className="shrink-0 text-emerald-500">✓</span>
-                              {f}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-
-            {/* ── Ligne Vigilance ── */}
-            <tr className="bg-white dark:bg-[#0f172a]">
-              <td />
-              {regimes.map((r: any) => {
-                const data = REGIME_ANALYSIS[r.id];
-                return (
-                  <td key={r.id} className="px-3 py-1" style={{ height: '1px' }}>
-                    {data && (
-                      <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 h-full">
-                        <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
-                          <AlertCircle size={10} /> Vigilance
-                        </h4>
-                        <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
-                          {data.vigilance}
-                        </p>
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-
-            {/* ── Ligne Boutons Je me lance ── */}
-            <tr className="bg-white dark:bg-[#0f172a]">
-              <td />
-              {regimes.map((r: any) => {
-                const color = REGIME_COLORS[r.id] ?? '#6366f1';
-                return (
-                  <td key={r.id} className="px-3 pt-1 pb-4">
-                    <Link
-                      href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
-                      className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
-                      style={{ background: color }}
-                    >
-                      <Rocket size={12} /> Je me lance en {r.id}
-                    </Link>
-                  </td>
-                );
-              })}
-            </tr>
           </tbody>
         </table>
       </div>
@@ -622,42 +509,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     );
                   })}
                 </div>
-                {/* Analyse statutaire mobile */}
-                {(() => {
-                  const data = REGIME_ANALYSIS[r.id];
-                  return data ? (
-                    <div className="px-4 pb-4 space-y-2 border-t dark:border-slate-800 pt-3 mt-1">
-                      <div className="bg-emerald-50/60 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
-                        <h4 className="text-[9px] font-black text-emerald-600 uppercase mb-2 flex items-center gap-1">
-                          <CheckCircle size={10} /> Points Forts
-                        </h4>
-                        <ul className="text-[10px] font-bold text-slate-700 dark:text-slate-300 space-y-1.5">
-                          {data.forts.map(f => (
-                            <li key={f} className="flex gap-1.5">
-                              <span className="shrink-0 text-emerald-500">✓</span>
-                              {f}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="bg-amber-50/60 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20">
-                        <h4 className="text-[9px] font-black text-amber-600 uppercase mb-2 flex items-center gap-1">
-                          <AlertCircle size={10} /> Vigilance
-                        </h4>
-                        <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 leading-relaxed">
-                          {data.vigilance}
-                        </p>
-                      </div>
-                      <Link
-                        href={`/partenaires?regime=${encodeURIComponent(r.id)}`}
-                        className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl text-white font-black text-[10px] uppercase tracking-wider transition-all hover:opacity-90 shadow-sm"
-                        style={{ background: color }}
-                      >
-                        <Rocket size={12} /> Je me lance en {r.id}
-                      </Link>
-                    </div>
-                  ) : null;
-                })()}
               </div>
             );
           })}
@@ -794,26 +645,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               </div>
             );
           })()}
-
-          {/* Analyse */}
-          <div style={{ marginTop: 18 }}>
-            <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Analyse par statut</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {regimes.map((r: any) => {
-                const data = REGIME_ANALYSIS[r.id];
-                if (!data) return null;
-                return (
-                  <div key={r.id} style={{ padding: '6px 8px', background: '#f8fafc', borderLeft: `3px solid ${REGIME_COLORS[r.id] ?? '#6366f1'}`, borderRadius: 2 }}>
-                    <p style={{ fontSize: 9, fontWeight: 900, margin: '0 0 4px', color: REGIME_COLORS[r.id] }}>{r.id}</p>
-                    {data.forts.map((f: string, i: number) => (
-                      <p key={i} style={{ fontSize: 8, margin: '1px 0', color: '#16a34a' }}>✓ {f}</p>
-                    ))}
-                    <p style={{ fontSize: 8, margin: '4px 0 0', color: '#dc2626' }}>⚠ {data.vigilance}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
           <p style={{ fontSize: 7, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces simulations ne constituent pas un conseil fiscal.</p>
         </div>
