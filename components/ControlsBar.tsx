@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { Calculator, TrendingUp, Percent, Settings, FileText } from 'lucide-react';
+import { Percent, Settings, FileText } from 'lucide-react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
@@ -33,9 +33,6 @@ export default function ControlsBar({ sim, ca, showGrowth = false, pageSlug }: C
           {/* Inputs TJM, Jours et Croissance optionnelle */}
           <div className="flex flex-wrap items-center gap-3 md:gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                <Calculator size={14} className="text-indigo-600 dark:text-indigo-400" />
-              </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TJM</span>
                 <NumberInput
@@ -53,9 +50,6 @@ export default function ControlsBar({ sim, ca, showGrowth = false, pageSlug }: C
             <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
 
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                <TrendingUp size={14} className="text-amber-600 dark:text-amber-400" />
-              </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jours</span>
                 <NumberInput

@@ -176,14 +176,29 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
     { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
     { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true },
-    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
+    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '', color: 'text-emerald-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
     { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true },
   ];
 
-  // Masquer complètement la ligne "Trésorerie société" s'il n'y a aucune trésorerie positive
+  // Masquer complètement certaines lignes si elles sont vides pour tous les statuts
   const hasAnyCashInCompany = regimes.some((r: any) => r.cashInCompany != null && r.cashInCompany > 0);
-  const visibleRows = hasAnyCashInCompany ? rows : rows.filter(r => r.key !== 'cashInCompany');
+  const hasAnyFees = regimes.some((r: any) => r.id !== 'Micro' && r.fees != null && r.fees > 0);
+  const hasAnyOptimisations = regimes.some((r: any) => {
+    const lines = (r.lines as any[] | undefined) ?? [];
+    const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+    const sum = lines
+      .filter((l: any) => ids.includes(l.id))
+      .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+    return sum > 0;
+  });
+
+  const visibleRows = rows.filter(r => {
+    if (r.key === 'cashInCompany') return hasAnyCashInCompany;
+    if (r.key === 'fees') return hasAnyFees;
+    if (r.key === 'optimisations') return hasAnyOptimisations;
+    return true;
+  });
 
   const getRowBgClass = (row: (typeof rows)[number]) => {
     const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
@@ -358,36 +373,44 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     return (
                       <td
                         key={r.id}
-                        className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${
-                          (row as any).color || ''
-                        }`}
+                        className={`px-3 py-3 ${(row as any).color || ''}`}
                       >
-                        {(() => {
-                          if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
-                          const content = (
-                            <>
-                              {row.key === 'beforeTax' && (
-                                <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">
-                                  {getBeforeTaxRowLabel(r.id)}
+                        <div className="w-full flex justify-center">
+                          {(() => {
+                            if (val === null) {
+                              return (
+                                <span className="inline-flex justify-end tabular-nums text-sm font-bold w-[88px] text-slate-300 dark:text-slate-600">
+                                  —
+                                </span>
+                              );
+                            }
+                            const content = (
+                              <>
+                                {row.key === 'beforeTax' && (
+                                  <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5 text-right">
+                                    {getBeforeTaxRowLabel(r.id)}
+                                  </div>
+                                )}
+                                <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                  {(row as any).prefix} {fmt(val)}
+                                </span>
+                              </>
+                            );
+                            return (
+                              <AmountTooltip
+                                amount={val}
+                                ca={r.ca}
+                                detailText={detailText}
+                                label={row.label}
+                                color={tooltipColor}
+                              >
+                                <div className="inline-flex flex-col items-end tabular-nums text-sm font-bold w-[88px]">
+                                  {content}
                                 </div>
-                              )}
-                              <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
-                                {(row as any).prefix} {fmt(val)}
-                              </span>
-                            </>
-                          );
-                          return (
-                            <AmountTooltip
-                              amount={val}
-                              ca={r.ca}
-                              detailText={detailText}
-                              label={row.label}
-                              color={tooltipColor}
-                            >
-                              {content}
-                            </AmountTooltip>
-                          );
-                        })()}
+                              </AmountTooltip>
+                            );
+                          })()}
+                        </div>
                       </td>
                     );
                   })}
@@ -716,12 +739,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       padding: '4px 7px',
                       fontWeight: (row as any).isFinal ? 900 : 600,
                       borderBottom: '1px solid #e2e8f0',
-                      fontSize: (row as any).bigAmount ? 10 : 9,
+                      fontSize: 9,
                     }}
                   >
                     {row.label}
                   </td>
-                  {regimes.map((r: any) => {
+                    {regimes.map((r: any) => {
                     const val = getDisplayValue(r, row);
                     const sublabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : null;
                     return (
@@ -729,10 +752,10 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                         key={r.id}
                         style={{
                           padding: '4px 7px',
-                          textAlign: 'center',
+                          textAlign: 'right',
                           fontWeight: (row as any).isFinal ? 900 : 'normal',
                           borderBottom: '1px solid #e2e8f0',
-                          fontSize: (row as any).bigAmount ? 10 : 9,
+                          fontSize: 9,
                           color: (row as any).isFinal ? '#4f46e5' : 'inherit',
                         }}
                       >

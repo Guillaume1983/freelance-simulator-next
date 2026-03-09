@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -169,30 +169,54 @@ export default function SimulationSection({
     `,
   });
 
-  const simulations = useMemo(() => projeterSurNAns({
-    tjm: sim.state.tjm,
-    days: sim.state.days,
-    taxParts: sim.state.taxParts,
-    spouseIncome: sim.state.spouseIncome,
-    kmAnnuel: sim.state.kmAnnuel,
-    cvFiscaux: sim.state.cvFiscaux,
-    typeVehicule: sim.state.typeVehicule ?? 'voiture',
-    vehiculeElectrique: sim.state.vehiculeElectrique ?? false,
-    loyerPercu: sim.state.loyerPercu,
-    activeCharges: sim.state.activeCharges,
-    sectionsActive: sim.state.sectionsActive,
-    portageComm: sim.state.portageComm,
-    chargeAmounts: sim.state.chargeAmounts,
-    acreEnabled: sim.state.acreEnabled,
-    citySize: sim.state.citySize,
-    growthRate: sim.state.growthRate / 100,
-    materielAnnuel: sim.state.materielAnnuel,
-    avantagesOptimises: sim.state.avantagesOptimises,
-    typeActiviteMicro: sim.state.typeActiviteMicro,
-    prelevementLiberatoire: sim.state.prelevementLiberatoire,
-    remunerationDirigeantMensuelle: sim.state.remunerationDirigeantMensuelle,
-    repartitionRemuneration: sim.state.repartitionRemuneration,
-  }), [sim.state]);
+  const [growthByYear, setGrowthByYear] = useState<number[]>(() =>
+    Array.from({ length: 5 }, () => sim.state.growthRate ?? 0)
+  );
+  const [growthModalOpen, setGrowthModalOpen] = useState(false);
+  const [growthModalInitialIndex, setGrowthModalInitialIndex] = useState<number | null>(null);
+
+  const updateGrowthYear = (index: number, next: number) => {
+    setGrowthByYear(prev =>
+      prev.map((v, i) => (i === index ? Math.min(50, Math.max(0, Math.round(next))) : v)),
+    );
+  };
+
+  const openGrowthModal = (yearIndex: number | null = null) => {
+    setGrowthModalInitialIndex(yearIndex);
+    setGrowthModalOpen(true);
+  };
+
+  const simulations = useMemo(
+    () =>
+      projeterSurNAns(
+        {
+          tjm: sim.state.tjm,
+          days: sim.state.days,
+          taxParts: sim.state.taxParts,
+          spouseIncome: sim.state.spouseIncome,
+          kmAnnuel: sim.state.kmAnnuel,
+          cvFiscaux: sim.state.cvFiscaux,
+          typeVehicule: sim.state.typeVehicule ?? 'voiture',
+          vehiculeElectrique: sim.state.vehiculeElectrique ?? false,
+          loyerPercu: sim.state.loyerPercu,
+          activeCharges: sim.state.activeCharges,
+          sectionsActive: sim.state.sectionsActive,
+          portageComm: sim.state.portageComm,
+          chargeAmounts: sim.state.chargeAmounts,
+          acreEnabled: sim.state.acreEnabled,
+          citySize: sim.state.citySize,
+          growthRate: sim.state.growthRate / 100,
+          materielAnnuel: sim.state.materielAnnuel,
+          avantagesOptimises: sim.state.avantagesOptimises,
+          typeActiviteMicro: sim.state.typeActiviteMicro,
+          prelevementLiberatoire: sim.state.prelevementLiberatoire,
+          remunerationDirigeantMensuelle: sim.state.remunerationDirigeantMensuelle,
+          repartitionRemuneration: sim.state.repartitionRemuneration,
+        },
+        growthByYear.map(v => (v ?? 0) / 100),
+      ),
+    [sim.state, growthByYear],
+  );
 
   // Alias vers fmtEur — formatage identique partout, sans hydratation mismatch
   const fmt = fmtEur;
@@ -219,15 +243,31 @@ export default function SimulationSection({
     { label: 'Base avant impôt',             key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
     { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false, separatorAbove: true },
-    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '+', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany', prefix: '',  color: 'text-slate-500', highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
   ];
 
-  // Masquer la ligne trésorerie si aucune trésorerie positive sur 5 ans pour le régime actif
+  // Masquer certaines lignes si elles sont vides sur 5 ans pour le régime actif
   const hasAnyCashInCompany = simulations.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     return r && r.cashInCompany != null && r.cashInCompany > 0;
+  });
+  const hasAnyFees = simulations.some(yr => {
+    const r = yr.find((x: any) => x.id === activeRegime) as any;
+    if (!r) return false;
+    if (activeRegime === 'Micro') return false;
+    return r.fees != null && r.fees > 0;
+  });
+  const hasAnyOptimisations = simulations.some(yr => {
+    const r = yr.find((x: any) => x.id === activeRegime) as any;
+    if (!r) return false;
+    const lines = (r.lines as any[] | undefined) ?? [];
+    const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+    const sum = lines
+      .filter((l: any) => ids.includes(l.id))
+      .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+    return sum > 0;
   });
   const rows = baseRows.filter(row => {
     if (row.key === 'cashInCompany') return hasAnyCashInCompany;
@@ -236,6 +276,8 @@ export default function SimulationSection({
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
     // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
     if (row.key === 'fees' && activeRegime === 'Micro') return false;
+    if (row.key === 'fees') return hasAnyFees;
+    if (row.key === 'optimisations') return hasAnyOptimisations;
     return true;
   });
 
@@ -362,7 +404,7 @@ export default function SimulationSection({
               </span>
             </div>
             <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              Années 1 à 5 · Croissance CA : icône % sur les colonnes pour ajuster
+              Années 1 à 5 — cliquez sur % pour ajuster la croissance (par année)
             </p>
           </div>
           <table className="w-full border-separate border-spacing-0 table-fixed">
@@ -388,21 +430,17 @@ export default function SimulationSection({
                         </button>
                       ) : (
                         <button
-                          onClick={() => {
-                            const cur = sim.state.growthRate ?? 0;
-                            const next = cur === 0 ? 5 : cur === 5 ? 10 : cur === 10 ? 20 : cur === 20 ? 30 : 0;
-                            sim.setters.setGrowthRate(next);
-                          }}
-                          title={`Croissance annuelle : ${sim.state.growthRate ?? 0}% (cliquer pour changer)`}
+                          onClick={() => openGrowthModal(i)}
+                          title={`Croissance année ${i + 1} : ${growthByYear[i] ?? sim.state.growthRate ?? 0}% (cliquer pour modifier)`}
                           className="absolute top-2 right-2 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
                           style={{
-                            background: (sim.state.growthRate ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
-                            color: (sim.state.growthRate ?? 0) > 0 ? regimeColor : '#94a3b8',
-                            border: `1px solid ${(sim.state.growthRate ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
+                            background: (growthByYear[i] ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
+                            color: (growthByYear[i] ?? 0) > 0 ? regimeColor : '#94a3b8',
+                            border: `1px solid ${(growthByYear[i] ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
                           }}
                         >
                           <Percent size={8} />
-                          {sim.state.growthRate ?? 0}
+                          {growthByYear[i] ?? 0}
                         </button>
                       )}
                       <div className="flex flex-col items-center gap-2">
@@ -461,33 +499,44 @@ export default function SimulationSection({
                         return (
                           <td
                             key={i}
-                            className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${(row as any).color || ''}`}
+                            className={`px-3 py-3 ${(row as any).color || ''}`}
                           >
-                            {(() => {
-                              if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
-                              const content = (
-                                <>
-                                  {row.key === 'beforeTax' && (
-                                    <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(activeRegime)}</div>
-                                  )}
-                                  <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
-                                    {(row as any).prefix} {fmt(val)}
-                                    {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                                  </span>
-                                </>
-                              );
-                              return (
-                                <AmountTooltip
-                                  amount={val}
-                                  ca={r.ca}
-                                  detailText={detailText}
-                                  label={row.label}
-                                  color={tooltipColor}
-                                >
-                                  {content}
-                                </AmountTooltip>
-                              );
-                            })()}
+                            <div className="w-full flex justify-center">
+                              {(() => {
+                                if (val === null) {
+                                  return (
+                                    <span className="inline-flex justify-end tabular-nums text-sm font-bold w-[88px] text-slate-300 dark:text-slate-600">
+                                      —
+                                    </span>
+                                  );
+                                }
+                                const content = (
+                                  <>
+                                    {row.key === 'beforeTax' && (
+                                      <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5 text-right">
+                                        {getBeforeTaxRowLabel(activeRegime)}
+                                      </div>
+                                    )}
+                                    <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                      {(row as any).prefix} {fmt(val)}
+                                    </span>
+                                  </>
+                                );
+                                return (
+                                  <AmountTooltip
+                                    amount={val}
+                                    ca={r.ca}
+                                    detailText={detailText}
+                                    label={row.label}
+                                    color={tooltipColor}
+                                  >
+                                    <div className="inline-flex flex-col items-end tabular-nums text-sm font-bold w-[88px]">
+                                      {content}
+                                    </div>
+                                  </AmountTooltip>
+                                );
+                              })()}
+                            </div>
                           </td>
                         );
                       })}
@@ -719,6 +768,115 @@ export default function SimulationSection({
         </div>
       )}
 
+      {/* Modal réglage croissance par année — alignée sur RegimeParamsModal */}
+      {growthModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Réglage de la croissance par année"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm"
+            onClick={() => setGrowthModalOpen(false)}
+          />
+
+          {/* Panel */}
+          <div className="relative z-10 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-700/50 overflow-hidden">
+            {/* Barre colorée en haut, même logique que RegimeParamsModal */}
+            <div className="h-1 w-full" style={{ background: regimeColor }} />
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: `${regimeColor}18` }}
+                >
+                  <Percent size={16} style={{ color: regimeColor }} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Croissance CA
+                  </h3>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                    Ajuster année par année
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setGrowthModalOpen(false)}
+                className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
+                aria-label="Fermer"
+              >
+                <X size={14} className="text-slate-500 dark:text-slate-400" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-5 py-5">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+                Ajustez la croissance annuelle (0–50&nbsp;%) pour l&apos;année sélectionnée. La valeur est exprimée en
+                pourcentage de hausse du CA par rapport à l&apos;année précédente.
+              </p>
+
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700/50 space-y-2.5 max-h-[260px] overflow-y-auto">
+                {(() => {
+                  const index = growthModalInitialIndex ?? 1; // fallback année 2 par défaut si jamais
+                  const value = growthByYear[index] ?? 0;
+                  return (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        Année {index + 1}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => updateGrowthYear(index, value - 1)}
+                          className="w-6 h-6 flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min={0}
+                          max={50}
+                          step={1}
+                          value={value}
+                          onChange={e => updateGrowthYear(index, Number(e.target.value))}
+                          className="w-14 px-1 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 text-center tabular-nums"
+                        />
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">%</span>
+                        <button
+                          type="button"
+                          onClick={() => updateGrowthYear(index, value + 1)}
+                          className="w-6 h-6 flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Footer aligné sur RegimeParamsModal */}
+            <div className="px-5 pb-4">
+              <button
+                type="button"
+                onClick={() => setGrowthModalOpen(false)}
+                className="w-full py-2.5 rounded-xl font-bold text-sm transition-all text-white"
+                style={{ background: regimeColor }}
+              >
+                Appliquer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hypothèses et disclaimer */}
       <div className="px-4 md:px-6 py-4">
         <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
@@ -777,12 +935,12 @@ export default function SimulationSection({
                       padding: '4px 7px',
                       fontWeight: row.isFinal ? 900 : 600,
                       borderBottom: '1px solid #e2e8f0',
-                      fontSize: (row as any).bigAmount ? 10 : 9,
+                      fontSize: 9,
                     }}
                   >
                     {row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}
                   </td>
-                  {simulations.map((yr, j) => {
+                    {simulations.map((yr, j) => {
                     const r = yr.find((x: any) => x.id === activeRegime) as any;
                     let val: number | null = null;
                     if (row.key === 'optimisations') {
@@ -807,10 +965,10 @@ export default function SimulationSection({
                         key={j}
                         style={{
                           padding: '4px 7px',
-                          textAlign: 'center',
+                          textAlign: 'right',
                           fontWeight: row.isFinal ? 900 : 'normal',
                           borderBottom: '1px solid #e2e8f0',
-                          fontSize: (row as any).bigAmount ? 10 : 9,
+                          fontSize: 9,
                           color: row.isFinal ? '#4f46e5' : 'inherit',
                         }}
                       >

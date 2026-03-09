@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { Info } from 'lucide-react';
 import { fmtEur } from '@/lib/utils';
 
 interface AmountTooltipProps {
@@ -159,7 +158,7 @@ export default function AmountTooltip({
     <>
       <span
         ref={triggerRef}
-        className="inline-flex items-center gap-1 cursor-help group"
+        className="inline-flex cursor-help group"
         onMouseEnter={openTooltip}
         onMouseLeave={scheduleCloseTooltip}
         onClick={() => {
@@ -168,10 +167,6 @@ export default function AmountTooltip({
         }}
       >
         {children}
-        <Info
-          size={12}
-          className="text-slate-300 dark:text-slate-600 group-hover:text-indigo-400 transition-colors flex-shrink-0"
-        />
       </span>
 
       {isOpen && coords && (

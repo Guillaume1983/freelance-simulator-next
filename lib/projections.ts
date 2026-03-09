@@ -214,8 +214,11 @@ export function calculateRegimes(
   });
 }
 
-export function projeterSurNAns(params: ProjectionParams): RegimeResult[][] {
-  return [1, 2, 3, 4, 5].map(annee => calculateRegimes({ ...params, annee }));
+export function projeterSurNAns(params: ProjectionParams, growthRates?: number[]): RegimeResult[][] {
+  return [1, 2, 3, 4, 5].map((annee, index) => {
+    const growth = growthRates && growthRates[index] != null ? growthRates[index]! : params.growthRate;
+    return calculateRegimes({ ...params, growthRate: growth, annee });
+  });
 }
 
 export function computeTaxParts(nbAdultes: number, nbEnfants: number): number {
