@@ -185,59 +185,58 @@ export default function ControlsBar({
                 </div>
               )}
 
-              {/* Vue simulateur : ne montrer que le statut actif + croissance */}
+              {/* Vue simulateur : grille Année 1–5 avec paramétrage et croissance alignés sur les colonnes */}
               {pageSlug && pageSlug.startsWith('simulateur/') && activeRegimeId && (
                 <div
                   className="hidden md:grid gap-3"
-                  style={{
-                    gridTemplateColumns: '200px minmax(0, 1fr)',
-                  }}
+                  style={{ gridTemplateColumns: '200px repeat(5, minmax(0, 1fr))' }}
                 >
-                  {/* Colonne métriques (vide) */}
+                  {/* Colonne Métriques (vide, pour aligner avec la première colonne du tableau) */}
                   <div />
-                  <div className="space-y-3">
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5">
-                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center">
-                        {activeRegimeId}
-                      </div>
-                      <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="center" variant="light" />
-                    </div>
+                  {[0, 1, 2, 3, 4].map((index) => {
+                    const value = growthByYear?.[index] ?? 0;
+                    const isYearOne = index === 0;
+                    return (
+                      <div
+                        key={index}
+                        className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
+                      >
+                        <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center mb-1">
+                          {isYearOne ? 'Paramétrage statut' : `Année ${index + 1}`}
+                        </div>
 
-                    {/* Bloc croissance CA sur 5 ans */}
-                    <div className="rounded-2xl border border-dashed border-emerald-200/80 dark:border-emerald-700/60 bg-emerald-50/40 dark:bg-emerald-900/20 px-3 py-3">
-                      <div className="max-w-sm mx-auto">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
-                            Croissance CA (2e à 5e année)
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {[1, 2, 3, 4].map((index) => {
-                            const value = growthByYear?.[index] ?? 0;
-                            return (
-                              <div key={index} className="flex items-center gap-3 justify-between">
-                                <span className="w-16 text-[9px] font-semibold text-slate-500 dark:text-slate-400">
-                                  Année {index + 1}
-                                </span>
-                                <input
-                                  type="range"
-                                  min={0}
-                                  max={50}
-                                  step={1}
-                                  value={value}
-                                  onChange={(e) => onChangeGrowthYear?.(index, Number(e.target.value))}
-                                  className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 max-w-[160px] flex-1"
-                                />
-                                <span className="w-10 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
-                                  {value}%
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        {isYearOne ? (
+                          activeRegimeId !== 'EURL IR' ? (
+                            <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="center" variant="light" />
+                          ) : (
+                            <p className="text-[9px] text-slate-400 dark:text-slate-500 text-center italic">
+                              Aucun paramètre spécifique pour ce statut.
+                            </p>
+                          )
+                        ) : (
+                          <div className="flex flex-col items-stretch gap-1.5">
+                            <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 text-center">
+                              Croissance CA
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="range"
+                                min={0}
+                                max={50}
+                                step={1}
+                                value={value}
+                                onChange={(e) => onChangeGrowthYear?.(index, Number(e.target.value))}
+                                className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 flex-1"
+                              />
+                              <span className="w-10 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                                {value}%
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               )}
 

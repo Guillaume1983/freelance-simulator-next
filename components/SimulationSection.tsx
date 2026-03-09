@@ -393,7 +393,9 @@ export default function SimulationSection({
                     <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top min-w-[130px]">
                       <div className={`header-band band-${regimeClass}`} />
                       <div className="flex flex-col items-center gap-2">
-                        <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">Année {i + 1}</span>
+                        <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                          Année {i + 1}
+                        </span>
                         <div className="flex flex-col items-center min-h-[52px] justify-center">
                           <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
                             {r ? fmt(r.net / 12) : '—'}
