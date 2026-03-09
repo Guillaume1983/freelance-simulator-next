@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { Percent, Settings } from 'lucide-react';
+import { Percent } from 'lucide-react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
@@ -29,6 +28,14 @@ export default function ControlsBar({
   onChangeGrowthYear,
 }: ControlsBarProps) {
   const [showStatusPanel, setShowStatusPanel] = useState(false);
+
+  const paramétrageDeLabel = (regimeId: string) => {
+    if (regimeId === 'Micro') return 'de la micro';
+    if (regimeId === 'SASU') return 'de la SASU';
+    if (regimeId.startsWith('EURL')) return `de l'${regimeId}`;
+    return `du ${regimeId}`;
+  };
+
   return (
     <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -97,7 +104,7 @@ export default function ControlsBar({
             )}
           </div>
 
-          {/* CA calculé + lien paramètres */}
+          {/* CA calculé */}
           <div className="flex items-center gap-3 md:gap-4">
             <div className="flex flex-col items-end">
               <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
@@ -105,16 +112,6 @@ export default function ControlsBar({
                 {fmtEur(ca)}
               </span>
             </div>
-
-            <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
-
-            <Link
-              href={pageSlug ? `/reglages?from=${pageSlug}` : '/reglages'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white text-xs font-semibold transition-all shrink-0"
-            >
-              <Settings size={14} />
-              <span className="hidden sm:inline">Paramètres</span>
-            </Link>
           </div>
         </div>
       </div>
@@ -127,7 +124,10 @@ export default function ControlsBar({
             onClick={() => setShowStatusPanel(v => !v)}
             className="absolute left-1/2 -translate-x-1/2 -top-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
           >
-            <span>{showStatusPanel ? 'Masquer paramétrage statuts' : 'Paramétrage par statut'}</span>
+            <span>{showStatusPanel
+              ? (activeRegimeId ? `Masquer paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Masquer paramétrage statuts')
+              : (activeRegimeId ? `Paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Paramétrage par statut')
+            }</span>
           </button>
 
           {showStatusPanel && (

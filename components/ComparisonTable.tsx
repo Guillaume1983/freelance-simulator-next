@@ -241,12 +241,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   };
 
   return (
-    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none">
+    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none">
 
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">
         {/* Header bar */}
-        <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+        <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-2xl border-b border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
             {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
             <button
@@ -368,7 +368,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
             {/* ── Ligne Trimestres retraite validés ── */}
             <tr className="bg-white dark:bg-slate-900">
-              <td className="px-4 py-3 border-r dark:border-slate-800 align-top">
+              <td className="px-4 py-3 border-r border-slate-100 dark:border-slate-800 align-top">
                 <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">
                   Trimestres retraite<br />validés
                 </div>
@@ -440,7 +440,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             return (
               <div
                 key={r.id}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
@@ -516,23 +516,26 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>
 
-      {/* Hypothèses et disclaimer */}
+      {/* Hypothèses (bloc séparé, aligné simulateur) */}
       <div className="px-4 md:px-6 py-4">
-        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-          <div className="flex flex-col gap-3">
+        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+          <div className="p-4 md:p-5 bg-slate-50/50 dark:bg-slate-800/30">
             <div className="flex items-start gap-2">
               <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
-                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
+                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
                   <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année (hors CSG/CRDS)</li>
+                  <li>IR : barème progressif 2026, parts fiscales du foyer</li>
                   <li>IK : barème fiscal annuel, remboursés net et déductibles</li>
                   <li>Loyer perçu : charge société, revenu imposable pour le foyer</li>
+                  <li>Micro : plafond 77 700 € en BNC (dépassement = sortie du régime)</li>
+                  <li>Portage : frais de gestion inclus (ordre 5–10 % du CA)</li>
                   <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes</li>
                 </ul>
               </div>
             </div>
-            <p className="text-[9px] text-slate-400 dark:text-slate-500 italic border-t border-slate-200/80 dark:border-slate-700/50 pt-3">
+            <p className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700/50 text-[9px] text-slate-400 dark:text-slate-500 italic">
               Simulation estimative basée sur les barèmes 2026. Consultez un expert-comptable pour votre situation personnelle.
             </p>
           </div>

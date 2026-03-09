@@ -311,8 +311,8 @@ export default function SimulationSection({
   };
 
   const getRowBgClass = (row: (typeof rows)[number]) => {
-    if (row.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
-    if (row.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30 font-bold';
+    if (row.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30';
+    if (row.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30';
     if (row.key === 'optimisations') return 'bg-emerald-50/50 dark:bg-emerald-900/25';
     if (row.key === 'cashInCompany') return 'bg-slate-50/50 dark:bg-slate-800/25';
     return '';
@@ -327,7 +327,8 @@ export default function SimulationSection({
   };
 
   return (
-    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+    <>
+    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none">
 
       {/* ── Barre de contrôle supplémentaire (multi‑statuts uniquement) ── */}
       {!singleRegime && (
@@ -355,11 +356,10 @@ export default function SimulationSection({
         </div>
       )}
 
-      {/* ── Tableau Simulations (desktop) — même rendu que ComparisonTable ── */}
-      <div className="overflow-visible bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none">
-        <div className="hidden md:block">
-          {/* Barre d'en-tête (alignée comparateur) */}
-          <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+      {/* ── Tableau Simulations (desktop) — même code que ComparisonTable ── */}
+      <div className="hidden md:block">
+        {/* Header bar — exactement comme ComparisonTable */}
+        <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-2xl border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
               {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
               <button
@@ -382,7 +382,7 @@ export default function SimulationSection({
                 {simulations.map((yr, i) => {
                   const r = yr.find((x: any) => x.id === activeRegime);
                   return (
-                    <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top min-w-[130px]">
+                    <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
                       <div className={`header-band band-${regimeClass}`} />
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
@@ -541,10 +541,51 @@ export default function SimulationSection({
             </tbody>
           </table>
         </div>
-      </div>
+
+      {/* Analyse (à la suite des Répartitions, dans la même carte — desktop uniquement) */}
+      {PROJECTION_ANALYSIS[activeRegime] && (
+        <div className="hidden md:block border-t border-slate-200 dark:border-slate-700">
+          <div className="p-4 md:p-5">
+          <h3 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-1">
+            Analyse sur 5 ans
+          </h3>
+          <p className="text-sm font-black text-slate-900 dark:text-slate-50 mb-3">
+            Points forts & vigilances pour {activeRegime}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <div className="rounded-xl bg-emerald-50/70 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-900/30 px-3 py-2.5">
+              <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
+                <span className="text-emerald-500">●</span> Points forts
+              </p>
+              <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
+                {PROJECTION_ANALYSIS[activeRegime]!.forts.map((f) => (
+                  <li key={f} className="flex gap-1.5">
+                    <span className="shrink-0 text-emerald-500">✓</span>
+                    <span className="font-medium">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-xl bg-amber-50/70 dark:bg-amber-900/15 border border-amber-100 dark:border-amber-900/30 px-3 py-2.5">
+              <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
+                <span className="text-amber-500">●</span> Vigilances
+              </p>
+              <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
+                {PROJECTION_ANALYSIS[activeRegime]!.vigilance.map((v) => (
+                  <li key={v} className="flex gap-1.5">
+                    <span className="shrink-0 text-amber-500">!</span>
+                    <span className="font-medium">{v}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+        </div>
+      )}
 
       {/* ── Vue mobile : cartes par année ── */}
-      <div className="block md:hidden">
+      <div className="block md:hidden p-4 pt-5">
 
         {/* Cartes années (scroll horizontal snap) */}
         <div
@@ -557,7 +598,7 @@ export default function SimulationSection({
             return (
               <div
                 key={i}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm overflow-hidden rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
                 {/* Bande couleur + header */}
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
@@ -629,72 +670,32 @@ export default function SimulationSection({
         <ScrollDots total={simulations.length} active={activeYear} color={regimeColor} />
       </div>
 
-      {/* Bloc analyse + CTA Je me lance */}
-      {PROJECTION_ANALYSIS[activeRegime] && (
-        <div className="px-4 md:px-6 pt-2 pb-3">
-          <div className="max-w-[1600px] mx-auto mt-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 md:px-6 py-4 md:py-5">
-            <div className="space-y-2">
-              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                Analyse sur 5 ans
-              </p>
-              <h3 className="text-sm md:text-base font-black tracking-tight text-slate-900 dark:text-slate-50">
-                Points forts & vigilances pour {activeRegime}
-              </h3>
-              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                <div className="rounded-xl bg-emerald-50/70 dark:bg-emerald-900/15 border border-emerald-100 dark:border-emerald-900/30 px-3 py-2.5">
-                  <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
-                    <span className="text-emerald-500">●</span> Points forts
-                  </p>
-                  <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
-                    {PROJECTION_ANALYSIS[activeRegime]!.forts.map((f) => (
-                      <li key={f} className="flex gap-1.5">
-                        <span className="shrink-0 text-emerald-500">✓</span>
-                        <span className="font-medium">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="rounded-xl bg-amber-50/70 dark:bg-amber-900/15 border border-amber-100 dark:border-amber-900/30 px-3 py-2.5">
-                  <p className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-[0.16em] mb-1.5 flex items-center gap-1">
-                    <span className="text-amber-500">●</span> Vigilances
-                  </p>
-                  <ul className="text-[10px] text-slate-700 dark:text-slate-200 space-y-1.5">
-                    {PROJECTION_ANALYSIS[activeRegime]!.vigilance.map((v) => (
-                      <li key={v} className="flex gap-1.5">
-                        <span className="shrink-0 text-amber-500">!</span>
-                        <span className="font-medium">{v}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hypothèses et disclaimer */}
+      {/* Hypothèses — même bloc que le comparatif, dans la même carte */}
       <div className="px-4 md:px-6 py-4">
-        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-          <div className="flex flex-col gap-3">
+        <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+          <div className="p-4 md:p-5 bg-slate-50/50 dark:bg-slate-800/30">
             <div className="flex items-start gap-2">
               <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
-              <div>
+              <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
-                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
-                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année</li>
-                  <li>CFE : ajoutée dès la 2e année d'activité</li>
-                  <li>Croissance CA : appliquée année après année</li>
-                  <li>EURL IS : IS 25% sur bénéfice. SASU : PFU 30% sur dividendes</li>
+                <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
+                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année (hors CSG/CRDS)</li>
+                  <li>IR : barème progressif 2026, parts fiscales du foyer</li>
+                  <li>IK : barème fiscal annuel, remboursés net et déductibles</li>
+                  <li>Loyer perçu : charge société, revenu imposable pour le foyer</li>
+                  <li>Micro : plafond 77 700 € en BNC (dépassement = sortie du régime)</li>
+                  <li>Portage : frais de gestion inclus (ordre 5–10 % du CA)</li>
+                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes</li>
                 </ul>
               </div>
             </div>
-            <p className="text-[9px] text-slate-400 dark:text-slate-500 italic border-t border-slate-200/80 dark:border-slate-700/50 pt-3">
+            <p className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700/50 text-[9px] text-slate-400 dark:text-slate-500 italic">
               Simulation estimative basée sur les barèmes 2026. Consultez un expert-comptable pour votre situation personnelle.
             </p>
           </div>
         </div>
       </div>
+    </div>
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>
@@ -856,6 +857,6 @@ export default function SimulationSection({
         message="Connectez-vous ou créez un compte pour exporter la simulation en PDF et accéder aux détails de calcul."
       />
 
-    </div>
+    </>
   );
 }

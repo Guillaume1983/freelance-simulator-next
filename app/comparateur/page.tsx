@@ -6,7 +6,7 @@ import ComparisonTable from '@/components/ComparisonTable';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
-import { ArrowLeft, BarChart3, TrendingUp } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Settings } from 'lucide-react';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
@@ -48,6 +48,15 @@ export default function ComparateurPage() {
                       <PdfIcon size={24} className="shrink-0" />
                       <span className="text-xs font-bold uppercase tracking-wide">PDF</span>
                     </button>
+                    <Link
+                      href="/reglages?from=comparateur"
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors border border-slate-200 dark:border-slate-600"
+                      title="Paramètres"
+                      aria-label="Ouvrir les paramètres"
+                    >
+                      <Settings size={20} className="shrink-0" />
+                      <span className="text-xs font-bold uppercase tracking-wide">Paramètres</span>
+                    </Link>
                   </div>
                   <p className="mt-1 text-slate-500 dark:text-slate-400">
                     Comparez les 5 statuts freelance en temps réel
