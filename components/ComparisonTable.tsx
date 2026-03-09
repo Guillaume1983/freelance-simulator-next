@@ -416,7 +416,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
             {/* ── Ligne Répartitions ── */}
             <tr className="bg-slate-50/20 dark:bg-slate-900/10">
-              <td className="p-4 border-r dark:border-slate-800">
+              <td className="p-4">
                 <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Répartitions</div>
                 <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
                   {[
@@ -443,7 +443,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
             {/* ── Ligne Points Forts ── */}
             <tr className="bg-white dark:bg-[#0f172a]">
-              <td className="px-4 pt-4 pb-2 border-r dark:border-slate-800 align-top">
+              <td className="px-4 pt-4 pb-2 align-top">
                 <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Analyse<br />Statutaire</div>
               </td>
               {regimes.map((r: any) => {
@@ -472,7 +472,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
             {/* ── Ligne Vigilance ── */}
             <tr className="bg-white dark:bg-[#0f172a]">
-              <td className="border-r dark:border-slate-800" />
+              <td />
               {regimes.map((r: any) => {
                 const data = REGIME_ANALYSIS[r.id];
                 return (
@@ -494,7 +494,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
             {/* ── Ligne Boutons Je me lance ── */}
             <tr className="bg-white dark:bg-[#0f172a]">
-              <td className="border-r dark:border-slate-800" />
+              <td />
               {regimes.map((r: any) => {
                 const color = REGIME_COLORS[r.id] ?? '#6366f1';
                 return (

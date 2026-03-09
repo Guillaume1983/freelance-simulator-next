@@ -95,7 +95,7 @@ export default function SimulateurStatutPage() {
         </div>
       </header>
 
-      {/* Barre de contrôle sticky — identique au comparateur */}
+      {/* Barre de contrôle sticky — TJM, Jours, CA, Paramètres */}
       <div className="sticky top-0 z-40">
         <ControlsBar sim={sim} ca={ca} pageSlug={`simulateur/${slug}`} />
       </div>

@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, Info, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -26,8 +26,8 @@ function ScrollDots({ total, active, color }: { total: number; active: number; c
   );
 }
 
-/* ── Style unifié pour tous les boutons export PDF ── */
-const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
+/* ── Style unifié pour tous les boutons export PDF (aligné sur ComparisonTable) ── */
+const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage':  '#6366f1',
@@ -242,6 +242,25 @@ export default function SimulationSection({
 
   const regimeColor = REGIME_COLORS[activeRegime] ?? '#6366f1';
   const allRegimes  = sim.resultats.map((r: any) => r.id);
+  const regimeClass = simulations[0]?.find((x: any) => x.id === activeRegime)?.class ?? 'portage';
+
+  const RetirementBadge = ({ quarters, regimeId }: { quarters: number; regimeId: string }) => {
+    const validated = quarters >= 4;
+    const label = validated ? '4 trim. retraite validés' : `~${quarters}/4 trim. retraite`;
+    return (
+      <span
+        title={label}
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold cursor-default select-none ${
+          validated
+            ? 'bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400'
+            : 'bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400'
+        }`}
+      >
+        <span className={`w-1.5 h-1.5 rounded-full ${validated ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+        {label}
+      </span>
+    );
+  };
 
   const getRegimePhrase = (id: string) => {
     if (id === 'Portage') return 'au portage salarial';
@@ -286,13 +305,13 @@ export default function SimulationSection({
   };
 
   return (
-    <div className="overflow-visible mt-6 md:mt-8 bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
 
-      {/* ── Barre de contrôle : une ligne (croissance + paramètres statut) ── */}
-      <div className="px-4 md:px-6 py-3 flex flex-wrap items-center gap-4 md:gap-6 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
+      {/* ── Barre de contrôle supplémentaire (multi‑statuts uniquement) ── */}
+      {!singleRegime && (
+        <div className="px-4 md:px-6 py-3 flex flex-wrap items-center gap-4 md:gap-6 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 rounded-t-2xl">
 
-        {/* Sélecteur de régime — desktop (masqué sur page simulateur single statut) */}
-        {!singleRegime && (
+          {/* Sélecteur de régime — desktop */}
           <div className="hidden md:flex gap-1 flex-wrap">
             {allRegimes.map((id: string) => (
               <button
@@ -310,10 +329,8 @@ export default function SimulationSection({
               </button>
             ))}
           </div>
-        )}
 
-        {/* Bouton paramètres statut */}
-        {!singleRegime && (
+          {/* Bouton paramètres statut */}
           <div className="shrink-0">
             <button
               onClick={() => setParamsOpen(true)}
@@ -323,189 +340,216 @@ export default function SimulationSection({
               Paramètres {activeRegime}
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* ── Tableau Simulations (desktop) ── */}
-      <div className="hidden md:block overflow-x-auto mt-4">
-        <table className="w-full border-separate border-spacing-0">
-          <thead>
-            <tr className="bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
-
-              {/* Cellule haut-gauche : boutons PDF / Détails sur la même ligne que les montants €/m */}
-              <th className="p-4 pr-6 pt-6 border-b dark:border-slate-800 w-px align-bottom">
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
-                    className={`${PDF_BTN} min-w-[88px] justify-center`}
-                  >
-                    <FileBarChart2 size={12} /> PDF
-                  </button>
-                  <button
-                    onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-                    className={`${PDF_BTN} min-w-[88px] justify-center ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
-                  >
-                    {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-                    {showDetails ? 'Masquer' : 'Détails'}
-                  </button>
-                </div>
-              </th>
-
-              {/* Colonnes années (5 ans) */}
-              {simulations.map((yr, i) => {
-                const r = yr.find((x: any) => x.id === activeRegime);
-                return (
-                  <th key={i} className="p-4 relative pt-6 border-b dark:border-slate-800 min-w-[130px]">
-                    <div className="header-band" style={{ background: regimeColor, opacity: 0.35 + i * 0.13 }} />
-
-                    {/* Icône paramètres — coin haut-droit */}
-                    {i === 0 ? (
-                      <button
-                        onClick={() => setParamsOpen(true)}
-                        title={`Paramètres spécifiques ${activeRegime}`}
-                        className="absolute top-1.5 right-1.5 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                      >
-                        <Settings2 size={12} className="group-hover:rotate-45 transition-transform duration-200" />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          const cur = sim.state.growthRate ?? 0;
-                          const next = cur === 0 ? 5 : cur === 5 ? 10 : cur === 10 ? 20 : cur === 20 ? 30 : 0;
-                          sim.setters.setGrowthRate(next);
-                        }}
-                        title={`Croissance annuelle : ${sim.state.growthRate ?? 0}% (cliquer pour changer)`}
-                        className="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
-                        style={{
-                          background: (sim.state.growthRate ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
-                          color: (sim.state.growthRate ?? 0) > 0 ? regimeColor : '#94a3b8',
-                          border: `1px solid ${(sim.state.growthRate ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
-                        }}
-                      >
-                        <Percent size={8} />
-                        {sim.state.growthRate ?? 0}
-                      </button>
-                    )}
-
-                    <div className="text-[13px] font-black dark:text-white uppercase tracking-tighter">Année {i + 1}</div>
-                    <div className="text-[9px] font-bold mt-0.5 text-slate-400">
-                      {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? 'ACRE −50% cotis' : i > 0 ? '+CFE' : '—'}
-                    </div>
-                    <div className="text-3xl font-black leading-none tracking-tighter mt-1" style={{ color: regimeColor }}>
-                      {r ? fmt(r.net / 12) : '—'}
-                      <span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
-                    </div>
-                    {r && r.cashInCompany != null && r.cashInCompany > 0 && (
-                      <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-                        Trésorerie&nbsp;: {fmt(r.cashInCompany)} /an
+      {/* ── Tableau Simulations (desktop) — même rendu que ComparisonTable ── */}
+      <div className="overflow-visible bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none">
+        <div className="hidden md:block">
+          {/* Barre d'en-tête (alignée comparateur) */}
+          <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
+                className={PDF_BTN}
+              >
+                <FileText size={11} /> Exporter PDF
+              </button>
+              <button
+                onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
+                className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
+              >
+                {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
+                {showDetails ? 'Masquer détails' : 'Voir détails'}
+              </button>
+              <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
+                <Settings2 size={10} className="shrink-0" />
+                Icône en haut à droite = paramètres spécifiques au statut
+              </span>
+            </div>
+            <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+              Années 1 à 5 · Croissance CA : icône % sur les colonnes pour ajuster
+            </p>
+          </div>
+          <table className="w-full border-separate border-spacing-0 table-fixed">
+            <thead>
+              <tr className="bg-white dark:bg-slate-900">
+                <th className="p-5 text-left border-b border-slate-100 dark:border-slate-800 w-[200px] align-bottom">
+                  <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Métriques
+                  </h3>
+                </th>
+                {simulations.map((yr, i) => {
+                  const r = yr.find((x: any) => x.id === activeRegime);
+                  return (
+                    <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top min-w-[130px]">
+                      <div className={`header-band band-${regimeClass}`} />
+                      {i === 0 ? (
+                        <button
+                          onClick={() => setParamsOpen(true)}
+                          title={`Paramètres spécifiques ${activeRegime}`}
+                          className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
+                        >
+                          <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const cur = sim.state.growthRate ?? 0;
+                            const next = cur === 0 ? 5 : cur === 5 ? 10 : cur === 10 ? 20 : cur === 20 ? 30 : 0;
+                            sim.setters.setGrowthRate(next);
+                          }}
+                          title={`Croissance annuelle : ${sim.state.growthRate ?? 0}% (cliquer pour changer)`}
+                          className="absolute top-2 right-2 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
+                          style={{
+                            background: (sim.state.growthRate ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
+                            color: (sim.state.growthRate ?? 0) > 0 ? regimeColor : '#94a3b8',
+                            border: `1px solid ${(sim.state.growthRate ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
+                          }}
+                        >
+                          <Percent size={8} />
+                          {sim.state.growthRate ?? 0}
+                        </button>
+                      )}
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">Année {i + 1}</span>
+                        <div className="flex flex-col items-center min-h-[52px] justify-center">
+                          <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                            {r ? fmt(r.net / 12) : '—'}
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400 mt-0.5">net / mois</span>
+                          {r && r.cashInCompany != null && r.cashInCompany > 0 ? (
+                            <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                              + {fmt(r.cashInCompany)} trésorerie
+                            </span>
+                          ) : (
+                            <span className="mt-1.5 invisible text-[8px]">—</span>
+                          )}
+                        </div>
+                        <div className="h-[22px] flex items-center justify-center">
+                          <RetirementBadge quarters={r?.retirementQuarters ?? 0} regimeId={activeRegime} />
+                        </div>
                       </div>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody className="text-slate-700 dark:text-slate-300">
+              {rows.map((row, idx) => {
+                const isLast = idx === rows.length - 1;
+                const isFinal = (row as any).isFinal;
+                return (
+                  <React.Fragment key={idx}>
+                    <tr className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''}`}>
+                      <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
+                        <div className="font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wide leading-tight">{row.label}</div>
+                      </td>
+                      {simulations.map((yr, i) => {
+                        const r = yr.find((x: any) => x.id === activeRegime) as any;
+                        let val: number | null = null;
+                        if (row.key === 'optimisations') {
+                          const lines = (r?.lines as any[] | undefined) ?? [];
+                          const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+                          const sum = lines
+                            .filter((l: any) => ids.includes(l.id))
+                            .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+                          val = sum > 0 ? sum : null;
+                        } else {
+                          val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
+                        }
+                        if (row.key === 'portageCommission') {
+                          if (activeRegime !== 'Portage') val = null;
+                          else val = r?.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                        }
+                        if (row.key === 'fees' && r?.id === 'Micro') val = null;
+                        if (row.key === 'cotis' && r?.id === 'SASU') val = null;
+                        if (row.key === 'cashInCompany' && (r?.cashInCompany == null || r?.cashInCompany === 0)) val = null;
+                        const detailText = r ? getDetailText(r, row.key, row.monthly) : '';
+                        const tooltipColor = getTooltipColor(row.key);
+                        return (
+                          <td
+                            key={i}
+                            className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${(row as any).color || ''}`}
+                          >
+                            {(() => {
+                              if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
+                              const content = (
+                                <>
+                                  {row.key === 'beforeTax' && (
+                                    <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(activeRegime)}</div>
+                                  )}
+                                  <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                    {(row as any).prefix} {fmt(val)}
+                                    {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
+                                  </span>
+                                </>
+                              );
+                              return (
+                                <AmountTooltip
+                                  amount={val}
+                                  ca={r.ca}
+                                  detailText={detailText}
+                                  label={row.label}
+                                  color={tooltipColor}
+                                >
+                                  {content}
+                                </AmountTooltip>
+                              );
+                            })()}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {showDetails && (
+                      <tr className="bg-slate-50/60 dark:bg-slate-800/30">
+                        <td className="px-5 py-1.5 border-r border-slate-100 dark:border-slate-800 text-[8px] text-slate-400 font-medium italic">Calcul</td>
+                        {simulations.map((yr, i) => {
+                          const r = yr.find((x: any) => x.id === activeRegime) as any;
+                          return (
+                            <td key={i} className="px-3 py-1.5 text-center">
+                              <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{r ? getDetailText(r, row.key, row.monthly) : ''}</span>
+                            </td>
+                          );
+                        })}
+                      </tr>
                     )}
-                  </th>
+                  </React.Fragment>
                 );
               })}
-            </tr>
-          </thead>
 
-          <tbody className="text-slate-700 dark:text-slate-300">
-            {rows.map((row, idx) => (
-              <React.Fragment key={idx}>
-                <tr className={`transition-colors ${getRowBgClass(row)}`}>
-                  <td className="p-4 border-r dark:border-slate-800">
-                    <div className="font-bold text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</div>
-                  </td>
+              {/* ── Ligne Répartitions (alignée comparateur) ── */}
+              <tr className="bg-slate-50/20 dark:bg-slate-900/10">
+                <td className="p-4">
+                  <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Répartitions</div>
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
+                    {[
+                      { color: '#fb7185', label: 'Charges' },
+                      { color: '#fbbf24', label: 'Cotis' },
+                      { color: '#f87171', label: 'IR' },
+                      { color: '#34d399', label: 'Net' },
+                    ].map(item => (
+                      <span key={item.label} className="flex items-center gap-1 text-[7px] text-slate-400 font-bold">
+                        <span className="w-2 h-2 rounded-sm inline-block" style={{ background: item.color }} />
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                </td>
                 {simulations.map((yr, i) => {
-                  const r   = yr.find((x: any) => x.id === activeRegime) as any;
-                  let val: number | null = null;
-                  if (row.key === 'optimisations') {
-                    const lines = (r.lines as any[] | undefined) ?? [];
-                    const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
-                    const sum = lines
-                      .filter((l: any) => ids.includes(l.id))
-                      .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
-                    val = sum > 0 ? sum : null;
-                  } else {
-                    val = row.monthly ? r[row.key] / 12 : r[row.key];
-                  }
-                  if (row.key === 'portageCommission') {
-                    if (activeRegime !== 'Portage') val = null;
-                    else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
-                  }
-                  if (row.key === 'fees' && r.id === 'Micro') val = null;
-                  if (row.key === 'cotis' && r.id === 'SASU') val = null;
-                  if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
-                  const detailText = getDetailText(r, row.key, row.monthly);
-                  const tooltipColor = getTooltipColor(row.key);
+                  const r = yr.find((x: any) => x.id === activeRegime) as any;
                   return (
-                    <td key={i} className={`p-4 text-center font-bold transition-all duration-300 ${(row as any).bigAmount ? 'text-lg' : 'text-sm'} ${row.color}`}>
-                      {val === null ? (
-                        '—'
-                      ) : (
-                        <AmountTooltip
-                          amount={val}
-                          ca={r.ca}
-                          detailText={detailText}
-                          label={row.label}
-                          color={tooltipColor}
-                        >
-                          {row.prefix && <span className="mr-0.5">{row.prefix}</span>}
-                          {fmt(val)}
-                          {row.monthly && <span className="text-[10px] font-bold text-slate-400 ml-0.5">/mois</span>}
-                          {row.isFinal && (
-                            <div className="text-[9px] text-slate-400 font-bold mt-0.5">{fmt(r[row.key])} /an</div>
-                          )}
-                        </AmountTooltip>
-                      )}
+                    <td key={i} className="px-4 py-3">
+                      <div className="flex justify-center">
+                        <StackedBar ca={r?.ca ?? 0} fees={r?.fees ?? 0} cotis={r?.cotis ?? 0} ir={r?.ir ?? 0} net={r?.net ?? 0} />
+                      </div>
                     </td>
                   );
                 })}
-                </tr>
-                {showDetails && (
-                  <tr className="bg-slate-50/40 dark:bg-slate-800/20">
-                    <td className="px-4 py-1.5 border-r dark:border-slate-800 text-[8px] text-slate-400 font-bold uppercase italic tracking-widest">Calcul</td>
-                    {simulations.map((yr, i) => {
-                      const r = yr.find((x: any) => x.id === activeRegime) as any;
-                      return (
-                        <td key={i} className="px-4 py-1.5 text-center">
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.monthly)}</span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-
-            {/* ── Ligne Répartitions ── */}
-            <tr className="bg-slate-50/20 dark:bg-slate-900/10">
-              <td className="p-4 border-r dark:border-slate-800">
-                <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Répartitions</div>
-                <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
-                  {[
-                    { color: '#fb7185', label: 'Charges' },
-                    { color: '#fbbf24', label: 'Cotis' },
-                    { color: '#f87171', label: 'IR' },
-                    { color: '#34d399', label: 'Net' },
-                  ].map(item => (
-                    <span key={item.label} className="flex items-center gap-1 text-[7px] text-slate-400 font-bold">
-                      <span className="w-2 h-2 rounded-sm inline-block" style={{ background: item.color }} />
-                      {item.label}
-                    </span>
-                  ))}
-                </div>
-              </td>
-              {simulations.map((yr, i) => {
-                const r = yr.find((x: any) => x.id === activeRegime) as any;
-                return (
-                  <td key={i} className="px-4 py-3">
-                    <div className="flex justify-center">
-                      <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
-                    </div>
-                  </td>
-                );
-              })}
-            </tr>
-          </tbody>
-        </table>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ── Vue mobile : cartes par année ── */}
@@ -731,7 +775,7 @@ export default function SimulationSection({
           <div style={{ textAlign: 'center', margin: '0 0 14px' }}>
             <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Simulations 5 ans — Freelance</h1>
             <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0' }}>
-              Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · +{sim.state.growthRate} %/an · {sim.state.taxParts} parts fiscales
+              Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · {sim.state.taxParts} parts fiscales
             </p>
           </div>
 
