@@ -37,58 +37,33 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
     holdTimerRef.current = null;
   };
 
-  const [portageInputStr, setPortageInputStr] = useState('');
-  const [portageFocused, setPortageFocused] = useState(false);
   const portageComm = sim.state.portageComm;
-  useEffect(() => {
-    if (!portageFocused) setPortageInputStr('');
-  }, [portageFocused]);
-  useEffect(() => {
-    if (portageFocused) {
-      const fromInput = parseFloat(portageInputStr.replace(',', '.'));
-      if (Number.isNaN(fromInput) || Math.abs(fromInput - portageComm) > 0.01) setPortageInputStr(String(portageComm));
-    }
-  }, [portageComm, portageFocused]);
-  const portageValue = portageFocused ? (portageInputStr || String(portageComm)) : String(portageComm);
-  const commitPortage = (raw: string) => {
-    const n = parseFloat(raw.replace(',', '.'));
-    const clamped = Number.isNaN(n) ? 7 : Math.max(1, Math.min(15, n));
-    sim.setters.setPortageComm(clamped);
-  };
 
   if (regimeId === 'Portage') return (
     <div className="space-y-1">
-      <div className={`flex items-center gap-1.5 ${alignClass}`}>
-        <label className={`${lbl} shrink-0`}>Frais gestion</label>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={portageValue}
-          onChange={e => {
-            const v = e.target.value;
-            setPortageInputStr(v);
-            const n = parseFloat(v.replace(',', '.'));
-            if (!Number.isNaN(n)) sim.setters.setPortageComm(Math.max(1, Math.min(15, n)));
-          }}
-          onFocus={e => {
-            setPortageFocused(true);
-            setPortageInputStr(String(portageComm));
-            (e.target as HTMLInputElement).select();
-          }}
-          onBlur={() => {
-            commitPortage(portageInputStr || String(portageComm));
-            setPortageFocused(false);
-          }}
-          className={isDark ? inputDark : inputLight}
-          onClick={e => e.stopPropagation()}
-        />
-        {isDark && (
-          <div className="flex flex-col gap-0.5">
-            <button type="button" className={arrowBtn} onMouseDown={() => startHold(() => sim.setters.setPortageComm((p: number) => Math.min(15, (p || 7) + 0.5)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="+Frais">▲</button>
-            <button type="button" className={arrowBtn} onMouseDown={() => startHold(() => sim.setters.setPortageComm((p: number) => Math.max(1, (p || 7) - 0.5)))} onMouseUp={stopHold} onMouseLeave={stopHold} aria-label="-Frais">▼</button>
-          </div>
-        )}
-        <span className={sp}>%</span>
+      <div className={`flex flex-col gap-1 ${alignClass === 'justify-center' ? 'items-center' : 'items-start'}`}>
+        <label className={`${lbl}`}>Frais gestion portage</label>
+        <div className="flex items-center gap-2 w-full">
+          <input
+            type="range"
+            min={0}
+            max={20}
+            step={1}
+            value={Math.max(0, Math.min(20, portageComm ?? 0))}
+            onChange={e => {
+              const n = Number(e.target.value);
+              sim.setters.setPortageComm(Math.max(0, Math.min(20, n)));
+            }}
+            className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-violet-300' : 'accent-violet-500'}`}
+            onClick={e => e.stopPropagation()}
+          />
+          <span className={`${spVal} w-10 text-right`}>
+            {Math.round(portageComm ?? 0)}%
+          </span>
+        </div>
+        <p className={`${sp} text-[7px]`}>
+          0% = aucune commission de portage
+        </p>
       </div>
     </div>
   );

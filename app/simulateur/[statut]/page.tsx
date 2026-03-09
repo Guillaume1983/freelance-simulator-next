@@ -63,6 +63,17 @@ export default function SimulateurStatutPage() {
   const sim = ctx.sim ?? ctx;
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
 
+  // Croissance par année (5 ans) — utilisée à la fois dans la barre de contrôle et dans la section de simulation
+  const [growthByYear, setGrowthByYear] = useState<number[]>(() =>
+    Array.from({ length: 5 }, () => sim.state.growthRate ?? 0)
+  );
+
+  const updateGrowthYear = (index: number, next: number) => {
+    setGrowthByYear(prev =>
+      prev.map((v, i) => (i === index ? Math.min(50, Math.max(0, Math.round(next))) : v)),
+    );
+  };
+
   return (
     <main className="min-h-screen bg-page-settings">
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
@@ -88,7 +99,7 @@ export default function SimulateurStatutPage() {
                 Simulation sur 5 ans — {statutId}
               </h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
-                ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Icône % sur an 2-5 pour ajuster la croissance
+                ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Croissance du CA ajustable dans le panneau de paramétrage sous le bandeau
               </p>
             </div>
           </div>
@@ -97,7 +108,14 @@ export default function SimulateurStatutPage() {
 
       {/* Barre de contrôle sticky — TJM, Jours, CA, Paramètres */}
       <div className="sticky top-0 z-40">
-        <ControlsBar sim={sim} ca={ca} pageSlug={`simulateur/${slug}`} />
+        <ControlsBar
+          sim={sim}
+          ca={ca}
+          pageSlug={`simulateur/${slug}`}
+          activeRegimeId={activeRegime}
+          growthByYear={growthByYear}
+          onChangeGrowthYear={updateGrowthYear}
+        />
       </div>
 
       {/* Section simulation */}
@@ -106,6 +124,7 @@ export default function SimulateurStatutPage() {
           sim={ctx}
           activeRegime={activeRegime}
           setActiveRegime={setActiveRegime}
+          growthByYear={growthByYear}
           singleRegime
         />
       </div>

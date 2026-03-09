@@ -5,11 +5,10 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Settings2, Rocket, Percent, CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, Rocket, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
-import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -140,18 +139,19 @@ export default function SimulationSection({
   activeRegime,
   setActiveRegime,
   singleRegime = false,
+  growthByYear,
 }: {
   sim: any;
   activeRegime: string;
   setActiveRegime: (id: string) => void;
   /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc SIMULATIONS / nom / +% */
   singleRegime?: boolean;
+  growthByYear: number[];
 }) {
   const printBizRef    = useRef<HTMLDivElement>(null);
   const yearScrollRef  = useRef<HTMLDivElement>(null);
   const [activeYear, setActiveYear]     = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
-  const [paramsOpen, setParamsOpen] = useState(false);
   const { isConnected } = useUser();
 
   const handlePrintBiz = useReactToPrint({
@@ -168,23 +168,6 @@ export default function SimulationSection({
       }
     `,
   });
-
-  const [growthByYear, setGrowthByYear] = useState<number[]>(() =>
-    Array.from({ length: 5 }, () => sim.state.growthRate ?? 0)
-  );
-  const [growthModalOpen, setGrowthModalOpen] = useState(false);
-  const [growthModalInitialIndex, setGrowthModalInitialIndex] = useState<number | null>(null);
-
-  const updateGrowthYear = (index: number, next: number) => {
-    setGrowthByYear(prev =>
-      prev.map((v, i) => (i === index ? Math.min(50, Math.max(0, Math.round(next))) : v)),
-    );
-  };
-
-  const openGrowthModal = (yearIndex: number | null = null) => {
-    setGrowthModalInitialIndex(yearIndex);
-    setGrowthModalOpen(true);
-  };
 
   const simulations = useMemo(
     () =>
@@ -269,9 +252,15 @@ export default function SimulationSection({
       .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
     return sum > 0;
   });
+  const hasAnyPortageCommission = simulations.some(yr => {
+    const r = yr.find((x: any) => x.id === activeRegime) as any;
+    if (!r || activeRegime !== 'Portage') return false;
+    const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+    return commission > 0;
+  });
   const rows = baseRows.filter(row => {
     if (row.key === 'cashInCompany') return hasAnyCashInCompany;
-    if (row.key === 'portageCommission') return activeRegime === 'Portage';
+    if (row.key === 'portageCommission') return hasAnyPortageCommission;
     // Micro : optimisations non déductibles → masquer totalement la ligne
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
     // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
@@ -371,16 +360,6 @@ export default function SimulationSection({
             ))}
           </div>
 
-          {/* Bouton paramètres statut */}
-          <div className="shrink-0">
-            <button
-              onClick={() => setParamsOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-            >
-              <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
-              Paramètres {activeRegime}
-            </button>
-          </div>
         </div>
       )}
 
@@ -388,7 +367,7 @@ export default function SimulationSection({
       <div className="overflow-visible bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/40 dark:shadow-none">
         <div className="hidden md:block">
           {/* Barre d'en-tête (alignée comparateur) */}
-          <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+          <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
               {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
               <button
@@ -398,14 +377,7 @@ export default function SimulationSection({
               >
                 <FileText size={11} /> Exporter PDF
               </button>
-              <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
-                <Settings2 size={10} className="shrink-0" />
-                Icône en haut à droite = paramètres spécifiques au statut
-              </span>
             </div>
-            <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-              Années 1 à 5 — cliquez sur % pour ajuster la croissance (par année)
-            </p>
           </div>
           <table className="w-full border-separate border-spacing-0 table-fixed">
             <thead>
@@ -420,29 +392,6 @@ export default function SimulationSection({
                   return (
                     <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top min-w-[130px]">
                       <div className={`header-band band-${regimeClass}`} />
-                      {i === 0 ? (
-                        <button
-                          onClick={() => setParamsOpen(true)}
-                          title={`Paramètres spécifiques ${activeRegime}`}
-                          className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                        >
-                          <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => openGrowthModal(i)}
-                          title={`Croissance année ${i + 1} : ${growthByYear[i] ?? sim.state.growthRate ?? 0}% (cliquer pour modifier)`}
-                          className="absolute top-2 right-2 z-10 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black tabular-nums transition-all hover:scale-105"
-                          style={{
-                            background: (growthByYear[i] ?? 0) > 0 ? `${regimeColor}22` : 'transparent',
-                            color: (growthByYear[i] ?? 0) > 0 ? regimeColor : '#94a3b8',
-                            border: `1px solid ${(growthByYear[i] ?? 0) > 0 ? regimeColor + '44' : '#e2e8f0'}`,
-                          }}
-                        >
-                          <Percent size={8} />
-                          {growthByYear[i] ?? 0}
-                        </button>
-                      )}
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">Année {i + 1}</span>
                         <div className="flex flex-col items-center min-h-[52px] justify-center">
@@ -639,29 +588,6 @@ export default function SimulationSection({
                   <div className="mt-3">
                     {r && <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />}
                   </div>
-                  {singleRegime && i === 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
-                          <ChevronLeft className="w-3.5 h-3.5" aria-hidden />
-                          An 1
-                        </span>
-                        <div className="flex-1 min-w-0 flex justify-center">
-                          <button
-                            onClick={() => setParamsOpen(true)}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[9px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                          >
-                            <Settings2 size={11} className="group-hover:rotate-45 transition-transform duration-200" />
-                            Paramètres
-                          </button>
-                        </div>
-                        <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider">
-                          An 5
-                          <ChevronRight className="w-3.5 h-3.5" aria-hidden />
-                        </span>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Métriques */}
@@ -768,121 +694,12 @@ export default function SimulationSection({
         </div>
       )}
 
-      {/* Modal réglage croissance par année — alignée sur RegimeParamsModal */}
-      {growthModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Réglage de la croissance par année"
-        >
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm"
-            onClick={() => setGrowthModalOpen(false)}
-          />
-
-          {/* Panel */}
-          <div className="relative z-10 w-full max-w-sm mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-700/50 overflow-hidden">
-            {/* Barre colorée en haut, même logique que RegimeParamsModal */}
-            <div className="h-1 w-full" style={{ background: regimeColor }} />
-
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: `${regimeColor}18` }}
-                >
-                  <Percent size={16} style={{ color: regimeColor }} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                    Croissance CA
-                  </h3>
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                    Ajuster année par année
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setGrowthModalOpen(false)}
-                className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
-                aria-label="Fermer"
-              >
-                <X size={14} className="text-slate-500 dark:text-slate-400" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="px-5 py-5">
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
-                Ajustez la croissance annuelle (0–50&nbsp;%) pour l&apos;année sélectionnée. La valeur est exprimée en
-                pourcentage de hausse du CA par rapport à l&apos;année précédente.
-              </p>
-
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700/50 space-y-2.5 max-h-[260px] overflow-y-auto">
-                {(() => {
-                  const index = growthModalInitialIndex ?? 1; // fallback année 2 par défaut si jamais
-                  const value = growthByYear[index] ?? 0;
-                  return (
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                        Année {index + 1}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => updateGrowthYear(index, value - 1)}
-                          className="w-6 h-6 flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          min={0}
-                          max={50}
-                          step={1}
-                          value={value}
-                          onChange={e => updateGrowthYear(index, Number(e.target.value))}
-                          className="w-14 px-1 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 text-center tabular-nums"
-                        />
-                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">%</span>
-                        <button
-                          type="button"
-                          onClick={() => updateGrowthYear(index, value + 1)}
-                          className="w-6 h-6 flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-
-            {/* Footer aligné sur RegimeParamsModal */}
-            <div className="px-5 pb-4">
-              <button
-                type="button"
-                onClick={() => setGrowthModalOpen(false)}
-                className="w-full py-2.5 rounded-xl font-bold text-sm transition-all text-white"
-                style={{ background: regimeColor }}
-              >
-                Appliquer
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Hypothèses et disclaimer */}
       <div className="px-4 md:px-6 py-4">
         <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-2">
-              <Info size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+              <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
               <div>
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
                 <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
@@ -1060,12 +877,6 @@ export default function SimulationSection({
         message="Connectez-vous ou créez un compte pour exporter la simulation en PDF et accéder aux détails de calcul."
       />
 
-      <RegimeParamsModal
-        sim={sim}
-        regimeId={activeRegime}
-        isOpen={paramsOpen}
-        onClose={() => setParamsOpen(false)}
-      />
     </div>
   );
 }

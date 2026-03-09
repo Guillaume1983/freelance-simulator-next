@@ -32,7 +32,7 @@ export const useSimulation = () => {
   const [materielAnnuel, setMaterielAnnuel] = useState(0);
 
   // --- Portage ---
-  const [portageComm, setPortageComm] = useState(7);
+  const [portageComm, setPortageComm] = useState(0);
 
   // --- Paramètres par statut ---
   const [typeActiviteMicro, setTypeActiviteMicro] = useState<'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'>('BNC');

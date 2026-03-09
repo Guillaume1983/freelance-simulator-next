@@ -2,14 +2,13 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Info, Rocket, Settings2, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Info, Rocket, CheckCircle, AlertCircle } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
-import RegimeParamsModal from '@/components/RegimeParamsModal';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -123,7 +122,6 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 export default function ComparisonTable({ sim }: { sim: any }) {
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
-  const [openParamsFor, setOpenParamsFor] = useState<string | null>(null);
   const { isConnected } = useUser();
 
   const printRef      = useRef<HTMLDivElement>(null);
@@ -192,11 +190,17 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
     return sum > 0;
   });
+  const hasAnyPortageCommission = regimes.some((r: any) => {
+    if (r.id !== 'Portage') return false;
+    const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+    return commission > 0;
+  });
 
   const visibleRows = rows.filter(r => {
     if (r.key === 'cashInCompany') return hasAnyCashInCompany;
     if (r.key === 'fees') return hasAnyFees;
     if (r.key === 'optimisations') return hasAnyOptimisations;
+    if (r.key === 'portageCommission') return hasAnyPortageCommission;
     return true;
   });
 
@@ -285,7 +289,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       {/* ── Vue desktop ── */}
       <div className="hidden md:block">
         {/* Header bar */}
-        <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
+        <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
           <div className="flex items-center gap-3">
             {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
             <button
@@ -295,10 +299,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             >
               <FileText size={11} /> Exporter PDF
             </button>
-            <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
-              <Settings2 size={10} className="shrink-0" />
-              Icone en haut à droite = paramètres spécifiques au statut
-            </span>
           </div>
         </div>
         <table className="w-full border-separate border-spacing-0 table-fixed">
@@ -317,15 +317,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   <div className={`header-band band-${r.class}`} />
                   {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
                   {isMicroPlafondExceeded(r) && <div className="plafond-badge">PLAFOND DÉPASSÉ</div>}
-
-                  {/* Icône paramètres — coin haut-droit */}
-                  <button
-                    onClick={() => setOpenParamsFor(r.id)}
-                    title={`Paramètres spécifiques ${r.id}`}
-                    className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center rounded-md text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                  >
-                    <Settings2 size={13} className="group-hover:rotate-45 transition-transform duration-200" />
-                  </button>
 
                   <div className="flex flex-col items-center gap-2">
                     {/* Nom */}
@@ -564,15 +555,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 key={r.id}
                 className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
-                {/* Icône paramètres — coin haut-droit */}
-                <button
-                  onClick={() => setOpenParamsFor(r.id)}
-                  title={`Paramètres spécifiques ${r.id}`}
-                  className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group"
-                >
-                  <Settings2 size={14} className="group-hover:rotate-45 transition-transform duration-200" />
-                </button>
-
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
                   <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300 mb-2">{r.id}</span>
@@ -688,7 +670,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <div className="max-w-[1600px] mx-auto rounded-xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/30 p-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-2">
-              <Info size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+              <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
               <div>
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
                 <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
@@ -844,14 +826,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         message="Connectez-vous ou créez un compte pour exporter en PDF et accéder aux détails de calcul."
       />
 
-      {openParamsFor && (
-        <RegimeParamsModal
-          sim={sim}
-          regimeId={openParamsFor}
-          isOpen={!!openParamsFor}
-          onClose={() => setOpenParamsFor(null)}
-        />
-      )}
     </div>
   );
 }
