@@ -14,7 +14,7 @@ export default function ComparateurPage() {
   return (
     <main className="min-h-screen bg-page-settings">
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
@@ -44,7 +44,7 @@ export default function ComparateurPage() {
       </div>
 
       {/* Tableau comparatif */}
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <ComparisonTable sim={sim} />
       </div>
 

@@ -150,7 +150,6 @@ export default function SimulationSection({
   const printBizRef    = useRef<HTMLDivElement>(null);
   const yearScrollRef  = useRef<HTMLDivElement>(null);
   const [activeYear, setActiveYear]     = useState(0);
-  const [showDetails, setShowDetails]   = useState(false);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
   const [paramsOpen, setParamsOpen] = useState(false);
   const { isConnected } = useUser();
@@ -349,18 +348,13 @@ export default function SimulationSection({
           {/* Barre d'en-tête (alignée comparateur) */}
           <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
             <div className="flex items-center gap-3">
+              {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
               <button
+                id="simulateur-pdf-btn"
                 onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
-                className={PDF_BTN}
+                className={`sr-only ${PDF_BTN}`}
               >
                 <FileText size={11} /> Exporter PDF
-              </button>
-              <button
-                onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-                className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
-              >
-                {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-                {showDetails ? 'Masquer détails' : 'Voir détails'}
               </button>
               <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
                 <Settings2 size={10} className="shrink-0" />
@@ -425,9 +419,6 @@ export default function SimulationSection({
                           ) : (
                             <span className="mt-1.5 invisible text-[8px]">—</span>
                           )}
-                        </div>
-                        <div className="h-[22px] flex items-center justify-center">
-                          <RetirementBadge quarters={r?.retirementQuarters ?? 0} regimeId={activeRegime} />
                         </div>
                       </div>
                     </th>
@@ -501,22 +492,30 @@ export default function SimulationSection({
                         );
                       })}
                     </tr>
-                    {showDetails && (
-                      <tr className="bg-slate-50/60 dark:bg-slate-800/30">
-                        <td className="px-5 py-1.5 border-r border-slate-100 dark:border-slate-800 text-[8px] text-slate-400 font-medium italic">Calcul</td>
-                        {simulations.map((yr, i) => {
-                          const r = yr.find((x: any) => x.id === activeRegime) as any;
-                          return (
-                            <td key={i} className="px-3 py-1.5 text-center">
-                              <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{r ? getDetailText(r, row.key, row.monthly) : ''}</span>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    )}
                   </React.Fragment>
                 );
               })}
+
+              {/* ── Ligne Trimestres retraite validés ── */}
+              <tr className="bg-white dark:bg-slate-900">
+                <td className="px-4 py-3 border-r border-slate-100 dark:border-slate-800 align-top">
+                  <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">
+                    Trimestres retraite<br />validés
+                  </div>
+                </td>
+                {simulations.map((yr, i) => {
+                  const r = yr.find((x: any) => x.id === activeRegime) as any;
+                  return (
+                    <td key={i} className="px-3 py-3 text-center">
+                      {r ? (
+                        <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={activeRegime} />
+                      ) : (
+                        <span className="text-slate-300 dark:text-slate-600">—</span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
 
               {/* ── Ligne Répartitions (alignée comparateur) ── */}
               <tr className="bg-slate-50/20 dark:bg-slate-900/10">
@@ -554,25 +553,6 @@ export default function SimulationSection({
 
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden">
-
-        {/* Contrôle mobile : boutons export (croissance + paramètres statut sont dans la barre du haut) */}
-        <div className="px-4 pt-3 pb-4 border-b dark:border-slate-800">
-          <div className="flex gap-2">
-            <button
-              onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-              className={`flex-1 ${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
-            >
-              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-              {showDetails ? 'Masquer détails' : 'Détails'}
-            </button>
-            <button
-              onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
-              className={PDF_BTN}
-            >
-              <FileBarChart2 size={12} /> PDF
-            </button>
-          </div>
-        </div>
 
         {/* Cartes années (scroll horizontal snap) */}
         <div
@@ -668,11 +648,6 @@ export default function SimulationSection({
                             ) : '—'}
                           </span>
                         </div>
-                        {showDetails && r && (
-                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
-                            {detailText}
-                          </p>
-                        )}
                       </div>
                     );
                   })}
@@ -793,50 +768,57 @@ export default function SimulationSection({
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <React.Fragment key={i}>
-                  <tr style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                    <td style={{ padding: '4px 7px', fontWeight: row.isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</td>
-                    {simulations.map((yr, j) => {
-                      const r = yr.find((x: any) => x.id === activeRegime) as any;
-                      let val: number | null = null;
-                      if (row.key === 'optimisations') {
-                        const lines = (r.lines as any[] | undefined) ?? [];
-                        const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
-                        const sum = lines
-                          .filter((l: any) => ids.includes(l.id))
-                          .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
-                        val = sum > 0 ? sum : null;
-                      } else {
-                        val = row.monthly ? r[row.key] / 12 : r[row.key];
-                      }
-                      if (row.key === 'portageCommission') {
-                        if (activeRegime !== 'Portage') val = null;
-                        else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
-                      }
-                      if (row.key === 'fees' && r.id === 'Micro') val = null;
-                      if (row.key === 'cotis' && r.id === 'SASU') val = null;
-                      if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
-                      return (
-                        <td key={j} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: row.isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: row.isFinal ? '#4f46e5' : 'inherit' }}>
-                          {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {showDetails && (
-                    <tr style={{ background: '#fafafa' }}>
-                      <td style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', fontStyle: 'italic' }}>Calcul</td>
-                      {simulations.map((yr, j) => {
-                        const r = yr.find((x: any) => x.id === activeRegime) as any;
-                        return (
-                          <td key={j} style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'pre-line', fontStyle: 'italic', textAlign: 'center' }}>
-                            {getDetailText(r, row.key, row.monthly)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  )}
-                </React.Fragment>
+                <tr
+                  key={i}
+                  style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}
+                >
+                  <td
+                    style={{
+                      padding: '4px 7px',
+                      fontWeight: row.isFinal ? 900 : 600,
+                      borderBottom: '1px solid #e2e8f0',
+                      fontSize: (row as any).bigAmount ? 10 : 9,
+                    }}
+                  >
+                    {row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}
+                  </td>
+                  {simulations.map((yr, j) => {
+                    const r = yr.find((x: any) => x.id === activeRegime) as any;
+                    let val: number | null = null;
+                    if (row.key === 'optimisations') {
+                      const lines = (r.lines as any[] | undefined) ?? [];
+                      const ids = ['indemnites_km', 'loyer_percu', 'avantages'];
+                      const sum = lines
+                        .filter((l: any) => ids.includes(l.id))
+                        .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
+                      val = sum > 0 ? sum : null;
+                    } else {
+                      val = row.monthly ? r[row.key] / 12 : r[row.key];
+                    }
+                    if (row.key === 'portageCommission') {
+                      if (activeRegime !== 'Portage') val = null;
+                      else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
+                    }
+                    if (row.key === 'fees' && r.id === 'Micro') val = null;
+                    if (row.key === 'cotis' && r.id === 'SASU') val = null;
+                    if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
+                    return (
+                      <td
+                        key={j}
+                        style={{
+                          padding: '4px 7px',
+                          textAlign: 'center',
+                          fontWeight: row.isFinal ? 900 : 'normal',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: (row as any).bigAmount ? 10 : 9,
+                          color: row.isFinal ? '#4f46e5' : 'inherit',
+                        }}
+                      >
+                        {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
+                      </td>
+                    );
+                  })}
+                </tr>
               ))}
             </tbody>
           </table>

@@ -77,8 +77,28 @@ export default function AmountTooltip({
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const triggerRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   const percentage = ca > 0 ? (Math.abs(amount) / ca) * 100 : 0;
+
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  };
+
+  const openTooltip = () => {
+    clearCloseTimeout();
+    setIsOpen(true);
+  };
+
+  const scheduleCloseTooltip = () => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsOpen(false);
+    }, 120);
+  };
 
   useEffect(() => {
     if (!isOpen || !triggerRef.current) return;
@@ -105,6 +125,13 @@ export default function AmountTooltip({
 
     setCoords({ top, left });
   }, [isOpen, position]);
+
+  // Nettoyage du timeout à l'unmount
+  useEffect(() => {
+    return () => {
+      clearCloseTimeout();
+    };
+  }, []);
 
   // Fermer au scroll
   useEffect(() => {
@@ -133,9 +160,12 @@ export default function AmountTooltip({
       <span
         ref={triggerRef}
         className="inline-flex items-center gap-1 cursor-help group"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-        onClick={() => setIsOpen((v) => !v)}
+        onMouseEnter={openTooltip}
+        onMouseLeave={scheduleCloseTooltip}
+        onClick={() => {
+          clearCloseTimeout();
+          setIsOpen((v) => !v);
+        }}
       >
         {children}
         <Info
@@ -149,6 +179,8 @@ export default function AmountTooltip({
           ref={tooltipRef}
           className="fixed z-[9999] w-[280px] bg-white dark:bg-slate-900 rounded-xl shadow-2xl shadow-slate-900/20 dark:shadow-black/40 border border-slate-200 dark:border-slate-700 p-4 animate-in fade-in-0 zoom-in-95 duration-150"
           style={{ top: coords.top, left: coords.left }}
+          onMouseEnter={openTooltip}
+          onMouseLeave={scheduleCloseTooltip}
         >
           {/* Header */}
           <div className="flex items-start gap-3">

@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, Info, Eye, EyeOff, Rocket, Settings2, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Info, Rocket, Settings2, CheckCircle, AlertCircle } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
@@ -121,7 +121,6 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 }
 
 export default function ComparisonTable({ sim }: { sim: any }) {
-  const [showDetails, setShowDetails] = useState(false);
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
   const [openParamsFor, setOpenParamsFor] = useState<string | null>(null);
@@ -175,7 +174,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
-    { label: 'Prél��vement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
+    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
     { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true },
     { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '+', color: 'text-emerald-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
@@ -273,31 +272,19 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         {/* Header bar */}
         <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-3xl border-b border-slate-200/80 dark:border-slate-700/50">
           <div className="flex items-center gap-3">
+            {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
             <button
+              id="comparateur-pdf-btn"
               onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
-              className={PDF_BTN}
+              className={`sr-only ${PDF_BTN}`}
             >
               <FileText size={11} /> Exporter PDF
-            </button>
-            <button
-              onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-              className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! dark:border-indigo-700! text-indigo-600! dark:text-indigo-400!' : ''}`}
-            >
-              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-              {showDetails ? 'Masquer détails' : 'Voir détails'}
             </button>
             <span className="hidden lg:flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 ml-2 border-l border-slate-200 dark:border-slate-700 pl-3">
               <Settings2 size={10} className="shrink-0" />
               Icone en haut à droite = paramètres spécifiques au statut
             </span>
           </div>
-          <p className="text-[9px] font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-[8px] font-bold text-emerald-700 dark:text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              4 trim.
-            </span>
-            = trimestres retraite validés · badge rouge si plafond micro dépassé
-          </p>
         </div>
         <table className="w-full border-separate border-spacing-0 table-fixed">
           <thead>
@@ -343,11 +330,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                         <span className="mt-1.5 invisible text-[8px]">—</span>
                       )}
                     </div>
-
-                    {/* Badge retraite — hauteur fixe pour alignement */}
-                    <div className="h-[22px] flex items-center justify-center">
-                      <RetirementBadge quarters={r.retirementQuarters} regimeId={r.id} />
-                    </div>
                   </div>
                 </th>
               ))}
@@ -358,61 +340,74 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               const isLast = idx === visibleRows.length - 1;
               const isFinal = (row as any).isFinal;
               return (
-                <React.Fragment key={idx}>
-                  <tr className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''}`}>
-                    <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
-                      <div className="font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wide leading-tight">{row.label}</div>
-                    </td>
-                    {regimes.map((r: any) => {
-                      const val = getDisplayValue(r, row);
-                      const detailText = getDetailText(r, row.key, row.div === 12);
-                      const tooltipColor = getTooltipColor(row.key);
-                      return (
-                        <td
-                          key={r.id}
-                          className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${(row as any).color || ''}`}
-                        >
-                          {(() => {
-                            if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
-                            const content = (
-                              <>
-                                {row.key === 'beforeTax' && (
-                                  <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">{getBeforeTaxRowLabel(r.id)}</div>
-                                )}
-                                <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
-                                  {(row as any).prefix} {fmt(val)}
-                                </span>
-                              </>
-                            );
-                            return (
-                              <AmountTooltip
-                                amount={val}
-                                ca={r.ca}
-                                detailText={detailText}
-                                label={row.label}
-                                color={tooltipColor}
-                              >
-                                {content}
-                              </AmountTooltip>
-                            );
-                          })()}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {showDetails && (
-                    <tr className="bg-slate-50/60 dark:bg-slate-800/30">
-                      <td className="px-5 py-1.5 border-r border-slate-100 dark:border-slate-800 text-[8px] text-slate-400 font-medium italic">Calcul</td>
-                      {regimes.map((r: any) => (
-                        <td key={r.id} className="px-3 py-1.5 text-center">
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium whitespace-pre-line">{getDetailText(r, row.key, row.div === 12)}</span>
-                        </td>
-                      ))}
-                    </tr>
-                  )}
-                </React.Fragment>
+                <tr
+                  key={idx}
+                  className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${
+                    isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''
+                  }`}
+                >
+                  <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
+                    <div className="font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wide leading-tight">
+                      {row.label}
+                    </div>
+                  </td>
+                  {regimes.map((r: any) => {
+                    const val = getDisplayValue(r, row);
+                    const detailText = getDetailText(r, row.key, row.div === 12);
+                    const tooltipColor = getTooltipColor(row.key);
+                    return (
+                      <td
+                        key={r.id}
+                        className={`px-3 py-3 text-center font-bold tabular-nums ${isFinal ? 'text-base' : 'text-sm'} ${
+                          (row as any).color || ''
+                        }`}
+                      >
+                        {(() => {
+                          if (val === null) return <span className="text-slate-300 dark:text-slate-600">—</span>;
+                          const content = (
+                            <>
+                              {row.key === 'beforeTax' && (
+                                <div className="text-[8px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-0.5">
+                                  {getBeforeTaxRowLabel(r.id)}
+                                </div>
+                              )}
+                              <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                {(row as any).prefix} {fmt(val)}
+                              </span>
+                            </>
+                          );
+                          return (
+                            <AmountTooltip
+                              amount={val}
+                              ca={r.ca}
+                              detailText={detailText}
+                              label={row.label}
+                              color={tooltipColor}
+                            >
+                              {content}
+                            </AmountTooltip>
+                          );
+                        })()}
+                      </td>
+                    );
+                  })}
+                </tr>
               );
             })}
+
+            {/* ── Ligne Trimestres retraite validés ── */}
+            <tr className="bg-white dark:bg-slate-900">
+              <td className="px-4 py-3 border-r dark:border-slate-800 align-top">
+                <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">
+                  Trimestres retraite<br />validés
+                </div>
+              </td>
+              {regimes.map((r: any) => (
+                <td key={r.id} className="px-3 py-3 text-center">
+                  <RetirementBadge quarters={r.retirementQuarters} regimeId={r.id} />
+                </td>
+              ))}
+            </tr>
 
             {/* ── Ligne Répartitions ── */}
             <tr className="bg-slate-50/20 dark:bg-slate-900/10">
@@ -525,15 +520,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => (isConnected ? setShowDetails(v => !v) : setShowConnectorModal(true))}
-              className={`${PDF_BTN} ${showDetails ? 'bg-indigo-50! dark:bg-indigo-900/30! border-indigo-300! text-indigo-600!' : ''}`}
-            >
-              {showDetails ? <EyeOff size={11} /> : <Eye size={11} />}
-              {showDetails ? 'Masquer' : 'Détails'}
-            </button>
-            <button
               onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
-              className={PDF_BTN}
+              id="comparateur-pdf-btn-mobile"
+              className={`sr-only ${PDF_BTN}`}
             >
               <FileText size={11} /> PDF
             </button>
@@ -624,11 +613,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                             )}
                           </span>
                         </div>
-                        {showDetails && (
-                          <p className="text-[8px] text-slate-400 dark:text-slate-500 italic font-medium px-3 pt-0.5 pb-1 whitespace-pre-line">
-                            {detailText}
-                          </p>
-                        )}
                       </div>
                     );
                   })}
@@ -723,31 +707,43 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </thead>
             <tbody>
               {visibleRows.map((row, i) => (
-                <React.Fragment key={i}>
-                  <tr style={{ background: (row as any).bigAmount ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}>
-                    <td style={{ padding: '4px 7px', fontWeight: (row as any).isFinal ? 900 : 600, borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9 }}>{row.label}</td>
-                    {regimes.map((r: any) => {
-                      const val = getDisplayValue(r, row);
-                      const sublabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : null;
-                      return (
-                        <td key={r.id} style={{ padding: '4px 7px', textAlign: 'center', fontWeight: (row as any).isFinal ? 900 : 'normal', borderBottom: showDetails ? 'none' : '1px solid #e2e8f0', fontSize: (row as any).bigAmount ? 10 : 9, color: (row as any).isFinal ? '#4f46e5' : 'inherit' }}>
-                          {sublabel ? <div style={{ fontSize: 7, color: '#94a3b8', marginBottom: 2 }}>{sublabel}</div> : null}
-                          {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/mois' : ''}`}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {showDetails && (
-                    <tr style={{ background: '#fafafa' }}>
-                      <td style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', fontStyle: 'italic' }}>Calcul</td>
-                      {regimes.map((r: any) => (
-                        <td key={r.id} style={{ padding: '2px 7px 5px', fontSize: 7, color: '#94a3b8', borderBottom: '1px solid #e2e8f0', whiteSpace: 'pre-line', fontStyle: 'italic', textAlign: 'center' }}>
-                          {getDetailText(r, row.key, row.div === 12)}
-                        </td>
-                      ))}
-                    </tr>
-                  )}
-                </React.Fragment>
+                <tr
+                  key={i}
+                  style={{ background: (row as any).bigAmount ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}
+                >
+                  <td
+                    style={{
+                      padding: '4px 7px',
+                      fontWeight: (row as any).isFinal ? 900 : 600,
+                      borderBottom: '1px solid #e2e8f0',
+                      fontSize: (row as any).bigAmount ? 10 : 9,
+                    }}
+                  >
+                    {row.label}
+                  </td>
+                  {regimes.map((r: any) => {
+                    const val = getDisplayValue(r, row);
+                    const sublabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : null;
+                    return (
+                      <td
+                        key={r.id}
+                        style={{
+                          padding: '4px 7px',
+                          textAlign: 'center',
+                          fontWeight: (row as any).isFinal ? 900 : 'normal',
+                          borderBottom: '1px solid #e2e8f0',
+                          fontSize: (row as any).bigAmount ? 10 : 9,
+                          color: (row as any).isFinal ? '#4f46e5' : 'inherit',
+                        }}
+                      >
+                        {sublabel ? (
+                          <div style={{ fontSize: 7, color: '#94a3b8', marginBottom: 2 }}>{sublabel}</div>
+                        ) : null}
+                        {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/mois' : ''}`}
+                      </td>
+                    );
+                  })}
+                </tr>
               ))}
             </tbody>
           </table>
