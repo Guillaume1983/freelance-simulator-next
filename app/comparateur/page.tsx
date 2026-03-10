@@ -18,8 +18,8 @@ export default function ComparateurPage() {
   useEffect(() => {
     const tjm = sim.state.tjm ?? 0;
     const days = sim.state.days ?? 0;
-    // Si TJM et jours sont à des valeurs "par défaut" ou trop basiques
-    const hasCustomSettings = tjm !== 500 || days !== 18;
+    // Si TJM et jours sont à des valeurs "par défaut"
+    const hasCustomSettings = tjm !== 400 || days !== 200;
     const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed');
     setShowSettingsBanner(!hasCustomSettings && !dismissed);
   }, [sim.state.tjm, sim.state.days]);

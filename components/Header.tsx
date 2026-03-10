@@ -284,12 +284,9 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
 
               <Link
                 href="/inscription"
-                className="hidden md:flex items-center gap-2 bg-indigo-600 text-white pl-4 pr-5 py-2 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap group"
+                className="hidden md:inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-black text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap"
               >
-                <span className="flex flex-col items-start">
-                  <span className="text-[11px] font-black">Créer un compte</span>
-                  <span className="text-[9px] font-medium text-indigo-200 group-hover:text-indigo-100">Gratuit · Sauvegarde auto</span>
-                </span>
+                Créer un compte
               </Link>
             </>
           )}

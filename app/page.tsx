@@ -36,20 +36,35 @@ export default function Home() {
               Portage, Micro, EURL IR, EURL IS, SASU — données certifiées Loi de Finances 2026.
             </p>
 
-            {/* CTA principal : Commencer par les réglages */}
-            <div className="mt-10 md:mt-14 flex flex-col items-center gap-4">
+            {/* CTA principal : carte paramètres dans le hero (style carte jaune) */}
+            <div className="mt-8 md:mt-10 flex flex-col items-center gap-5">
               <Link
                 href="/reglages"
-                className="group flex items-center gap-3 w-full sm:w-auto justify-center px-8 py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-black text-base shadow-xl hover:from-amber-300 hover:to-orange-400 transition-all hover:scale-[1.02] border-2 border-white/30"
+                className="w-full max-w-2xl text-left rounded-2xl bg-amber-50/90 dark:bg-amber-900/15 border border-amber-300/80 dark:border-amber-700/80 px-5 py-4 md:px-6 md:py-5 shadow-md hover:shadow-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all"
               >
-                <Settings className="w-6 h-6" />
-                <span>
-                  <span className="block text-base">Commencer par configurer mon profil</span>
-                  <span className="block text-[11px] font-bold opacity-80 mt-0.5">TJM, charges, situation — pour des résultats précis</span>
-                </span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
+                    <Settings className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="inline-flex items-center gap-2 mb-1">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.16em]">
+                        Étape recommandée
+                      </span>
+                    </div>
+                    <p className="text-sm md:text-base font-black text-slate-900 dark:text-white">
+                      Configurez votre profil freelance
+                    </p>
+                    <p className="mt-0.5 text-[12px] md:text-[13px] text-slate-700 dark:text-slate-200">
+                      TJM, jours travaillés, véhicule, charges professionnelles, situation fiscale…
+                      <span className="font-bold"> Ces paramètres sont utilisés dans toutes vos simulations et comparaisons.</span>
+                    </p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-amber-600 hidden sm:block" />
+                </div>
               </Link>
-              
+
+              {/* Raccourcis principaux */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full">
                 <Link
                   href="/comparateur"
@@ -78,33 +93,33 @@ export default function Home() {
             </div>
             
             <p className="mt-6 text-[11px] text-white/70 font-bold uppercase tracking-widest">
-              Configurez vos paramètres une fois, ils s&apos;appliquent à tous les outils.
+              Simulation basée sur la Loi de Finances 2026.
             </p>
           </div>
         </section>
 
-        {/* Bannière "Pourquoi configurer d'abord ?" */}
+        {/* Bannière compte : création de compte gratuite */}
         <section className="relative z-10 bg-gradient-to-r from-indigo-600 to-indigo-700 py-6">
           <div className="max-w-[1000px] mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-white">
                 <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                  <Sparkles className="w-6 h-6" />
+                  <Gift className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="font-black text-sm">Pourquoi configurer votre profil en premier ?</p>
+                  <p className="font-black text-sm">Créez un compte gratuit pour aller plus loin</p>
                   <p className="text-[13px] text-white/80 mt-0.5">
-                    Vos paramètres (TJM, jours, charges, situation fiscale) alimentent le comparateur ET le simulateur. 
-                    <span className="font-bold text-white"> Résultats personnalisés garantis.</span>
+                    Sauvegarde automatique de vos paramètres, export PDF de vos comparatifs et simulations.
+                    <span className="font-bold text-white"> Seule votre adresse email est demandée.</span>
                   </p>
                 </div>
               </div>
               <Link
-                href="/reglages"
+                href="/inscription"
                 className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-700 font-black text-[12px] uppercase tracking-wide hover:bg-indigo-50 transition-all"
               >
-                <Settings className="w-4 h-4" />
-                Configurer maintenant
+                <Sparkles className="w-4 h-4" />
+                Créer mon compte gratuit
               </Link>
             </div>
           </div>
@@ -113,38 +128,6 @@ export default function Home() {
         {/* Entrées principales */}
         <section className="relative z-10 bg-page-settings py-12 md:py-16">
           <div className="max-w-[1000px] mx-auto px-4 md:px-6">
-            {/* Carte paramètres mise en avant */}
-            <div className="mb-8">
-              <Link
-                href="/reglages"
-                className="block rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-2 border-amber-300 dark:border-amber-700 p-6 md:p-8 shadow-lg hover:shadow-xl hover:border-amber-400 dark:hover:border-amber-600 transition-all"
-              >
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shrink-0">
-                    <Settings className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wide">
-                        Étape recommandée
-                      </span>
-                    </div>
-                    <h3 className="font-black text-slate-900 dark:text-white text-lg">
-                      Configurez votre profil freelance
-                    </h3>
-                    <p className="mt-1 text-[14px] text-slate-600 dark:text-slate-400">
-                      TJM, nombre de jours travaillés, véhicule, charges professionnelles, situation familiale…
-                      <span className="font-bold text-slate-700 dark:text-slate-300"> Ces paramètres sont utilisés dans toutes vos simulations et comparaisons.</span>
-                    </p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 text-white font-black text-sm hover:bg-amber-600 transition-colors">
-                    Configurer
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </Link>
-            </div>
-
             {/* Ligne 1 : 3 cartes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6">
               <Link
@@ -185,11 +168,23 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Carte Guides */}
-            <div className="mt-6">
+            {/* Ligne 2 : 2 cartes centrées */}
+            <div className="flex flex-col sm:flex-row items-stretch justify-center gap-6 md:gap-6 mt-6 md:mt-6 max-w-[700px] mx-auto">
+              <Link
+                href="/reglages"
+                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-md transition-all block flex-1 min-w-0"
+              >
+                <div className="w-12 h-12 mx-auto rounded-xl bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3">
+                  <Settings className="w-6 h-6" />
+                </div>
+                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Paramètres</h3>
+                <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
+                  TJM, jours, véhicule, charges… Configurez votre profil pour les comparaisons et simulations.
+                </p>
+              </Link>
               <Link
                 href="/articles"
-                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition-all block"
+                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition-all block flex-1 min-w-0"
               >
                 <div className="w-12 h-12 mx-auto rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-3">
                   <BookOpen className="w-6 h-6" />
@@ -255,16 +250,13 @@ export default function Home() {
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">Gratuit pour toujours</span>
-                    <span className="text-slate-300 dark:text-slate-600">•</span>
-                    <Mail className="w-4 h-4 text-slate-400" />
-                    <span className="text-[12px] font-bold text-slate-500 dark:text-slate-400">Seul l&apos;email est demandé</span>
+                    <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">Compte recommandé</span>
                   </div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                    Prêt à optimiser votre stratégie fiscale ?
+                    Sauvegardez vos réglages et exportez vos simulations
                   </h3>
                   <p className="mt-2 text-[13px] text-slate-600 dark:text-slate-400">
-                    Rejoignez des milliers de freelances qui utilisent notre simulateur.
+                    Créez un compte pour retrouver facilement vos paramètres et générer des PDF à partager.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
