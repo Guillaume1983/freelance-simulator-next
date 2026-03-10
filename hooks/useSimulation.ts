@@ -8,8 +8,8 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export const useSimulation = () => {
   // --- Paramètres de production ---
-  const [tjm, setTjm] = useState(600);
-  const [days, setDays] = useState(210);
+  const [tjm, setTjm] = useState(400);
+  const [days, setDays] = useState(200);
 
   // --- Paramètres foyer & fiscalité ---
   const [nbAdultes, setNbAdultes] = useState<1 | 2>(1);

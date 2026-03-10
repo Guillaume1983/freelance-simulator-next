@@ -17,17 +17,20 @@ const STATUTS = [
 
 export default function SimulateurHubPage() {
   const sim = useSimulationContext();
-  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
+  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page
+  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const hasVisited = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
+    return !hasVisited && !dismissed;
+  });
 
-  // Afficher la bannière si les paramètres semblent être par défaut
+  // Resynchroniser avec userId et sessionStorage
   useEffect(() => {
-    const tjm = sim.state.tjm ?? 0;
-    const days = sim.state.days ?? 0;
-    // Si TJM et jours sont à des valeurs "par défaut"
-    const hasCustomSettings = tjm !== 400 || days !== 200;
+    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
     const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed-sim');
-    setShowSettingsBanner(!hasCustomSettings && !dismissed);
-  }, [sim.state.tjm, sim.state.days]);
+    setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
+  }, [sim.state.userId]);
 
   const dismissBanner = () => {
     setShowSettingsBanner(false);

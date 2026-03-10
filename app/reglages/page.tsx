@@ -123,6 +123,13 @@ export default function ReglagesPage() {
   const [user, setUser] = useState<User | null>(null);
   const [showAccountBanner, setShowAccountBanner] = useState(false);
 
+  // Marquer que l'utilisateur a visité la page paramètres (pour masquer les incitations sur accueil / comparateur / simulateur)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('has-visited-settings', 'true');
+    }
+  }, []);
+
   // Vérifier si l'utilisateur est connecté
   useEffect(() => {
     const supabase = createClient();

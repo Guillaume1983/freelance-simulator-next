@@ -12,17 +12,20 @@ import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
-  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
+  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page (sinon 1er rendu = false, puis effet = true)
+  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const hasVisited = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed');
+    return !hasVisited && !dismissed;
+  });
 
-  // Afficher la bannière si les paramètres semblent être par défaut
+  // Resynchroniser avec userId (contexte peut arriver après le 1er rendu) et avec sessionStorage
   useEffect(() => {
-    const tjm = sim.state.tjm ?? 0;
-    const days = sim.state.days ?? 0;
-    // Si TJM et jours sont à des valeurs "par défaut"
-    const hasCustomSettings = tjm !== 400 || days !== 200;
+    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
     const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed');
-    setShowSettingsBanner(!hasCustomSettings && !dismissed);
-  }, [sim.state.tjm, sim.state.days]);
+    setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
+  }, [sim.state.userId]);
 
   const dismissBanner = () => {
     setShowSettingsBanner(false);

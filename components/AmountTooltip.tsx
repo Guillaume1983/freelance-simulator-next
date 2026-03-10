@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type ReactNode } from 'react';
+import { Info } from 'lucide-react';
 import { fmtEur } from '@/lib/utils';
 
 interface AmountTooltipProps {
@@ -74,30 +75,12 @@ export default function AmountTooltip({
 }: AmountTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
-  const triggerRef = useRef<HTMLSpanElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const closeTimeoutRef = useRef<number | null>(null);
 
   const percentage = ca > 0 ? (Math.abs(amount) / ca) * 100 : 0;
 
-  const clearCloseTimeout = () => {
-    if (closeTimeoutRef.current !== null) {
-      window.clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-  };
-
-  const openTooltip = () => {
-    clearCloseTimeout();
-    setIsOpen(true);
-  };
-
-  const scheduleCloseTooltip = () => {
-    clearCloseTimeout();
-    closeTimeoutRef.current = window.setTimeout(() => {
-      setIsOpen(false);
-    }, 120);
-  };
+  const toggleTooltip = () => setIsOpen((v) => !v);
 
   useEffect(() => {
     if (!isOpen || !triggerRef.current) return;
@@ -125,13 +108,6 @@ export default function AmountTooltip({
     setCoords({ top, left });
   }, [isOpen, position]);
 
-  // Nettoyage du timeout à l'unmount
-  useEffect(() => {
-    return () => {
-      clearCloseTimeout();
-    };
-  }, []);
-
   // Fermer au scroll
   useEffect(() => {
     if (!isOpen) return;
@@ -156,17 +132,17 @@ export default function AmountTooltip({
 
   return (
     <>
-      <span
-        ref={triggerRef}
-        className="inline-flex cursor-help group"
-        onMouseEnter={openTooltip}
-        onMouseLeave={scheduleCloseTooltip}
-        onClick={() => {
-          clearCloseTimeout();
-          setIsOpen((v) => !v);
-        }}
-      >
+      <span className="inline-flex items-center gap-1.5">
         {children}
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={toggleTooltip}
+          className="w-5 h-5 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 border border-indigo-300 dark:border-indigo-600 transition-colors shrink-0"
+          aria-label="Détail du calcul"
+        >
+          <Info className="w-3 h-3" strokeWidth={2.5} />
+        </button>
       </span>
 
       {isOpen && coords && (
@@ -174,8 +150,6 @@ export default function AmountTooltip({
           ref={tooltipRef}
           className="fixed z-[9999] w-[280px] bg-white dark:bg-slate-900 rounded-xl shadow-2xl shadow-slate-900/20 dark:shadow-black/40 border border-slate-200 dark:border-slate-700 p-4 animate-in fade-in-0 zoom-in-95 duration-150"
           style={{ top: coords.top, left: coords.left }}
-          onMouseEnter={openTooltip}
-          onMouseLeave={scheduleCloseTooltip}
         >
           {/* Header */}
           <div className="flex items-start gap-3">

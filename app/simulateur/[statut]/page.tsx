@@ -8,7 +8,7 @@ import SimulationSection from '@/components/SimulationSection';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
-import { ArrowLeft, Briefcase, Store, Building2, Building, Rocket, Settings } from 'lucide-react';
+import { ArrowLeft, Briefcase, Store, Building2, Building, Rocket, Settings, Sparkles, X } from 'lucide-react';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage': '#6366f1',
@@ -44,6 +44,28 @@ export default function SimulateurStatutPage() {
   const slug = (params?.statut as string)?.toLowerCase() ?? '';
   const statutId = STATUT_SLUG_TO_ID[slug];
   const [activeRegime, setActiveRegimeState] = useState(statutId ?? 'Portage');
+  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page (ex. comparateur → simulation)
+  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const hasVisited = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
+    return !hasVisited && !dismissed;
+  });
+
+  // Resynchroniser avec userId et sessionStorage
+  useEffect(() => {
+    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
+    const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed-sim');
+    const sim = ctx.sim ?? ctx;
+    setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
+  }, [(ctx.sim ?? ctx).state.userId]);
+
+  const dismissBanner = () => {
+    setShowSettingsBanner(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('settings-banner-dismissed-sim', 'true');
+    }
+  };
 
   const backLink = useMemo(() => {
     if (searchParams.get('from') === 'comparateur') {
@@ -90,6 +112,46 @@ export default function SimulateurStatutPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
+      {/* Bannière d'encouragement à configurer — mêmes conditions que comparateur / hub simulateur */}
+      {showSettingsBanner && (
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-black text-sm">
+                    Pour des résultats précis, configurez d&apos;abord votre profil !
+                  </p>
+                  <p className="text-[12px] opacity-90">
+                    TJM, charges, véhicule, situation fiscale — vos paramètres alimentent toutes les simulations.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href={`/reglages?from=simulateur/${slug}`}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-slate-900 font-black text-[11px] uppercase tracking-wide hover:bg-slate-100 transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  Configurer
+                </Link>
+                <button
+                  type="button"
+                  onClick={dismissBanner}
+                  className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           <Link
