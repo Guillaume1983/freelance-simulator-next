@@ -3,12 +3,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LineChart, Eye, EyeOff, ArrowRight, Check } from 'lucide-react';
-import Header from '@/components/Header';
 import { createClient } from '@/lib/supabase/client';
 
 export default function InscriptionPage() {
   const router = useRouter();
-  const [isDark, setIsDark] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [form, setForm] = useState({ prenom: '', nom: '', email: '', password: '', confirm: '' });
@@ -71,11 +69,8 @@ export default function InscriptionPage() {
   ];
 
   return (
-    <div className={isDark ? 'dark' : ''}>
-      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
-        <Header isDark={isDark} setIsDark={setIsDark} />
-
-        <div className="max-w-[1100px] mx-auto px-4 md:px-6 py-12 md:py-20 flex flex-col md:flex-row items-center gap-12 md:gap-16">
+    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
+      <div className="max-w-[1100px] mx-auto px-4 md:px-6 py-12 md:py-20 flex flex-col md:flex-row items-center gap-12 md:gap-16">
 
           {/* Panneau gauche — bénéfices */}
           <div className="flex-1 hidden md:flex flex-col gap-8">
@@ -266,7 +261,6 @@ export default function InscriptionPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
