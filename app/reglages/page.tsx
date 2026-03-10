@@ -14,6 +14,10 @@ import {
   ArrowLeft,
   ChevronRight,
   Building2,
+  Save,
+  FileDown,
+  Gift,
+  X,
 } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ExpandPanels from '@/components/ExpandPanels';
@@ -21,6 +25,8 @@ import Footer from '@/components/Footer';
 import { cn } from '@/lib/utils';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import { getIK } from '@/lib/financial/rates';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 const TABS = [
   {
@@ -114,6 +120,28 @@ export default function ReglagesPage() {
   const ctx = useSimulationContext();
   const sim = ctx.sim ?? ctx;
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>('activite');
+  const [user, setUser] = useState<User | null>(null);
+  const [showAccountBanner, setShowAccountBanner] = useState(false);
+
+  // Vérifier si l'utilisateur est connecté
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      // Afficher la bannière si non connecté et pas déjà fermée
+      if (!user) {
+        const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('account-banner-dismissed');
+        setShowAccountBanner(!dismissed);
+      }
+    });
+  }, []);
+
+  const dismissAccountBanner = () => {
+    setShowAccountBanner(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('account-banner-dismissed', 'true');
+    }
+  };
 
   useEffect(() => {
     const panel = searchParams.get('panel');
@@ -230,6 +258,56 @@ export default function ReglagesPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
+      {/* Bannière encouragement création de compte */}
+      {!user && showAccountBanner && (
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-black text-sm flex items-center gap-2">
+                    Créez un compte gratuit pour sauvegarder vos paramètres
+                    <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-400 text-emerald-900 text-[10px] font-black uppercase">
+                      100% Gratuit
+                    </span>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 mt-1.5 text-[12px] text-white/80">
+                    <span className="flex items-center gap-1.5">
+                      <Save className="w-3.5 h-3.5" />
+                      Sauvegarde automatique
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <FileDown className="w-3.5 h-3.5" />
+                      Export PDF
+                    </span>
+                    <span className="text-white/60">•</span>
+                    <span className="text-white/70">Seul l&apos;email est demandé</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                <Link
+                  href="/inscription"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-indigo-700 font-black text-[11px] uppercase tracking-wide hover:bg-indigo-50 transition-colors"
+                >
+                  Créer mon compte
+                </Link>
+                <button
+                  type="button"
+                  onClick={dismissAccountBanner}
+                  className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">

@@ -1,16 +1,35 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ComparisonTable from '@/components/ComparisonTable';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
-import { ArrowLeft, BarChart3, TrendingUp, Settings } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } from 'lucide-react';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
+  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
+
+  // Afficher la bannière si les paramètres semblent être par défaut
+  useEffect(() => {
+    const tjm = sim.state.tjm ?? 0;
+    const days = sim.state.days ?? 0;
+    // Si TJM et jours sont à des valeurs "par défaut" ou trop basiques
+    const hasCustomSettings = tjm !== 500 || days !== 18;
+    const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed');
+    setShowSettingsBanner(!hasCustomSettings && !dismissed);
+  }, [sim.state.tjm, sim.state.days]);
+
+  const dismissBanner = () => {
+    setShowSettingsBanner(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('settings-banner-dismissed', 'true');
+    }
+  };
 
   const handleExportPdf = () => {
     if (typeof document === 'undefined') return;
@@ -19,6 +38,46 @@ export default function ComparateurPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
+      {/* Bannière d'encouragement à configurer */}
+      {showSettingsBanner && (
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/30 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="font-black text-sm">
+                    Personnalisez vos résultats !
+                  </p>
+                  <p className="text-[12px] opacity-90">
+                    Configurez votre TJM, charges et situation pour un comparatif adapté à votre profil.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/reglages?from=comparateur"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-slate-900 font-black text-[11px] uppercase tracking-wide hover:bg-slate-100 transition-colors"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  Configurer
+                </Link>
+                <button
+                  type="button"
+                  onClick={dismissBanner}
+                  className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+                  aria-label="Fermer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
             <Link

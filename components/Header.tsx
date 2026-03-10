@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, Settings, BarChart3, TrendingUp, BookOpen, Wrench } from 'lucide-react';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, Settings, BarChart3, TrendingUp, BookOpen, Wrench, Gift } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { SaveStatus } from '@/hooks/useSimulation';
@@ -270,7 +270,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               )}
             </div>
           ) : (
-            /* ── NON CONNECTÉ ── */
+            /* ── NON CONNECTÉ — avec mise en avant des avantages ── */
             <>
               <div className="hidden lg:flex items-center gap-4">
                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
@@ -284,9 +284,12 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
 
               <Link
                 href="/inscription"
-                className="hidden md:block bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap"
+                className="hidden md:flex items-center gap-2 bg-indigo-600 text-white pl-4 pr-5 py-2 rounded-xl font-800 text-[11px] shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all whitespace-nowrap group"
               >
-                S&apos;inscrire
+                <span className="flex flex-col items-start">
+                  <span className="text-[11px] font-black">Créer un compte</span>
+                  <span className="text-[9px] font-medium text-indigo-200 group-hover:text-indigo-100">Gratuit · Sauvegarde auto</span>
+                </span>
               </Link>
             </>
           )}
@@ -380,13 +383,33 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
                 >
                   Se connecter
                 </Link>
-                <div className="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800">
+                  {/* Avantages du compte */}
+                  <div className="mb-3 px-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-2">
+                      Créer un compte gratuit
+                    </p>
+                    <ul className="space-y-1.5">
+                      <li className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <Check size={12} className="text-emerald-500 shrink-0" />
+                        <span>Sauvegarde automatique des paramètres</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <Check size={12} className="text-emerald-500 shrink-0" />
+                        <span>Export PDF de vos simulations</span>
+                      </li>
+                      <li className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <Check size={12} className="text-emerald-500 shrink-0" />
+                        <span>Seul l&apos;email est demandé</span>
+                      </li>
+                    </ul>
+                  </div>
                   <Link
                     href="/inscription"
-                    className="block w-full bg-indigo-600 text-white py-2.5 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-center"
+                    className="block w-full bg-indigo-600 text-white py-3 rounded-xl font-800 text-sm shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all text-center"
                     onClick={() => setMenuOpen(false)}
                   >
-                    S&apos;inscrire
+                    Créer mon compte gratuit
                   </Link>
                 </div>
               </>

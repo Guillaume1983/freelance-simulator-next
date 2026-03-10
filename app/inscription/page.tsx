@@ -63,9 +63,11 @@ export default function InscriptionPage() {
   };
 
   const perks = [
-    'Simulation complète des 5 régimes fiscaux 2026',
-    'Sauvegarde automatique de vos paramètres',
-    'Accès gratuit, sans engagement',
+    { text: 'Sauvegarde automatique de vos paramètres', highlight: true },
+    { text: 'Export PDF de vos simulations et comparatifs', highlight: true },
+    { text: 'Simulation complète des 5 régimes fiscaux 2026', highlight: false },
+    { text: 'Accès 100% gratuit, sans engagement', highlight: false },
+    { text: 'Seule une adresse email est requise', highlight: false },
   ];
 
   return (
@@ -97,22 +99,35 @@ export default function InscriptionPage() {
               </p>
             </div>
 
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {perks.map(p => (
-                <li key={p} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-indigo-600" />
+                <li key={p.text} className={`flex items-start gap-3 ${p.highlight ? 'bg-indigo-50 dark:bg-indigo-900/20 -mx-3 px-3 py-2 rounded-xl' : ''}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${p.highlight ? 'bg-indigo-600' : 'bg-indigo-100 dark:bg-indigo-900/40'}`}>
+                    <Check size={11} className={p.highlight ? 'text-white' : 'text-indigo-600'} />
                   </div>
-                  <span className="text-[13px] font-bold text-slate-700 dark:text-slate-300">{p}</span>
+                  <span className={`text-[13px] font-bold ${p.highlight ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'}`}>{p.text}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-5 flex items-center gap-4">
-              <span className="text-2xl">📊</span>
-              <div>
-                <p className="text-[11px] font-black text-slate-700 dark:text-slate-200">Données certifiées</p>
-                <p className="text-[11px] text-slate-400 font-medium">Loi de Finances 2026</p>
+            <div className="space-y-3">
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[12px] font-black text-emerald-700 dark:text-emerald-300">Vos données restent privées</p>
+                  <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">Aucune information personnelle collectée, seulement votre email</p>
+                </div>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-4">
+                <span className="text-2xl">📊</span>
+                <div>
+                  <p className="text-[11px] font-black text-slate-700 dark:text-slate-200">Données certifiées</p>
+                  <p className="text-[11px] text-slate-400 font-medium">Loi de Finances 2026</p>
+                </div>
               </div>
             </div>
           </div>
