@@ -47,7 +47,7 @@ export default function Home() {
               Comparez et simulez votre revenu net en freelance
             </h1>
             <p className="mt-4 text-lg md:text-xl text-white/90 font-medium leading-snug drop-shadow-md max-w-2xl mx-auto">
-              Portage, Micro, EURL IR, EURL IS, SASU — données certifiées Loi de Finances 2026.
+              Portage, Micro, EURL IR, EURL IS, SASU — simulations indicatives basées sur les barèmes 2026. Pour une décision finale, faites valider par un expert-comptable.
             </p>
 
             {/* CTA principal : carte paramètres dans le hero — uniquement si non connecté et valeurs par défaut */}

@@ -38,6 +38,9 @@ export default function OutilsHubPage() {
               <p className="mt-1 text-slate-500 dark:text-slate-400">
                 Calculatrices et simulateurs pour freelance et création d’entreprise.
               </p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                Outils fournis à titre indicatif : ils ne remplacent pas un avis fiscal, social ou juridique adapté à votre situation.
+              </p>
             </div>
           </div>
         </div>

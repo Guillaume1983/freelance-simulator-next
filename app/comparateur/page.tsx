@@ -123,6 +123,9 @@ export default function ComparateurPage() {
                   <p className="mt-1 text-slate-500 dark:text-slate-400">
                     Comparez les 5 statuts freelance en temps réel
                   </p>
+                  <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
+                    Résultats estimatifs et pédagogiques, basés sur des hypothèses simplifiées et les barèmes 2026. Ne remplace pas un conseil personnalisé.
+                  </p>
                 </div>
                 <Link
                   href="/simulateur"
