@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { SimulationProvider } from '@/context/SimulationContext';
 import AppShell from '@/components/AppShell';
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AppShell>{children}</AppShell>
           <ChatBot />
         </SimulationProvider>
+        <Analytics />
       </body>
     </html>
   );
