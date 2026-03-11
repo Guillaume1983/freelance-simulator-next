@@ -33,6 +33,10 @@ export type CitySize = 'petite' | 'moyenne' | 'grande';
 
 export const SEUIL_TRIMESTRE_RETRAITE = 1800;
 
-/* ── Plafonds Micro 2026 ── */
-export const PLAFOND_MICRO_BNC = 77_700;
-export const PLAFOND_MICRO_BIC = 188_700;
+/** Taux de commission portage (%), valeur par défaut dans Réglages. */
+export const DEFAULT_PORTAGE_COMM = 5;
+
+/* ── Plafonds Micro 2026 (URSSAF autoentrepreneur, actualité du 20/02/2026) ── */
+// 203 100 € pour les activités de vente / hébergement (BIC) et 83 600 € pour les prestations de services (BIC/BNC).
+export const PLAFOND_MICRO_BNC = 83_600;
+export const PLAFOND_MICRO_BIC = 203_100;

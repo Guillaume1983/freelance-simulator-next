@@ -16,13 +16,20 @@ export const RATES_2026 = {
     ],
   },
   micro: {
-    BNC:          { cotis: 0.211, abattement: 0.34, pl: 0.022 },
+    // Micro-BNC : taux 2026 URSSAF ~25,6 % (hors CFP) + PL éventuel
+    BNC:          { cotis: 0.256, abattement: 0.34, pl: 0.022 },
+    // Micro-BIC services : ~21,2 % de cotisations sociales
     BIC_SERVICE:  { cotis: 0.212, abattement: 0.50, pl: 0.017 },
+    // Micro-BIC commerce : ~12,3 % de cotisations sociales
     BIC_COMMERCE: { cotis: 0.123, abattement: 0.71, pl: 0.010 },
-    acre: 0.5,
+    // ACRE micro : exonération ramenée de 50 % à 25 % au 1ᵉʳ juillet 2026 → on modélise un taux "ACRE"
+    // comme 75 % du taux normal (réforme 2026-69). Simplification : taux constant sur l'année 1.
+    acre: 0.75,
   },
-  portage: { cotis: 0.45, acre: 0.5 },
-  eurlIs: { cotis: 0.45, acre: 0.5 }, // ACRE : exonération 50 % cotisations an 1
+  // Cotisations assimilé salarié (SASU / Portage, ordre 45 % charges patronales)
+  // ACRE : exonération ramenée de 50 % à 25 % → on passe de 0,5 à 0,75 (on paie 75 % du taux).
+  portage: { cotis: 0.45, acre: 0.75 },
+  eurlIs: { cotis: 0.45, acre: 0.75 }, // ACRE : ~25 % d'exonération de cotisations an 1 (hors CSG/CRDS)
   is: { taux: 0.25 },
   /** SASU / PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
   isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
@@ -99,13 +106,14 @@ export function computeTNSCotisations(benefice: number, acreActive = false): TNS
   const cotisHorsCsg = retBase + retCompl + invalDeces + maladie + allocFam + formation;
 
   if (acreActive) {
-    // ACRE : réduction ~50 % sur toutes les cotisations hors CSG/CRDS
-    const cotisAcre = cotisHorsCsg * 0.5;
+    // ACRE : depuis 2026-69, exonération ramenée de 50 % à 25 %.
+    // On modélise une réduction globale à 25 % ≈ on paie 75 % des cotisations hors CSG/CRDS.
+    const cotisAcre = cotisHorsCsg * 0.75;
     return {
       total: cotisAcre + csgDed + csgNonDed,
       deductible: cotisAcre + csgDed,
       detail: [
-        { label: 'Cotisations hors CSG/CRDS (ACRE −50 %)', amount: cotisAcre },
+        { label: 'Cotisations hors CSG/CRDS (ACRE ~−25 %)', amount: cotisAcre },
         { label: 'CSG déductible 6,8 %', amount: csgDed },
         { label: 'CSG non-déductible + CRDS 3,4 %', amount: csgNonDed },
       ],

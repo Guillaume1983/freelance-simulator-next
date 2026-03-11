@@ -2,6 +2,7 @@
 import React, { useRef, useMemo, useState } from 'react';
 
 import { useReactToPrint } from 'react-to-print';
+import { DEFAULT_PORTAGE_COMM } from '@/lib/constants';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
@@ -44,7 +45,7 @@ const PROJECTION_ANALYSIS: Record<string, { forts: string[]; vigilance: string[]
       'Protection chômage (ARE) qui sécurise les années de croissance incertaine.',
     ],
     vigilance: [
-      'Les frais de gestion (5–10 % du CA) pèsent sur le net à long terme.',
+      'Les frais de gestion (taux paramétrable dans Réglages) pèsent sur le net à long terme.',
       'Peu de marge de manœuvre pour capitaliser de la trésorerie en société.',
     ],
   },
@@ -605,7 +606,7 @@ export default function SimulationSection({
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
                   {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage'
-                    ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE −50% cotis</span>
+                    ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE ~−25% cotis</span>
                     : i > 0
                       ? <span className="text-[8px] text-slate-400 font-bold mt-0.5">+CFE</span>
                       : null
@@ -679,13 +680,13 @@ export default function SimulationSection({
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
                 <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
-                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année (hors CSG/CRDS)</li>
-                  <li>IR : barème progressif 2026, parts fiscales du foyer</li>
-                  <li>IK : barème fiscal annuel, remboursés net et déductibles</li>
-                  <li>Loyer perçu : charge société, revenu imposable pour le foyer</li>
-                  <li>Micro : plafond 77 700 € en BNC (dépassement = sortie du régime)</li>
-                  <li>Portage : frais de gestion inclus (ordre 5–10 % du CA)</li>
-                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes</li>
+                  <li>ACRE : allègement ~25% des cotisations TNS/Micro la 1re année (hors CSG/CRDS), conformément au décret 2026-69 (modélisation simplifiée, sans dégressivité selon le revenu).</li>
+                  <li>Micro : taux 2026 URSSAF (~12,3% BIC commerce, ~21,2% BIC services, ~25,6% BNC) et plafonds (83 600 € pour les prestations de services BIC/BNC et 203 100 € pour les activités de vente / hébergement).</li>
+                  <li>IR : barème progressif 2026, parts fiscales du foyer.</li>
+                  <li>IK : barème fiscal annuel, remboursés net et déductibles.</li>
+                  <li>Loyer perçu : charge société, revenu imposable pour le foyer.</li>
+                  <li>Portage : frais de gestion au taux paramétrable (Réglages, valeur par défaut : {DEFAULT_PORTAGE_COMM} %).</li>
+                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes.</li>
                 </ul>
               </div>
             </div>
@@ -825,7 +826,7 @@ export default function SimulationSection({
           {/* Analyse */}
           {(() => {
             const analysis: Record<string, { forts: string[]; vigilance: string }> = {
-              Portage:  { forts: ['Accès au chômage (ARE) en fin de mission','Protection sociale complète (régime salarié)','Zéro gestion administrative'], vigilance: "Les frais de gestion (5–15 % du CA, selon le contrat) réduisent directement votre net." },
+              Portage:  { forts: ['Accès au chômage (ARE) en fin de mission','Protection sociale complète (régime salarié)','Zéro gestion administrative'], vigilance: "Les frais de gestion (taux paramétrable dans Réglages) réduisent directement votre net." },
               Micro:    { forts: ['Création instantanée, formalités nulles','Comptabilité ultra simplifiée','Charges proportionnelles au CA réel'], vigilance: "Plafond de CA à 77 700 € en BNC. Pas de déduction des charges réelles." },
               'EURL IR':{ forts: ['Déduction des charges professionnelles réelles','IR progressif : avantageux si revenus modérés','Structure souple'], vigilance: "Cotisations TNS calculées selon le barème réel (URSSAF/CIPAV). Comptabilité obligatoire." },
               'EURL IS':{ forts: ["Bénéfice non versé en salaire taxé à l'IS 25 %","Pilotage précis de la part en salaire TNS vs capitalisation en société","Création d’une trésorerie de société mobilisable plus tard"], vigilance: "IS 25 % sur le bénéfice restant + impôt sur le revenu sur le salaire TNS. Comptabilité exigeante." },

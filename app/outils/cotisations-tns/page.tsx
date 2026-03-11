@@ -44,7 +44,7 @@ export default function CotisationsTNSPage() {
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
           <div className="px-6 py-5 bg-gradient-to-r from-slate-500 to-slate-600 text-white">
             <h2 className="text-xl font-bold">Total cotisations</h2>
-            <p className="text-white/80 text-sm mt-1">{acreActive ? 'An 1 avec ACRE (−50 % hors CSG/CRDS)' : 'Sans ACRE'}</p>
+            <p className="text-white/80 text-sm mt-1">{acreActive ? 'An 1 avec ACRE (~−25 % hors CSG/CRDS)' : 'Sans ACRE'}</p>
             <p className="text-3xl font-black mt-4 tabular-nums">{Math.round(result.total).toLocaleString('fr-FR')} €</p>
             <p className="text-sm mt-1">Dont déductibles IR : {Math.round(result.deductible).toLocaleString('fr-FR')} €</p>
           </div>
@@ -67,7 +67,7 @@ export default function CotisationsTNSPage() {
                 onChange={(e) => setAcreActive(e.target.checked)}
                 className="rounded border-slate-300"
               />
-              <span className="font-medium text-slate-700 dark:text-slate-300">An 1 avec ACRE (réduction ~50 % hors CSG/CRDS)</span>
+              <span className="font-medium text-slate-700 dark:text-slate-300">An 1 avec ACRE (réduction ~25 % hors CSG/CRDS)</span>
             </label>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border-collapse">

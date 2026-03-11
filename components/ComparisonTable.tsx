@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { FileText, Info } from 'lucide-react';
-import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
+import { DEFAULT_PORTAGE_COMM, PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
 import { useUser } from '@/hooks/useUser';
@@ -525,13 +525,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hypothèses de calcul</span>
                 <ul className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-500 dark:text-slate-400 list-disc pl-4">
-                  <li>ACRE : allègement ~50% cotisations TNS/Micro la 1re année (hors CSG/CRDS)</li>
-                  <li>IR : barème progressif 2026, parts fiscales du foyer</li>
-                  <li>IK : barème fiscal annuel, remboursés net et déductibles</li>
-                  <li>Loyer perçu : charge société, revenu imposable pour le foyer</li>
-                  <li>Micro : plafond 77 700 € en BNC (dépassement = sortie du régime)</li>
-                  <li>Portage : frais de gestion inclus (ordre 5–10 % du CA)</li>
-                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes</li>
+                  <li>ACRE : allègement ~25% des cotisations TNS/Micro la 1re année (hors CSG/CRDS), conformément au décret 2026-69 (modélisation simplifiée, sans dégressivité selon le revenu).</li>
+                  <li>Micro : taux 2026 URSSAF (~12,3% BIC commerce, ~21,2% BIC services, ~25,6% BNC) et plafonds (83 600 € pour les prestations de services BIC/BNC et 203 100 € pour les activités de vente / hébergement).</li>
+                  <li>IR : barème progressif 2026, parts fiscales du foyer.</li>
+                  <li>IK : barème fiscal annuel, remboursés net et déductibles.</li>
+                  <li>Loyer perçu : charge société, revenu imposable pour le foyer.</li>
+                  <li>Portage : frais de gestion au taux paramétrable (Réglages, valeur par défaut : {DEFAULT_PORTAGE_COMM} %).</li>
+                  <li>EURL IS : IS 25% sur bénéfice non versé. SASU : IS puis PFU 30% sur dividendes.</li>
                 </ul>
               </div>
             </div>

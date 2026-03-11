@@ -17,7 +17,7 @@ const regimeData: Record<string, { forts: string[]; vigilance: string }> = {
       'Protection sociale complète (régime salarié)',
       'Zéro gestion administrative',
     ],
-    vigilance: "Les frais de gestion (5–10 % du CA) réduisent directement votre net. À comparer avec le gain en tranquillité administrative.",
+    vigilance: "Les frais de gestion (taux paramétrable dans Réglages) réduisent directement votre net. À comparer avec le gain en tranquillité administrative.",
   },
   Micro: {
     forts: [

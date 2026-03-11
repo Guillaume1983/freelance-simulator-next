@@ -27,7 +27,8 @@ export default function ACREPage() {
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">ACRE</h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Aide aux créateurs et repreneurs d’entreprises — réduction d’environ 50 % des cotisations la 1ʳᵉ année (hors CSG/CRDS).
+                Aide aux créateurs et repreneurs d’entreprises — depuis le décret 2026-69, exonération partielle d’environ 25 % des
+                cotisations la 1ʳᵉ année (hors CSG/CRDS), modélisée ici de façon simplifiée.
               </p>
             </div>
           </div>
@@ -54,7 +55,8 @@ export default function ACREPage() {
               className="w-full max-w-xs px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
             />
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Avec ACRE : vous payez environ 50 % de ce montant (hors CSG/CRDS non réductibles). L’ACRE ne s’applique pas au portage salarial ni aux assimilés salariés.
+              Avec ACRE : vous payez environ 75 % de ce montant (soit ~25 % d&apos;exonération, hors CSG/CRDS non réductibles).
+              L’ACRE ne s’applique pas au portage salarial ni aux assimilés salariés.
             </p>
             <p className="text-sm">
               <a

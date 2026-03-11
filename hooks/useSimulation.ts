@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { CHARGES_CATALOG } from '@/lib/constants';
+import { CHARGES_CATALOG, DEFAULT_PORTAGE_COMM } from '@/lib/constants';
 import { calculateRegimes, computeTaxParts, type CitySize } from '@/lib/projections';
 
 export { CHARGES_CATALOG };
@@ -32,7 +32,7 @@ export const useSimulation = () => {
   const [materielAnnuel, setMaterielAnnuel] = useState(0);
 
   // --- Portage ---
-  const [portageComm, setPortageComm] = useState(0);
+  const [portageComm, setPortageComm] = useState(DEFAULT_PORTAGE_COMM);
 
   // --- Paramètres par statut ---
   const [typeActiviteMicro, setTypeActiviteMicro] = useState<'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'>('BNC');
