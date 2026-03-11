@@ -104,11 +104,36 @@ export function getDetailTextFromLines(
       return r.id === 'Micro' ? `CA × ${tauxMicro[typeMicro]} (micro ${typeMicro})` : r.id === 'Portage' ? 'Base nette × 45 %' : r.id === 'EURL IR' ? '(CA − Charges) × ~40 % (TNS)' : r.id === 'EURL IS' ? 'Salaire net × 45 %' : 'IS 20 % (inclus)';
     }
     case 'beforeTax': {
-      const line = getLine('portage_remuneration') ?? getLine('micro_remuneration') ?? getLine('eurl_ir_remuneration') ?? getLine('eurl_is_remuneration') ?? getLine('sasu_dividendes');
+      // CAS SPÉCIFIQUES (EURL IS / SASU) : on ignore volontairement line.formula
+      // pour pouvoir expliquer clairement la CFE et le lien avec le résultat société.
+      if (r.id === 'EURL IS') {
+        const cfe = getLine('eurl_is_cfe')?.amount ?? 0;
+        const baseText = `Base avant impôt = salaire net du dirigeant (part du résultat société affectée au salaire).`;
+        return monthly12(
+          cfe > 0
+            ? `${baseText}\nCFE annuelle prise en compte dans les charges de la société : ${fmt(cfe)}.`
+            : baseText
+        );
+      }
+      if (r.id === 'SASU') {
+        const cfe = getLine('sasu_cfe')?.amount ?? 0;
+        const baseText = `Base avant impôt = dividendes bruts.\nDividendes bruts = résultat après IS × % distribué.`;
+        return monthly12(
+          cfe > 0
+            ? `${baseText}\nCFE annuelle prise en compte dans le calcul du résultat société : ${fmt(cfe)}.`
+            : baseText
+        );
+      }
+
+      const line =
+        getLine('portage_remuneration') ??
+        getLine('micro_remuneration') ??
+        getLine('eurl_ir_remuneration') ??
+        getLine('eurl_is_remuneration') ??
+        getLine('sasu_dividendes');
       if (line?.formula) return monthly12(line.formula);
-      if (r.id === 'EURL IS') return monthly12(`(${fmt(r.ca)} − ${fmt(r.fees)}) ÷ 1,45`);
-      if (r.id === 'SASU') return monthly12(`Résultat après IS × % distribué = dividendes bruts (voir détail ligne)`);
-      // Construire la formule : CA − charges − [commission si Portage] − [CFE si Micro] − cotis
+
+      // CAS GÉNÉRAL : Construire la formule : CA − charges − [commission si Portage] − [CFE si Micro] − cotis
       const terms: string[] = [fmt(r.ca)];
       if (r.fees > 0) terms.push(`− ${fmt(r.fees)} (charges)`);
       if (r.id === 'Portage') {
