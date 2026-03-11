@@ -47,7 +47,26 @@ export default function Footer() {
           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em]">
             © 2026 freelance-simulateur.fr
           </p>
-          <a href="#" className="text-slate-400 hover:text-indigo-600 text-[10px] font-black uppercase tracking-widest transition-colors">Confidentialité</a>
+          <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+            <Link
+              href="/cgu"
+              className="text-slate-400 hover:text-indigo-600 transition-colors"
+            >
+              CGU
+            </Link>
+            <Link
+              href="/mentions-legales"
+              className="text-slate-400 hover:text-indigo-600 transition-colors"
+            >
+              Mentions légales
+            </Link>
+            <a
+              href="#"
+              className="text-slate-400 hover:text-indigo-600 transition-colors"
+            >
+              Confidentialité
+            </a>
+          </div>
         </div>
       </div>
     </footer>
