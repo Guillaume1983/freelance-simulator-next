@@ -1,18 +1,11 @@
 'use client';
 
-import type { Metadata } from 'next';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Calculator } from 'lucide-react';
 import { calculateRegimes, computeTaxParts } from '@/lib/projections';
 import { CHARGES_CATALOG } from '@/lib/constants';
 import Footer from '@/components/Footer';
-
-export const metadata: Metadata = {
-  title: 'TJM → Revenu net — Calculateur freelance 2026',
-  description:
-    'Calculez votre revenu net annuel à partir de votre TJM et du nombre de jours travaillés, en comparant Portage, Micro, EURL et SASU avec les barèmes 2026.',
-};
 
 const defaultChargeAmounts = CHARGES_CATALOG.reduce((acc, c) => {
   acc[c.id] = c.amount;

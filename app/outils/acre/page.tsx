@@ -1,16 +1,9 @@
 'use client';
 
-import type { Metadata } from 'next';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Sparkles, ExternalLink } from 'lucide-react';
 import Footer from '@/components/Footer';
-
-export const metadata: Metadata = {
-  title: 'Outil ACRE 2026 — Impact sur les cotisations freelance',
-  description:
-    'Estimez l’économie de cotisations sociales grâce à l’ACRE 2026 pour les indépendants TNS et micro-entrepreneurs, avec une modélisation simplifiée des barèmes.',
-};
 
 export default function ACREPage() {
   const [cotisationsAn1, setCotisationsAn1] = useState(15000);

@@ -14,7 +14,10 @@ const jakarta = Plus_Jakarta_Sans({
 const SITE_URL = 'https://freelance-simulateur.fr';
 
 export const metadata: Metadata = {
-  title: 'Freelance Simulateur — Simulation fiscale 2026',
+  title: {
+    default: 'Freelance Simulateur — Comparateur & simulateur de revenus freelance 2026',
+    template: '%s | Freelance Simulateur',
+  },
   description:
     'Comparez les 5 régimes fiscaux (Portage, Micro, EURL IR, EURL IS, SASU) et optimisez votre revenu net en tant que freelance. Données certifiées Loi de Finances 2026.',
   metadataBase: new URL(SITE_URL),
