@@ -152,7 +152,7 @@ export default function SimulateurStatutPage() {
         </div>
       )}
 
-      <header className="bg-white/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
+      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           <Link
             href={backLink.href}

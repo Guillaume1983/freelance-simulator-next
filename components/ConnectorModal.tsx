@@ -7,7 +7,7 @@ export default function ConnectorModal({
   open,
   onClose,
   title = 'Connectez-vous pour débloquer',
-  message = 'Connectez-vous ou créez un compte pour exporter en PDF et accéder aux détails de calcul.',
+  message = 'Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres.',
 }: {
   open: boolean;
   onClose: () => void;

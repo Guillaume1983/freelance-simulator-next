@@ -657,7 +657,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         open={showConnectorModal}
         onClose={() => setShowConnectorModal(false)}
         title="Connectez-vous pour débloquer"
-        message="Connectez-vous ou créez un compte pour exporter en PDF et accéder aux détails de calcul."
+        message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
 
     </div>
