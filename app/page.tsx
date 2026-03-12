@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2 } from 'lucide-react';
 import Footer from '@/components/Footer';
+import FaqSection from '@/components/FaqSection';
 import { useSimulationContext } from '@/context/SimulationContext';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600';
@@ -298,6 +299,8 @@ export default function Home() {
             </div>
           </section>
         )}
+
+        <FaqSection />
 
         <Footer />
       </main>

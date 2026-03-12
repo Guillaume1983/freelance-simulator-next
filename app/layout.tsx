@@ -5,6 +5,7 @@ import './globals.css';
 import { SimulationProvider } from '@/context/SimulationContext';
 import AppShell from '@/components/AppShell';
 import ChatBot from '@/components/ChatBot';
+import { FAQ_ITEMS } from '@/lib/faq';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -89,6 +90,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               description:
                 'Outil de simulation et comparateur de statuts freelances (portage, micro-entreprise, EURL, SASU) avec barèmes 2026.',
               inLanguage: 'fr-FR',
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: FAQ_ITEMS.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: item.answer,
+                },
+              })),
             }),
           }}
         />
