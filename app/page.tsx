@@ -1,5 +1,6 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2 } from 'lucide-react';
@@ -7,6 +8,12 @@ import Footer from '@/components/Footer';
 import { useSimulationContext } from '@/context/SimulationContext';
 
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600';
+
+export const metadata: Metadata = {
+  title: 'Freelance Simulateur — Comparateur & simulateur de revenus freelance 2026',
+  description:
+    'Simulez et comparez votre revenu net en portage salarial, micro-entreprise, EURL IR/IS et SASU à partir de votre TJM et de vos paramètres, avec les barèmes 2026.',
+};
 
 export default function Home() {
   const { state } = useSimulationContext();

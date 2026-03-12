@@ -1,5 +1,6 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -35,6 +36,12 @@ const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: st
 };
 
 const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
+
+export const metadata: Metadata = {
+  title: 'Simulateur par statut freelance — Portage, Micro, EURL, SASU',
+  description:
+    'Simulateur détaillé par statut (portage salarial, micro-entreprise, EURL IR/IS, SASU) avec projection 5 ans, ACRE, CFE et options de rémunération.',
+};
 
 export default function SimulateurStatutPage() {
   const params = useParams();

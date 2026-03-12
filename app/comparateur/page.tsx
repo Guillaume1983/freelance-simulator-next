@@ -1,5 +1,6 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -8,6 +9,12 @@ import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
 import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Comparateur statuts freelance 2026 — Portage, Micro, EURL, SASU',
+  description:
+    'Comparez en temps réel votre revenu net en portage salarial, micro-entreprise, EURL IR/IS et SASU à partir de votre TJM, de vos charges et de votre situation fiscale.',
+};
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();

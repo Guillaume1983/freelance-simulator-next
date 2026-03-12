@@ -1,10 +1,17 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, Briefcase, Store, Building2, Building, Settings, Sparkles, X } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import Footer from '@/components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Simulateur freelance 5 ans — Portage, Micro, EURL, SASU',
+  description:
+    'Projetez votre activité freelance sur 5 ans : portage salarial, micro-entreprise, EURL IR/IS et SASU, avec ACRE, CFE et croissance du chiffre d’affaires.',
+};
 
 /* Couleurs alignées sur SimulationSection (REGIME_COLORS) */
 const STATUTS = [

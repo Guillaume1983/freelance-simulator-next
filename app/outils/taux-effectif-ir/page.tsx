@@ -1,10 +1,17 @@
 'use client';
 
+import type { Metadata } from 'next';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Receipt } from 'lucide-react';
 import { computeIR, RATES_2026 } from '@/lib/financial/rates';
 import Footer from '@/components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Taux effectif d’impôt sur le revenu — Barème 2026',
+  description:
+    'Calculez votre taux effectif et votre tranche marginale d’impôt sur le revenu à partir de votre revenu imposable et du nombre de parts fiscales.',
+};
 
 const TRANCHES = [
   { seuil: 11294, taux: 0, label: '0 %' },
