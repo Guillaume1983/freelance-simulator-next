@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/outils/franchise-tva',
     '/outils/tjm-revenu-net',
     '/outils/taux-effectif-ir',
+    '/outils/cotisations-tns',
     '/articles',
     '/contact',
     '/tarifs',
