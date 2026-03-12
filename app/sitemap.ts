@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next';
+import { ARTICLES } from '@/lib/articles';
 
 const BASE_URL = 'https://freelance-simulateur.fr';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  const urls = [
+  const staticPaths = [
     '/',
     '/comparateur',
     '/simulateur',
@@ -29,7 +30,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/tarifs',
     '/cgu',
     '/mentions-legales',
+    '/confidentialite',
   ];
+
+  const articlePaths = ARTICLES.map((a) => `/articles/${a.slug}`);
+  const urls = [...staticPaths, ...articlePaths];
 
   return urls.map((path) => ({
     url: `${BASE_URL}${path}`,

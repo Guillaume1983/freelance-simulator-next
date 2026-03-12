@@ -37,50 +37,48 @@ export default function ArticlesPage() {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <section className="space-y-4">
           {ARTICLES.map((article) => (
-            <article
+            <Link
               key={article.slug}
-              className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden"
+              href={`/articles/${article.slug}`}
+              className="block"
             >
-              <div className="h-40 md:h-52 w-full overflow-hidden">
-                <img
-                  src={article.imageUrl}
-                  alt={article.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="px-4 md:px-5 py-4 md:py-5 flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                    {article.category}
-                  </span>
-                  <span
-                    className="text-[10px] text-slate-400 font-semibold"
-                    suppressHydrationWarning
-                  >
-                    {new Date(article.date).toLocaleDateString('fr-FR', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}{' '}
-                    · {article.readingTime}
-                  </span>
+              <article className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-xl transition-all">
+                <div className="h-40 md:h-52 w-full overflow-hidden">
+                  <img
+                    src={article.imageUrl}
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <h2 className="text-base md:text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-                  {article.title}
-                </h2>
-                <p className="text-[13px] md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {article.excerpt}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <Link
-                    href="/"
-                    className="text-[11px] font-black uppercase tracking-[0.16em] text-indigo-600 hover:text-indigo-700"
-                  >
-                    Revenir au simulateur
-                  </Link>
+                <div className="px-4 md:px-5 py-4 md:py-5 flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                      {article.category}
+                    </span>
+                    <span
+                      className="text-[10px] text-slate-400 font-semibold"
+                      suppressHydrationWarning
+                    >
+                      {new Date(article.date).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}{' '}
+                      · {article.readingTime}
+                    </span>
+                  </div>
+                  <h2 className="text-base md:text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                    {article.title}
+                  </h2>
+                  <p className="text-[13px] md:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {article.excerpt}
+                  </p>
+                  <p className="mt-2 text-[11px] font-black uppercase tracking-[0.16em] text-indigo-600 hover:text-indigo-700">
+                    Lire la suite →
+                  </p>
                 </div>
-              </div>
-            </article>
+              </article>
+            </Link>
           ))}
         </section>
       </div>

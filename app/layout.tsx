@@ -9,7 +9,7 @@ import { FAQ_ITEMS } from '@/lib/faq';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '600', '800'],
 });
 
 const SITE_URL = 'https://freelance-simulateur.fr';

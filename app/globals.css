@@ -96,6 +96,15 @@
   .dark .page-blob-2 {
     background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(16,185,129,0.10) 50%, transparent 70%);
   }
+  /* Alléger les blobs sur mobile : pas d’animation, moins de blur (perf) */
+  @media (max-width: 768px) {
+    .page-blob-1,
+    .page-blob-2,
+    .page-blob-3 {
+      animation: none;
+      filter: blur(28px);
+    }
+  }
   @keyframes blob-drift {
     0%   { transform: translate(0, 0) scale(1); }
     50%  { transform: translate(4vw, 3vh) scale(1.06); }

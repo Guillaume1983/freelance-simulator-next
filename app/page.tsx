@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2 } from 'lucide-react';
 import Footer from '@/components/Footer';
@@ -36,11 +37,16 @@ export default function Home() {
           className="section-hero w-full min-h-[70vh] flex flex-col justify-center pt-20 pb-16 md:pt-28 md:pb-24"
           aria-label="Accueil"
         >
-          <div
-            className="section-hero-bg"
-            style={{ backgroundImage: `url('${HERO_IMAGE}')` }}
-            aria-hidden
-          />
+          <div className="absolute inset-0 z-0" aria-hidden>
+            <Image
+              src={HERO_IMAGE}
+              alt=""
+              fill
+              className="object-cover object-top"
+              priority
+              sizes="100vw"
+            />
+          </div>
           <div className="section-hero-overlay" aria-hidden />
 
           <div className="relative z-10 max-w-[900px] mx-auto px-4 md:px-6 text-center">

@@ -43,7 +43,7 @@ export default function ChatBot() {
           </div>
           <div
             ref={listRef}
-            className="flex max-h=[min(60vh,400px)] min-h-[200px] flex-col gap-3 overflow-y-auto p-4 bg-white dark:bg-slate-900"
+            className="flex max-h-[min(60vh,400px)] min-h-[200px] flex-col gap-3 overflow-y-auto p-4 bg-white dark:bg-slate-900"
           >
             {error && (
               <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-100">
