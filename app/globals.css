@@ -28,6 +28,9 @@
     background-color: #060b18;
     color: #e2e8f0;
   }
+  /* Couleur de l’ombre du bandeau sticky (comble l’interstice avec la nav) */
+  :root { --bandeau-sticky-bg: #eef2ff; }
+  .dark { --bandeau-sticky-bg: #0f172a; }
   p {
     overflow-wrap: normal;
     word-break: normal;

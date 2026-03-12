@@ -213,16 +213,19 @@ export default function SimulateurStatutPage() {
         </div>
       </header>
 
-      {/* Barre de contrôle sticky — TJM, Jours, CA, Paramètres */}
-      <div className="sticky top-0 z-40">
+      {/* Seul le bandeau TJM/Jours est sticky ; chevauchement + ombre vers le haut pour supprimer tout interstice */}
+      <div
+        className="sticky z-40 border-b border-slate-200/80 dark:border-slate-700/50 bg-page-settings shadow-[0_-8px_0_0_var(--bandeau-sticky-bg)]"
+        style={{ top: 'calc(var(--header-height, 56px) - 4px)' }}
+      >
         <ControlsBar
-          sim={sim}
-          ca={ca}
-          pageSlug={`simulateur/${slug}`}
-          activeRegimeId={activeRegime}
-          growthByYear={growthByYear}
-          onChangeGrowthYear={updateGrowthYear}
-        />
+            sim={sim}
+            ca={ca}
+            pageSlug={`simulateur/${slug}`}
+            activeRegimeId={activeRegime}
+            growthByYear={growthByYear}
+            onChangeGrowthYear={updateGrowthYear}
+          />
       </div>
 
       {/* Section simulation */}

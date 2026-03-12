@@ -40,6 +40,20 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const simulateurRef = useRef<HTMLDivElement>(null);
   const outilsRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // Hauteur de la nav pour coller le bandeau TJM/Jours sans espace (--header-height)
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const setHeight = () => {
+      document.documentElement.style.setProperty('--header-height', `${el.offsetHeight}px`);
+    };
+    setHeight();
+    const ro = new ResizeObserver(setHeight);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Détecter l'utilisateur connecté et écouter les changements d'auth
   useEffect(() => {
@@ -99,7 +113,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
   };
 
   return (
-    <nav className="bg-white dark:bg-slate-900/90 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 sticky top-0 z-[100]">
+    <nav ref={navRef} className="bg-white dark:bg-slate-900/90 backdrop-blur-md border-b-2 border-slate-200 dark:border-slate-800 sticky top-0 z-[100]">
       {/* Barre principale */}
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-4">
         {/* LOGO */}
