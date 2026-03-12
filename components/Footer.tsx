@@ -60,12 +60,12 @@ export default function Footer() {
             >
               Mentions légales
             </Link>
-            <a
-              href="#"
+            <Link
+              href="/confidentialite"
               className="text-slate-400 hover:text-indigo-600 transition-colors"
             >
               Confidentialité
-            </a>
+            </Link>
           </div>
         </div>
       </div>

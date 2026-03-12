@@ -126,17 +126,25 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               type="button"
               onClick={() => setSimulateurOpen((o) => !o)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={simulateurOpen}
+              aria-controls="simulateur-menu"
             >
               <TrendingUp size={14} />
               Simuler
               <ChevronDown size={12} className={simulateurOpen ? 'rotate-180' : ''} />
             </button>
             {simulateurOpen && (
-              <div className="absolute left-0 top-full mt-1 w-44 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50">
+              <div
+                id="simulateur-menu"
+                role="menu"
+                className="absolute left-0 top-full mt-1 w-44 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50"
+              >
                 {SIMULATEUR_LINKS.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
+                    role="menuitem"
                     className="block px-4 py-2 text-[12px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600"
                     onClick={() => setSimulateurOpen(false)}
                   >
@@ -151,17 +159,25 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               type="button"
               onClick={() => setOutilsOpen((o) => !o)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={outilsOpen}
+              aria-controls="outils-menu"
             >
               <Wrench size={14} />
               Outils
               <ChevronDown size={12} className={outilsOpen ? 'rotate-180' : ''} />
             </button>
             {outilsOpen && (
-              <div className="absolute left-0 top-full mt-1 w-52 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50">
+              <div
+                id="outils-menu"
+                role="menu"
+                className="absolute left-0 top-full mt-1 w-52 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50"
+              >
                 {OUTILS_LINKS.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
+                    role="menuitem"
                     className="block px-4 py-2 text-[12px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600"
                     onClick={() => setOutilsOpen(false)}
                   >
