@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
 import ComparisonTable from '@/components/ComparisonTable';
 import ControlsBar from '@/components/ControlsBar';
-import FaqSection from '@/components/FaqSection';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
 import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } from 'lucide-react';
@@ -152,8 +151,6 @@ export default function ComparateurPage() {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <ComparisonTable sim={sim} />
       </div>
-
-      <FaqSection />
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <Footer />
