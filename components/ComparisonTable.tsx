@@ -432,7 +432,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
         <div
           ref={cardScrollRef}
           onScroll={onCardScroll}
-          className="-mx-4 px-1 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2"
+          className="-mx-4 px-1 flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-2 min-w-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
         >
           {regimes.map((r: any) => {
             const isWinner = r.id === winnerId;
@@ -440,7 +440,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             return (
               <div
                 key={r.id}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
+                className="snap-center shrink-0 w-[min(calc(100vw-2rem),22rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">

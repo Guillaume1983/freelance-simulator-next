@@ -30,7 +30,7 @@ export default function Home() {
       <div className="page-blob-3" aria-hidden />
       <div className="bg-page-grid" aria-hidden />
 
-      <main className="relative z-10 min-h-screen">
+      <main className="relative z-10 min-h-screen overflow-x-hidden min-w-0">
 
         {/* Hero épuré */}
         <section

@@ -29,14 +29,14 @@ export default function ChatBot() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900"
+        className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-900"
         aria-label={open ? 'Fermer le chat' : 'Ouvrir le chat'}
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {open && (
-        <div className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl md:w-full md:max-w-md dark:border-slate-700 dark:bg-slate-900">
+        <div className="fixed left-3 right-3 md:left-auto md:right-6 bottom-24 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl md:w-full md:max-w-md dark:border-slate-700 dark:bg-slate-900 max-h-[min(60vh,400px)]">
           <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800">
             <h2 className="font-semibold text-slate-800 dark:text-slate-50">Assistant Freelance Simulateur</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">Questions sur les statuts (Micro, EURL, SASU…)</p>

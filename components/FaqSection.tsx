@@ -21,10 +21,10 @@ export default function FaqSection() {
             <button
               type="button"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full flex items-center justify-between gap-4 px-4 py-3.5 text-left font-semibold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              className="w-full flex items-center justify-between gap-4 px-4 py-4 min-h-[48px] text-left font-semibold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               aria-expanded={openIndex === index}
             >
-              <span className="text-sm md:text-base">{item.question}</span>
+              <span className="text-sm md:text-base wrap-break-word text-left">{item.question}</span>
               {openIndex === index ? (
                 <ChevronUp className="w-5 h-5 shrink-0 text-slate-400" />
               ) : (

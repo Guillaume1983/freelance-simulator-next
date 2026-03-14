@@ -44,10 +44,10 @@ export default function Footer() {
 
         {/* Bottom Bar : © + lien légal (Contact déjà dans Accès rapide) */}
         <div className="border-t border-slate-100 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em]">
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em] text-center md:text-left">
             © 2026 freelance-simulateur.fr
           </p>
-          <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-4 text-[10px] font-black uppercase tracking-widest">
             <Link
               href="/cgu"
               className="text-slate-400 hover:text-indigo-600 transition-colors"

@@ -17,12 +17,17 @@
    BASE
 ───────────────────────────────────────────────────── */
 @layer base {
+  html {
+    overflow-x: hidden;
+  }
   body {
     @apply font-sans antialiased;
     background-color: #f8fafc; /* slate-50 */
     color: #0f172a;
     font-size: 13px;
     transition: background-color 0.4s, color 0.4s;
+    overflow-x: hidden;
+    min-width: 0;
   }
   .dark body {
     background-color: #060b18;

@@ -122,9 +122,9 @@ export default function ControlsBar({
           <button
             type="button"
             onClick={() => setShowStatusPanel(v => !v)}
-            className="absolute left-1/2 -translate-x-1/2 -top-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            className="absolute left-1/2 -translate-x-1/2 -top-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors max-w-[calc(100vw-2rem)] text-center"
           >
-            <span>{showStatusPanel
+            <span className="truncate">{showStatusPanel
               ? (activeRegimeId ? `Masquer paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Masquer paramétrage statuts')
               : (activeRegimeId ? `Paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Paramétrage par statut')
             }</span>
