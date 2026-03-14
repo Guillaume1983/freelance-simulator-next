@@ -13,8 +13,14 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const SITE_URL = 'https://freelance-simulateur.fr';
+/** Logo pour onglet navigateur et moteurs de recherche (favicon + schéma). Remplacer par ton fichier dans public/. */
+const LOGO_URL = `${SITE_URL}/logo.png`;
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
+  },
   title: {
     default: 'Freelance Simulateur — Comparateur & simulateur de revenus freelance 2026',
     template: '%s | Freelance Simulateur',
@@ -86,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@type': 'WebApplication',
               name: 'Freelance Simulateur',
               url: SITE_URL,
+              image: LOGO_URL,
               applicationCategory: 'FinanceApplication',
               description:
                 'Outil de simulation et comparateur de statuts freelances (portage, micro-entreprise, EURL, SASU) avec barèmes 2026.',
