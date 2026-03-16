@@ -447,24 +447,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           </div>
         </div>
         <div className="relative">
-          {/* Flèches de navigation mobile */}
-          <button
-            type="button"
-            onClick={() => scrollToCard(activeCard - 1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
-            aria-label="Statut précédent"
-          >
-            <span className="text-xs">{'‹'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToCard(activeCard + 1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
-            aria-label="Statut suivant"
-          >
-            <span className="text-xs">{'›'}</span>
-          </button>
-
           <div
             ref={cardScrollRef}
             onScroll={onCardScroll}
@@ -550,7 +532,30 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           })}
           </div>
         </div>
-        <ScrollDots total={sim.resultats.length} active={activeCard} />
+        
+        {/* ── Navigation par tabs cliquables (mobile) ── */}
+        <div className="flex gap-1 overflow-x-auto justify-center pt-2 pb-3 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
+          {regimes.map((r: any, i: number) => {
+            const color = REGIME_COLORS[r.id] ?? '#6366f1';
+            return (
+              <button
+                key={r.id}
+                onClick={() => scrollToCard(i)}
+                className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
+                  activeCard === i
+                    ? 'text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
+                }`}
+                style={{
+                  background: activeCard === i ? color : undefined,
+                }}
+                aria-current={activeCard === i ? 'page' : undefined}
+              >
+                {r.id}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ── PDF Comparatif (masqué) ── */}

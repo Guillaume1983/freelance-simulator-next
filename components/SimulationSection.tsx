@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, FileText, Eye, EyeOff, ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -613,23 +613,6 @@ export default function SimulationSection({
         </div>
 
         <div className="relative">
-          <button
-            type="button"
-            onClick={() => scrollToYear(activeYear - 1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
-            aria-label="Année précédente"
-          >
-            <span className="text-xs">{'‹'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToYear(activeYear + 1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
-            aria-label="Année suivante"
-          >
-            <span className="text-xs">{'›'}</span>
-          </button>
-
           <div
             ref={yearScrollRef}
             onScroll={onYearScroll}
@@ -709,8 +692,27 @@ export default function SimulationSection({
           })}
           </div>
         </div>
-
-        <ScrollDots total={simulations.length} active={activeYear} color={regimeColor} />
+        
+        {/* ── Navigation par tabs cliquables (mobile) ── */}
+        <div className="flex gap-1 overflow-x-auto justify-center pt-2 pb-3 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
+          {simulations.map((_, i: number) => (
+            <button
+              key={i}
+              onClick={() => scrollToYear(i)}
+              className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
+                activeYear === i
+                  ? 'text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
+              }`}
+              style={{
+                background: activeYear === i ? regimeColor : undefined,
+              }}
+              aria-current={activeYear === i ? 'page' : undefined}
+            >
+              An {i + 1}
+            </button>
+          ))}
+        </div>
       </div>
 
     </div>
