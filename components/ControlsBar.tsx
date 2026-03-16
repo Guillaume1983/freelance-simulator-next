@@ -7,21 +7,27 @@ import type { SimulationState, SimulationSetters } from '@/context/SimulationCon
 export interface ControlsBarProps {
   sim: { state: SimulationState; setters: SimulationSetters; resultats?: any[] };
   ca: number;
-  showGrowth?: boolean;
   pageSlug?: string;
   activeRegimeId?: string;
   growthByYear?: number[];
   onChangeGrowthYear?: (index: number, value: number) => void;
+  /** Quand true, pas de fond propre (bandeau coloré en fond) */
+  transparentBg?: boolean;
+  /** Quand true, labels et CA en blanc (sur bandeau coloré) */
+  lightText?: boolean;
 }
 
 export default function ControlsBar({
   sim,
   ca,
-  showGrowth = false,
   pageSlug,
   activeRegimeId,
+  transparentBg = false,
+  lightText = false,
 }: ControlsBarProps) {
-  const labelClass = 'text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap';
+  const labelClass = lightText
+    ? 'text-[9px] font-bold text-white uppercase tracking-wider whitespace-nowrap'
+    : 'text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap';
 
   // Le paramètre statut n'est visible QUE sur les pages simulateur/
   const isSimulateur = Boolean(pageSlug?.startsWith('simulateur/'));
@@ -41,8 +47,8 @@ export default function ControlsBar({
   const showStatut = Boolean(statutLabel);
   const showPrelevLiberatoire = showStatut && activeRegimeId === 'Micro';
 
-  // Nombre exact de colonnes = nombre exact d'items dans chaque ligne (Micro = 2 colonnes : type + prélèv. lib.)
-  const cols = 2 + (showGrowth ? 1 : 0) + (showStatut ? 1 : 0) + (showPrelevLiberatoire ? 1 : 0);
+  // Nombre exact de colonnes (croissance = au niveau du tableau, pas dans le bandeau)
+  const cols = 2 + (showStatut ? 1 : 0) + (showPrelevLiberatoire ? 1 : 0);
 
   const s = sim.state;
 
@@ -55,7 +61,7 @@ export default function ControlsBar({
             onChange={e => sim.setters.setPortageComm(Number(e.target.value))}
             className="w-20 h-2 rounded-full accent-violet-500 dark:accent-violet-300 bg-slate-200 dark:bg-slate-700"
           />
-          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{Math.round(v)}%</span>
+          <span className={`w-8 text-right text-[10px] font-bold tabular-nums ${lightText ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>{Math.round(v)}%</span>
         </div>
       );
     }
@@ -70,7 +76,7 @@ export default function ControlsBar({
             onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
             className="w-20 h-2 rounded-full accent-blue-500 dark:accent-blue-400 bg-slate-200 dark:bg-slate-700"
           />
-          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{v}%</span>
+          <span className={`w-8 text-right text-[10px] font-bold tabular-nums ${lightText ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>{v}%</span>
         </div>
       );
     }
@@ -82,7 +88,7 @@ export default function ControlsBar({
             onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
             className="w-20 h-2 rounded-full accent-violet-500 dark:accent-violet-400 bg-slate-200 dark:bg-slate-700"
           />
-          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{v}%</span>
+          <span className={`w-8 text-right text-[10px] font-bold tabular-nums ${lightText ? 'text-white' : 'text-slate-700 dark:text-slate-200'}`}>{v}%</span>
         </div>
       );
     }
@@ -90,7 +96,7 @@ export default function ControlsBar({
   })() : null;
 
   return (
-    <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
+    <div className={transparentBg ? 'bg-transparent' : 'bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm'}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
 
@@ -107,7 +113,6 @@ export default function ControlsBar({
             {/* ── Ligne 1 : labels ── */}
             <span className={labelClass}>TJM</span>
             <span className={labelClass}>Jours</span>
-            {showGrowth && <span className={labelClass}>Croissance</span>}
             {showStatut && <span className={labelClass}>{statutLabel}</span>}
             {showPrelevLiberatoire && <span className={labelClass}>Prélèvement libératoire</span>}
 
@@ -130,16 +135,6 @@ export default function ControlsBar({
               label="Jours"
               inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
             />
-            {showGrowth && (
-              <div className="flex items-center gap-1.5">
-                <input type="range" min={0} max={50} step={1}
-                  value={s.growthRate ?? 2}
-                  onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                  className="w-20 h-2 rounded-full accent-indigo-600 dark:accent-indigo-400 bg-slate-200 dark:bg-slate-700"
-                />
-                <span className="w-6 text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.growthRate ?? 2}%</span>
-              </div>
-            )}
             {showStatut && activeRegimeId === 'Micro' && (
               <select
                 value={s.typeActiviteMicro}
@@ -177,7 +172,7 @@ export default function ControlsBar({
           {/* CA calculé */}
           <div className="flex flex-col items-start md:items-end">
             <span className={labelClass}>CA annuel</span>
-            <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
+            <span className={`text-lg md:text-xl font-black tabular-nums ${lightText ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
               {fmtEur(ca)}
             </span>
           </div>

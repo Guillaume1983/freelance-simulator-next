@@ -34,6 +34,15 @@ const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: st
   'SASU': { Icon: Building, iconClass: 'bg-violet-500 text-white' },
 };
 
+/** Bandeau sticky : dégradé deux couleurs comme outils / paramètres, texte en blanc */
+const STATUT_BANDEAU: Record<string, { gradient: string }> = {
+  'Portage': { gradient: 'bg-gradient-to-r from-indigo-500 to-blue-500' },
+  'Micro': { gradient: 'bg-gradient-to-r from-amber-500 to-orange-500' },
+  'EURL IR': { gradient: 'bg-gradient-to-r from-emerald-500 to-teal-500' },
+  'EURL IS': { gradient: 'bg-gradient-to-r from-sky-500 to-blue-500' },
+  'SASU': { gradient: 'bg-gradient-to-r from-violet-500 to-purple-500' },
+};
+
 const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
 
 export default function SimulateurStatutPage() {
@@ -105,7 +114,7 @@ export default function SimulateurStatutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-page-settings overflow-x-hidden min-w-0">
+    <main className="min-h-screen bg-page-settings min-w-0">
       {/* Bannière d'encouragement à configurer — mêmes conditions que comparateur / hub simulateur */}
       {showSettingsBanner && (
         <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900">
@@ -193,7 +202,7 @@ export default function SimulateurStatutPage() {
                   </span>
                 </div>
                 <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm sm:text-base">
-                  ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Croissance du CA ajustable dans le panneau de paramétrage sous le bandeau
+                  ACRE an 1{ctx.state?.acreEnabled ? ' activé' : ' désactivé'} · CFE dès an 2 · Croissance du CA ajustable au niveau du tableau
                 </p>
               </div>
               <Link
@@ -209,21 +218,27 @@ export default function SimulateurStatutPage() {
         </div>
       </header>
 
-      {/* Seul le bandeau TJM/Jours est sticky ; chevauchement + ombre vers le haut pour supprimer tout interstice */}
+      {/* Bandeau TJM/Jours sticky : une seule couleur (statut), texte en blanc */}
+      {activeRegime && STATUT_BANDEAU[activeRegime] && (
       <div
-        className="sticky z-40 border-b border-slate-200/80 dark:border-slate-700/50 bg-page-settings shadow-[0_-8px_0_0_var(--bandeau-sticky-bg)]"
-        style={{ top: 'calc(var(--header-height, 56px) - 4px)' }}
+        className={`sticky top-0 z-40 -mt-px py-3 shadow-lg ${STATUT_BANDEAU[activeRegime].gradient}`}
+        style={{ top: 'var(--header-height, 56px)' }}
       >
         <ControlsBar
-            sim={sim}
-            ca={ca}
-            pageSlug={`simulateur/${slug}`}
-            activeRegimeId={activeRegime}
-            growthByYear={growthByYear}
-            onChangeGrowthYear={updateGrowthYear}
-          />
+          sim={sim}
+          ca={ca}
+          pageSlug={`simulateur/${slug}`}
+          activeRegimeId={activeRegime}
+          growthByYear={growthByYear}
+          onChangeGrowthYear={updateGrowthYear}
+          transparentBg
+          lightText
+        />
       </div>
+      )}
 
+      {/* Contenu scrollable (overflow limité pour ne pas casser le sticky) */}
+      <div className="overflow-x-hidden min-w-0">
       {/* Section simulation */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <SimulationSection
@@ -249,6 +264,7 @@ export default function SimulateurStatutPage() {
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <Footer />
+      </div>
       </div>
     </main>
   );

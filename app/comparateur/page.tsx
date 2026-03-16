@@ -34,7 +34,7 @@ export default function ComparateurPage() {
   };
 
   return (
-    <main className="min-h-screen bg-page-settings overflow-x-hidden min-w-0">
+    <main className="min-h-screen bg-page-settings min-w-0">
       {/* Bannière d'encouragement à configurer */}
       {showSettingsBanner && (
         <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900">
@@ -119,9 +119,6 @@ export default function ComparateurPage() {
                 <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm sm:text-base">
                   Comparez les 5 statuts freelance en temps réel
                 </p>
-                <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
-                  Résultats estimatifs et pédagogiques, basés sur des hypothèses simplifiées et les barèmes 2026. Ne remplace pas un conseil personnalisé.
-                </p>
               </div>
               <Link
                 href="/simulateur"
@@ -135,14 +132,16 @@ export default function ComparateurPage() {
         </div>
       </header>
 
-      {/* Seul le bandeau TJM/Jours est sticky ; chevauchement + ombre vers le haut pour supprimer tout interstice */}
+      {/* Bandeau TJM/Jours sticky : dégradé comme outils / paramètres, texte en blanc */}
       <div
-        className="sticky z-40 border-b border-slate-200/80 dark:border-slate-700/50 bg-page-settings shadow-[0_-8px_0_0_var(--bandeau-sticky-bg)]"
-        style={{ top: 'calc(var(--header-height, 56px) - 4px)' }}
+        className="sticky top-0 z-40 -mt-px bg-gradient-to-r from-indigo-500 to-violet-500 py-3 shadow-lg"
+        style={{ top: 'var(--header-height, 56px)' }}
       >
-        <ControlsBar sim={sim} ca={ca} pageSlug="comparateur" />
+        <ControlsBar sim={sim} ca={ca} pageSlug="comparateur" transparentBg lightText />
       </div>
 
+      {/* Contenu scrollable (overflow limité au contenu pour ne pas casser le sticky) */}
+      <div className="overflow-x-hidden min-w-0">
       {/* Tableau comparatif */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <ComparisonTable sim={sim} />
@@ -161,6 +160,7 @@ export default function ComparateurPage() {
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <Footer />
+      </div>
       </div>
     </main>
   );
