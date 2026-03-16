@@ -155,7 +155,7 @@ export default function SimulateurStatutPage() {
             <ArrowLeft size={16} />
             {backLink.label}
           </Link>
-          <div className="mt-6 flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="mt-6 flex items-start gap-4">
             {statutId && STATUT_HEADER_ICON[statutId] && (() => {
               const { Icon, iconClass } = STATUT_HEADER_ICON[statutId];
               return (

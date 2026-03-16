@@ -84,7 +84,7 @@ export default function ComparateurPage() {
             <ArrowLeft size={16} />
             Retour à l&apos;accueil
           </Link>
-          <div className="mt-6 flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="mt-6 flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none shrink-0">
               <BarChart3 className="w-6 h-6 text-white" />
             </div>

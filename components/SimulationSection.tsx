@@ -596,6 +596,22 @@ export default function SimulationSection({
 
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden p-4 pt-5">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-sm shrink-0">
+              <FileBarChart2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                Projection 5 ans
+              </h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Swipe ou utilisez les flèches pour changer d&apos;année
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="relative">
           <button
             type="button"

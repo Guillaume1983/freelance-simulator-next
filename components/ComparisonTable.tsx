@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { FileText } from 'lucide-react';
+import { FileText, BarChart3 } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
@@ -423,13 +423,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
       {/* ── Vue mobile : cartes par régime ── */}
       <div className="block md:hidden p-4 pt-5">
         <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-              Comparatif stratégique
-            </h3>
-            <p className="text-[8px] text-slate-400 mt-0.5">
-              Swipe ou utilisez les flèches pour comparer
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
+              <BarChart3 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                Comparatif stratégique
+              </h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Swipe ou utilisez les flèches pour comparer
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             <button
