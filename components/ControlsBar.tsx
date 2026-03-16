@@ -1,6 +1,6 @@
 'use client';
-import React, { useState } from 'react';
-import { Percent } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Percent, X, SlidersHorizontal } from 'lucide-react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
@@ -27,210 +27,248 @@ export default function ControlsBar({
   growthByYear,
   onChangeGrowthYear,
 }: ControlsBarProps) {
-  const [showStatusPanel, setShowStatusPanel] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
-  const paramétrageDeLabel = (regimeId: string) => {
-    if (regimeId === 'Micro') return 'de la micro';
-    if (regimeId === 'SASU') return 'de la SASU';
-    if (regimeId.startsWith('EURL')) return `de l'${regimeId}`;
-    return `du ${regimeId}`;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (showModal) {
+      dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [showModal]);
+
+  // Fermer sur clic sur le backdrop
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const rect = dialogRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    if (
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom
+    ) {
+      setShowModal(false);
+    }
   };
 
+  const modalTitle =
+    activeRegimeId
+      ? `Paramétrage — ${activeRegimeId}`
+      : 'Paramétrage par statut';
+
   return (
-    <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
-          {/* Inputs TJM, Jours et Croissance optionnelle */}
-          <div className="flex flex-wrap items-center gap-3 md:gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TJM</span>
-                <NumberInput
-                  value={sim.state.tjm ?? 0}
-                  onChange={(v) => sim.setters.setTjm(v)}
-                  onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
-                  onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
-                  suffix="€"
-                  label="TJM"
-                  inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
-                />
+    <>
+      <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
+            {/* Inputs TJM, Jours et Croissance optionnelle */}
+            <div className="flex flex-wrap items-center gap-3 md:gap-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TJM</span>
+                  <NumberInput
+                    value={sim.state.tjm ?? 0}
+                    onChange={(v) => sim.setters.setTjm(v)}
+                    onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
+                    onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
+                    suffix="€"
+                    label="TJM"
+                    inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
+              <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
 
-            <div className="flex items-center gap-2.5">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jours</span>
-                <NumberInput
-                  value={sim.state.days ?? 0}
-                  onChange={(v) => sim.setters.setDays(v)}
-                  onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
-                  onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
-                  suffix="j"
-                  label="Jours"
-                  inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
-                />
+              <div className="flex items-center gap-2.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jours</span>
+                  <NumberInput
+                    value={sim.state.days ?? 0}
+                    onChange={(v) => sim.setters.setDays(v)}
+                    onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
+                    onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
+                    suffix="j"
+                    label="Jours"
+                    inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
+                  />
+                </div>
               </div>
-            </div>
 
-            {showGrowth && (
-              <>
-                <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-                    <Percent size={14} className="text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Croissance</span>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="range"
-                        min={0}
-                        max={50}
-                        step={1}
-                        value={sim.state.growthRate ?? 2}
-                        onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                        className="w-16 h-2 rounded-full accent-indigo-600 dark:accent-indigo-400 bg-slate-200 dark:bg-slate-700"
-                        aria-label="Croissance CA par an"
-                      />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums w-6">
-                        {sim.state.growthRate ?? 2}%
-                      </span>
+              {showGrowth && (
+                <>
+                  <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                      <Percent size={14} className="text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Croissance</span>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="range"
+                          min={0}
+                          max={50}
+                          step={1}
+                          value={sim.state.growthRate ?? 2}
+                          onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
+                          className="w-16 h-2 rounded-full accent-indigo-600 dark:accent-indigo-400 bg-slate-200 dark:bg-slate-700"
+                          aria-label="Croissance CA par an"
+                        />
+                        <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums w-6">
+                          {sim.state.growthRate ?? 2}%
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
-            )}
-          </div>
+                </>
+              )}
+            </div>
 
-          {/* CA calculé */}
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
-              <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
-                {fmtEur(ca)}
-              </span>
+            {/* CA calculé + bouton paramétrage */}
+            <div className="flex items-center gap-3 md:gap-4">
+              <button
+                type="button"
+                onClick={() => setShowModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors min-h-[36px]"
+                aria-label="Ouvrir le paramétrage par statut"
+              >
+                <SlidersHorizontal size={13} />
+                <span className="hidden sm:inline">Paramétrage</span>
+              </button>
+
+              <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
+
+              <div className="flex flex-col items-end">
+                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
+                <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
+                  {fmtEur(ca)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bandeau bas avec bouton centré sur la bordure + panneau éventuel */}
-      <div className="border-t border-slate-200/80 dark:border-slate-700/50 bg-white/70 dark:bg-slate-950/80 relative">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
+      {/* Modal native */}
+      <dialog
+        ref={dialogRef}
+        onClick={handleDialogClick}
+        onClose={() => setShowModal(false)}
+        className="m-auto w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-0 shadow-2xl backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm open:flex open:flex-col"
+        aria-labelledby="modal-params-title"
+        aria-modal="true"
+      >
+        {/* En-tête */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 flex items-center justify-center">
+              <SlidersHorizontal size={15} className="text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h2
+              id="modal-params-title"
+              className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wide"
+            >
+              {modalTitle}
+            </h2>
+          </div>
           <button
             type="button"
-            onClick={() => setShowStatusPanel(v => !v)}
-            className="absolute left-1/2 -translate-x-1/2 -top-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors max-w-[calc(100vw-2rem)] text-center"
+            onClick={() => setShowModal(false)}
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+            aria-label="Fermer"
           >
-            <span className="truncate">{showStatusPanel
-              ? (activeRegimeId ? `Masquer paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Masquer paramétrage statuts')
-              : (activeRegimeId ? `Paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Paramétrage par statut')
-            }</span>
+            <X size={16} />
           </button>
+        </div>
 
-          {showStatusPanel && (
-            <div className="pt-6 pb-4">
-              {/* Desktop : aligner visuellement les cartes sur les colonnes de statut */}
-              {pageSlug === 'comparateur' && (
+        {/* Contenu */}
+        <div className="px-6 py-5 overflow-y-auto max-h-[70vh]">
+          {/* Comparateur : une carte par statut */}
+          {pageSlug === 'comparateur' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {sim.resultats?.map((r: any) => (
                 <div
-                  className="hidden md:grid gap-3"
-                  style={{
-                    gridTemplateColumns: `200px repeat(${sim.resultats?.length ?? 0}, minmax(0, 1fr))`,
-                  }}
+                  key={r.id}
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-4 py-4 flex flex-col gap-2"
                 >
-                  {/* Colonne métriques (vide, pour l'alignement) */}
-                  <div />
-                  {sim.resultats?.map((r: any) => (
-                    <div
-                      key={r.id}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                    >
-                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center">
-                        {r.id}
-                      </div>
-                      <RegimeParamsInline sim={sim} regimeId={r.id} align="center" variant="light" />
-                    </div>
-                  ))}
+                  <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                    {r.id}
+                  </div>
+                  <RegimeParamsInline sim={sim} regimeId={r.id} align="left" variant="light" />
                 </div>
-              )}
+              ))}
+            </div>
+          )}
 
-              {/* Vue simulateur : grille Année 1–5 avec paramétrage et croissance alignés sur les colonnes */}
-              {pageSlug && pageSlug.startsWith('simulateur/') && activeRegimeId && (
-                <div
-                  className="hidden md:grid gap-3"
-                  style={{ gridTemplateColumns: '200px repeat(5, minmax(0, 1fr))' }}
-                >
-                  {/* Colonne Métriques (vide, pour aligner avec la première colonne du tableau) */}
-                  <div />
-                  {[0, 1, 2, 3, 4].map((index) => {
+          {/* Simulateur : paramétrage statut + croissance par année */}
+          {pageSlug && pageSlug.startsWith('simulateur/') && activeRegimeId && (
+            <div className="flex flex-col gap-4">
+              {/* Paramétrage statut */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-4 py-4 flex flex-col gap-2">
+                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mb-1">
+                  Paramétrage — {activeRegimeId}
+                </div>
+                {activeRegimeId !== 'EURL IR' ? (
+                  <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="left" variant="light" />
+                ) : (
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 italic">
+                    Aucun paramètre spécifique pour ce statut.
+                  </p>
+                )}
+              </div>
+
+              {/* Croissance par année */}
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 px-4 py-4 flex flex-col gap-3">
+                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  Croissance CA par année
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[1, 2, 3, 4].map((yearOffset) => {
+                    const index = yearOffset; // Années 2–5 (index 1–4)
                     const value = growthByYear?.[index] ?? 0;
-                    const isYearOne = index === 0;
                     return (
-                      <div
-                        key={index}
-                        className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                      >
-                        <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center mb-1">
-                          {isYearOne ? 'Paramétrage statut' : `Année ${index + 1}`}
+                      <div key={index} className="flex flex-col gap-1.5">
+                        <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                          Année {index + 1}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min={0}
+                            max={50}
+                            step={1}
+                            value={value}
+                            onChange={(e) => onChangeGrowthYear?.(index, Number(e.target.value))}
+                            className="flex-1 h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400"
+                          />
+                          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                            {value}%
+                          </span>
                         </div>
-
-                        {isYearOne ? (
-                          activeRegimeId !== 'EURL IR' ? (
-                            <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="center" variant="light" />
-                          ) : (
-                            <p className="text-[9px] text-slate-400 dark:text-slate-500 text-center italic">
-                              Aucun paramètre spécifique pour ce statut.
-                            </p>
-                          )
-                        ) : (
-                          <div className="flex flex-col items-stretch gap-1.5">
-                            <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 text-center">
-                              Croissance CA
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="range"
-                                min={0}
-                                max={50}
-                                step={1}
-                                value={value}
-                                onChange={(e) => onChangeGrowthYear?.(index, Number(e.target.value))}
-                                className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 flex-1"
-                              />
-                              <span className="w-10 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
-                                {value}%
-                              </span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
                 </div>
-              )}
-
-              {/* Vue mobile : pile de cartes (comparateur uniquement) */}
-              {pageSlug === 'comparateur' && (
-                <div className="grid md:hidden gap-3">
-                  {sim.resultats?.map((r: any) => (
-                    <div
-                      key={r.id}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                    >
-                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                        {r.id}
-                      </div>
-                      <RegimeParamsInline sim={sim} regimeId={r.id} align="left" variant="light" />
-                    </div>
-                  ))}
-                </div>
-              )}
+              </div>
             </div>
           )}
         </div>
-      </div>
-    </div>
+
+        {/* Pied */}
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowModal(false)}
+            className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase tracking-wide transition-colors min-h-[40px]"
+          >
+            Fermer
+          </button>
+        </div>
+      </dialog>
+    </>
   );
 }
