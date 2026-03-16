@@ -88,8 +88,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     const el = cardScrollRef.current;
     if (!el) return;
     const count = sim.resultats.length;
-    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count));
-    setActiveCard(Math.min(idx, count - 1));
+    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count || 1));
+    setActiveCard(Math.min(Math.max(idx, 0), Math.max(count - 1, 0)));
+  };
+
+  const scrollToCard = (index: number) => {
+    const el = cardScrollRef.current;
+    const count = sim.resultats.length;
+    if (!el || count === 0) return;
+    const safeIndex = Math.min(Math.max(index, 0), count - 1);
+    const cardWidth = el.scrollWidth / count || 0;
+    el.scrollTo({ left: safeIndex * cardWidth, behavior: 'smooth' });
+    setActiveCard(safeIndex);
   };
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -417,7 +427,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
               Comparatif stratégique
             </h3>
-                  <p className="text-[8px] text-slate-400 mt-0.5">Swipe pour comparer</p>
+            <p className="text-[8px] text-slate-400 mt-0.5">
+              Swipe ou utilisez les flèches pour comparer
+            </p>
           </div>
           <div className="flex gap-2">
             <button
@@ -429,18 +441,37 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </button>
           </div>
         </div>
-        <div
-          ref={cardScrollRef}
-          onScroll={onCardScroll}
-          className="-mx-4 px-1 flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-2 min-w-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
-        >
-          {regimes.map((r: any) => {
+        <div className="relative">
+          {/* Flèches de navigation mobile */}
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCard - 1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
+            aria-label="Statut précédent"
+          >
+            <span className="text-xs">{'‹'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCard + 1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
+            aria-label="Statut suivant"
+          >
+            <span className="text-xs">{'›'}</span>
+          </button>
+
+          <div
+            ref={cardScrollRef}
+            onScroll={onCardScroll}
+            className="-mx-4 px-7 flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory pb-2 min-w-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+          >
+            {regimes.map((r: any) => {
             const isWinner = r.id === winnerId;
             const color    = REGIME_COLORS[r.id] ?? '#6366f1';
             return (
               <div
                 key={r.id}
-                className="snap-center shrink-0 w-[min(calc(100vw-2rem),22rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
+                className="snap-center shrink-0 w-[min(calc(100vw-3.5rem),22rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
               >
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
@@ -512,6 +543,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               </div>
             );
           })}
+          </div>
         </div>
         <ScrollDots total={sim.resultats.length} active={activeCard} />
       </div>

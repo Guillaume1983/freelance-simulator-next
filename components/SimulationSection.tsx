@@ -208,8 +208,18 @@ export default function SimulationSection({
     const el = yearScrollRef.current;
     if (!el) return;
     const count = simulations.length;
-    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count));
-    setActiveYear(Math.min(idx, count - 1));
+    const idx = Math.round(el.scrollLeft / (el.scrollWidth / count || 1));
+    setActiveYear(Math.min(Math.max(idx, 0), Math.max(count - 1, 0)));
+  };
+
+  const scrollToYear = (index: number) => {
+    const el = yearScrollRef.current;
+    const count = simulations.length;
+    if (!el || count === 0) return;
+    const safeIndex = Math.min(Math.max(index, 0), count - 1);
+    const cardWidth = el.scrollWidth / count || 0;
+    el.scrollTo({ left: safeIndex * cardWidth, behavior: 'smooth' });
+    setActiveYear(safeIndex);
   };
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
@@ -586,20 +596,36 @@ export default function SimulationSection({
 
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden p-4 pt-5">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => scrollToYear(activeYear - 1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
+            aria-label="Année précédente"
+          >
+            <span className="text-xs">{'‹'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToYear(activeYear + 1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-500 dark:text-slate-300"
+            aria-label="Année suivante"
+          >
+            <span className="text-xs">{'›'}</span>
+          </button>
 
-        {/* Cartes années (scroll horizontal snap) */}
-        <div
-          ref={yearScrollRef}
-          onScroll={onYearScroll}
-          className="px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 pt-4"
-        >
-          {simulations.map((yr, i) => {
-            const r = yr.find((x: any) => x.id === activeRegime) as any;
-            return (
-              <div
-                key={i}
-                className="snap-center shrink-0 w-[calc(100vw-3rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
-              >
+          <div
+            ref={yearScrollRef}
+            onScroll={onYearScroll}
+            className="px-7 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 pt-4 min-w-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+          >
+            {simulations.map((yr, i) => {
+              const r = yr.find((x: any) => x.id === activeRegime) as any;
+              return (
+                <div
+                  key={i}
+                  className="snap-center shrink-0 w-[min(calc(100vw-3.5rem),22rem)] max-w-sm relative border border-slate-200 dark:border-slate-700 overflow-hidden rounded-2xl bg-white dark:bg-[#020617] shadow-lg"
+                >
                 {/* Bande couleur + header */}
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
@@ -665,6 +691,7 @@ export default function SimulationSection({
               </div>
             );
           })}
+          </div>
         </div>
 
         <ScrollDots total={simulations.length} active={activeYear} color={regimeColor} />
