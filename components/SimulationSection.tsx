@@ -612,6 +612,27 @@ export default function SimulationSection({
           </div>
         </div>
 
+        {/* ── Navigation par tabs cliquables (mobile) ── */}
+        <div className="flex gap-1 overflow-x-auto justify-center pt-3 pb-4 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
+          {simulations.map((_, i: number) => (
+            <button
+              key={i}
+              onClick={() => scrollToYear(i)}
+              className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
+                activeYear === i
+                  ? 'text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
+              }`}
+              style={{
+                background: activeYear === i ? regimeColor : undefined,
+              }}
+              aria-current={activeYear === i ? 'page' : undefined}
+            >
+              An {i + 1}
+            </button>
+          ))}
+        </div>
+
         <div className="relative">
           <div
             ref={yearScrollRef}
@@ -691,27 +712,6 @@ export default function SimulationSection({
             );
           })}
           </div>
-        </div>
-        
-        {/* ── Navigation par tabs cliquables (mobile) ── */}
-        <div className="flex gap-1 overflow-x-auto justify-center pt-2 pb-3 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
-          {simulations.map((_, i: number) => (
-            <button
-              key={i}
-              onClick={() => scrollToYear(i)}
-              className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
-                activeYear === i
-                  ? 'text-white shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
-              }`}
-              style={{
-                background: activeYear === i ? regimeColor : undefined,
-              }}
-              aria-current={activeYear === i ? 'page' : undefined}
-            >
-              An {i + 1}
-            </button>
-          ))}
         </div>
       </div>
 

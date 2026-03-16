@@ -446,6 +446,30 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             </button>
           </div>
         </div>
+        {/* ── Navigation par tabs cliquables (mobile) ── */}
+        <div className="flex gap-1 overflow-x-auto justify-center pt-3 pb-4 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
+          {regimes.map((r: any, i: number) => {
+            const color = REGIME_COLORS[r.id] ?? '#6366f1';
+            return (
+              <button
+                key={r.id}
+                onClick={() => scrollToCard(i)}
+                className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
+                  activeCard === i
+                    ? 'text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
+                }`}
+                style={{
+                  background: activeCard === i ? color : undefined,
+                }}
+                aria-current={activeCard === i ? 'page' : undefined}
+              >
+                {r.id}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="relative">
           <div
             ref={cardScrollRef}
@@ -531,30 +555,6 @@ export default function ComparisonTable({ sim }: { sim: any }) {
             );
           })}
           </div>
-        </div>
-        
-        {/* ── Navigation par tabs cliquables (mobile) ── */}
-        <div className="flex gap-1 overflow-x-auto justify-center pt-2 pb-3 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
-          {regimes.map((r: any, i: number) => {
-            const color = REGIME_COLORS[r.id] ?? '#6366f1';
-            return (
-              <button
-                key={r.id}
-                onClick={() => scrollToCard(i)}
-                className={`shrink-0 px-3 py-1.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center ${
-                  activeCard === i
-                    ? 'text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50'
-                }`}
-                style={{
-                  background: activeCard === i ? color : undefined,
-                }}
-                aria-current={activeCard === i ? 'page' : undefined}
-              >
-                {r.id}
-              </button>
-            );
-          })}
         </div>
       </div>
 
