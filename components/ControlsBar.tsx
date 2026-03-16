@@ -1,19 +1,15 @@
 'use client';
-import React, { useState } from 'react';
-import { Percent } from 'lucide-react';
+import React from 'react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
-import RegimeParamsInline from '@/components/RegimeParamsInline';
 
 export interface ControlsBarProps {
   sim: { state: SimulationState; setters: SimulationSetters; resultats?: any[] };
   ca: number;
   showGrowth?: boolean;
   pageSlug?: string;
-  /** Optionnel — utilisé sur les pages simulateur pour ne montrer que le statut actif dans le panneau */
   activeRegimeId?: string;
-  /** Optionnel — série 5 ans de croissance, utilisée dans le panneau des simulateurs */
   growthByYear?: number[];
   onChangeGrowthYear?: (index: number, value: number) => void;
 }
@@ -24,211 +20,168 @@ export default function ControlsBar({
   showGrowth = false,
   pageSlug,
   activeRegimeId,
-  growthByYear,
-  onChangeGrowthYear,
 }: ControlsBarProps) {
-  const [showStatusPanel, setShowStatusPanel] = useState(false);
+  const labelClass = 'text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap';
 
-  const paramétrageDeLabel = (regimeId: string) => {
-    if (regimeId === 'Micro') return 'de la micro';
-    if (regimeId === 'SASU') return 'de la SASU';
-    if (regimeId.startsWith('EURL')) return `de l'${regimeId}`;
-    return `du ${regimeId}`;
-  };
+  // Le paramètre statut n'est visible QUE sur les pages simulateur/
+  const isSimulateur = Boolean(pageSlug?.startsWith('simulateur/'));
+
+  const statutLabel = isSimulateur
+    ? activeRegimeId === 'Portage'
+      ? 'Frais de gestion'
+      : activeRegimeId === 'Micro'
+        ? 'Micro'
+        : activeRegimeId === 'EURL IS'
+          ? 'Part en salaire'
+          : activeRegimeId === 'SASU'
+            ? 'Dividendes'
+            : null
+    : null;
+
+  const showStatut = Boolean(statutLabel);
+  const showPrelevLiberatoire = showStatut && activeRegimeId === 'Micro';
+
+  // Nombre exact de colonnes = nombre exact d'items dans chaque ligne (Micro = 2 colonnes : type + prélèv. lib.)
+  const cols = 2 + (showGrowth ? 1 : 0) + (showStatut ? 1 : 0) + (showPrelevLiberatoire ? 1 : 0);
+
+  const s = sim.state;
+
+  const statutControl = showStatut ? (() => {
+    if (activeRegimeId === 'Portage') {
+      const v = Math.max(0, Math.min(20, s.portageComm ?? 0));
+      return (
+        <div className="flex items-center gap-1.5">
+          <input type="range" min={0} max={20} step={1} value={v}
+            onChange={e => sim.setters.setPortageComm(Number(e.target.value))}
+            className="w-20 h-2 rounded-full accent-violet-500 dark:accent-violet-300 bg-slate-200 dark:bg-slate-700"
+          />
+          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{Math.round(v)}%</span>
+        </div>
+      );
+    }
+    if (activeRegimeId === 'Micro') {
+      return null; // Micro : select et toggle rendus séparément dans la grille (2 colonnes)
+    }
+    if (activeRegimeId === 'EURL IS') {
+      const v = Math.round((s.remunerationDirigeantMensuelle ?? 1) * 100);
+      return (
+        <div className="flex items-center gap-1.5">
+          <input type="range" min={0} max={100} step={5} value={v}
+            onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
+            className="w-20 h-2 rounded-full accent-blue-500 dark:accent-blue-400 bg-slate-200 dark:bg-slate-700"
+          />
+          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{v}%</span>
+        </div>
+      );
+    }
+    if (activeRegimeId === 'SASU') {
+      const v = s.repartitionRemuneration ?? 100;
+      return (
+        <div className="flex items-center gap-1.5">
+          <input type="range" min={0} max={100} step={5} value={v}
+            onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
+            className="w-20 h-2 rounded-full accent-violet-500 dark:accent-violet-400 bg-slate-200 dark:bg-slate-700"
+          />
+          <span className="w-8 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">{v}%</span>
+        </div>
+      );
+    }
+    return null;
+  })() : null;
 
   return (
     <div className="bg-linear-to-r from-slate-50 to-white dark:from-slate-800/80 dark:to-slate-850 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-3">
-          {/* Inputs TJM, Jours et Croissance optionnelle */}
-          <div className="flex flex-wrap items-center gap-3 md:gap-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TJM</span>
-                <NumberInput
-                  value={sim.state.tjm ?? 0}
-                  onChange={(v) => sim.setters.setTjm(v)}
-                  onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
-                  onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
-                  suffix="€"
-                  label="TJM"
-                  inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
-                />
-              </div>
-            </div>
 
-            <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
+          {/*
+            Grille stricte : exactement `cols` colonnes, 2 lignes.
+            Ligne 1 = labels, ligne 2 = contrôles.
+            Chaque label est dans la même colonne que son contrôle.
+            Le nombre de labels == le nombre de contrôles == cols, toujours.
+          */}
+          <div
+            className="grid gap-y-1.5 gap-x-5"
+            style={{ gridTemplateColumns: `repeat(${cols}, auto)` }}
+          >
+            {/* ── Ligne 1 : labels ── */}
+            <span className={labelClass}>TJM</span>
+            <span className={labelClass}>Jours</span>
+            {showGrowth && <span className={labelClass}>Croissance</span>}
+            {showStatut && <span className={labelClass}>{statutLabel}</span>}
+            {showPrelevLiberatoire && <span className={labelClass}>Prélèvement libératoire</span>}
 
-            <div className="flex items-center gap-2.5">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jours</span>
-                <NumberInput
-                  value={sim.state.days ?? 0}
-                  onChange={(v) => sim.setters.setDays(v)}
-                  onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
-                  onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
-                  suffix="j"
-                  label="Jours"
-                  inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
-                />
-              </div>
-            </div>
-
+            {/* ── Ligne 2 : contrôles (même ordre, même nombre) ── */}
+            <NumberInput
+              value={s.tjm ?? 0}
+              onChange={(v) => sim.setters.setTjm(v)}
+              onIncrement={() => sim.setters.setTjm((p: number) => (p || 0) + 10)}
+              onDecrement={() => sim.setters.setTjm((p: number) => Math.max(0, (p || 0) - 10))}
+              suffix="€"
+              label="TJM"
+              inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
+            />
+            <NumberInput
+              value={s.days ?? 0}
+              onChange={(v) => sim.setters.setDays(v)}
+              onIncrement={() => sim.setters.setDays((p: number) => Math.min(365, (p || 0) + 5))}
+              onDecrement={() => sim.setters.setDays((p: number) => Math.max(0, (p || 0) - 5))}
+              suffix="j"
+              label="Jours"
+              inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
+            />
             {showGrowth && (
-              <>
-                <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-slate-700" />
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
-                    <Percent size={14} className="text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Croissance</span>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="range"
-                        min={0}
-                        max={50}
-                        step={1}
-                        value={sim.state.growthRate ?? 2}
-                        onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
-                        className="w-16 h-2 rounded-full accent-indigo-600 dark:accent-indigo-400 bg-slate-200 dark:bg-slate-700"
-                        aria-label="Croissance CA par an"
-                      />
-                      <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums w-6">
-                        {sim.state.growthRate ?? 2}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </>
+              <div className="flex items-center gap-1.5">
+                <input type="range" min={0} max={50} step={1}
+                  value={s.growthRate ?? 2}
+                  onChange={(e) => sim.setters.setGrowthRate(Number(e.target.value))}
+                  className="w-20 h-2 rounded-full accent-indigo-600 dark:accent-indigo-400 bg-slate-200 dark:bg-slate-700"
+                />
+                <span className="w-6 text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.growthRate ?? 2}%</span>
+              </div>
             )}
+            {showStatut && activeRegimeId === 'Micro' && (
+              <select
+                value={s.typeActiviteMicro}
+                onChange={e => sim.setters.setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')}
+                className="text-[9px] py-1 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 cursor-pointer"
+              >
+                <option value="BNC">BNC</option>
+                <option value="BIC_SERVICE">BIC Service</option>
+                <option value="BIC_COMMERCE">BIC Commerce</option>
+              </select>
+            )}
+            {showPrelevLiberatoire && (
+              <button
+                type="button"
+                onClick={() => sim.setters.setPrelevementLiberatoire(!s.prelevementLiberatoire)}
+                className="flex items-center justify-center cursor-pointer select-none"
+                aria-label="Prélèvement libératoire"
+              >
+                <span
+                  className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+                    s.prelevementLiberatoire ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3 w-3 rounded-full bg-white shadow-sm transform transition-transform ${
+                      s.prelevementLiberatoire ? 'translate-x-3' : 'translate-x-1'
+                    }`}
+                  />
+                </span>
+              </button>
+            )}
+            {showStatut && activeRegimeId !== 'Micro' && statutControl}
           </div>
 
           {/* CA calculé */}
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="flex flex-col items-end">
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CA annuel</span>
-              <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
-                {fmtEur(ca)}
-              </span>
-            </div>
+          <div className="flex flex-col items-start md:items-end">
+            <span className={labelClass}>CA annuel</span>
+            <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white tabular-nums">
+              {fmtEur(ca)}
+            </span>
           </div>
-        </div>
-      </div>
 
-      {/* Bandeau bas avec bouton centré sur la bordure + panneau éventuel */}
-      <div className="border-t border-slate-200/80 dark:border-slate-700/50 bg-white/70 dark:bg-slate-950/80 relative">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <button
-            type="button"
-            onClick={() => setShowStatusPanel(v => !v)}
-            className="absolute left-1/2 -translate-x-1/2 -top-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-full border border-dashed border-slate-300 dark:border-slate-600 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors max-w-[calc(100vw-2rem)] text-center"
-          >
-            <span className="truncate">{showStatusPanel
-              ? (activeRegimeId ? `Masquer paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Masquer paramétrage statuts')
-              : (activeRegimeId ? `Paramétrage ${paramétrageDeLabel(activeRegimeId)}` : 'Paramétrage par statut')
-            }</span>
-          </button>
-
-          {showStatusPanel && (
-            <div className="pt-6 pb-4">
-              {/* Desktop : aligner visuellement les cartes sur les colonnes de statut */}
-              {pageSlug === 'comparateur' && (
-                <div
-                  className="hidden md:grid gap-3"
-                  style={{
-                    gridTemplateColumns: `200px repeat(${sim.resultats?.length ?? 0}, minmax(0, 1fr))`,
-                  }}
-                >
-                  {/* Colonne métriques (vide, pour l'alignement) */}
-                  <div />
-                  {sim.resultats?.map((r: any) => (
-                    <div
-                      key={r.id}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                    >
-                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center">
-                        {r.id}
-                      </div>
-                      <RegimeParamsInline sim={sim} regimeId={r.id} align="center" variant="light" />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Vue simulateur : grille Année 1–5 avec paramétrage et croissance alignés sur les colonnes */}
-              {pageSlug && pageSlug.startsWith('simulateur/') && activeRegimeId && (
-                <div
-                  className="hidden md:grid gap-3"
-                  style={{ gridTemplateColumns: '200px repeat(5, minmax(0, 1fr))' }}
-                >
-                  {/* Colonne Métriques (vide, pour aligner avec la première colonne du tableau) */}
-                  <div />
-                  {[0, 1, 2, 3, 4].map((index) => {
-                    const value = growthByYear?.[index] ?? 0;
-                    const isYearOne = index === 0;
-                    return (
-                      <div
-                        key={index}
-                        className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                      >
-                        <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400 text-center mb-1">
-                          {isYearOne ? 'Paramétrage statut' : `Année ${index + 1}`}
-                        </div>
-
-                        {isYearOne ? (
-                          activeRegimeId !== 'EURL IR' ? (
-                            <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="center" variant="light" />
-                          ) : (
-                            <p className="text-[9px] text-slate-400 dark:text-slate-500 text-center italic">
-                              Aucun paramètre spécifique pour ce statut.
-                            </p>
-                          )
-                        ) : (
-                          <div className="flex flex-col items-stretch gap-1.5">
-                            <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400 text-center">
-                              Croissance CA
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="range"
-                                min={0}
-                                max={50}
-                                step={1}
-                                value={value}
-                                onChange={(e) => onChangeGrowthYear?.(index, Number(e.target.value))}
-                                className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 flex-1"
-                              />
-                              <span className="w-10 text-right text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
-                                {value}%
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Vue mobile : pile de cartes (comparateur uniquement) */}
-              {pageSlug === 'comparateur' && (
-                <div className="grid md:hidden gap-3">
-                  {sim.resultats?.map((r: any) => (
-                    <div
-                      key={r.id}
-                      className="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-900/60 px-3 py-3 flex flex-col gap-1.5"
-                    >
-                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-                        {r.id}
-                      </div>
-                      <RegimeParamsInline sim={sim} regimeId={r.id} align="left" variant="light" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -231,6 +231,7 @@ export default function SimulateurStatutPage() {
           activeRegime={activeRegime}
           setActiveRegime={setActiveRegime}
           growthByYear={growthByYear}
+          onChangeGrowthYear={updateGrowthYear}
           singleRegime
         />
       </div>

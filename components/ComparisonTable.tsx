@@ -1,13 +1,14 @@
 'use client';
 import React, { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, BarChart3 } from 'lucide-react';
+import { FileText, BarChart3, Settings2 } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
+import RegimeParamsInline from '@/components/RegimeParamsInline';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active }: { total: number; active: number }) {
@@ -79,6 +80,7 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
 export default function ComparisonTable({ sim }: { sim: any }) {
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
+  const [openRegimeSettings, setOpenRegimeSettings] = useState<string | null>(null);
   const { isConnected } = useUser();
 
   const printRef      = useRef<HTMLDivElement>(null);
@@ -285,6 +287,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
                   {isMicroPlafondExceeded(r) && <div className="plafond-badge">PLAFOND DÉPASSÉ</div>}
 
+                  {/* Bouton de paramétrage par statut (desktop) */}
+                  {['Portage', 'Micro', 'EURL IS', 'SASU'].includes(r.id) && (
+                    <button
+                      type="button"
+                      onClick={() => setOpenRegimeSettings(r.id)}
+                      className="absolute right-2 top-2 inline-flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 dark:hover:border-indigo-500 shadow-sm w-7 h-7"
+                      aria-label={`Paramétrer ${r.id}`}
+                    >
+                      <Settings2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
                   <div className="flex flex-col items-center gap-2">
                     {/* Nom */}
                     <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">{r.id}</span>
@@ -486,7 +500,21 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               >
                 <div className="h-1 w-full" style={{ background: color }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center">
-                  <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300 mb-2">{r.id}</span>
+                  <div className="w-full flex items-start justify-between gap-2">
+                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300 mb-2">
+                      {r.id}
+                    </span>
+                    {['Portage', 'Micro', 'EURL IS', 'SASU'].includes(r.id) && (
+                      <button
+                        type="button"
+                        onClick={() => setOpenRegimeSettings(r.id)}
+                        className="inline-flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 dark:hover:border-indigo-500 shadow-sm w-7 h-7"
+                        aria-label={`Paramétrer ${r.id}`}
+                      >
+                        <Settings2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
 
                   {/* Montant net */}
                   <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-1">
@@ -668,6 +696,34 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <p style={{ fontSize: 7, color: '#999', marginTop: 12 }}>Simulation estimative — barèmes 2026. Ces simulations ne constituent pas un conseil fiscal.</p>
         </div>
       </div>
+
+      {/* Modale de paramétrage par statut */}
+      {openRegimeSettings && (
+        <div
+          className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
+          onClick={() => setOpenRegimeSettings(null)}
+        >
+          <div
+            className="max-w-md w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.16em]">
+                Paramètres {openRegimeSettings}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setOpenRegimeSettings(null)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <RegimeParamsInline sim={sim} regimeId={openRegimeSettings} align="left" variant="light" />
+          </div>
+        </div>
+      )}
 
       <ConnectorModal
         open={showConnectorModal}

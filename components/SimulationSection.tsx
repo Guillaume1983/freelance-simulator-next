@@ -5,7 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { projeterSurNAns } from '@/lib/projections';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
-import { FileBarChart2, FileText, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileBarChart2, FileText, Eye, EyeOff, CheckCircle, AlertCircle, Percent } from 'lucide-react';
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
@@ -140,6 +140,7 @@ export default function SimulationSection({
   setActiveRegime,
   singleRegime = false,
   growthByYear,
+  onChangeGrowthYear,
 }: {
   sim: any;
   activeRegime: string;
@@ -147,10 +148,12 @@ export default function SimulationSection({
   /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc SIMULATIONS / nom / +% */
   singleRegime?: boolean;
   growthByYear: number[];
+  onChangeGrowthYear?: (index: number, value: number) => void;
 }) {
   const printBizRef    = useRef<HTMLDivElement>(null);
   const yearScrollRef  = useRef<HTMLDivElement>(null);
   const [activeYear, setActiveYear]     = useState(0);
+  const [openGrowthYear, setOpenGrowthYear] = useState<number | null>(null);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
   const { isConnected } = useUser();
 
@@ -262,6 +265,19 @@ export default function SimulationSection({
       .reduce((acc: number, l: any) => acc + (typeof l.amount === 'number' ? l.amount : 0), 0);
     return sum > 0;
   });
+
+  const currentGrowthIndex = openGrowthYear ?? 0;
+  const currentGrowthValue = growthByYear[currentGrowthIndex] ?? 0;
+
+  const handleOpenGrowthModal = (index: number) => {
+    if (!onChangeGrowthYear) return;
+    setOpenGrowthYear(index);
+  };
+
+  const handleChangeGrowth = (value: number) => {
+    if (openGrowthYear == null || !onChangeGrowthYear) return;
+    onChangeGrowthYear(openGrowthYear, value);
+  };
   const hasAnyPortageCommission = simulations.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     if (!r || activeRegime !== 'Portage') return false;
@@ -391,9 +407,20 @@ export default function SimulationSection({
                 </th>
                 {simulations.map((yr, i) => {
                   const r = yr.find((x: any) => x.id === activeRegime);
+                  const growthValue = growthByYear[i] ?? 0;
                   return (
                     <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
                       <div className={`header-band band-${regimeClass}`} />
+                      {i > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenGrowthModal(i)}
+                          className="absolute right-2 top-2 inline-flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-emerald-600 hover:border-emerald-400 shadow-sm w-7 h-7"
+                          aria-label={`Régler la croissance de l'année ${i + 1}`}
+                        >
+                          <Percent className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
                           Année {i + 1}
@@ -649,7 +676,21 @@ export default function SimulationSection({
                 {/* Bande couleur + header */}
                 <div className="h-1 w-full" style={{ background: regimeColor }} />
                 <div className="px-4 pt-4 pb-3 flex flex-col items-center text-center border-b dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Année {i + 1}</span>
+                  <div className="w-full flex items-start justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Année {i + 1}
+                    </span>
+                    {i > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenGrowthModal(i)}
+                        className="inline-flex items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-slate-500 hover:text-emerald-600 hover:border-emerald-400 shadow-sm w-7 h-7"
+                        aria-label={`Régler la croissance de l'année ${i + 1}`}
+                      >
+                        <Percent className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                   {i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage'
                     ? <span className="text-[8px] text-emerald-500 font-black mt-0.5">ACRE ~−25% cotis</span>
                     : i > 0
@@ -716,6 +757,51 @@ export default function SimulationSection({
       </div>
 
     </div>
+
+      {/* Modale de réglage de la croissance par année */}
+      {openGrowthYear != null && onChangeGrowthYear && (
+        <div
+          className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
+          onClick={() => setOpenGrowthYear(null)}
+        >
+          <div
+            className="max-w-md w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.16em]">
+                Croissance année {currentGrowthIndex + 1}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setOpenGrowthYear(null)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+              Ajuste le taux de croissance du chiffre d&apos;affaires pour cette année uniquement.
+            </p>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={0}
+                max={50}
+                step={1}
+                value={currentGrowthValue}
+                onChange={(e) => handleChangeGrowth(Number(e.target.value))}
+                className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 flex-1"
+                aria-label={`Croissance CA année ${currentGrowthIndex + 1}`}
+              />
+              <span className="w-12 text-right text-sm font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                {currentGrowthValue}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══ PDF — Business Plan (masqué) ══ */}
       <div style={{ display: 'none' }}>
