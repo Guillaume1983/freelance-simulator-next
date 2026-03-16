@@ -356,7 +356,7 @@ export default function ReglagesPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Mobile Pills Navigation */}
           <div className="lg:hidden -mx-4 px-4">
-            <div className="flex gap-2 overflow-x-auto pb-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
+            <div className="flex flex-wrap gap-2 pb-4">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -366,7 +366,7 @@ export default function ReglagesPage() {
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center',
+                      'flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200',
                       isActive
                         ? 'text-white shadow-lg'
                         : 'text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
