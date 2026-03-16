@@ -115,6 +115,17 @@ const TABS = [
   },
 ] as const;
 
+// Map des couleurs pour les pills mobile
+const TAB_COLORS: Record<(typeof TABS)[number]['id'], string> = {
+  activite: '#10b981',
+  charges: '#f43f5e',
+  amortissement: '#06b6d4',
+  vehicule: '#0ea5e9',
+  opti: '#8b5cf6',
+  cotisations: '#f59e0b',
+  foyer: '#6366f1',
+};
+
 export default function ReglagesPage() {
   const searchParams = useSearchParams();
   const ctx = useSimulationContext();
@@ -326,10 +337,10 @@ export default function ReglagesPage() {
             {backLink.label}
           </Link>
           <div className="mt-6 flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none">
+            <div className="w-12 h-12 min-w-[3rem] rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none shrink-0">
               <Building2 className="w-6 h-6 text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 Paramètres de simulation
               </h1>
@@ -343,9 +354,9 @@ export default function ReglagesPage() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="lg:w-72 shrink-0">
-            <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 lg:overflow-visible">
+          {/* Mobile Pills Navigation */}
+          <div className="lg:hidden -mx-4 px-4">
+            <div className="flex gap-2 overflow-x-auto pb-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -355,7 +366,37 @@ export default function ReglagesPage() {
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all border-2 shrink-0 lg:shrink',
+                      'shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-xs uppercase tracking-wide transition-all duration-200 snap-center',
+                      isActive
+                        ? 'text-white shadow-lg'
+                        : 'text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                    )}
+                    style={{
+                      background: isActive ? TAB_COLORS[tab.id] : undefined,
+                    }}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <Icon className={cn('w-4 h-4', isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400')} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Sidebar Navigation */}
+          <aside className="hidden lg:block lg:w-72 shrink-0">
+            <nav className="flex flex-col gap-2">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all border-2',
                       isActive
                         ? `dark:bg-slate-800 shadow-sm ${tab.activeBg} dark:bg-slate-800 ${tab.activeBorder} dark:border-slate-700`
                         : 'bg-white dark:bg-slate-800 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:border-slate-200 dark:hover:border-slate-600'
