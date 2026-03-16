@@ -36,6 +36,7 @@ export default function Footer() {
                 <Link href="/contact" className="footer-link">Contact</Link>
                 <Link href="/connexion" className="footer-link">Se connecter</Link>
                 <Link href="/inscription" className="footer-link">Créer un compte</Link>
+                <Link href="/hypotheses" className="footer-link col-span-2">Méthodologie</Link>
               </div>
             </div>
           </div>

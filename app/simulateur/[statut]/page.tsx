@@ -44,13 +44,7 @@ export default function SimulateurStatutPage() {
   const slug = (params?.statut as string)?.toLowerCase() ?? '';
   const statutId = STATUT_SLUG_TO_ID[slug];
   const [activeRegime, setActiveRegimeState] = useState(statutId ?? 'Portage');
-  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page (ex. comparateur → simulation)
-  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const hasVisited = sessionStorage.getItem('has-visited-settings');
-    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
-    return !hasVisited && !dismissed;
-  });
+  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
 
   // Resynchroniser avec userId et sessionStorage
   useEffect(() => {
@@ -239,6 +233,17 @@ export default function SimulateurStatutPage() {
           growthByYear={growthByYear}
           singleRegime
         />
+      </div>
+
+      {/* Lien discret vers la méthodologie */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-4">
+        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          Hypothèses détaillées des simulations&nbsp;:&nbsp;
+          <Link href="/hypotheses" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            voir la méthodologie
+          </Link>
+          .
+        </p>
       </div>
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">

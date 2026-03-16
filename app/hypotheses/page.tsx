@@ -1,0 +1,157 @@
+'use client';
+
+import Link from 'next/link';
+
+export default function HypothesesPage() {
+  return (
+    <main className="min-h-screen bg-page-settings px-4 md:px-6 py-10">
+      <div className="max-w-3xl mx-auto">
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 mb-3">
+          Méthodologie
+        </p>
+        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-4">
+          Hypothèses de calcul & limites du simulateur
+        </h1>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+          Cette page décrit les principales hypothèses simplifiées utilisées pour le comparateur
+          et les simulateurs de statuts freelance. Elle ne remplace pas un conseil personnalisé
+          par un expert-comptable.
+        </p>
+
+        <section className="space-y-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              ACRE & cotisations sociales
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                ACRE modélisée comme un allègement d&apos;environ 25&nbsp;% des cotisations
+                TNS / Micro la première année (hors CSG/CRDS), sans dégressivité fine en fonction
+                du revenu.
+              </li>
+              <li>
+                Au-delà de la première année, les cotisations reviennent sur un niveau &laquo;&nbsp;plein&nbsp;&raquo;
+                selon les barèmes 2026.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              Micro‑entreprise
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Plafonds de chiffre d&apos;affaires 2026 utilisés (BIC/BNC), avec un indicateur
+                de dépassement du plafond dans le comparateur.
+              </li>
+              <li>
+                Taux de cotisations forfaitaires URSSAF 2026 par type d&apos;activité (BIC commerce,
+                BIC services, BNC), sans prise en compte de toutes les options possibles (versement
+                libératoire, etc.).
+              </li>
+              <li>
+                Les dépenses professionnelles ne sont pas déduites en micro‑entreprise au‑delà de
+                l&apos;abattement forfaitaire prévu par le régime.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              IR, IS & dividendes
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Impôt sur le revenu calculé à partir du barème progressif 2026 et du nombre de parts
+                fiscales saisi, sur la base d&apos;un revenu imposable simplifié.
+              </li>
+              <li>
+                Pour les sociétés à l&apos;IS (EURL IS, SASU), l&apos;IS est appliqué à 25&nbsp;% sur
+                le bénéfice modélisé, sans intégration de tous les dispositifs spécifiques
+                (taux réduits, crédits d&apos;impôt, etc.).
+              </li>
+              <li>
+                Dividendes de SASU supposés imposés au PFU 30&nbsp;% (12,8&nbsp;% IR + 17,2&nbsp;% prélèvements
+                sociaux) sans simulation d&apos;arbitrage détaillé PFU / barème.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              Indemnités kilométriques & loyer
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Indemnités kilométriques calculées sur la base du barème fiscal annuel, en supposant
+                que les déplacements déclarés sont bien éligibles.
+              </li>
+              <li>
+                Loyer perçu modélisé comme une charge pour la société et un revenu imposable pour le
+                foyer, sans détailler toutes les conséquences fiscales (foncier, micro‑foncier, etc.).
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              Portage salarial
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Commission de portage paramétrable (taux par défaut inspiré du marché), appliquée
+                sur le chiffre d&apos;affaires encaissé.
+              </li>
+              <li>
+                Les frais de gestion additionnels et services optionnels ne sont pas modélisés de
+                façon exhaustive.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              Limites de la simulation
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Les résultats sont des ordres de grandeur pédagogiques pour comparer les statuts,
+                pas une situation fiscale exacte.
+              </li>
+              <li>
+                Ne sont pas pris en compte&nbsp;: tous les crédits / réductions d&apos;impôt possibles,
+                les situations familiales complexes, les activités mixtes, les options fiscales
+                spécifiques, etc.
+              </li>
+              <li>
+                Avant un choix de statut ou une décision importante, faites valider les résultats
+                par un expert‑comptable.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <p className="mt-8 text-xs text-slate-400 dark:text-slate-500 italic">
+          Dernière mise à jour&nbsp;: Loi de Finances 2026. Cette méthodologie est amenée à évoluer.
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href="/comparateur"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-black text-white shadow hover:bg-indigo-700 transition-colors"
+          >
+            ← Retour au comparateur
+          </Link>
+          <Link
+            href="/simulateur"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-black text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors"
+          >
+            Voir les simulateurs
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+

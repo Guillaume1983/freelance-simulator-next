@@ -31,6 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/cgu',
     '/mentions-legales',
     '/confidentialite',
+    '/hypotheses',
   ];
 
   const articlePaths = ARTICLES.map((a) => `/articles/${a.slug}`);

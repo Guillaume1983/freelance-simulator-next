@@ -12,13 +12,7 @@ import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } 
 export default function ComparateurPage() {
   const sim = useSimulationContext();
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
-  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page (sinon 1er rendu = false, puis effet = true)
-  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const hasVisited = sessionStorage.getItem('has-visited-settings');
-    const dismissed = sessionStorage.getItem('settings-banner-dismissed');
-    return !hasVisited && !dismissed;
-  });
+  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
 
   // Resynchroniser avec userId (contexte peut arriver après le 1er rendu) et avec sessionStorage
   useEffect(() => {
@@ -152,6 +146,17 @@ export default function ComparateurPage() {
       {/* Tableau comparatif */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <ComparisonTable sim={sim} />
+      </div>
+
+      {/* Lien discret vers la méthodologie */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-4">
+        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          Méthodologie de calcul&nbsp;:&nbsp;
+          <Link href="/hypotheses" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            voir le détail
+          </Link>
+          .
+        </p>
       </div>
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
