@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Mail, MessageSquare, Send, CheckCircle } from 'lucide-react';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';
 
@@ -14,7 +13,6 @@ const SUBJECTS = [
 ];
 
 export default function ContactPage() {
-  const [isDark, setIsDark] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', _honeypot: '' });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,11 +71,8 @@ export default function ContactPage() {
   };
 
   return (
-    <div className={isDark ? 'dark' : ''}>
-      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
-        <Header isDark={isDark} setIsDark={setIsDark} />
-
-        <div className="max-w-[1000px] mx-auto px-4 md:px-6 py-12 md:py-20 flex flex-col md:flex-row gap-12 md:gap-16 items-start">
+    <main className="min-h-screen bg-page-settings min-w-0">
+      <div className="max-w-[1000px] mx-auto px-4 md:px-6 py-12 md:py-20 flex flex-col md:flex-row gap-12 md:gap-16 items-start">
 
           {/* Panneau gauche */}
           <div className="flex-1 md:max-w-[300px] flex flex-col gap-8">
@@ -236,10 +231,9 @@ export default function ContactPage() {
               )}
             </div>
           </div>
-        </div>
+      </div>
 
-        <Footer />
-      </main>
-    </div>
+      <Footer />
+    </main>
   );
 }
