@@ -127,9 +127,9 @@ export default function ConnexionPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">Mot de passe</label>
-                    <a href="#" className="text-[10px] text-indigo-500 font-black hover:underline">
+                    <Link href="/mot-de-passe-oublie" className="text-[10px] text-indigo-500 font-black hover:underline">
                       Mot de passe oublié ?
-                    </a>
+                    </Link>
                   </div>
                   <div className="relative">
                     <input
