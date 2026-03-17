@@ -336,11 +336,11 @@ export default function ReglagesPage() {
             <ArrowLeft size={16} />
             {backLink.label}
           </Link>
-          <div className="mt-6 flex items-start gap-4">
+          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
             <div className="w-12 h-12 min-w-[3rem] rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none shrink-0">
               <Building2 className="w-6 h-6 text-white" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 text-center md:text-left">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 Paramètres de simulation
               </h1>

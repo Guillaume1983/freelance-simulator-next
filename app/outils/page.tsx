@@ -27,11 +27,11 @@ export default function OutilsHubPage() {
             <ArrowLeft size={16} />
             Accueil
           </Link>
-          <div className="mt-6 flex items-start gap-4">
+          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shrink-0">
               <Wrench className="w-6 h-6 text-white" />
             </div>
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                 Outils
               </h1>

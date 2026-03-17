@@ -20,11 +20,11 @@ export default function ACREPage() {
             <ArrowLeft size={16} />
             Retour aux outils
           </Link>
-          <div className="mt-6 flex items-start gap-4">
+          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shrink-0">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">ACRE</h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
                 Aide aux créateurs et repreneurs d’entreprises — depuis le décret 2026-69, exonération partielle d’environ 25 % des

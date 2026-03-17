@@ -32,11 +32,11 @@ export default function PlafondsMicroPage() {
             <ArrowLeft size={16} />
             Retour aux outils
           </Link>
-          <div className="mt-6 flex items-start gap-4">
+          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shrink-0">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <div>
+            <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Plafonds Micro</h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
                 Seuils de chiffre d’affaires (Loi de Finances 2026) et reste à facturer avant dépassement.

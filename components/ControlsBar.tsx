@@ -108,7 +108,7 @@ export default function ControlsBar({
           */}
           <div
             className="grid gap-y-1.5 gap-x-5"
-            style={{ gridTemplateColumns: `repeat(${cols}, auto)` }}
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}
           >
             {/* ── Ligne 1 : labels ── */}
             <span className={labelClass}>TJM</span>
