@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LineChart, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -12,6 +12,20 @@ export default function ConnexionPage() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  function ConfirmedBanner() {
+    const searchParams = useSearchParams();
+    const confirmed = searchParams.get('confirmed');
+    if (confirmed !== '1') return null;
+
+    return (
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3 mb-4">
+        <p className="text-[12px] text-emerald-700 dark:text-emerald-300 font-bold">
+          Votre email a bien été confirmé. Vous pouvez maintenant vous connecter.
+        </p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +118,10 @@ export default function ConnexionPage() {
                   </Link>
                 </p>
               </div>
+
+              <Suspense fallback={null}>
+                <ConfirmedBanner />
+              </Suspense>
 
               {errors.global && (
                 <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl px-4 py-3 mb-4">

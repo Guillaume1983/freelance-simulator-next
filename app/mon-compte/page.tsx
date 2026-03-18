@@ -2,14 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Mail, Lock, Trash2, Eye, EyeOff, CheckCircle, AlertTriangle } from 'lucide-react';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { createClient } from '@/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export default function MonComptePage() {
   const router = useRouter();
-  const [isDark, setIsDark] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -85,22 +83,16 @@ export default function MonComptePage() {
 
   if (loading) {
     return (
-      <div className={isDark ? 'dark' : ''}>
-        <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617]">
-          <Header isDark={isDark} setIsDark={setIsDark} />
-          <div className="flex items-center justify-center h-64">
-            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        </main>
-      </div>
+      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617]">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className={isDark ? 'dark' : ''}>
-      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
-        <Header isDark={isDark} setIsDark={setIsDark} />
-
+    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-[700px] mx-auto px-4 md:px-6 py-12 md:py-16 space-y-6">
 
           <div>
@@ -281,8 +273,7 @@ export default function MonComptePage() {
 
         </div>
 
-        <Footer />
-      </main>
-    </div>
+      <Footer />
+    </main>
   );
 }

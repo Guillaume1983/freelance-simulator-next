@@ -39,7 +39,7 @@ export default function InscriptionPage() {
       options: {
         data: { prenom: form.prenom, nom: form.nom },
         // URL de redirection après confirmation par email
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/connexion?confirmed=1`,
       },
     });
 
@@ -57,7 +57,6 @@ export default function InscriptionPage() {
     // Si Supabase a la confirmation email activée → afficher le message
     // Si désactivée → rediriger directement
     setSuccess(true);
-    setTimeout(() => router.push('/'), 3000);
   };
 
   const perks = [
@@ -138,9 +137,27 @@ export default function InscriptionPage() {
                   </div>
                   <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">Compte créé !</h2>
                   <p className="text-[13px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                    Vérifiez vos emails et cliquez sur le lien de confirmation.<br />
-                    Redirection en cours…
+                    Un email de confirmation vient d&apos;être envoyé à votre adresse.<br />
+                    Avant de pouvoir vous connecter, vous devez confirmer votre email via le lien dans le message.
                   </p>
+
+                  <div className="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                      type="button"
+                      onClick={() => router.push('/connexion')}
+                      className="bg-indigo-600 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      Aller à la connexion
+                      <ArrowRight size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push('/')}
+                      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all"
+                    >
+                      Retour à l&apos;accueil
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>
