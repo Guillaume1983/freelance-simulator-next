@@ -39,7 +39,9 @@ export default function InscriptionPage() {
       options: {
         data: { prenom: form.prenom, nom: form.nom },
         // URL de redirection après confirmation par email
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/connexion?confirmed=1`,
+        // Redirection vers une page dédiée (pas de query param),
+        // comme ça le message d'email confirmé s'affiche même si Supabase tronque les query params.
+        emailRedirectTo: `${window.location.origin}/connexion/confirmed`,
       },
     });
 
@@ -145,7 +147,7 @@ export default function InscriptionPage() {
                     <button
                       type="button"
                       onClick={() => router.push('/connexion')}
-                      className="bg-indigo-600 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-black text-sm sm:text-base text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-colors min-h-[48px] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       Aller à la connexion
                       <ArrowRight size={13} />
@@ -153,7 +155,7 @@ export default function InscriptionPage() {
                     <button
                       type="button"
                       onClick={() => router.push('/')}
-                      className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-widest border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-black text-sm sm:text-base text-slate-900 dark:text-white bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 dark:hover:border-slate-600 shadow-sm transition-colors min-h-[48px]"
                     >
                       Retour à l&apos;accueil
                     </button>
