@@ -89,7 +89,7 @@ export default function MonComptePage() {
       }
       const supabase = createClient();
       await supabase.auth.signOut();
-      router.replace('/');
+      router.replace('/?account_deleted=1');
     } catch {
       setDeleteMsg('Erreur réseau. Réessayez.');
       setDeletingAccount(false);

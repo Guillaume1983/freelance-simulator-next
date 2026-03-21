@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
-
-const CONTACT_EMAIL = 'contact@freelance-simulateur.fr';
+import { EMAIL_FROM_TRANSACTIONAL, SITE_CONTACT_EMAIL } from '@/lib/email';
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -48,8 +47,8 @@ export async function POST(request: Request) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: `Freelance Simulateur <noreply@freelance-simulateur.fr>`,
-        to: CONTACT_EMAIL,
+        from: EMAIL_FROM_TRANSACTIONAL,
+        to: SITE_CONTACT_EMAIL,
         replyTo: email.trim(),
         subject: `[Contact] ${subject?.trim() || 'Nouveau message'}`,
         html: `

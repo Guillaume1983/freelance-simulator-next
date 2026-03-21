@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2, X } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2, X, Trash2 } from 'lucide-react';
 import Footer from '@/components/Footer';
 import FaqSection from '@/components/FaqSection';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -15,6 +15,7 @@ export default function Home() {
   const userId = state.userId ?? null;
   const [hasVisitedSettings, setHasVisitedSettings] = useState(false);
   const [showEmailConfirmedBanner, setShowEmailConfirmedBanner] = useState(false);
+  const [showAccountDeletedBanner, setShowAccountDeletedBanner] = useState(false);
   const [authLinkErrorMessage, setAuthLinkErrorMessage] = useState<string | null>(null);
   const [authLinkErrorCode, setAuthLinkErrorCode] = useState<string | null>(null);
 
@@ -25,16 +26,23 @@ export default function Home() {
 
     const params = new URLSearchParams(window.location.search);
     const hadEmailValidated = params.get('email_validated') === '1';
+    const hadAccountDeleted = params.get('account_deleted') === '1';
 
-    // 1) Flux principal : Supabase redirige vers /?email_validated=1 après confirmation (voir emailRedirectTo inscription).
+    // 1) Email validé (Supabase) ou 2) compte supprimé (redirection depuis Mon compte)
     if (hadEmailValidated) {
       queueMicrotask(() => setShowEmailConfirmedBanner(true));
+    }
+    if (hadAccountDeleted) {
+      queueMicrotask(() => setShowAccountDeletedBanner(true));
+    }
+    if (hadEmailValidated || hadAccountDeleted) {
       params.delete('email_validated');
+      params.delete('account_deleted');
       const q = params.toString();
       const path = window.location.pathname;
       window.history.replaceState({}, '', q ? `${path}?${q}` : path);
     } else {
-      // 2) Secours : page intermédiaire /connexion/confirmed qui pose sessionStorage
+      // Secours : page intermédiaire /connexion/confirmed qui pose sessionStorage
       const emailConfirmedFlag = sessionStorage.getItem('emailConfirmedBanner');
       if (emailConfirmedFlag === '1') {
         queueMicrotask(() => setShowEmailConfirmedBanner(true));
@@ -45,7 +53,7 @@ export default function Home() {
     // Erreurs lien (ex. 2e clic) — pas si on vient de confirmer avec succès
     const errorCode = params.get('error_code');
     const error = params.get('error');
-    if (!hadEmailValidated && (errorCode || error)) {
+    if (!hadEmailValidated && !hadAccountDeleted && (errorCode || error)) {
       if (errorCode === 'otp_expired') {
         queueMicrotask(() =>
           setAuthLinkErrorMessage('Le lien de confirmation a expiré.')
@@ -60,12 +68,18 @@ export default function Home() {
     }
   }, []);
 
-  // Bandeau vert : disparaît après quelques secondes ou au clic sur fermer
+  // Bandeaux : disparaissent après quelques secondes ou au clic sur fermer
   useEffect(() => {
     if (!showEmailConfirmedBanner) return;
     const t = window.setTimeout(() => setShowEmailConfirmedBanner(false), 8000);
     return () => window.clearTimeout(t);
   }, [showEmailConfirmedBanner]);
+
+  useEffect(() => {
+    if (!showAccountDeletedBanner) return;
+    const t = window.setTimeout(() => setShowAccountDeletedBanner(false), 8000);
+    return () => window.clearTimeout(t);
+  }, [showAccountDeletedBanner]);
 
   const showConfigCard = !userId && !hasVisitedSettings;
 
@@ -112,6 +126,33 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setShowEmailConfirmedBanner(false)}
+                  className="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 transition-colors"
+                  aria-label="Fermer le message"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+        {showAccountDeletedBanner && (
+          <section className="w-full bg-gradient-to-r from-slate-600 to-slate-800 py-4">
+            <div className="max-w-[1000px] mx-auto px-4 md:px-6">
+              <div className="flex items-start sm:items-center justify-between gap-3 text-white">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
+                    <Trash2 className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-black text-sm">Compte supprimé</p>
+                    <p className="text-[13px] text-white/85 font-medium">
+                      Votre compte et vos données associées ont bien été effacés de nos serveurs.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAccountDeletedBanner(false)}
                   className="shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 transition-colors"
                   aria-label="Fermer le message"
                 >

@@ -18,7 +18,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ### Suppression de compte (RGPD)
 
-La route `POST /api/account/delete` exige la variable d’environnement **`SUPABASE_SERVICE_ROLE_KEY`** (clé *service role* du projet Supabase, **jamais** exposée au navigateur). Sans elle, la suppression affiche une erreur côté UI. À ajouter dans `.env.local` et sur l’hébergeur (ex. Vercel).
+La route `POST /api/account/delete` exige la variable d’environnement **`SUPABASE_SERVICE_ROLE_KEY`** : c’est la clé **secrète** `service_role` (Dashboard Supabase → **Settings** → **API** → *service_role* **secret**). Ce n’est **pas** la clé `anon` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Si tu mets la clé anon par erreur, l’API renvoie une erreur du type `not_admin` / 403. À ajouter dans `.env.local` et sur l’hébergeur (Vercel, etc.), **sans** préfixe `NEXT_PUBLIC_`.
+
+Après une suppression réussie, un **e-mail de confirmation** est envoyé à l’utilisateur via **Resend** (même clé que le formulaire de contact : **`RESEND_API_KEY`**). Si la clé est absente, la suppression reste effectuée mais aucun mail n’est parti (voir les logs serveur).
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
