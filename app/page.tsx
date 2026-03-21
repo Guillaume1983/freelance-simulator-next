@@ -122,123 +122,128 @@ export default function Home() {
           </section>
         )}
 
-        {/* Hero épuré */}
-        <section
-          className="section-hero w-full min-h-[70vh] flex flex-col justify-center pt-20 pb-16 md:pt-28 md:pb-24"
-          aria-label="Accueil"
+        {/* Bloc premier écran : hero pleine hauteur (nav déduite) + bandeau compte en bas du viewport si invité */}
+        <div
+          className={`relative w-full grid min-h-[calc(100dvh-var(--header-height,56px))] ${userId ? 'grid-rows-[1fr]' : 'grid-rows-[1fr_auto]'}`}
         >
-          <div className="absolute inset-0 z-0" aria-hidden>
-            <Image
-              src={HERO_IMAGE}
-              alt=""
-              fill
-              className="object-cover object-top"
-              priority
-              sizes="100vw"
-            />
-          </div>
-          <div className="section-hero-overlay" aria-hidden />
-
-          <div className="relative z-10 max-w-[900px] mx-auto px-4 md:px-6 text-center">
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-xl leading-tight">
-              Comparez et simulez votre revenu net en freelance
-            </h1>
-            <p className="mt-4 text-lg md:text-xl text-white/90 font-medium leading-snug drop-shadow-md max-w-2xl mx-auto">
-              Portage, Micro, EURL IR, EURL IS, SASU — simulations indicatives basées sur les barèmes 2026. Pour une décision finale, faites valider par un expert-comptable.
-            </p>
-
-            {/* CTA principal : carte paramètres dans le hero — uniquement si non connecté et valeurs par défaut */}
-            <div className="mt-8 md:mt-10 flex flex-col items-center gap-5">
-              {showConfigCard && (
-                <Link
-                  href="/reglages"
-                  className="w-full max-w-2xl text-left rounded-2xl bg-amber-50/90 dark:bg-amber-900/15 border border-amber-300/80 dark:border-amber-700/80 px-5 py-4 md:px-6 md:py-5 shadow-md hover:shadow-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
-                      <Settings className="w-7 h-7 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="inline-flex items-center gap-2 mb-1">
-                        <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.16em]">
-                          Étape recommandée
-                        </span>
-                      </div>
-                      <p className="text-sm md:text-base font-black text-slate-900 dark:text-white">
-                        Configurez votre profil freelance
-                      </p>
-                      <p className="mt-0.5 text-[12px] md:text-[13px] text-slate-700 dark:text-slate-200">
-                        TJM, jours travaillés, véhicule, charges professionnelles, situation fiscale…
-                        <span className="font-bold"> Ces paramètres sont utilisés dans toutes vos simulations et comparaisons.</span>
-                      </p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-amber-600 hidden sm:block" />
-                  </div>
-                </Link>
-              )}
-
-              {/* Raccourcis principaux */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full">
-                <Link
-                  href="/comparateur"
-                  className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white text-indigo-700 font-black text-sm shadow-lg hover:bg-indigo-50 transition-all hover:scale-[1.02]"
-                >
-                  <BarChart3 className="w-5 h-5" />
-                  Comparer les statuts
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/simulateur"
-                  className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-indigo-500 text-white font-black text-sm shadow-lg hover:bg-indigo-600 transition-all hover:scale-[1.02] border-2 border-white/20"
-                >
-                  <TrendingUp className="w-5 h-5" />
-                  Simulation 5 ans
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/articles"
-                  className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-sm border border-white/30 hover:bg-white/20 transition-all"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Guides
-                </Link>
-              </div>
+          {/* Hero épuré — la ligne 1fr absorbe l’espace pour hauteur identique connecté / invité */}
+          <section
+            className="section-hero relative min-h-0 flex flex-col justify-center pt-16 pb-8 md:pt-20 md:pb-12"
+            aria-label="Accueil"
+          >
+            <div className="absolute inset-0 z-0" aria-hidden>
+              <Image
+                src={HERO_IMAGE}
+                alt=""
+                fill
+                className="object-cover object-top"
+                priority
+                sizes="100vw"
+              />
             </div>
-            
-            <p className="mt-6 text-[11px] text-white/70 font-bold uppercase tracking-widest">
-              Simulation basée sur la Loi de Finances 2026.
-            </p>
-          </div>
-        </section>
+            <div className="section-hero-overlay" aria-hidden />
 
-        {/* Bannière compte : affichée uniquement si non connecté */}
-        {!userId && (
-          <section className="relative z-10 bg-gradient-to-r from-indigo-600 to-indigo-700 py-6">
-            <div className="max-w-[1000px] mx-auto px-4 md:px-6">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4 text-white">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                    <Gift className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="font-black text-sm">Créez un compte gratuit pour aller plus loin</p>
-                    <p className="text-[13px] text-white/80 mt-0.5">
-                      Sauvegarde automatique de vos paramètres, export PDF de vos comparatifs et simulations.
-                      <span className="font-bold text-white"> Seule votre adresse email est demandée.</span>
-                    </p>
-                  </div>
+            <div className="relative z-10 max-w-[900px] mx-auto px-4 md:px-6 text-center">
+              <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight drop-shadow-xl leading-tight">
+                Comparez et simulez votre revenu net en freelance
+              </h1>
+              <p className="mt-4 text-lg md:text-xl text-white/90 font-medium leading-snug drop-shadow-md max-w-2xl mx-auto">
+                Portage, Micro, EURL IR, EURL IS, SASU — simulations indicatives basées sur les barèmes 2026. Pour une décision finale, faites valider par un expert-comptable.
+              </p>
+
+              {/* CTA principal : carte paramètres dans le hero — uniquement si non connecté et valeurs par défaut */}
+              <div className="mt-6 md:mt-8 flex flex-col items-center gap-4 md:gap-5">
+                {showConfigCard && (
+                  <Link
+                    href="/reglages"
+                    className="w-full max-w-2xl text-left rounded-2xl bg-amber-50/90 dark:bg-amber-900/15 border border-amber-300/80 dark:border-amber-700/80 px-5 py-4 md:px-6 md:py-5 shadow-md hover:shadow-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
+                        <Settings className="w-7 h-7 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="inline-flex items-center gap-2 mb-1">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.16em]">
+                            Étape recommandée
+                          </span>
+                        </div>
+                        <p className="text-sm md:text-base font-black text-slate-900 dark:text-white">
+                          Configurez votre profil freelance
+                        </p>
+                        <p className="mt-0.5 text-[12px] md:text-[13px] text-slate-700 dark:text-slate-200">
+                          TJM, jours travaillés, véhicule, charges professionnelles, situation fiscale…
+                          <span className="font-bold"> Ces paramètres sont utilisés dans toutes vos simulations et comparaisons.</span>
+                        </p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-amber-600 hidden sm:block" />
+                    </div>
+                  </Link>
+                )}
+
+                {/* Raccourcis principaux */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full">
+                  <Link
+                    href="/comparateur"
+                    className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white text-indigo-700 font-black text-sm shadow-lg hover:bg-indigo-50 transition-all hover:scale-[1.02]"
+                  >
+                    <BarChart3 className="w-5 h-5" />
+                    Comparer les statuts
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link
+                    href="/simulateur"
+                    className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-indigo-500 text-white font-black text-sm shadow-lg hover:bg-indigo-600 transition-all hover:scale-[1.02] border-2 border-white/20"
+                  >
+                    <TrendingUp className="w-5 h-5" />
+                    Simulation 5 ans
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link
+                    href="/articles"
+                    className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-sm border border-white/30 hover:bg-white/20 transition-all"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Guides
+                  </Link>
                 </div>
-                <Link
-                  href="/inscription"
-                  className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-700 font-black text-[12px] uppercase tracking-wide hover:bg-indigo-50 transition-all"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Créer mon compte gratuit
-                </Link>
               </div>
+
+              <p className="mt-5 md:mt-6 text-[11px] text-white/70 font-bold uppercase tracking-widest">
+                Simulation basée sur la Loi de Finances 2026.
+              </p>
             </div>
           </section>
-        )}
+
+          {/* Bannière compte : même premier écran que le hero (grille 1fr + auto) */}
+          {!userId && (
+            <section className="relative z-10 bg-gradient-to-r from-indigo-600 to-indigo-700 py-4 md:py-5 shrink-0">
+              <div className="max-w-[1000px] mx-auto px-4 md:px-6">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
+                  <div className="flex items-center gap-3 md:gap-4 text-white text-center md:text-left">
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 mx-auto md:mx-0">
+                      <Gift className="w-5 h-5 md:w-6 md:h-6" />
+                    </div>
+                    <div>
+                      <p className="font-black text-sm">Créez un compte gratuit pour aller plus loin</p>
+                      <p className="text-[12px] md:text-[13px] text-white/80 mt-0.5">
+                        Sauvegarde automatique, export PDF.
+                        <span className="font-bold text-white"> Seule votre adresse email est demandée.</span>
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/inscription"
+                    className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-700 font-black text-[12px] uppercase tracking-wide hover:bg-indigo-50 transition-all w-full md:w-auto justify-center"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Créer mon compte gratuit
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
 
         {/* Entrées principales */}
         <section className="relative z-10 bg-page-settings py-12 md:py-16">

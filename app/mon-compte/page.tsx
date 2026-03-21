@@ -28,6 +28,8 @@ export default function MonComptePage() {
   // Suppression
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [showDeleteZone, setShowDeleteZone] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteMsg, setDeleteMsg] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -73,12 +75,25 @@ export default function MonComptePage() {
     }
   };
 
-  const handleDeleteRequest = () => {
-    const subject = encodeURIComponent('Demande de suppression de compte');
-    const body = encodeURIComponent(
-      `Bonjour,\n\nJe souhaite supprimer mon compte sur freelance-simulateur.fr.\n\nEmail du compte : ${user?.email}\n\nMerci de traiter ma demande dans les meilleurs délais.\n\nCordialement`
-    );
-    window.location.href = `mailto:contact@freelance-simulateur.fr?subject=${subject}&body=${body}`;
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== 'SUPPRIMER' || !user) return;
+    setDeletingAccount(true);
+    setDeleteMsg(null);
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        setDeleteMsg(data.error ?? 'La suppression a échoué. Réessayez ou contactez le support.');
+        setDeletingAccount(false);
+        return;
+      }
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.replace('/');
+    } catch {
+      setDeleteMsg('Erreur réseau. Réessayez.');
+      setDeletingAccount(false);
+    }
   };
 
   if (loading) {
@@ -224,14 +239,14 @@ export default function MonComptePage() {
             {!showDeleteZone ? (
               <div>
                 <p className="text-[12px] text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-4">
-                  La suppression de votre compte est définitive. Toutes vos données (paramètres, historique) seront effacées.
-                  Conformément au RGPD, nous traitons votre demande dans un délai de 30 jours.
+                  La suppression est <strong className="text-slate-700 dark:text-slate-300">immédiate et définitive</strong>.
+                  Vos paramètres de simulation et votre profil sont effacés de nos serveurs.
                 </p>
                 <button
                   onClick={() => setShowDeleteZone(true)}
                   className="border-2 border-rose-200 dark:border-rose-800 text-rose-500 px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all"
                 >
-                  Demander la suppression du compte
+                  Supprimer mon compte
                 </button>
               </div>
             ) : (
@@ -245,28 +260,36 @@ export default function MonComptePage() {
                 <input
                   type="text"
                   value={deleteConfirm}
-                  onChange={e => setDeleteConfirm(e.target.value)}
+                  onChange={e => { setDeleteConfirm(e.target.value); setDeleteMsg(null); }}
                   placeholder="Tapez SUPPRIMER"
+                  disabled={deletingAccount}
+                  autoComplete="off"
                   className="w-full px-3 py-2.5 text-sm"
                 />
-                <div className="flex gap-3">
+                {deleteMsg && (
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-600">
+                    <AlertTriangle size={13} />
+                    {deleteMsg}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={handleDeleteRequest}
-                    disabled={deleteConfirm !== 'SUPPRIMER'}
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirm !== 'SUPPRIMER' || deletingAccount}
                     className="bg-rose-600 text-white px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Envoyer la demande
+                    {deletingAccount ? 'Suppression…' : 'Supprimer définitivement'}
                   </button>
                   <button
-                    onClick={() => { setShowDeleteZone(false); setDeleteConfirm(''); }}
-                    className="border-2 border-slate-200 dark:border-slate-700 text-slate-500 px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                    type="button"
+                    onClick={() => { if (!deletingAccount) { setShowDeleteZone(false); setDeleteConfirm(''); setDeleteMsg(null); } }}
+                    disabled={deletingAccount}
+                    className="border-2 border-slate-200 dark:border-slate-700 text-slate-500 px-6 py-2.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-50"
                   >
                     Annuler
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  Votre client email va s&apos;ouvrir avec un message pré-rempli à envoyer à contact@freelance-simulateur.fr
-                </p>
               </div>
             )}
           </div>
