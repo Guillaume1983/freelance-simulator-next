@@ -38,10 +38,9 @@ export default function InscriptionPage() {
       password: form.password,
       options: {
         data: { prenom: form.prenom, nom: form.nom },
-        // URL de redirection après confirmation par email
-        // Redirection vers une page dédiée (pas de query param),
-        // comme ça le message d'email confirmé s'affiche même si Supabase tronque les query params.
-        emailRedirectTo: `${window.location.origin}/connexion/confirmed`,
+        // Après clic sur le mail, Supabase redirige ici. Le paramètre est lu par l'accueil pour le bandeau vert.
+        // À allowlister dans Supabase : https://ton-domaine.fr/** (wildcard) pour garder la query.
+        emailRedirectTo: `${window.location.origin}/?email_validated=1`,
       },
     });
 
