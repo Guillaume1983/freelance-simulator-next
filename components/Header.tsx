@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, Settings, BarChart3, TrendingUp, BookOpen, Wrench, Gift } from 'lucide-react';
+import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, Settings, BarChart3, TrendingUp, BookOpen, Wrench, Gift, Info } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { SaveStatus } from '@/hooks/useSimulation';
@@ -213,6 +213,13 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
             <BookOpen size={14} />
             Guides
           </Link>
+          <Link
+            href="/a-propos"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+          >
+            <Info size={14} />
+            À propos
+          </Link>
         </div>
 
         {/* ACTIONS */}
@@ -364,6 +371,10 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
             <Link href="/articles" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors mt-1" onClick={() => setMenuOpen(false)}>
               <BookOpen size={16} />
               Guides & articles
+            </Link>
+            <Link href="/a-propos" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors" onClick={() => setMenuOpen(false)}>
+              <Info size={16} />
+              À propos
             </Link>
             <div className="border-t border-slate-200 dark:border-slate-700 my-3 pt-3" />
             {user && (

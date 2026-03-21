@@ -5,16 +5,17 @@ import './globals.css';
 import { SimulationProvider } from '@/context/SimulationContext';
 import AppShell from '@/components/AppShell';
 import ChatBot from '@/components/ChatBot';
-import { FAQ_ITEMS } from '@/lib/faq';
+import {
+  getFaqPageJsonLd,
+  getOrganizationJsonLd,
+  getWebApplicationJsonLd,
+  SITE_URL,
+} from '@/lib/seo/jsonLd';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '600', '800'],
 });
-
-const SITE_URL = 'https://freelance-simulateur.fr';
-/** Logo pour onglet navigateur et moteurs de recherche (favicon + schéma). Remplacer par ton fichier dans public/. */
-const LOGO_URL = `${SITE_URL}/logo.png`;
 
 export const metadata: Metadata = {
   icons: {
@@ -87,34 +88,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebApplication',
-              name: 'Freelance Simulateur',
-              url: SITE_URL,
-              image: LOGO_URL,
-              applicationCategory: 'FinanceApplication',
-              description:
-                'Outil de simulation et comparateur de statuts freelances (portage, micro-entreprise, EURL, SASU) avec barèmes 2026.',
-              inLanguage: 'fr-FR',
-            }),
+            __html: JSON.stringify(getOrganizationJsonLd()),
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'FAQPage',
-              mainEntity: FAQ_ITEMS.map((item) => ({
-                '@type': 'Question',
-                name: item.question,
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: item.answer,
-                },
-              })),
-            }),
+            __html: JSON.stringify(getWebApplicationJsonLd()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getFaqPageJsonLd()),
           }}
         />
         <SimulationProvider>

@@ -20,7 +20,29 @@ export default function Footer() {
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md font-medium">
               Simulez et comparez votre revenu net selon votre statut juridique.
-              Calculs basés sur la Loi de Finances 2026.
+              Calculs indicatifs basés sur la Loi de Finances 2026 et les barèmes de référence (
+              <a
+                href="https://www.urssaf.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Urssaf
+              </a>
+              ,{' '}
+              <a
+                href="https://www.impots.gouv.fr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                impots.gouv.fr
+              </a>
+              ). Pas un conseil fiscal personnalisé — voir{' '}
+              <Link href="/a-propos" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                À propos
+              </Link>
+              .
             </p>
           </div>
 
@@ -35,7 +57,8 @@ export default function Footer() {
                 <Link href="/contact" className="footer-link">Contact</Link>
                 <Link href="/connexion" className="footer-link">Se connecter</Link>
                 <Link href="/inscription" className="footer-link">Créer un compte</Link>
-                <Link href="/hypotheses" className="footer-link col-span-2">Méthodologie</Link>
+                <Link href="/hypotheses" className="footer-link">Méthodologie</Link>
+                <Link href="/a-propos" className="footer-link">À propos</Link>
               </div>
             </div>
           </div>
