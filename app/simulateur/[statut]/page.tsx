@@ -50,18 +50,19 @@ export default function SimulateurStatutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const ctx = useSimulationContext();
+  const sim = ctx.sim ?? ctx;
   const slug = (params?.statut as string)?.toLowerCase() ?? '';
   const statutId = STATUT_SLUG_TO_ID[slug];
   const [activeRegime, setActiveRegimeState] = useState(statutId ?? 'Portage');
   const [showSettingsBanner, setShowSettingsBanner] = useState(false);
 
-  // Resynchroniser avec userId et sessionStorage
+  // Après auth résolue (évite flash invité → connecté sur la bannière orange)
   useEffect(() => {
-    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
-    const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed-sim');
-    const sim = ctx.sim ?? ctx;
+    if (typeof window === 'undefined' || sim.isLoading) return;
+    const hasVisitedSettings = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
     setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
-  }, [(ctx.sim ?? ctx).state.userId]);
+  }, [sim.state.userId, sim.isLoading]);
 
   const dismissBanner = () => {
     setShowSettingsBanner(false);
@@ -94,7 +95,6 @@ export default function SimulateurStatutPage() {
 
   if (!statutId && params?.statut) return null;
 
-  const sim = ctx.sim ?? ctx;
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
 
   // Croissance par année (5 ans) — utilisée à la fois dans la barre de contrôle et dans la section de simulation

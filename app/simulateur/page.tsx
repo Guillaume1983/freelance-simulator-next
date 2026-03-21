@@ -17,20 +17,15 @@ const STATUTS = [
 
 export default function SimulateurHubPage() {
   const sim = useSimulationContext();
-  // Initialiser depuis sessionStorage pour éviter un clignotement au changement de page
-  const [showSettingsBanner, setShowSettingsBanner] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const hasVisited = sessionStorage.getItem('has-visited-settings');
-    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
-    return !hasVisited && !dismissed;
-  });
+  const [showSettingsBanner, setShowSettingsBanner] = useState(false);
 
-  // Resynchroniser avec userId et sessionStorage
+  // Après auth résolue (évite bannière affichée puis retirée pour les comptes connectés)
   useEffect(() => {
-    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
-    const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed-sim');
+    if (typeof window === 'undefined' || sim.isLoading) return;
+    const hasVisitedSettings = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed-sim');
     setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
-  }, [sim.state.userId]);
+  }, [sim.state.userId, sim.isLoading]);
 
   const dismissBanner = () => {
     setShowSettingsBanner(false);

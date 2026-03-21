@@ -11,9 +11,12 @@ import { useSimulationContext } from '@/context/SimulationContext';
 const HERO_IMAGE = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600';
 
 export default function Home() {
-  const { state } = useSimulationContext();
+  const { state, isLoading } = useSimulationContext();
   const userId = state.userId ?? null;
-  const [hasVisitedSettings, setHasVisitedSettings] = useState(false);
+  /** null = pas encore lu (évite carte visible puis masquée au refresh) */
+  const [hasVisitedSettings, setHasVisitedSettings] = useState<boolean | null>(null);
+  /** Invité confirmé : auth résolue et pas de compte (évite flash invité → connecté) */
+  const isGuest = !isLoading && !userId;
   const [showEmailConfirmedBanner, setShowEmailConfirmedBanner] = useState(false);
   const [showAccountDeletedBanner, setShowAccountDeletedBanner] = useState(false);
   const [authLinkErrorMessage, setAuthLinkErrorMessage] = useState<string | null>(null);
@@ -81,7 +84,7 @@ export default function Home() {
     return () => window.clearTimeout(t);
   }, [showAccountDeletedBanner]);
 
-  const showConfigCard = !userId && !hasVisitedSettings;
+  const showConfigCard = isGuest && hasVisitedSettings === false;
 
   return (
     <>
@@ -165,11 +168,13 @@ export default function Home() {
 
         {/* Bloc premier écran : hero pleine hauteur (nav déduite) + bandeau compte en bas du viewport si invité */}
         <div
-          className={`relative w-full grid min-h-[calc(100dvh-var(--header-height,56px))] ${userId ? 'grid-rows-[1fr]' : 'grid-rows-[1fr_auto]'}`}
+          className={`relative w-full grid min-h-[calc(100dvh-var(--header-height,56px))] ${
+            isLoading || userId ? 'grid-rows-[1fr]' : 'grid-rows-[minmax(auto,1fr)_auto]'
+          }`}
         >
-          {/* Hero épuré — la ligne 1fr absorbe l’espace pour hauteur identique connecté / invité */}
+          {/* Hero : minmax(auto,1fr) + pas de min-h-0 évite de couper la carte paramètres (overflow du hero) */}
           <section
-            className="section-hero relative min-h-0 flex flex-col justify-center pt-16 pb-8 md:pt-20 md:pb-12"
+            className="section-hero relative flex flex-col justify-center pt-16 pb-8 md:pt-20 md:pb-12"
             aria-label="Accueil"
           >
             <div className="absolute inset-0 z-0" aria-hidden>
@@ -257,7 +262,7 @@ export default function Home() {
           </section>
 
           {/* Bannière compte : même premier écran que le hero (grille 1fr + auto) */}
-          {!userId && (
+          {isGuest && (
             <section className="relative z-10 bg-gradient-to-r from-indigo-600 to-indigo-700 py-4 md:py-5 shrink-0">
               <div className="max-w-[1000px] mx-auto px-4 md:px-6">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
@@ -360,7 +365,7 @@ export default function Home() {
         </section>
 
         {/* Section avantages du compte : uniquement si non connecté */}
-        {!userId && (
+        {isGuest && (
           <section className="relative z-10 bg-white dark:bg-slate-900 py-12 md:py-16 border-t border-slate-200 dark:border-slate-800">
             <div className="max-w-[900px] mx-auto px-4 md:px-6">
               <div className="text-center mb-10">

@@ -57,7 +57,8 @@ export const useSimulation = () => {
   // readyToSave passe à true uniquement après que les settings ont été chargés
   // depuis Supabase, pour éviter d'écraser les données pendant le chargement.
   const readyToSaveRef    = useRef(false);
-  const trackedUserIdRef  = useRef<string | null>(null);
+  /** `undefined` = jamais traité ; évite null === null au 1er handleAuth (invité) qui bloquait setSettingsLoaded */
+  const trackedUserIdRef  = useRef<string | null | undefined>(undefined);
 
   const taxParts = useMemo(
     () => computeTaxParts(nbAdultes, nbEnfants),
@@ -119,8 +120,8 @@ export const useSimulation = () => {
     const supabase = createClient();
 
     const handleAuth = async (uid: string | null) => {
-      // Dédupliquer (onAuthStateChange peut émettre le même état plusieurs fois)
-      if (uid === trackedUserIdRef.current) return;
+      // Dédupliquer sans confondre « premier passage invité » (ref jamais initialisée) avec un doublon
+      if (trackedUserIdRef.current !== undefined && uid === trackedUserIdRef.current) return;
       trackedUserIdRef.current = uid;
 
       readyToSaveRef.current = false; // Bloquer les saves pendant le chargement

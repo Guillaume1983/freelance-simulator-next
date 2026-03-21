@@ -14,12 +14,13 @@ export default function ComparateurPage() {
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
   const [showSettingsBanner, setShowSettingsBanner] = useState(false);
 
-  // Resynchroniser avec userId (contexte peut arriver après le 1er rendu) et avec sessionStorage
+  // Après auth + sessionStorage (évite flash bannière pour utilisateurs connectés)
   useEffect(() => {
-    const hasVisitedSettings = typeof window !== 'undefined' && sessionStorage.getItem('has-visited-settings');
-    const dismissed = typeof window !== 'undefined' && sessionStorage.getItem('settings-banner-dismissed');
+    if (typeof window === 'undefined' || sim.isLoading) return;
+    const hasVisitedSettings = sessionStorage.getItem('has-visited-settings');
+    const dismissed = sessionStorage.getItem('settings-banner-dismissed');
     setShowSettingsBanner(!sim.state.userId && !hasVisitedSettings && !dismissed);
-  }, [sim.state.userId]);
+  }, [sim.state.userId, sim.isLoading]);
 
   const dismissBanner = () => {
     setShowSettingsBanner(false);
