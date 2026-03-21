@@ -1,7 +1,8 @@
 import type { Article } from '../articleTypes';
 
+/** Photo vérifiée (l’ancienne URL Unsplash renvoyait 404) */
 const IMG =
-  'https://images.unsplash.com/photo-1449965408867-eaa3c487b8a8?w=1200&auto=format&fit=crop&q=80';
+  'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&auto=format&fit=crop&q=80';
 
 const CONTENT = [
   `Les indemnités kilométriques permettent, sous conditions, de rembourser le coût d’usage d’un véhicule personnel pour des déplacements professionnels sans que ce remboursement constitue un revenu imposable pour le bénéficiaire. Pour un indépendant, la logique est différente de celle d’un salarié : vous ne « demandez » pas des IK à un employeur ; vous appliquez un barème forfaitaire ou vous comptabilisez des frais réels dans votre comptabilité, selon les règles du régime fiscal et social qui vous concernent. Cet article vulgarise les principes ; pour votre dossier précis, un expert-comptable reste la référence.`,

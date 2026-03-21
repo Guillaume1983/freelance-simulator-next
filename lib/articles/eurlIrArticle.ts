@@ -1,7 +1,8 @@
 import type { Article } from '../articleTypes';
 
+/** Photo vérifiée (l’ancienne URL Unsplash renvoyait 404) */
 const IMG_EURL_IR =
-  'https://images.unsplash.com/photo-1521737604893-d14bf237b1ed?w=1200&auto=format&fit=crop&q=80';
+  'https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&auto=format&fit=crop&q=80';
 
 const CONTENT = [
   `L’**EURL** (entreprise unipersonnelle à responsabilité limitée) est une **société unipersonnelle** : un seul associé qui est en général le **gérant**. Lorsqu’elle est soumise à l’**impôt sur le revenu** (option ou configuration conduisant à l’IR pour les bénéfices industriels et commerciaux / non commerciaux selon l’activité), on parle couramment d’**EURL à l’IR** dans le langage des simulateurs et des consultants. Les **bénéfices** de l’activité sont intégrés dans la **catégorie** correspondante (BIC ou BNC) du foyer du dirigeant, avec les règles d’abattements, de **déduction des charges** et de **cotisations de travailleur non salarié (TNS)** applicables. Ce schéma diffère nettement de l’**EURL à l’IS** où l’impôt sur les sociétés s’applique au niveau de la personne morale.`,
