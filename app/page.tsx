@@ -13,8 +13,6 @@ const HERO_IMAGE = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f
 export default function Home() {
   const { state, isLoading } = useSimulationContext();
   const userId = state.userId ?? null;
-  /** null = pas encore lu (évite carte visible puis masquée au refresh) */
-  const [hasVisitedSettings, setHasVisitedSettings] = useState<boolean | null>(null);
   /** Invité confirmé : auth résolue et pas de compte (évite flash invité → connecté) */
   const isGuest = !isLoading && !userId;
   const [showEmailConfirmedBanner, setShowEmailConfirmedBanner] = useState(false);
@@ -24,9 +22,6 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const value = !!sessionStorage.getItem('has-visited-settings');
-    queueMicrotask(() => setHasVisitedSettings(value));
-
     const params = new URLSearchParams(window.location.search);
     const hadEmailValidated = params.get('email_validated') === '1';
     const hadAccountDeleted = params.get('account_deleted') === '1';
@@ -83,8 +78,6 @@ export default function Home() {
     const t = window.setTimeout(() => setShowAccountDeletedBanner(false), 8000);
     return () => window.clearTimeout(t);
   }, [showAccountDeletedBanner]);
-
-  const showConfigCard = isGuest && hasVisitedSettings === false;
 
   return (
     <>
@@ -169,12 +162,12 @@ export default function Home() {
         {/* Bloc premier écran : hero pleine hauteur (nav déduite) + bandeau compte en bas du viewport si invité */}
         <div
           className={`relative w-full grid min-h-[calc(100dvh-var(--header-height,56px))] ${
-            isLoading || userId ? 'grid-rows-[1fr]' : 'grid-rows-[minmax(auto,1fr)_auto]'
+            isLoading || userId ? 'grid-rows-[1fr]' : 'grid-rows-[1fr_auto]'
           }`}
         >
-          {/* Hero : minmax(auto,1fr) + pas de min-h-0 évite de couper la carte paramètres (overflow du hero) */}
+          {/* Hero en 1fr + bandeau compte en auto : le bleu reste visible en bas du 1er écran */}
           <section
-            className="section-hero relative flex flex-col justify-center pt-16 pb-8 md:pt-20 md:pb-12"
+            className="section-hero relative min-h-0 flex flex-col justify-center overflow-y-auto pt-16 pb-8 md:pt-20 md:pb-12"
             aria-label="Accueil"
           >
             <div className="absolute inset-0 z-0" aria-hidden>
@@ -197,38 +190,8 @@ export default function Home() {
                 Portage, Micro, EURL IR, EURL IS, SASU — simulations indicatives basées sur les barèmes 2026. Pour une décision finale, faites valider par un expert-comptable.
               </p>
 
-              {/* CTA principal : carte paramètres dans le hero — uniquement si non connecté et valeurs par défaut */}
-              <div className="mt-6 md:mt-8 flex flex-col items-center gap-4 md:gap-5">
-                {showConfigCard && (
-                  <Link
-                    href="/reglages"
-                    className="w-full max-w-2xl text-left rounded-2xl bg-amber-50/90 dark:bg-amber-900/15 border border-amber-300/80 dark:border-amber-700/80 px-5 py-4 md:px-6 md:py-5 shadow-md hover:shadow-lg hover:border-amber-400 dark:hover:border-amber-500 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-sm">
-                        <Settings className="w-7 h-7 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="inline-flex items-center gap-2 mb-1">
-                          <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-[0.16em]">
-                            Étape recommandée
-                          </span>
-                        </div>
-                        <p className="text-sm md:text-base font-black text-slate-900 dark:text-white">
-                          Configurez votre profil freelance
-                        </p>
-                        <p className="mt-0.5 text-[12px] md:text-[13px] text-slate-700 dark:text-slate-200">
-                          TJM, jours travaillés, véhicule, charges professionnelles, situation fiscale…
-                          <span className="font-bold"> Ces paramètres sont utilisés dans toutes vos simulations et comparaisons.</span>
-                        </p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-amber-600 hidden sm:block" />
-                    </div>
-                  </Link>
-                )}
-
-                {/* Raccourcis principaux */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 w-full">
+              <div className="mt-6 md:mt-8 w-full">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap items-center justify-center gap-3 md:gap-4 w-full">
                   <Link
                     href="/comparateur"
                     className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white text-indigo-700 font-black text-sm shadow-lg hover:bg-indigo-50 transition-all hover:scale-[1.02]"
@@ -244,6 +207,13 @@ export default function Home() {
                     <TrendingUp className="w-5 h-5" />
                     Simulation 5 ans
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link
+                    href="/reglages"
+                    className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-sm border border-white/30 hover:bg-white/20 transition-all"
+                  >
+                    <Settings className="w-5 h-5" />
+                    Paramètres
                   </Link>
                   <Link
                     href="/articles"

@@ -407,11 +407,10 @@
   }
 
   /* ── Hero bandeaux (image de fond pleine largeur) ── */
-  /* overflow-y visible : évite de rogner la carte « paramètres » sur l’accueil (invité + bandeau compte en grille) */
+  /* overflow-y géré sur la page (scroll interne si contenu haut + grille 1fr / bandeau bleu) */
   .section-hero {
     position: relative;
     overflow-x: hidden;
-    overflow-y: visible;
     min-height: 320px;
     /* Fond de secours si l'image Unsplash n'est pas encore chargée */
     background-color: #0f172a;
