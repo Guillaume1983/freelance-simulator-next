@@ -163,7 +163,7 @@
     transform: translateY(-2px);
   }
 
-  /* Panneaux translucides (ExpandPanels) avec même niveau de flou que les TopCards */
+  /* Panneaux translucides (ExpandPanels) */
   .glass-panel {
     backdrop-filter: blur(12px);
   }
@@ -204,7 +204,7 @@
     opacity: 1;
   }
 
-  /* ── Boutons d’extension (TopCards) ── */
+  /* ── Boutons d’extension (expand-trigger) ── */
   .expand-trigger {
     transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }

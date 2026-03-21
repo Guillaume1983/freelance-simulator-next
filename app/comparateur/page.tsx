@@ -7,7 +7,7 @@ import ComparisonTable from '@/components/ComparisonTable';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
-import { ArrowLeft, BarChart3, TrendingUp, Settings, AlertCircle, X, Sparkles } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Settings, X, Sparkles } from 'lucide-react';
 
 export default function ComparateurPage() {
   const sim = useSimulationContext();

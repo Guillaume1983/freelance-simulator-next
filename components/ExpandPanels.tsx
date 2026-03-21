@@ -1,7 +1,7 @@
 'use client';
 
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { fmtEur } from '@/lib/utils';
+import { cn, fmtEur } from '@/lib/utils';
 import Link from 'next/link';
 import {
   Car,
@@ -21,7 +21,6 @@ import {
   Minus,
   Info,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { getIK } from '@/lib/financial/rates';
 import NumberInput from '@/components/NumberInput';
 

@@ -1,7 +1,7 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { FileText, BarChart3, Settings2 } from 'lucide-react';
+import { FileText, Settings2 } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import { fmtEur } from '@/lib/utils';
@@ -9,21 +9,6 @@ import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
-
-/* ── Pastilles de scroll mobile ── */
-function ScrollDots({ total, active }: { total: number; active: number }) {
-  return (
-    <div className="flex justify-center items-center gap-1.5 py-2">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className="rounded-full transition-all duration-300"
-          style={{ width: i === active ? 20 : 6, height: 6, background: i === active ? '#6366f1' : '#cbd5e1' }}
-        />
-      ))}
-    </div>
-  );
-}
 
 /* ── Style unifié pour tous les boutons export PDF ── */
 const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';

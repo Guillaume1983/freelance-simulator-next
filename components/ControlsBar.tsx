@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import NumberInput from './NumberInput';
 import { fmtEur } from '@/lib/utils';
 import type { SimulationState, SimulationSetters } from '@/context/SimulationContext';
