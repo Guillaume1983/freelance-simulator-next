@@ -9,6 +9,7 @@ import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
 import { ArrowLeft, Briefcase, Store, Building2, Building, Rocket, Settings, Sparkles, X } from 'lucide-react';
+import { STATUT_SLUG_TO_ID, VALID_STATUT_SLUGS } from '@/lib/simulateur/paliers';
 
 const REGIME_COLORS: Record<string, string> = {
   'Portage': '#6366f1',
@@ -16,14 +17,6 @@ const REGIME_COLORS: Record<string, string> = {
   'EURL IR': '#10b981',
   'EURL IS': '#3b82f6',
   'SASU': '#8b5cf6',
-};
-
-const STATUT_SLUG_TO_ID: Record<string, string> = {
-  portage: 'Portage',
-  micro: 'Micro',
-  'eurl-ir': 'EURL IR',
-  'eurl-is': 'EURL IS',
-  sasu: 'SASU',
 };
 
 const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
@@ -43,7 +36,7 @@ const STATUT_BANDEAU: Record<string, { gradient: string }> = {
   'SASU': { gradient: 'bg-gradient-to-r from-violet-500 to-purple-500' },
 };
 
-const VALID_SLUGS = Object.keys(STATUT_SLUG_TO_ID);
+const VALID_SLUGS = VALID_STATUT_SLUGS;
 
 export default function SimulateurStatutPage() {
   const params = useParams();

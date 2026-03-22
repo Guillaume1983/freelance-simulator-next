@@ -139,6 +139,27 @@ export default function SimulateurHubPage() {
         </div>
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-10 border-t border-slate-200 dark:border-slate-800 pt-8">
+        <h2 className="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3 text-center">
+          Paliers CA (année 1)
+        </h2>
+        <p className="text-center text-[13px] text-slate-600 dark:text-slate-400 mb-4 max-w-2xl mx-auto">
+          Tableau et histogramme sur l&apos;année 1 pour un CA cible (ex.&nbsp;100&nbsp;k€) — même moteur que la simulation, sans projection multi-années.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 max-w-4xl mx-auto">
+          {STATUTS.map(({ slug, label }) => (
+            <Link
+              key={slug}
+              href={`/simulateur/${slug}/100000`}
+              className="text-center text-[11px] font-bold px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors border border-slate-200 dark:border-slate-700"
+            >
+              {label}
+              <span className="block text-[10px] font-semibold text-slate-500 mt-0.5">~100 k€ / an</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <Footer />
     </main>
   );

@@ -1,20 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSimulationContext } from '@/context/SimulationContext';
+import { useComparateurUrlSync } from '@/hooks/useComparateurUrlSync';
 import ComparisonTable from '@/components/ComparisonTable';
 import ControlsBar from '@/components/ControlsBar';
 import Footer from '@/components/Footer';
 import PdfIcon from '@/components/PdfIcon';
 import { ArrowLeft, BarChart3, TrendingUp, Settings, X, Sparkles } from 'lucide-react';
 
-export default function ComparateurPage() {
+function ComparateurFallback() {
+  return (
+    <main className="min-h-screen bg-page-settings min-w-0 flex items-center justify-center px-4">
+      <p className="text-slate-500 dark:text-slate-400 text-sm">Chargement du comparateur…</p>
+    </main>
+  );
+}
+
+function ComparateurPageContent() {
   const sim = useSimulationContext();
   const ca = (sim.state.tjm ?? 0) * (sim.state.days ?? 0);
   const [showSettingsBanner, setShowSettingsBanner] = useState(false);
+  const urlFocus = useComparateurUrlSync(sim.setters);
 
-  // Après auth + sessionStorage (évite flash bannière pour utilisateurs connectés)
   useEffect(() => {
     if (typeof window === 'undefined' || sim.isLoading) return;
     const hasVisitedSettings = sessionStorage.getItem('has-visited-settings');
@@ -36,7 +45,6 @@ export default function ComparateurPage() {
 
   return (
     <main className="min-h-screen bg-page-settings min-w-0">
-      {/* Bannière d'encouragement à configurer */}
       {showSettingsBanner && (
         <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900">
           <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
@@ -46,9 +54,7 @@ export default function ComparateurPage() {
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-black text-sm">
-                    Personnalisez vos résultats !
-                  </p>
+                  <p className="font-black text-sm">Personnalisez vos résultats !</p>
                   <p className="text-[12px] opacity-90">
                     Configurez votre TJM, charges et situation pour un comparatif adapté à votre profil.
                   </p>
@@ -75,7 +81,7 @@ export default function ComparateurPage() {
           </div>
         </div>
       )}
-      
+
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
           <Link
@@ -95,7 +101,6 @@ export default function ComparateurPage() {
                   <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                     Comparatif des statuts
                   </h1>
-                  {/* Desktop : boutons sur la même ligne que le titre */}
                   <span className="hidden md:flex items-center gap-1.5">
                     <button
                       type="button"
@@ -121,7 +126,6 @@ export default function ComparateurPage() {
                 <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm sm:text-base">
                   Comparez les 5 statuts freelance en temps réel
                 </p>
-                {/* Mobile : boutons sous le sous-titre */}
                 <div className="mt-3 flex flex-wrap items-center gap-2 justify-center md:hidden">
                   <button
                     type="button"
@@ -156,7 +160,6 @@ export default function ComparateurPage() {
         </div>
       </header>
 
-      {/* Bandeau TJM/Jours sticky : dégradé comme outils / paramètres, texte en blanc */}
       <div
         className="sticky top-0 z-40 -mt-px bg-gradient-to-r from-indigo-500 to-violet-500 py-3 shadow-lg"
         style={{ top: 'var(--header-height, 56px)' }}
@@ -164,28 +167,37 @@ export default function ComparateurPage() {
         <ControlsBar sim={sim} ca={ca} pageSlug="comparateur" transparentBg lightText />
       </div>
 
-      {/* Contenu scrollable (overflow limité au contenu pour ne pas casser le sticky) */}
       <div className="overflow-x-hidden min-w-0">
-      {/* Tableau comparatif */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <ComparisonTable sim={sim} />
-      </div>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <ComparisonTable
+            sim={sim}
+            comparateurUrlFocusKey={urlFocus.key}
+            focusRegimeId={urlFocus.regimeId}
+          />
+        </div>
 
-      {/* Lien discret vers la méthodologie */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-4">
-        <p className="text-[11px] text-slate-400 dark:text-slate-500">
-          Méthodologie de calcul&nbsp;:&nbsp;
-          <Link href="/hypotheses" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-            voir le détail
-          </Link>
-          .
-        </p>
-      </div>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 pb-4">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+            Méthodologie de calcul&nbsp;:&nbsp;
+            <Link href="/hypotheses" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              voir le détail
+            </Link>
+            .
+          </p>
+        </div>
 
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <Footer />
-      </div>
+        <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+          <Footer />
+        </div>
       </div>
     </main>
+  );
+}
+
+export default function ComparateurPage() {
+  return (
+    <Suspense fallback={<ComparateurFallback />}>
+      <ComparateurPageContent />
+    </Suspense>
   );
 }

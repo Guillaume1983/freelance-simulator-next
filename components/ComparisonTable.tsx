@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { FileText, Settings2 } from 'lucide-react';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
@@ -9,6 +9,13 @@ import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
+import {
+  CA_REPARTITION_INK,
+  CA_REPARTITION_HISTOGRAM_LEXICON,
+  PORTAGE_COMMISSION,
+  buildCaRepartitionSegments,
+  tooltipColorForRowKey,
+} from '@/lib/simulateur/caRepartitionColors';
 
 /* ── Style unifié pour tous les boutons export PDF ── */
 const PDF_BTN = 'cursor-pointer flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 text-[10px] font-black uppercase tracking-wide transition-all shadow-sm';
@@ -22,28 +29,46 @@ const REGIME_COLORS: Record<string, string> = {
 };
 
 
-/* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
-function StackedBar({ ca, fees, cotis, ir, net }: {
-  ca: number; fees: number; cotis: number; ir: number; net: number;
+/* ── Barre segmentée (commission portage en premier si applicable) + labels à droite ── */
+function StackedBar({
+  ca,
+  fees,
+  cotis,
+  ir,
+  net,
+  regimeId,
+  portageCommission = 0,
+  lines,
+  cashInCompany,
+}: {
+  ca: number;
+  fees: number;
+  cotis: number;
+  ir: number;
+  net: number;
+  regimeId: string;
+  portageCommission?: number;
+  lines?: { id?: string; amount?: number }[];
+  cashInCompany?: number;
 }) {
-  const total = Math.max(ca, 1);
-  const segs = [
-    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Charges' },
-    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
-    { pct: (ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
-    { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
-  ];
+  const amounts = { fees, cotis, ir, net };
+  const segs = buildCaRepartitionSegments(ca, amounts, {
+    regimeId,
+    portageCommission,
+    lines,
+    cashInCompany,
+  });
   return (
     <div className="stacked-bar flex items-center gap-3 py-1">
       {/* Barre */}
       <div
-        className="stacked-bar-inner rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
+        className="stacked-bar-inner overflow-hidden shrink-0 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/50"
         style={{ width: 56, height: 88 }}
       >
-        {segs.map((s, i) => (
+        {segs.map((s) => (
           <div
-            key={i}
-            style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
+            key={s.key}
+            style={{ height: `${Math.max(0, s.pct)}%`, background: s.fill }}
             className="stacked-bar-segment transition-all duration-500 w-full"
             title={`${s.label} : ${Math.round(s.pct)}%`}
           />
@@ -51,9 +76,9 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
       </div>
       {/* Labels à droite */}
       <div className="stacked-bar-legend flex flex-col gap-1.5">
-        {segs.map(s => (
-          <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
-            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
+        {segs.map((s) => (
+          <span key={s.key} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.ink }}>
+            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.fill }} />
             {s.label} {Math.round(s.pct)}%
           </span>
         ))}
@@ -62,7 +87,17 @@ function StackedBar({ ca, fees, cotis, ir, net }: {
   );
 }
 
-export default function ComparisonTable({ sim }: { sim: any }) {
+export default function ComparisonTable({
+  sim,
+  comparateurUrlFocusKey,
+  focusRegimeId,
+}: {
+  sim: any;
+  /** Signature des query params (?ca=&statut=) — recentre la carte quand elle change */
+  comparateurUrlFocusKey?: string;
+  /** Id régime (ex. EURL IS) aligné sur ?statut= */
+  focusRegimeId?: string | null;
+}) {
   const [activeCard, setActiveCard] = useState(0);
   const [showConnectorModal, setShowConnectorModal] = useState(false);
   const [openRegimeSettings, setOpenRegimeSettings] = useState<string | null>(null);
@@ -88,6 +123,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     el.scrollTo({ left: safeIndex * cardWidth, behavior: 'smooth' });
     setActiveCard(safeIndex);
   };
+
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
@@ -104,6 +140,18 @@ export default function ComparisonTable({ sim }: { sim: any }) {
   });
 
   const regimes = sim.resultats;
+
+  const lastUrlFocusRef = useRef<string>('');
+  useEffect(() => {
+    if (!comparateurUrlFocusKey || !focusRegimeId || regimes.length === 0) return;
+    const sig = `${comparateurUrlFocusKey}|${focusRegimeId}`;
+    if (lastUrlFocusRef.current === sig) return;
+    const idx = regimes.findIndex((r: any) => r.id === focusRegimeId);
+    if (idx < 0) return;
+    lastUrlFocusRef.current = sig;
+    requestAnimationFrame(() => scrollToCard(idx));
+  }, [comparateurUrlFocusKey, focusRegimeId, regimes]);
+
   const typeMicro = sim.state?.typeActiviteMicro ?? 'BNC';
   const plafondMicro = typeMicro === 'BNC' ? PLAFOND_MICRO_BNC : PLAFOND_MICRO_BIC;
   const isMicroPlafondExceeded = (r: any) => r.id === 'Micro' && r.ca > plafondMicro;
@@ -122,12 +170,12 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
   const rows = [
     { label: 'CA annuel brut',                key: 'ca',             div: 1 },
+    { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-cyan-700 dark:text-cyan-400' },
     { label: 'Charges (dépenses + optimisations)', key: 'fees',      div: 1,  prefix: '-', color: 'text-rose-500' },
-    { label: 'Commission de portage',         key: 'portageCommission', div: 1, prefix: '-', color: 'text-violet-600' },
     { label: 'Cotisations sociales',          key: 'cotis',          div: 1,  prefix: '-', color: 'text-amber-600' },
     { label: 'Base avant impôt',              key: 'beforeTax',      div: 1,  highlight: true },
-    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-rose-600' },
-    { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true },
+    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',       div: 1,  prefix: '-', color: 'text-indigo-600 dark:text-indigo-400' },
+    { label: 'DISPONIBLE FINAL ANNUEL',       key: 'net',            div: 1,  isFinal: true, bigAmount: false, separatorAbove: true, color: 'text-emerald-600 dark:text-emerald-400' },
     { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', div: 1, prefix: '', color: 'text-emerald-600' },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany',  div: 1,  prefix: '',  color: 'text-slate-500' },
     { label: 'DISPONIBLE FINAL MENSUEL',      key: 'net',            div: 12, isFinal: true, bigAmount: true },
@@ -160,7 +208,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
   const getRowBgClass = (row: (typeof rows)[number]) => {
     const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
-    if (r.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-black';
+    if (r.isFinal) return 'bg-emerald-50/60 dark:bg-emerald-900/30';
     if (r.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30 font-bold';
     if (r.key === 'optimisations') return 'bg-emerald-50/50 dark:bg-emerald-900/25';
     if (r.key === 'cashInCompany') return 'bg-slate-50/50 dark:bg-slate-800/25';
@@ -169,7 +217,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
 
   const getRowBgClassCard = (row: (typeof rows)[number]) => {
     const r = row as typeof row & { highlight?: boolean; isFinal?: boolean; key?: string };
-    if (r.isFinal) return 'bg-indigo-50/70 dark:bg-indigo-900/35';
+    if (r.isFinal) return 'bg-emerald-50/70 dark:bg-emerald-900/35';
     if (r.highlight) return 'bg-slate-50/70 dark:bg-slate-800/35';
     if (r.key === 'optimisations') return 'bg-emerald-50/60 dark:bg-emerald-900/30';
     if (r.key === 'cashInCompany') return 'bg-slate-50/60 dark:bg-slate-800/30';
@@ -205,17 +253,19 @@ export default function ComparisonTable({ sim }: { sim: any }) {
     getDetailTextFromLines(r, key, sim, monthly);
 
   const getTooltipColor = (key: string): string => {
+    const rep = tooltipColorForRowKey(key);
+    if (rep) return rep;
     switch (key) {
-      case 'ca': return '#6366f1';
-      case 'fees': return '#fb7185';
-      case 'portageCommission': return '#8b5cf6';
-      case 'cotis': return '#fbbf24';
-      case 'beforeTax': return '#64748b';
-      case 'ir': return '#f87171';
-      case 'net': return '#34d399';
-      case 'optimisations': return '#10b981';
-      case 'cashInCompany': return '#3b82f6';
-      default: return '#6366f1';
+      case 'ca':
+        return '#6366f1';
+      case 'beforeTax':
+        return '#64748b';
+      case 'optimisations':
+        return '#10b981';
+      case 'cashInCompany':
+        return '#3b82f6';
+      default:
+        return '#6366f1';
     }
   };
 
@@ -259,15 +309,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <thead>
             <tr className="bg-white dark:bg-slate-900">
 
-              {/* Cellule haut-gauche */}
-              <th className="p-5 text-left border-b border-slate-100 dark:border-slate-800 w-[200px] align-bottom">
-                <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Métriques
-                </h3>
-              </th>
+              <th
+                scope="col"
+                className="p-4 text-left border-b border-slate-100 dark:border-slate-800 w-[200px] align-bottom"
+              />
 
               {regimes.map((r: any) => (
-                <th key={r.id} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
+                <th key={r.id} className="relative border-b border-slate-100 dark:border-slate-800 px-3 pt-8 pb-1.5 align-top">
                   <div className={`header-band band-${r.class}`} />
                   {r.id === winnerId && !isMicroPlafondExceeded(r) && <div className="winner-badge">OPTIMUM</div>}
                   {isMicroPlafondExceeded(r) && <div className="plafond-badge">PLAFOND DÉPASSÉ</div>}
@@ -284,22 +332,22 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                     </button>
                   )}
 
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-1.5">
                     {/* Nom */}
                     <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">{r.id}</span>
 
                     {/* Montant net mensuel — hauteur fixe pour alignement */}
-                    <div className="flex flex-col items-center min-h-[52px] justify-center">
+                    <div className="flex flex-col items-center min-h-[42px] justify-center">
                       <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
                         {fmt(r.net / 12)}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-400 mt-0.5">net / mois</span>
+                      <span className="text-[10px] font-bold leading-tight text-slate-400 mt-0.5">net / mois</span>
                       {r.cashInCompany != null && r.cashInCompany > 0 ? (
-                        <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
                           + {fmt(r.cashInCompany)} trésorerie
                         </span>
                       ) : (
-                        <span className="mt-1.5 invisible text-[8px]">—</span>
+                        <span className="mt-1 invisible text-[8px] leading-none">—</span>
                       )}
                     </div>
                   </div>
@@ -315,7 +363,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <tr
                   key={idx}
                   className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${
-                    isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''
+                    isFinal && !isLast ? 'border-b-2 border-emerald-100 dark:border-emerald-900/50' : ''
                   }`}
                 >
                   <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
@@ -348,7 +396,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                                     {getBeforeTaxRowLabel(r.id)}
                                   </div>
                                 )}
-                                <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                <span
+                                  className={
+                                    isFinal
+                                      ? 'text-emerald-600 dark:text-emerald-400'
+                                      : ''
+                                  }
+                                >
                                   {(row as any).prefix} {fmt(val)}
                                 </span>
                               </>
@@ -394,14 +448,9 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               <td className="p-4">
                 <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Répartitions</div>
                 <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
-                  {[
-                    { color: '#fb7185', label: 'Charges' },
-                    { color: '#fbbf24', label: 'Cotis' },
-                    { color: '#f87171', label: 'IR' },
-                    { color: '#34d399', label: 'Net' },
-                  ].map(item => (
-                    <span key={item.label} className="flex items-center gap-1 text-[7px] text-slate-400 font-bold">
-                      <span className="w-2 h-2 rounded-sm inline-block" style={{ background: item.color }} />
+                  {CA_REPARTITION_HISTOGRAM_LEXICON.map((item) => (
+                    <span key={item.key} className="flex items-center gap-1 text-[7px] font-bold" style={{ color: item.ink }}>
+                      <span className="w-2 h-2 rounded-sm inline-block opacity-90" style={{ background: item.fill }} />
                       {item.label}
                     </span>
                   ))}
@@ -410,7 +459,17 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                   {regimes.map((r: any) => (
                 <td key={r.id} className="px-4 py-3">
                   <div className="flex justify-center">
-                    <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                    <StackedBar
+                      ca={r.ca}
+                      fees={r.fees}
+                      cotis={r.cotis}
+                      ir={r.ir}
+                      net={r.net}
+                      regimeId={r.id}
+                      portageCommission={r.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0}
+                      lines={r.lines as { id?: string; amount?: number }[] | undefined}
+                      cashInCompany={r.cashInCompany}
+                    />
                   </div>
                 </td>
               ))}
@@ -521,7 +580,17 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                       Trésorerie&nbsp;: {fmt(r.cashInCompany)} /an
                     </div>
                   )}
-                  <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />
+                  <StackedBar
+                    ca={r.ca}
+                    fees={r.fees}
+                    cotis={r.cotis}
+                    ir={r.ir}
+                    net={r.net}
+                    regimeId={r.id}
+                    portageCommission={r.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0}
+                    lines={r.lines as { id?: string; amount?: number }[] | undefined}
+                    cashInCompany={r.cashInCompany}
+                  />
                 </div>
                 <div className="px-4 pb-2 space-y-1.5">
                   {visibleRows.map((row) => {
@@ -575,7 +644,7 @@ export default function ComparisonTable({ sim }: { sim: any }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 9 }}>
             <thead>
               <tr style={{ background: '#f1f5f9' }}>
-                <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Métrique</th>
+                <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }} />
                   {regimes.map((r: any) => (
                   <th key={r.id} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', color: REGIME_COLORS[r.id] }}>{r.id}</th>
                 ))}
@@ -585,7 +654,14 @@ export default function ComparisonTable({ sim }: { sim: any }) {
               {visibleRows.map((row, i) => (
                 <tr
                   key={i}
-                  style={{ background: (row as any).bigAmount ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}
+                  style={{
+                    background:
+                      (row as any).bigAmount || (row as any).isFinal
+                        ? '#ecfdf5'
+                        : i % 2 === 0
+                          ? '#fff'
+                          : '#f8fafc',
+                  }}
                 >
                   <td
                     style={{
@@ -609,7 +685,13 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                           fontWeight: (row as any).isFinal ? 900 : 'normal',
                           borderBottom: '1px solid #e2e8f0',
                           fontSize: 9,
-                          color: (row as any).isFinal ? '#4f46e5' : 'inherit',
+                          color: (row as any).isFinal
+                            ? CA_REPARTITION_INK.net
+                            : row.key === 'portageCommission'
+                              ? PORTAGE_COMMISSION.ink
+                              : row.key === 'ir'
+                                ? CA_REPARTITION_INK.ir
+                                : 'inherit',
                         }}
                       >
                         {sublabel ? (
@@ -631,33 +713,42 @@ export default function ComparisonTable({ sim }: { sim: any }) {
                 <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Répartition du CA par statut</h2>
                 <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                   {regimes.map((r: any) => {
-                    const total = Math.max(r.ca, 1);
-                    const segs = [
-                      { pct: (r.fees  / total) * 100, color: '#fb7185', label: 'Charges' },
-                      { pct: (r.cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
-                      { pct: (r.ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
-                      { pct: (r.net   / total) * 100, color: '#34d399', label: 'Net'     },
-                    ];
+                    const portageComm =
+                      r.id === 'Portage'
+                        ? (r.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0)
+                        : 0;
+                    const segs = buildCaRepartitionSegments(
+                      r.ca,
+                      { fees: r.fees, cotis: r.cotis, ir: r.ir, net: r.net },
+                      {
+                        regimeId: r.id,
+                        portageCommission: portageComm,
+                        lines: r.lines as { id?: string; amount?: number }[] | undefined,
+                        cashInCompany: r.cashInCompany,
+                      },
+                    );
                     return (
                       <div key={r.id} style={{ textAlign: 'center', flex: 1 }}>
                         <p style={{ fontSize: 8, fontWeight: 900, margin: '0 0 4px', color: REGIME_COLORS[r.id] }}>{r.id}</p>
-                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 4, overflow: 'hidden', background: '#e2e8f0' }}>
-                          {segs.map((s, j) => (
+                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 0, overflow: 'hidden', background: '#e2e8f0' }}>
+                          {segs.map((s) => (
                             <div
-                              key={j}
+                              key={s.key}
                               style={{
                                 width: `${Math.max(0, s.pct)}%`,
-                                background: s.color,
+                                background: s.fill,
                               }}
                             />
                           ))}
                         </div>
                         <div style={{ marginTop: 4 }}>
-                          {segs.map(s => (
-                            <div key={s.label} style={{ fontSize: 7, color: s.color, fontWeight: 700 }}>{s.label} {Math.round(s.pct)}%</div>
+                          {segs.map((s) => (
+                            <div key={s.key} style={{ fontSize: 7, color: s.ink, fontWeight: 700 }}>
+                              {s.label} {Math.round(s.pct)}%
+                            </div>
                           ))}
                         </div>
-                        <p style={{ fontSize: 9, fontWeight: 900, color: '#34d399', margin: '4px 0 0' }}>{fmt(r.net / 12)}/mois</p>
+                        <p style={{ fontSize: 9, fontWeight: 900, color: CA_REPARTITION_INK.net, margin: '4px 0 0' }}>{fmt(r.net / 12)}/mois</p>
                       </div>
                     );
                   })}

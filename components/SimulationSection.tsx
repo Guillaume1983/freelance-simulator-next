@@ -9,6 +9,13 @@ import { FileBarChart2, FileText, Eye, EyeOff, CheckCircle, AlertCircle, Percent
 import { useUser } from '@/hooks/useUser';
 import ConnectorModal from '@/components/ConnectorModal';
 import AmountTooltip from '@/components/AmountTooltip';
+import {
+  CA_REPARTITION_INK,
+  CA_REPARTITION_HISTOGRAM_LEXICON,
+  PORTAGE_COMMISSION,
+  buildCaRepartitionSegments,
+  tooltipColorForRowKey,
+} from '@/lib/simulateur/caRepartitionColors';
 
 /* ── Pastilles de scroll mobile ── */
 function ScrollDots({ total, active, color }: { total: number; active: number; color: string }) {
@@ -94,38 +101,121 @@ const PROJECTION_ANALYSIS: Record<string, { forts: string[]; vigilance: string[]
   },
 };
 
-/* ── Barre unique segmentée (Charges → Cotis → IR → Net) + labels à droite ── */
-function StackedBar({ ca, fees, cotis, ir, net }: {
-  ca: number; fees: number; cotis: number; ir: number; net: number;
+/* ── Histogramme : une barre rectangulaire segmentée + légende à droite (points + libellés + %) ── */
+function StackedBar({
+  ca,
+  fees,
+  cotis,
+  ir,
+  net,
+  variant = 'default',
+  portageCommissionAmount = 0,
+  activeRegime,
+  lines,
+  cashInCompany,
+}: {
+  ca: number;
+  fees: number;
+  cotis: number;
+  ir: number;
+  net: number;
+  /** hero = pages palier « article » : histogramme large */
+  variant?: 'default' | 'hero' | 'article';
+  /** Commission portage (€) — segment + ligne de légende si Portage */
+  portageCommissionAmount?: number;
+  activeRegime?: string;
+  /** Lignes financières (CFE, IS société, etc.) — pour répartition complète SASU / EURL IS */
+  lines?: { id?: string; amount?: number }[];
+  cashInCompany?: number;
 }) {
-  const total = Math.max(ca, 1);
-  const segs = [
-    { pct: (fees  / total) * 100, color: '#fb7185', label: 'Charges' },
-    { pct: (cotis / total) * 100, color: '#fbbf24', label: 'Cotis'   },
-    { pct: (ir    / total) * 100, color: '#f87171', label: 'Impôts'  },
-    { pct: (net   / total) * 100, color: '#34d399', label: 'Net'     },
-  ];
+  const amounts = { fees, cotis, ir, net };
+  const chartOpts = {
+    regimeId: activeRegime,
+    portageCommission: portageCommissionAmount,
+    lines,
+    cashInCompany,
+  };
+  const segs = buildCaRepartitionSegments(ca, amounts, chartOpts);
+  const barW = variant === 'hero' ? 120 : variant === 'article' ? 132 : 56;
+  const barH = variant === 'hero' ? 200 : variant === 'article' ? 240 : 88;
+  const gap = variant === 'hero' ? 'gap-6' : 'gap-3';
+  const legendGap = variant === 'hero' ? 'gap-3' : 'gap-1.5';
+  const labelClass =
+    variant === 'hero'
+      ? 'text-sm sm:text-base font-black leading-tight whitespace-nowrap'
+      : 'text-[8px] font-black leading-none whitespace-nowrap';
+  const dotClass = variant === 'hero' ? 'w-3 h-3 rounded-sm' : 'w-2 h-2 rounded-sm';
+
+  /** Palier article : une seule barre + légende (commission en premier si portage) */
+  if (variant === 'article') {
+    const articleSegs = buildCaRepartitionSegments(ca, amounts, chartOpts);
+
+    return (
+      <div className="stacked-bar flex w-full max-w-full items-stretch gap-3 py-1 md:gap-4">
+        <div
+          className="flex shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-inner dark:border-slate-600 dark:bg-slate-900/50"
+          style={{ width: barW, height: barH }}
+        >
+          {articleSegs.map((s) => (
+            <div
+              key={s.key}
+              style={{
+                height: `${Math.max(0, s.pct)}%`,
+                background: s.fill,
+                minHeight: s.pct > 0 ? '2px' : undefined,
+              }}
+              className="min-h-0 w-full transition-all duration-500"
+              title={`${s.label} : ${s.pct < 10 && s.pct > 0 ? s.pct.toFixed(1) : Math.round(s.pct)} %`}
+            />
+          ))}
+        </div>
+        <div className={`flex min-w-0 flex-1 flex-col justify-center ${legendGap}`}>
+          {articleSegs.map((s) => (
+            <div key={s.key} className="flex items-baseline gap-2 text-left">
+              <span className="h-2 w-2 shrink-0 rounded-sm md:h-2.5 md:w-2.5" style={{ background: s.fill }} />
+              <span
+                className="min-w-0 flex-1 text-[9px] font-black uppercase leading-tight tracking-tight md:text-[10px]"
+                style={{ color: s.ink }}
+              >
+                {s.label}
+              </span>
+              <span
+                className="shrink-0 text-[9px] font-black tabular-nums md:text-[10px]"
+                style={{ color: s.ink }}
+              >
+                {s.pct < 10 && s.pct > 0 ? s.pct.toFixed(1) : Math.round(s.pct)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /** Comparateur / simulateur : barres avec coins arrondis (mode palier `article` : barre séparée, aussi arrondie). */
+  const barShell =
+    'stacked-bar-inner overflow-hidden shrink-0 rounded-xl border border-slate-200 bg-slate-50 shadow-inner dark:border-slate-700 dark:bg-slate-900/50';
+
   return (
-    <div className="stacked-bar flex items-center gap-3 py-1">
-      {/* Barre */}
-      <div
-        className="stacked-bar-inner rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700"
-        style={{ width: 56, height: 88 }}
-      >
-        {segs.map((s, i) => (
+    <div
+      className={`stacked-bar flex items-center ${gap} py-1 ${
+        variant === 'hero' ? 'justify-center md:justify-start' : ''
+      }`}
+    >
+      <div className={barShell} style={{ width: barW, height: barH }}>
+        {segs.map((s) => (
           <div
-            key={i}
-            style={{ height: `${Math.max(0, s.pct)}%`, background: s.color }}
+            key={s.key}
+            style={{ height: `${Math.max(0, s.pct)}%`, background: s.fill }}
             className="stacked-bar-segment transition-all duration-500 w-full"
             title={`${s.label} : ${Math.round(s.pct)}%`}
           />
         ))}
       </div>
-      {/* Labels à droite */}
-      <div className="stacked-bar-legend flex flex-col gap-1.5">
-        {segs.map(s => (
-          <span key={s.label} className="flex items-center gap-1.5 text-[8px] font-black leading-none whitespace-nowrap" style={{ color: s.color }}>
-            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: s.color }} />
+      <div className={`stacked-bar-legend flex flex-col ${legendGap}`}>
+        {segs.map((s) => (
+          <span key={s.key} className={`flex items-center gap-2 ${labelClass}`} style={{ color: s.ink }}>
+            <span className={`${dotClass} shrink-0`} style={{ background: s.fill }} />
             {s.label} {Math.round(s.pct)}%
           </span>
         ))}
@@ -139,6 +229,10 @@ export default function SimulationSection({
   activeRegime,
   setActiveRegime,
   singleRegime = false,
+  /** Pages SEO palier CA : une seule colonne (année 1), pas de réglage croissance multi-années */
+  palierMode = false,
+  /** Tableau type « capture » à gauche, histogramme XXL à droite (desktop) */
+  articleSplitLayout = false,
   growthByYear,
   onChangeGrowthYear,
 }: {
@@ -147,6 +241,8 @@ export default function SimulationSection({
   setActiveRegime: (id: string) => void;
   /** true sur les pages simulateur (un seul statut) : masque les pastilles et le bloc SIMULATIONS / nom / +% */
   singleRegime?: boolean;
+  palierMode?: boolean;
+  articleSplitLayout?: boolean;
   growthByYear: number[];
   onChangeGrowthYear?: (index: number, value: number) => void;
 }) {
@@ -204,20 +300,23 @@ export default function SimulationSection({
     [sim.state, growthByYear],
   );
 
+  const yrsForUi = palierMode ? simulations.slice(0, 1) : simulations;
+  const splitArticle = Boolean(palierMode && articleSplitLayout);
+
   // Alias vers fmtEur — formatage identique partout, sans hydratation mismatch
   const fmt = fmtEur;
 
   const onYearScroll = () => {
     const el = yearScrollRef.current;
     if (!el) return;
-    const count = simulations.length;
+    const count = yrsForUi.length;
     const idx = Math.round(el.scrollLeft / (el.scrollWidth / count || 1));
     setActiveYear(Math.min(Math.max(idx, 0), Math.max(count - 1, 0)));
   };
 
   const scrollToYear = (index: number) => {
     const el = yearScrollRef.current;
-    const count = simulations.length;
+    const count = yrsForUi.length;
     if (!el || count === 0) return;
     const safeIndex = Math.min(Math.max(index, 0), count - 1);
     const cardWidth = el.scrollWidth / count || 0;
@@ -233,29 +332,39 @@ export default function SimulationSection({
 
   const baseRows = [
     { label: 'CA annuel brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
-    { label: 'Charges (dépenses + optimisations)', key: 'fees',      prefix: '-', color: 'text-rose-500',  highlight: false, isFinal: false, monthly: false },
-    { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-violet-600', highlight: false, isFinal: false, monthly: false },
+    { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-cyan-700 dark:text-cyan-400', highlight: false, isFinal: false, monthly: false },
+    {
+      label: splitArticle
+        ? 'Charges professionnelles'
+        : 'Charges (dépenses + optimisations)',
+      key: 'fees',
+      prefix: '-',
+      color: 'text-rose-500',
+      highlight: false,
+      isFinal: false,
+      monthly: false,
+    },
     { label: 'Cotisations sociales',         key: 'cotis',     prefix: '-', color: 'text-amber-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Base avant impôt',             key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
-    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-rose-600',  highlight: false, isFinal: false, monthly: false },
-    { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: false, bigAmount: false, separatorAbove: true },
+    { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-indigo-600 dark:text-indigo-400',  highlight: false, isFinal: false, monthly: false },
+    { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: 'text-emerald-600 dark:text-emerald-400', highlight: false, isFinal: true,  monthly: false, bigAmount: false, separatorAbove: true },
     { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany', prefix: '',  color: 'text-slate-500', highlight: false, isFinal: false, monthly: false },
-    { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: '',               highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
+    { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: 'text-emerald-600 dark:text-emerald-400', highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
   ];
 
-  // Masquer certaines lignes si elles sont vides sur 5 ans pour le régime actif
-  const hasAnyCashInCompany = simulations.some(yr => {
+  // Masquer certaines lignes si elles sont vides (sur la période affichée) pour le régime actif
+  const hasAnyCashInCompany = yrsForUi.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     return r && r.cashInCompany != null && r.cashInCompany > 0;
   });
-  const hasAnyFees = simulations.some(yr => {
+  const hasAnyFees = yrsForUi.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     if (!r) return false;
     if (activeRegime === 'Micro') return false;
     return r.fees != null && r.fees > 0;
   });
-  const hasAnyOptimisations = simulations.some(yr => {
+  const hasAnyOptimisations = yrsForUi.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     if (!r) return false;
     const lines = (r.lines as any[] | undefined) ?? [];
@@ -278,7 +387,7 @@ export default function SimulationSection({
     if (openGrowthYear == null || !onChangeGrowthYear) return;
     onChangeGrowthYear(openGrowthYear, value);
   };
-  const hasAnyPortageCommission = simulations.some(yr => {
+  const hasAnyPortageCommission = yrsForUi.some(yr => {
     const r = yr.find((x: any) => x.id === activeRegime) as any;
     if (!r || activeRegime !== 'Portage') return false;
     const commission = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
@@ -287,6 +396,8 @@ export default function SimulationSection({
   const rows = baseRows.filter(row => {
     if (row.key === 'cashInCompany') return hasAnyCashInCompany;
     if (row.key === 'portageCommission') return hasAnyPortageCommission;
+    // Pages palier « article » : pas de ligne optimisations (IK / loyer / avantages)
+    if (row.key === 'optimisations' && splitArticle) return false;
     // Micro : optimisations non déductibles → masquer totalement la ligne
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
     // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
@@ -322,22 +433,24 @@ export default function SimulationSection({
     getDetailTextFromLines(r, key, sim, monthly);
 
   const getTooltipColor = (key: string): string => {
+    const rep = tooltipColorForRowKey(key);
+    if (rep) return rep;
     switch (key) {
-      case 'ca': return '#6366f1';
-      case 'fees': return '#fb7185';
-      case 'portageCommission': return '#8b5cf6';
-      case 'cotis': return '#fbbf24';
-      case 'beforeTax': return '#64748b';
-      case 'ir': return '#f87171';
-      case 'net': return '#34d399';
-      case 'optimisations': return '#10b981';
-      case 'cashInCompany': return '#3b82f6';
-      default: return '#6366f1';
+      case 'ca':
+        return '#6366f1';
+      case 'beforeTax':
+        return '#64748b';
+      case 'optimisations':
+        return '#10b981';
+      case 'cashInCompany':
+        return '#3b82f6';
+      default:
+        return '#6366f1';
     }
   };
 
   const getRowBgClass = (row: (typeof rows)[number]) => {
-    if (row.isFinal) return 'bg-indigo-50/60 dark:bg-indigo-900/30';
+    if (row.isFinal) return 'bg-emerald-50/60 dark:bg-emerald-900/30';
     if (row.highlight) return 'bg-slate-50/60 dark:bg-slate-800/30';
     if (row.key === 'optimisations') return 'bg-emerald-50/50 dark:bg-emerald-900/25';
     if (row.key === 'cashInCompany') return 'bg-slate-50/50 dark:bg-slate-800/25';
@@ -345,16 +458,23 @@ export default function SimulationSection({
   };
 
   const getRowBgClassCard = (row: (typeof rows)[number]) => {
-    if (row.isFinal) return 'bg-indigo-50/70 dark:bg-indigo-900/35';
+    if (row.isFinal) return 'bg-emerald-50/70 dark:bg-emerald-900/35';
     if (row.highlight) return 'bg-slate-50/70 dark:bg-slate-800/35';
     if (row.key === 'optimisations') return 'bg-emerald-50/60 dark:bg-emerald-900/30';
     if (row.key === 'cashInCompany') return 'bg-slate-50/60 dark:bg-slate-800/30';
     return 'bg-slate-50/40 dark:bg-slate-900/20';
   };
 
+  const rArticleBar = splitArticle
+    ? (yrsForUi[0]?.find((x: any) => x.id === activeRegime) as any)
+    : null;
+
+  const cardShell =
+    'overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none';
+
   return (
     <>
-    <div className="overflow-visible bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/40 dark:shadow-none">
+    <div className={splitArticle ? 'overflow-visible' : cardShell}>
 
       {/* ── Barre de contrôle supplémentaire (multi‑statuts uniquement) ── */}
       {!singleRegime && (
@@ -383,35 +503,89 @@ export default function SimulationSection({
       )}
 
       {/* ── Tableau Simulations (desktop) — même code que ComparisonTable ── */}
-      <div className="hidden md:block">
-        {/* Header bar — exactement comme ComparisonTable */}
-        <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-slate-50 to-slate-100/50 dark:from-slate-800/50 dark:to-slate-900/50 rounded-t-2xl border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
-              <button
-                id="simulateur-pdf-btn"
-                onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
-                className={`sr-only ${PDF_BTN}`}
-              >
-                <FileText size={11} /> Exporter PDF
-              </button>
+      <div
+        className={`hidden md:block w-full ${
+          splitArticle
+            ? 'flex flex-col overflow-hidden rounded-2xl border border-slate-300/80 bg-white shadow-sm ring-1 ring-slate-900/5 dark:border-slate-600 dark:bg-slate-900'
+            : ''
+        }`}
+      >
+        {/* Layout « article » : une seule barre d’en-tête pour tout le bloc (table + histogramme) */}
+        {splitArticle && (
+          <>
+            <button
+              id="simulateur-pdf-btn"
+              type="button"
+              onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
+              className={`sr-only ${PDF_BTN}`}
+            >
+              <FileText size={11} /> Exporter PDF
+            </button>
+            <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-100/90 px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800/90">
+              <span className="flex shrink-0 gap-1.5" aria-hidden>
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ec6a5e]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#f4bf4f]" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[#61c554]" />
+              </span>
+              <span className="min-w-0 truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                Aperçu — année 1 · {activeRegime}
+              </span>
             </div>
-          </div>
-          <table className="w-full border-separate border-spacing-0 table-fixed">
+          </>
+        )}
+
+        <div className={splitArticle ? 'min-w-0 w-full' : ''}>
+          <div className={splitArticle ? 'min-w-0' : ''}>
+            {!splitArticle ? (
+              <div className="flex items-center justify-between rounded-t-2xl border-b border-slate-200 bg-linear-to-r from-slate-50 to-slate-100/50 px-6 py-3 dark:border-slate-700 dark:from-slate-800/50 dark:to-slate-900/50">
+                <div className="flex items-center gap-3">
+                  {/* Bouton PDF caché, déclenché depuis la barre de contrôle */}
+                  <button
+                    id="simulateur-pdf-btn"
+                    onClick={() => (isConnected ? handlePrintBiz() : setShowConnectorModal(true))}
+                    className={`sr-only ${PDF_BTN}`}
+                  >
+                    <FileText size={11} /> Exporter PDF
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          <table
+            className={`w-full border-separate border-spacing-0 table-fixed ${splitArticle ? 'text-[11px] md:text-[11px]' : ''}`}
+          >
+            {splitArticle && (() => {
+              const nRest = yrsForUi.length + (rArticleBar ? 1 : 0);
+              const wFirst = 20;
+              const wEach = nRest > 0 ? (100 - wFirst) / nRest : 0;
+              return (
+                <colgroup>
+                  <col style={{ width: `${wFirst}%` }} />
+                  {yrsForUi.map((_, i) => (
+                    <col key={`y-${i}`} style={{ width: `${wEach}%` }} />
+                  ))}
+                  {rArticleBar ? <col key="hist" style={{ width: `${wEach}%` }} /> : null}
+                </colgroup>
+              );
+            })()}
             <thead>
               <tr className="bg-white dark:bg-slate-900">
-                <th className="p-5 text-left border-b border-slate-100 dark:border-slate-800 w-[200px] align-bottom">
-                  <h3 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Métriques
-                  </h3>
-                </th>
-                {simulations.map((yr, i) => {
+                <th
+                  scope="col"
+                  className={`text-left border-b border-slate-100 dark:border-slate-800 align-bottom ${
+                    splitArticle ? 'p-2' : 'p-4 w-[200px]'
+                  }`}
+                />
+                {yrsForUi.map((yr, i) => {
                   const r = yr.find((x: any) => x.id === activeRegime);
-                  const growthValue = growthByYear[i] ?? 0;
                   return (
-                    <th key={i} className="p-3 relative pt-10 border-b border-slate-100 dark:border-slate-800 align-top">
+                    <th
+                      key={i}
+                      className={`relative border-b border-slate-100 dark:border-slate-800 align-top ${
+                        splitArticle ? 'px-2 pt-7 pb-1' : 'px-3 pt-10 pb-1.5'
+                      }`}
+                    >
                       <div className={`header-band band-${regimeClass}`} />
-                      {i > 0 && (
+                      {!palierMode && i > 0 && (
                         <button
                           type="button"
                           onClick={() => handleOpenGrowthModal(i)}
@@ -421,27 +595,53 @@ export default function SimulationSection({
                           <Percent className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      <div className="flex flex-col items-center gap-2">
-                        <span className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                      <div className={`flex flex-col items-center ${splitArticle ? 'gap-0.5' : 'gap-1.5'}`}>
+                        <span
+                          className={`font-black text-slate-800 dark:text-white uppercase tracking-tight ${
+                            splitArticle ? 'text-xs' : 'text-sm'
+                          }`}
+                        >
                           Année {i + 1}
                         </span>
-                        <div className="flex flex-col items-center min-h-[52px] justify-center">
-                          <span className="text-2xl font-black text-slate-900 dark:text-white leading-none tabular-nums">
+                        <div className={`flex flex-col items-center justify-center ${splitArticle ? 'min-h-[36px]' : 'min-h-[42px]'}`}>
+                          <span
+                            className={`font-black text-slate-900 dark:text-white leading-none tabular-nums ${
+                              splitArticle ? 'text-lg' : 'text-2xl'
+                            }`}
+                          >
                             {r ? fmt(r.net / 12) : '—'}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-400 mt-0.5">net / mois</span>
+                          <span className="text-[10px] font-bold leading-tight text-slate-400 mt-0.5">net / mois</span>
                           {r && r.cashInCompany != null && r.cashInCompany > 0 ? (
-                            <span className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
+                            <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[8px] font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300">
                               + {fmt(r.cashInCompany)} trésorerie
                             </span>
                           ) : (
-                            <span className="mt-1.5 invisible text-[8px]">—</span>
+                            <span className="mt-1 invisible text-[8px] leading-none">—</span>
                           )}
                         </div>
                       </div>
                     </th>
                   );
                 })}
+                {splitArticle && rArticleBar && (
+                  <th
+                    scope="col"
+                    className="relative border-b border-l border-slate-100 bg-white px-2 pt-7 pb-1 align-top dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    <div className={`header-band band-${regimeClass}`} />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-center text-xs font-black uppercase tracking-tight text-slate-800 dark:text-white">
+                        Répartition CA
+                      </span>
+                      <div className="flex min-h-[36px] flex-col items-center justify-center">
+                        <span className="invisible text-lg leading-none tabular-nums">0</span>
+                        <span className="invisible text-[10px] font-bold leading-tight text-slate-400">net / mois</span>
+                        <span className="invisible mt-1 text-[8px] leading-none">—</span>
+                      </div>
+                    </div>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="text-slate-700 dark:text-slate-300">
@@ -450,11 +650,19 @@ export default function SimulationSection({
                 const isFinal = (row as any).isFinal;
                 return (
                   <React.Fragment key={idx}>
-                    <tr className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${isFinal && !isLast ? 'border-b-2 border-indigo-100 dark:border-indigo-900/50' : ''}`}>
-                      <td className="px-5 py-3 border-r border-slate-100 dark:border-slate-800">
-                        <div className="font-semibold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wide leading-tight">{row.label}</div>
+                    <tr className={`transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30 ${getRowBgClass(row)} ${isFinal && !isLast ? 'border-b-2 border-emerald-100 dark:border-emerald-900/50' : ''}`}>
+                      <td
+                        className={`border-r border-slate-100 dark:border-slate-800 ${splitArticle ? 'px-2 py-1.5' : 'px-5 py-3'}`}
+                      >
+                        <div
+                          className={`font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight ${
+                            splitArticle ? 'text-[8px]' : 'text-[10px]'
+                          }`}
+                        >
+                          {row.label}
+                        </div>
                       </td>
-                      {simulations.map((yr, i) => {
+                      {yrsForUi.map((yr, i) => {
                         const r = yr.find((x: any) => x.id === activeRegime) as any;
                         let val: number | null = null;
                         if (row.key === 'optimisations') {
@@ -479,13 +687,17 @@ export default function SimulationSection({
                         return (
                           <td
                             key={i}
-                            className={`px-3 py-3 ${(row as any).color || ''}`}
+                            className={`${splitArticle ? 'px-1.5 py-1.5' : 'px-3 py-3'} ${(row as any).color || ''}`}
                           >
                             <div className="w-full flex justify-center">
                               {(() => {
                                 if (val === null) {
                                   return (
-                                    <span className="inline-flex justify-end tabular-nums text-sm font-bold w-[88px] text-slate-300 dark:text-slate-600">
+                                    <span
+                                      className={`inline-flex justify-end tabular-nums font-bold text-slate-300 dark:text-slate-600 ${
+                                        splitArticle ? 'text-xs w-[68px]' : 'text-sm w-[88px]'
+                                      }`}
+                                    >
                                       —
                                     </span>
                                   );
@@ -497,7 +709,13 @@ export default function SimulationSection({
                                         {getBeforeTaxRowLabel(activeRegime)}
                                       </div>
                                     )}
-                                    <span className={isFinal ? 'text-indigo-600 dark:text-indigo-400' : ''}>
+                                    <span
+                                      className={
+                                        isFinal
+                                          ? 'text-emerald-600 dark:text-emerald-400'
+                                          : ''
+                                      }
+                                    >
                                       {(row as any).prefix} {fmt(val)}
                                     </span>
                                   </>
@@ -510,7 +728,11 @@ export default function SimulationSection({
                                     label={row.label}
                                     color={tooltipColor}
                                   >
-                                    <div className="inline-flex flex-col items-end tabular-nums text-sm font-bold w-[88px]">
+                                    <div
+                                      className={`inline-flex flex-col items-end tabular-nums font-bold ${
+                                        splitArticle ? 'text-xs w-[68px]' : 'text-sm w-[88px]'
+                                      }`}
+                                    >
                                       {content}
                                     </div>
                                   </AmountTooltip>
@@ -520,22 +742,47 @@ export default function SimulationSection({
                           </td>
                         );
                       })}
+                      {splitArticle && rArticleBar && idx === 0 && (
+                        <td
+                          rowSpan={rows.length}
+                          className="border-l border-slate-100 bg-white align-middle dark:border-slate-800 dark:bg-slate-900"
+                        >
+                          <div className="flex h-full flex-col items-center justify-center px-2 py-3 md:px-3">
+                            <StackedBar
+                              variant="article"
+                              ca={rArticleBar.ca ?? 0}
+                              fees={rArticleBar.fees ?? 0}
+                              cotis={rArticleBar.cotis ?? 0}
+                              ir={rArticleBar.ir ?? 0}
+                              net={rArticleBar.net ?? 0}
+                              activeRegime={activeRegime}
+                              portageCommissionAmount={
+                                rArticleBar?.lines?.find((l: { id?: string }) => l.id === 'portage_commission')
+                                  ?.amount ?? 0
+                              }
+                              lines={rArticleBar?.lines as { id?: string; amount?: number }[] | undefined}
+                              cashInCompany={rArticleBar?.cashInCompany}
+                            />
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   </React.Fragment>
                 );
               })}
 
-              {/* ── Ligne Trimestres retraite validés ── */}
+              {/* ── Ligne Trimestres retraite validés (masquée en layout « article ») ── */}
+              {!splitArticle && (
               <tr className="bg-white dark:bg-slate-900">
-                <td className="px-4 py-3 border-r border-slate-100 dark:border-slate-800 align-top">
+                <td className="border-r border-slate-100 dark:border-slate-800 align-top px-4 py-3">
                   <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">
                     Trimestres retraite<br />validés
                   </div>
                 </td>
-                {simulations.map((yr, i) => {
+                {yrsForUi.map((yr, i) => {
                   const r = yr.find((x: any) => x.id === activeRegime) as any;
                   return (
-                    <td key={i} className="px-3 py-3 text-center">
+                    <td key={i} className="text-center px-3 py-3">
                       {r ? (
                         <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={activeRegime} />
                       ) : (
@@ -545,46 +792,58 @@ export default function SimulationSection({
                   );
                 })}
               </tr>
+              )}
 
-              {/* ── Ligne Répartitions (alignée comparateur) ── */}
+              {/* ── Ligne Répartitions (masquée en layout « article » : histogramme à part) ── */}
+              {!splitArticle && (
               <tr className="bg-slate-50/20 dark:bg-slate-900/10">
                 <td className="p-4">
                   <div className="font-black text-slate-400 dark:text-slate-500 uppercase text-[9px] tracking-widest leading-tight">Répartitions</div>
                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
-                    {[
-                      { color: '#fb7185', label: 'Charges' },
-                      { color: '#fbbf24', label: 'Cotis' },
-                      { color: '#f87171', label: 'IR' },
-                      { color: '#34d399', label: 'Net' },
-                    ].map(item => (
-                      <span key={item.label} className="flex items-center gap-1 text-[7px] text-slate-400 font-bold">
-                        <span className="w-2 h-2 rounded-sm inline-block" style={{ background: item.color }} />
+                    {CA_REPARTITION_HISTOGRAM_LEXICON.map((item) => (
+                      <span key={item.key} className="flex items-center gap-1 text-[7px] font-bold" style={{ color: item.ink }}>
+                        <span className="w-2 h-2 rounded-sm inline-block opacity-90" style={{ background: item.fill }} />
                         {item.label}
                       </span>
                     ))}
                   </div>
                 </td>
-                {simulations.map((yr, i) => {
+                {yrsForUi.map((yr, i) => {
                   const r = yr.find((x: any) => x.id === activeRegime) as any;
                   return (
                     <td key={i} className="px-4 py-3">
                       <div className="flex justify-center">
-                        <StackedBar ca={r?.ca ?? 0} fees={r?.fees ?? 0} cotis={r?.cotis ?? 0} ir={r?.ir ?? 0} net={r?.net ?? 0} />
+                        <StackedBar
+                          ca={r?.ca ?? 0}
+                          fees={r?.fees ?? 0}
+                          cotis={r?.cotis ?? 0}
+                          ir={r?.ir ?? 0}
+                          net={r?.net ?? 0}
+                          activeRegime={activeRegime}
+                          portageCommissionAmount={
+                            r?.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0
+                          }
+                          lines={r?.lines as { id?: string; amount?: number }[] | undefined}
+                          cashInCompany={r?.cashInCompany}
+                        />
                       </div>
                     </td>
                   );
                 })}
               </tr>
+              )}
             </tbody>
           </table>
         </div>
+        </div>
+      </div>
 
-      {/* Analyse (à la suite des Répartitions, dans la même carte — desktop uniquement) */}
-      {PROJECTION_ANALYSIS[activeRegime] && (
+      {/* Analyse (masquée en layout « article » — texte dans la page palier) */}
+      {PROJECTION_ANALYSIS[activeRegime] && !splitArticle && (
         <div className="hidden md:block border-t border-slate-200 dark:border-slate-700">
           <div className="p-4 md:p-5">
           <h3 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-1">
-            Analyse sur 5 ans
+            {palierMode ? 'Analyse indicative (année 1)' : 'Analyse sur 5 ans'}
           </h3>
           <p className="text-sm font-black text-slate-900 dark:text-slate-50 mb-3">
             Points forts & vigilances pour {activeRegime}
@@ -623,13 +882,16 @@ export default function SimulationSection({
 
       {/* ── Vue mobile : cartes par année ── */}
       <div className="block md:hidden p-4 pt-5">
+        {yrsForUi.length > 1 && (
         <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium px-1 mb-2">
           Faites glisser pour voir l&apos;évolution année par année.
         </p>
+        )}
 
         {/* ── Navigation par tabs cliquables (mobile) ── */}
+        {yrsForUi.length > 1 && (
         <div className="flex gap-1 overflow-x-auto justify-center pt-3 pb-4 -mx-4 px-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden snap-x">
-          {simulations.map((_, i: number) => (
+          {yrsForUi.map((_, i: number) => (
             <button
               key={i}
               onClick={() => scrollToYear(i)}
@@ -647,14 +909,15 @@ export default function SimulationSection({
             </button>
           ))}
         </div>
+        )}
 
         <div className="relative">
           <div
             ref={yearScrollRef}
             onScroll={onYearScroll}
-            className="px-7 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 pt-4 min-w-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden"
+            className={`px-7 flex gap-4 min-w-0 ${yrsForUi.length > 1 ? 'overflow-x-auto snap-x snap-mandatory pb-2 pt-4 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden' : 'pb-2 pt-4 justify-center'}`}
           >
-            {simulations.map((yr, i) => {
+            {yrsForUi.map((yr, i) => {
               const r = yr.find((x: any) => x.id === activeRegime) as any;
               return (
                 <div
@@ -668,7 +931,7 @@ export default function SimulationSection({
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                       Année {i + 1}
                     </span>
-                    {i > 0 && (
+                    {!palierMode && i > 0 && (
                       <button
                         type="button"
                         onClick={() => handleOpenGrowthModal(i)}
@@ -696,11 +959,25 @@ export default function SimulationSection({
                     </div>
                   )}
                   <div className="mt-3">
-                    {r && <StackedBar ca={r.ca} fees={r.fees} cotis={r.cotis} ir={r.ir} net={r.net} />}
+                    {r && !splitArticle && (
+                      <StackedBar
+                        ca={r.ca}
+                        fees={r.fees}
+                        cotis={r.cotis}
+                        ir={r.ir}
+                        net={r.net}
+                        activeRegime={activeRegime}
+                        portageCommissionAmount={
+                          r.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0
+                        }
+                        lines={r.lines as { id?: string; amount?: number }[] | undefined}
+                        cashInCompany={r.cashInCompany}
+                      />
+                    )}
                   </div>
                 </div>
 
-                {/* Métriques */}
+                {/* Lignes du simulateur */}
                 <div className="px-4 py-3 space-y-1.5">
                   {rows.map((row) => {
                     let val = r ? (row.monthly ? r[row.key] / 12 : r[row.key]) : null;
@@ -717,7 +994,7 @@ export default function SimulationSection({
                       <div key={row.label}>
                         <div className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}>
                           <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1">{row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}</p>
-                          <span className={`text-[11px] font-black ${row.isFinal ? 'text-indigo-700 dark:text-indigo-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
+                          <span className={`text-[11px] font-black ${row.isFinal ? 'text-emerald-700 dark:text-emerald-300' : row.color || 'text-slate-800 dark:text-slate-100'}`}>
                             {val !== null && r ? (
                               <AmountTooltip
                                 amount={val}
@@ -742,6 +1019,29 @@ export default function SimulationSection({
           })}
           </div>
         </div>
+        {splitArticle && rArticleBar && (
+          <div className="mt-6 rounded-2xl border border-slate-200 dark:border-slate-700 bg-linear-to-br from-slate-50 to-white dark:from-slate-900/80 dark:to-slate-900 p-6">
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-center text-xs font-black uppercase tracking-tight text-slate-800 dark:text-white">
+                Répartition CA
+              </span>
+              <StackedBar
+                variant="article"
+                ca={rArticleBar.ca ?? 0}
+                fees={rArticleBar.fees ?? 0}
+                cotis={rArticleBar.cotis ?? 0}
+                ir={rArticleBar.ir ?? 0}
+                net={rArticleBar.net ?? 0}
+                activeRegime={activeRegime}
+                portageCommissionAmount={
+                  rArticleBar?.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0
+                }
+                lines={rArticleBar?.lines as { id?: string; amount?: number }[] | undefined}
+                cashInCompany={rArticleBar?.cashInCompany}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
     </div>
@@ -797,7 +1097,9 @@ export default function SimulationSection({
 
           {/* En-tête */}
           <div style={{ textAlign: 'center', margin: '0 0 14px' }}>
-            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>Simulations 5 ans — Freelance</h1>
+            <h1 style={{ fontSize: 17, fontWeight: 900, margin: 0 }}>
+              {palierMode ? 'Simulation année 1 (palier CA) — Freelance' : 'Simulations 5 ans — Freelance'}
+            </h1>
             <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0' }}>
               Régime : <strong>{activeRegime}</strong> · TJM {sim.state.tjm} € · {sim.state.days} jours · {sim.state.taxParts} parts fiscales
             </p>
@@ -808,7 +1110,7 @@ export default function SimulationSection({
             <thead>
               <tr style={{ background: '#eef2ff' }}>
                 <th style={{ padding: '5px 7px', textAlign: 'left', borderBottom: '2px solid #c7d2fe' }}>Indicateur</th>
-                {simulations.map((_, i) => (
+                {yrsForUi.map((_, i) => (
                   <th key={i} style={{ padding: '5px 7px', textAlign: 'center', borderBottom: '2px solid #c7d2fe', color: '#4f46e5' }}>
                     Année {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? ' (ACRE)' : i > 0 ? ' (+CFE)' : ''}
                   </th>
@@ -819,7 +1121,7 @@ export default function SimulationSection({
               {rows.map((row, i) => (
                 <tr
                   key={i}
-                  style={{ background: row.isFinal ? '#eef2ff' : i % 2 === 0 ? '#fff' : '#f8fafc' }}
+                  style={{ background: row.isFinal ? '#ecfdf5' : i % 2 === 0 ? '#fff' : '#f8fafc' }}
                 >
                   <td
                     style={{
@@ -831,7 +1133,7 @@ export default function SimulationSection({
                   >
                     {row.key === 'beforeTax' ? getBeforeTaxRowLabel(activeRegime) : row.label}
                   </td>
-                    {simulations.map((yr, j) => {
+                    {yrsForUi.map((yr, j) => {
                     const r = yr.find((x: any) => x.id === activeRegime) as any;
                     let val: number | null = null;
                     if (row.key === 'optimisations') {
@@ -860,7 +1162,13 @@ export default function SimulationSection({
                           fontWeight: row.isFinal ? 900 : 'normal',
                           borderBottom: '1px solid #e2e8f0',
                           fontSize: 9,
-                          color: row.isFinal ? '#4f46e5' : 'inherit',
+                          color: row.isFinal
+                            ? CA_REPARTITION_INK.net
+                            : row.key === 'portageCommission'
+                              ? PORTAGE_COMMISSION.ink
+                              : row.key === 'ir'
+                                ? CA_REPARTITION_INK.ir
+                                : 'inherit',
                         }}
                       >
                         {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
@@ -878,37 +1186,46 @@ export default function SimulationSection({
               <div style={{ marginTop: 16 }}>
                 <h2 style={{ fontSize: 11, fontWeight: 900, margin: '0 0 8px', borderBottom: '1px solid #e2e8f0', paddingBottom: 4 }}>Évolution du net disponible — {activeRegime}</h2>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  {simulations.map((yr, i) => {
+                  {yrsForUi.map((yr, i) => {
                     const r = yr.find((x: any) => x.id === activeRegime) as any;
-                    const total = Math.max(r.ca, 1);
-                    const segs = [
-                      { pct: (r.fees  / total) * 100, color: '#fb7185' },
-                      { pct: (r.cotis / total) * 100, color: '#fbbf24' },
-                      { pct: (r.ir    / total) * 100, color: '#f87171' },
-                      { pct: (r.net   / total) * 100, color: '#34d399' },
-                    ];
+                    const portageComm =
+                      activeRegime === 'Portage'
+                        ? (r.lines?.find((l: { id?: string }) => l.id === 'portage_commission')?.amount ?? 0)
+                        : 0;
+                    const segs = buildCaRepartitionSegments(
+                      r.ca,
+                      { fees: r.fees, cotis: r.cotis, ir: r.ir, net: r.net },
+                      {
+                        regimeId: activeRegime,
+                        portageCommission: portageComm,
+                        lines: r.lines as { id?: string; amount?: number }[] | undefined,
+                        cashInCompany: r.cashInCompany,
+                      },
+                    );
                     return (
                       <div key={i} style={{ textAlign: 'center', flex: 1 }}>
-                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 3, overflow: 'hidden', background: '#e2e8f0' }}>
-                          {segs.map((s, j) => (
+                        <div style={{ display: 'flex', width: '100%', height: 10, borderRadius: 0, overflow: 'hidden', background: '#e2e8f0' }}>
+                          {segs.map((s) => (
                             <div
-                              key={j}
+                              key={s.key}
                               style={{
                                 width: `${Math.max(0, s.pct)}%`,
-                                background: s.color,
+                                background: s.fill,
                               }}
                             />
                           ))}
                         </div>
-                        <p style={{ fontSize: 8, fontWeight: 900, color: '#34d399', margin: '3px 0 0' }}>{fmt(r.net / 12)}/m</p>
+                        <p style={{ fontSize: 8, fontWeight: 900, color: CA_REPARTITION_INK.net, margin: '3px 0 0' }}>{fmt(r.net / 12)}/m</p>
                         <p style={{ fontSize: 7, color: '#64748b', margin: 0 }}>An {i + 1}{i === 0 && sim.state.acreEnabled && activeRegime !== 'Portage' ? '*' : ''}</p>
                       </div>
                     );
                   })}
                 </div>
-                <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-                  {[['#fb7185','Charges'],['#fbbf24','Cotis'],['#f87171','Impôts'],['#34d399','Net']].map(([c, l]) => (
-                    <span key={l} style={{ fontSize: 7, color: c as string, fontWeight: 700 }}>■ {l}</span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 6 }}>
+                  {CA_REPARTITION_HISTOGRAM_LEXICON.map((s) => (
+                    <span key={s.key} style={{ fontSize: 7, color: s.ink, fontWeight: 700 }}>
+                      ■ {s.label}
+                    </span>
                   ))}
                   {sim.state.acreEnabled && activeRegime !== 'Portage' && <span style={{ fontSize: 7, color: '#94a3b8' }}>* ACRE an 1</span>}
                 </div>

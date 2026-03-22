@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { ARTICLES } from '@/lib/articles';
+import { VALID_PALIER_CA, VALID_STATUT_SLUGS } from '@/lib/simulateur/paliers';
 
 const BASE_URL = 'https://freelance-simulateur.fr';
 
@@ -36,7 +37,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const articlePaths = ARTICLES.map((a) => `/articles/${a.slug}`);
-  const urls = [...staticPaths, ...articlePaths];
+  const palierPaths = VALID_STATUT_SLUGS.flatMap((statut) =>
+    VALID_PALIER_CA.map((ca) => `/simulateur/${statut}/${ca}`),
+  );
+  const urls = [...staticPaths, ...articlePaths, ...palierPaths];
 
   return urls.map((path) => ({
     url: `${BASE_URL}${path}`,
