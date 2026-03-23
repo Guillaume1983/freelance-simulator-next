@@ -85,7 +85,16 @@ function buildStatutContext(input: PipelineInput): {
 } {
   const annee = input.annee ?? 1;
   const ca = input.tjm * input.days * Math.pow(1 + input.growthRate, annee - 1);
-  const indemnitesKm = input.vehiculeActive ? getIK(input.kmAnnuel, input.typeVehicule ?? 'voiture', input.cvFiscaux) : 0;
+  // Les IK sont utilisées pour tous les régimes (y compris Portage) : on doit appliquer la majoration
+  // "véhicule électrique" de façon cohérente, comme pour la ligne d'optimisations.
+  const indemnitesKm = input.vehiculeActive
+    ? getIK(
+        input.kmAnnuel,
+        input.typeVehicule ?? 'voiture',
+        input.cvFiscaux,
+        input.vehiculeElectrique ?? false
+      )
+    : 0;
   const loyer = input.loyerActive ? input.loyerPercu * 12 : 0;
   const cfe = annee === 1 ? 0 : CFE_PAR_VILLE[input.citySize];
 

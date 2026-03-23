@@ -330,6 +330,11 @@ export default function SimulationSection({
     return 'Rémunération nette (avant IR)';
   };
 
+  const optimisationsLabel =
+    activeRegime === 'Portage'
+      ? 'Dont optimisations (IK remboursées)'
+      : 'Dont optimisations (IK, loyer, avantages)';
+
   const baseRows = [
     { label: 'CA annuel brut',               key: 'ca',        prefix: '',  color: '',               highlight: false, isFinal: false, monthly: false },
     { label: 'Commission de portage',        key: 'portageCommission', prefix: '-', color: 'text-cyan-700 dark:text-cyan-400', highlight: false, isFinal: false, monthly: false },
@@ -348,7 +353,7 @@ export default function SimulationSection({
     { label: 'Base avant impôt',             key: 'beforeTax', prefix: '',  color: '',               highlight: true,  isFinal: false, monthly: false },
     { label: 'Prélèvement fiscal perso (IR / PFU)', key: 'ir',  prefix: '-', color: 'text-indigo-600 dark:text-indigo-400',  highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL ANNUEL',      key: 'net',       prefix: '',  color: 'text-emerald-600 dark:text-emerald-400', highlight: false, isFinal: true,  monthly: false, bigAmount: false, separatorAbove: true },
-    { label: 'Dont optimisations (IK, loyer, avantages)', key: 'optimisations', prefix: '', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
+    { label: optimisationsLabel, key: 'optimisations', prefix: '', color: 'text-emerald-600', highlight: false, isFinal: false, monthly: false },
     { label: 'Trésorerie société (après IS)', key: 'cashInCompany', prefix: '',  color: 'text-slate-500', highlight: false, isFinal: false, monthly: false },
     { label: 'DISPONIBLE FINAL MENSUEL',     key: 'net',       prefix: '',  color: 'text-emerald-600 dark:text-emerald-400', highlight: false, isFinal: true,  monthly: true,  bigAmount: true },
   ];

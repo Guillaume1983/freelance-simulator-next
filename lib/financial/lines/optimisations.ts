@@ -32,7 +32,9 @@ export function buildOptimisationsLines(
       cashImpact: ik,
       fiscalImpact: -ik,
       socialImpact: 0,
-      applicableStatuses: ['EURL IR', 'EURL IS', 'SASU'],
+      // En portage, les IK sont un élément de frais intégré au mécanisme (et donc un poste
+      // à afficher dans "optimisations" pour la transparence UX).
+      applicableStatuses: ['Portage', 'EURL IR', 'EURL IS', 'SASU'],
       formula: `${kmAnnuel} km × barème ${IK_LABEL[typeVehicule]}${detail ? ` ${detail}` : ''}${electriqueSuffix}`,
     });
   }
