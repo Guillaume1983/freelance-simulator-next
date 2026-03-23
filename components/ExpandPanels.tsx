@@ -87,8 +87,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const avantagesOptimises = sim.state.avantagesOptimises ?? 1500;
   const spouseIncome = sim.state.spouseIncome ?? 0;
   const vehiculeActive = sim.state.sectionsActive?.vehicule ?? false;
-  const loyerActive = sim.state.sectionsActive?.loyer ?? false;
-  const activeChargeIds = new Set<string>(sim.state.activeCharges ?? []);
   const typeVehicule = sim.state.typeVehicule ?? 'voiture';
   const cvFiscauxRaw = sim.state.cvFiscaux ?? '6';
   const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
@@ -105,9 +103,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
 
   const renderChargeRow = (item: (typeof CHARGES_CATALOG)[number]) => {
-    const isActive = activeChargeIds.has(item.id);
-    const amount = isActive ? (sim.state.chargeAmounts?.[item.id] ?? item.amount) : 0;
-    const safeAmount = typeof amount === 'number' && !Number.isNaN(amount) ? amount : 0;
+    const raw = sim.state.chargeAmounts?.[item.id] ?? 0;
+    const safeAmount = typeof raw === 'number' && !Number.isNaN(raw) ? raw : 0;
     return (
       <div
         key={item.id}
@@ -121,25 +118,39 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         </div>
         <NumberInput
           value={safeAmount}
-          disabled={!isActive}
-          onChange={(v) =>
+          onChange={(v) => {
             sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
               ...(prev || {}),
               [item.id]: v,
-            }))
-          }
-          onIncrement={() =>
+            }));
+            sim.setters.setActiveCharges((prevIds: string[]) => {
+              if (v > 0) {
+                return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
+              }
+              return prevIds.filter((id) => id !== item.id);
+            });
+          }}
+          onIncrement={() => {
+            const next = safeAmount + 5;
             sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
               ...(prev || {}),
-              [item.id]: (prev?.[item.id] ?? item.amount ?? 0) + 5,
-            }))
-          }
-          onDecrement={() =>
+              [item.id]: next,
+            }));
+            sim.setters.setActiveCharges((prevIds: string[]) => {
+              return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
+            });
+          }}
+          onDecrement={() => {
+            const next = Math.max(0, safeAmount - 5);
             sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
               ...(prev || {}),
-              [item.id]: Math.max(0, (prev?.[item.id] ?? item.amount ?? 0) - 5),
-            }))
-          }
+              [item.id]: next,
+            }));
+            sim.setters.setActiveCharges((prevIds: string[]) => {
+              if (next <= 0) return prevIds.filter((id) => id !== item.id);
+              return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
+            });
+          }}
           suffix="€"
           label={item.name}
         />
@@ -430,11 +441,21 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             description="Si vous louez une partie de votre domicile à votre société"
           >
             <NumberInput
-              value={loyerActive ? loyerPercu : 0}
-              disabled={!loyerActive}
-              onChange={(v) => sim.setters.setLoyerPercu(v)}
-              onIncrement={() => sim.setters.setLoyerPercu((p: number) => (p || 0) + 50)}
-              onDecrement={() => sim.setters.setLoyerPercu((p: number) => Math.max(0, (p || 0) - 50))}
+              value={loyerPercu}
+              onChange={(v) => {
+                sim.setters.setLoyerPercu(v);
+                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: v > 0 }));
+              }}
+              onIncrement={() => {
+                const next = (loyerPercu ?? 0) + 50;
+                sim.setters.setLoyerPercu(next);
+                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: next > 0 }));
+              }}
+              onDecrement={() => {
+                const next = Math.max(0, (loyerPercu ?? 0) - 50);
+                sim.setters.setLoyerPercu(next);
+                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: next > 0 }));
+              }}
               suffix="€"
               label="Loyer"
             />
