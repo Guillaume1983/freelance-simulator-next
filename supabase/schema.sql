@@ -12,7 +12,6 @@ drop trigger  if exists on_auth_user_created    on auth.users;
 drop function if exists public.handle_new_user  cascade;
 
 drop table if exists public.contact_messages    cascade;
-drop table if exists public.subscriptions       cascade;
 drop table if exists public.simulation_settings cascade;
 drop table if exists public.user_profiles       cascade;
 
@@ -35,8 +34,8 @@ create table public.simulation_settings (
   user_id          uuid         references auth.users(id) on delete cascade unique not null,
 
   -- Production
-  tjm              integer      default 600,
-  days             integer      default 210,
+  tjm              integer      default 400,
+  days             integer      default 200,
 
   -- Foyer fiscal
   nb_adultes       integer      not null default 1,   -- 1 = célibataire, 2 = couple
@@ -45,9 +44,9 @@ create table public.simulation_settings (
   tax_parts        integer      default 1,            -- rétro-compat, calculé depuis nb_adultes/nb_enfants
 
   -- Optimisations
-  km_annuel        integer      default 10000,
+  km_annuel        integer      default 0,
   cv_fiscaux       text         default '6',
-  loyer_percu      integer      default 350,
+  loyer_percu      integer      default 0,
   -- Par défaut : pas de véhicule (donc pas d'optimisations IK)
   -- Le loyer est activé uniquement via `loyer_percu > 0`.
   sections_active  jsonb        default '{"vehicule": false}',
@@ -72,22 +71,10 @@ create table public.simulation_settings (
   type_activite_micro text     default 'BNC',  -- BNC | BIC_SERVICE | BIC_COMMERCE
   prelevement_liberatoire boolean default false,
   remuneration_dirigeant decimal(5,2) default 1,  -- EURL IS : % en salaire (0-1)
-  repartition_remuneration integer default 70,    -- SASU : 0=100% salaire, 100=100% dividendes
+  repartition_remuneration integer default 100,   -- SASU : 0=100% salaire, 100=100% dividendes
 
   -- Méta
   updated_at       timestamptz  default now()
-);
-
--- Abonnements
-create table public.subscriptions (
-  id                      uuid        default gen_random_uuid() primary key,
-  user_id                 uuid        references auth.users(id) on delete cascade unique not null,
-  plan                    text        not null default 'decouverte', -- 'decouverte' | 'pro' | 'expert'
-  status                  text        not null default 'active',    -- 'active' | 'cancelled' | 'past_due'
-  stripe_customer_id      text,
-  stripe_subscription_id  text,
-  current_period_end      timestamptz,
-  created_at              timestamptz default now()
 );
 
 -- Messages de contact
@@ -108,7 +95,6 @@ create table public.contact_messages (
 
 alter table public.user_profiles       enable row level security;
 alter table public.simulation_settings enable row level security;
-alter table public.subscriptions       enable row level security;
 alter table public.contact_messages    enable row level security;
 
 -- user_profiles : chaque user ne voit et ne modifie que son propre profil
@@ -133,11 +119,6 @@ create policy "Modifier ses settings"
   on public.simulation_settings for update
   using (auth.uid() = user_id);
 
--- subscriptions : lecture seule par le propriétaire (écriture via service role uniquement)
-create policy "Voir son abonnement"
-  on public.subscriptions for select
-  using (auth.uid() = user_id);
-
 -- contact_messages : tout le monde peut envoyer, personne ne peut lire via client
 create policy "Envoyer un message"
   on public.contact_messages for insert
@@ -150,7 +131,7 @@ create policy "Messages non lisibles via client"
 
 -- ────────────────────────────────────────────────────────────
 -- 3. TRIGGER : création automatique au signup
---    Crée profil + settings + abonnement dès qu'un user s'inscrit.
+--    Crée profil + settings dès qu'un user s'inscrit.
 -- ────────────────────────────────────────────────────────────
 
 create or replace function public.handle_new_user()
@@ -169,10 +150,6 @@ begin
 
   insert into public.simulation_settings (user_id)
   values (new.id)
-  on conflict (user_id) do nothing;
-
-  insert into public.subscriptions (user_id, plan, status)
-  values (new.id, 'decouverte', 'active')
   on conflict (user_id) do nothing;
 
   return new;
