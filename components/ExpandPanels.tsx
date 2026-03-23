@@ -21,7 +21,6 @@ import {
   Minus,
   Info,
 } from 'lucide-react';
-import { getIK } from '@/lib/financial/rates';
 import NumberInput from '@/components/NumberInput';
 
 function FieldCard({
@@ -87,6 +86,9 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const loyerAnnuel = loyerPercu * 12;
   const avantagesOptimises = sim.state.avantagesOptimises ?? 1500;
   const spouseIncome = sim.state.spouseIncome ?? 0;
+  const vehiculeActive = sim.state.sectionsActive?.vehicule ?? false;
+  const loyerActive = sim.state.sectionsActive?.loyer ?? false;
+  const activeChargeIds = new Set<string>(sim.state.activeCharges ?? []);
   const typeVehicule = sim.state.typeVehicule ?? 'voiture';
   const cvFiscauxRaw = sim.state.cvFiscaux ?? '6';
   const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
@@ -103,7 +105,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
   const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
 
   const renderChargeRow = (item: (typeof CHARGES_CATALOG)[number]) => {
-    const amount = sim.state.chargeAmounts?.[item.id] ?? item.amount;
+    const isActive = activeChargeIds.has(item.id);
+    const amount = isActive ? (sim.state.chargeAmounts?.[item.id] ?? item.amount) : 0;
     const safeAmount = typeof amount === 'number' && !Number.isNaN(amount) ? amount : 0;
     return (
       <div
@@ -118,6 +121,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         </div>
         <NumberInput
           value={safeAmount}
+          disabled={!isActive}
           onChange={(v) =>
             sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
               ...(prev || {}),
@@ -238,45 +242,79 @@ export default function ExpandPanels({ activePanel, sim }: any) {
 
       {/* PANNEAU VÉHICULE */}
       {activePanel === 'vehicule' && (() => {
-        const ikEstimate = getIK(
-          kmAnnuel,
-          typeVehicule,
-          typeVehicule === 'cyclo50' ? undefined : cvFiscauxRaw,
-          sim.state.vehiculeElectrique ?? false
-        );
         return (
           <>
-            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-              <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
-              <div className="flex gap-3 flex-wrap">
-                {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
-                  const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
-                  const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        sim.setters.setTypeVehicule(t);
-                        if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any))
-                          sim.setters.setCvFiscaux('3-5');
-                        if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any))
-                          sim.setters.setCvFiscaux('6');
-                      }}
-                      className={cn(
-                        'flex-1 min-w-[100px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
-                        typeVehicule === t
-                          ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-                      )}
-                    >
-                      <Icon className="w-6 h-6" />
-                      <span className="font-medium text-sm">{label}</span>
-                    </button>
-                  );
-                })}
+            <div className="space-y-4">
+              <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+                <p className="font-semibold text-slate-900 dark:text-white mb-3">Indemnités kilométriques</p>
+                <div className="flex gap-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sim.setters.setSectionsActive((prev: any) => ({ ...prev, vehicule: true }));
+                    }}
+                    className={cn(
+                      'flex-1 min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                      vehiculeActive
+                        ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                    )}
+                  >
+                    <Car className="w-5 h-5" />
+                    Véhicule (IK)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sim.setters.setSectionsActive((prev: any) => ({ ...prev, vehicule: false }));
+                    }}
+                    className={cn(
+                      'flex-1 min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                      !vehiculeActive
+                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                    )}
+                  >
+                    <Circle className="w-5 h-5" />
+                    Sans véhicule
+                  </button>
+                </div>
               </div>
-            </div>
+
+              <div className={vehiculeActive ? 'space-y-4' : 'hidden'}>
+                <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
+                <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
+                <div className="flex gap-3 flex-wrap">
+                  {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
+                    const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
+                    const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                      disabled={!vehiculeActive}
+                        onClick={() => {
+                          sim.setters.setTypeVehicule(t);
+                          if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any))
+                            sim.setters.setCvFiscaux('3-5');
+                          if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any))
+                            sim.setters.setCvFiscaux('6');
+                        }}
+                        className={cn(
+                          'flex-1 min-w-[100px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                          typeVehicule === t
+                            ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300',
+                          !vehiculeActive && 'opacity-50 pointer-events-none'
+                        )}
+                      >
+                        <Icon className="w-6 h-6" />
+                        <span className="font-medium text-sm">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -290,10 +328,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </div>
                 <button
                   type="button"
+                  disabled={!vehiculeActive}
                   onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
                   className={cn(
                     'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
                     sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
+                    , !vehiculeActive && 'opacity-50 pointer-events-none'
                   )}
                 >
                   <span
@@ -311,7 +351,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               description="Trajets clients, réunions, etc."
             >
               <NumberInput
-                value={kmAnnuel}
+                value={vehiculeActive ? kmAnnuel : 0}
+                disabled={!vehiculeActive}
                 onChange={(v) => sim.setters.setKmAnnuel(v)}
                 onIncrement={() => sim.setters.setKmAnnuel((p: number) => (p || 0) + 500)}
                 onDecrement={() => sim.setters.setKmAnnuel((p: number) => Math.max(0, (p || 0) - 500))}
@@ -327,6 +368,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               >
                 <select
                   value={cvFiscauxRaw}
+                  disabled={!vehiculeActive}
                   onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
                   className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30"
                 >
@@ -346,6 +388,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               >
                 <select
                   value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
+                  disabled={!vehiculeActive}
                   onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
                   className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500"
                 >
@@ -357,17 +400,23 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </select>
               </FieldCard>
             )}
-            <Link
-              href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-            >
-              <Calculator className="w-4 h-4" />
-              Simuler le barème en détail
-            </Link>
-            <InfoBox variant="info">
-              Les indemnités kilométriques suivent le barème URSSAF : déductibles pour l&apos;entreprise (EURL/SASU) et
-              exonérées de cotisations et d&apos;impôt sur le revenu pour vous.
-            </InfoBox>
+            <div className="mt-4">
+              <InfoBox variant="info">
+                Les indemnités kilométriques suivent le barème URSSAF : déductibles pour l&apos;entreprise (EURL/SASU) et
+                exonérées de cotisations et d&apos;impôt sur le revenu pour vous.
+              </InfoBox>
+            </div>
+            <div className="mt-4 flex items-center justify-center">
+              <Link
+                href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 transition-colors"
+              >
+                <Calculator className="w-4 h-4" />
+                Simuler le barème en détail
+              </Link>
+            </div>
+            </div>
+          </div>
           </>
         );
       })()}
@@ -381,7 +430,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             description="Si vous louez une partie de votre domicile à votre société"
           >
             <NumberInput
-              value={loyerPercu}
+              value={loyerActive ? loyerPercu : 0}
+              disabled={!loyerActive}
               onChange={(v) => sim.setters.setLoyerPercu(v)}
               onIncrement={() => sim.setters.setLoyerPercu((p: number) => (p || 0) + 50)}
               onDecrement={() => sim.setters.setLoyerPercu((p: number) => Math.max(0, (p || 0) - 50))}
@@ -499,12 +549,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {activePanel === 'foyer' && (
         <>
           <div className="w-full p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-              <p className="font-semibold text-slate-900 dark:text-white">Situation familiale</p>
-              <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold">
-                {sim.state.taxParts} parts
-              </span>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Composition du foyer</span>

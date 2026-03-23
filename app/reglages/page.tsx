@@ -68,7 +68,7 @@ const TABS = [
   {
     id: 'vehicule',
     label: 'Véhicule',
-    description: 'IK, frais réels',
+    description: 'IK',
     icon: Car,
     gradient: 'from-sky-500 to-blue-500',
     activeBg: 'bg-sky-50',

@@ -17,17 +17,29 @@ export const useSimulation = () => {
   const [spouseIncome, setSpouseIncome] = useState(0);
 
   // --- Paramètres optimisations ---
-  const [kmAnnuel, setKmAnnuel] = useState(10000);
+  // Par défaut : pas de véhicule -> IK = 0
+  const [kmAnnuel, setKmAnnuel] = useState(0);
   const [cvFiscaux, setCvFiscaux] = useState('6');
   const [typeVehicule, setTypeVehicule] = useState<'voiture' | 'moto' | 'cyclo50'>('voiture');
   const [vehiculeElectrique, setVehiculeElectrique] = useState(false);
-  const [loyerPercu, setLoyerPercu] = useState(350);
-  const [sectionsActive, setSectionsActive] = useState({ vehicule: true, loyer: true });
+  // Par défaut : pas de loyer / pas d'optimisation
+  const [loyerPercu, setLoyerPercu] = useState(0);
+  // Par défaut : aucune optimisation (pas de véhicule, pas de loyer)
+  const [sectionsActive, setSectionsActive] = useState({ vehicule: false, loyer: false });
 
   // --- Charges ---
-  const [activeCharges, setActiveCharges] = useState(['compta', 'mutuelle', 'assurance', 'repas', 'tel']);
+  // Par défaut : pas de charges déductibles
+  const [activeCharges, setActiveCharges] = useState<string[]>([]);
+  // Par défaut : pas de charges -> afficher 0 dans l'UI et ne rien déduire
   const [chargeAmounts, setChargeAmounts] = useState<Record<string, number>>(
-    () => CHARGES_CATALOG.reduce((acc, c) => { acc[c.id] = c.amount; return acc; }, {} as Record<string, number>)
+    () =>
+      CHARGES_CATALOG.reduce(
+        (acc, c) => {
+          acc[c.id] = 0;
+          return acc;
+        },
+        {} as Record<string, number>
+      )
   );
   const [materielAnnuel, setMaterielAnnuel] = useState(0);
 
@@ -39,7 +51,8 @@ export const useSimulation = () => {
   const [prelevementLiberatoire, setPrelevementLiberatoire] = useState(false);
   const [remunerationDirigeantMensuelle, setRemunerationDirigeantMensuelle] = useState(1);
   const [repartitionRemuneration, setRepartitionRemuneration] = useState(100);
-  const [avantagesOptimises, setAvantagesOptimises] = useState(1500);
+  // Par défaut : aucun avantage optimisé
+  const [avantagesOptimises, setAvantagesOptimises] = useState(0);
 
   // --- Paramètres projection ---
   const [acreEnabled, setAcreEnabled] = useState(true);

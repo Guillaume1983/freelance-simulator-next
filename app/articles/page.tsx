@@ -35,7 +35,7 @@ export default function ArticlesPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <section className="space-y-4">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {ARTICLES.map((article) => (
             <Link
               key={article.slug}

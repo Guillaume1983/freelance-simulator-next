@@ -48,12 +48,14 @@ create table public.simulation_settings (
   km_annuel        integer      default 10000,
   cv_fiscaux       text         default '6',
   loyer_percu      integer      default 350,
-  sections_active  jsonb        default '{"vehicule": true, "loyer": true}',
+  -- Par défaut : pas de véhicule / pas de loyer (donc pas d'optimisations)
+  sections_active  jsonb        default '{"vehicule": false, "loyer": false}',
 
   -- Charges
   portage_comm     decimal(5,2) default 5,
-  active_charges   text[]       default array['compta','mutuelle','assurance','repas','tel'],
-  charge_amounts   jsonb        default '{"compta":160,"mutuelle":140,"assurance":45,"repas":190,"tel":90}',
+  -- Par défaut : pas de charges
+  active_charges   text[]       default '{}'::text[],
+  charge_amounts   jsonb        default '{}'::jsonb,
 
   -- Projection
   acre_enabled     boolean      not null default true,
@@ -62,7 +64,8 @@ create table public.simulation_settings (
 
   -- Dépenses & optimisations
   materiel_annuel  integer      default 0,
-  avantages_optimises integer   default 1500,
+  -- Par défaut : aucun avantage optimisé
+  avantages_optimises integer   default 0,
 
   -- Paramètres par statut
   type_activite_micro text     default 'BNC',  -- BNC | BIC_SERVICE | BIC_COMMERCE
