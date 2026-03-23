@@ -56,7 +56,7 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
     const tjm = Math.max(1, Math.round(caAnnual / DAYS_FOR_PALIER));
     setTjm(tjm);
     setDays(DAYS_FOR_PALIER);
-    setSectionsActive({ vehicule: false, loyer: false });
+    setSectionsActive({ vehicule: false });
     setAvantagesOptimises(0);
     setMaterielAnnuel(0);
     const mensuel = getPalierChargeMensuel(caAnnual);

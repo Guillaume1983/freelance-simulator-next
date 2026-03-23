@@ -19,7 +19,7 @@ function baseParams(): ProjectionParams {
     cvFiscaux: '6',
     loyerPercu: 0,
     activeCharges: [],
-    sectionsActive: { vehicule: false, loyer: false },
+    sectionsActive: { vehicule: false },
     portageComm: 5,
     chargeAmounts: makeChargeAmounts(),
     acreEnabled: true,

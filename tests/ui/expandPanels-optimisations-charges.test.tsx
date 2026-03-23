@@ -4,11 +4,10 @@ import userEvent from '@testing-library/user-event';
 import ExpandPanels from '@/components/ExpandPanels';
 
 describe('UI : ExpandPanels (optimisations & charges)', () => {
-  it('permet de modifier le loyer dans Optimisations et active sectionsActive.loyer', async () => {
+  it('permet de modifier le loyer dans Optimisations', async () => {
     const user = userEvent.setup();
 
     const setLoyerPercu = vi.fn();
-    const setSectionsActive = vi.fn();
 
     const sim: any = {
       state: {
@@ -20,7 +19,7 @@ describe('UI : ExpandPanels (optimisations & charges)', () => {
         typeVehicule: 'voiture',
         vehiculeElectrique: false,
         loyerPercu: 0,
-        sectionsActive: { vehicule: false, loyer: false },
+        sectionsActive: { vehicule: false },
         activeCharges: [],
         chargeAmounts: {},
         materielAnnuel: 0,
@@ -38,7 +37,6 @@ describe('UI : ExpandPanels (optimisations & charges)', () => {
       },
       setters: {
         setLoyerPercu,
-        setSectionsActive,
       },
     };
 
@@ -53,10 +51,6 @@ describe('UI : ExpandPanels (optimisations & charges)', () => {
     await user.type(loyerInput, '500');
 
     expect(setLoyerPercu).toHaveBeenCalled();
-    expect(setSectionsActive).toHaveBeenCalled();
-
-    const lastCall = setSectionsActive.mock.calls[setSectionsActive.mock.calls.length - 1]?.[0];
-    expect(typeof lastCall).toBe('function');
   });
 
   it('permet de modifier les charges (aucun verrouillage des inputs)', async () => {
@@ -78,7 +72,7 @@ describe('UI : ExpandPanels (optimisations & charges)', () => {
         typeVehicule: 'voiture',
         vehiculeElectrique: false,
         loyerPercu: 0,
-        sectionsActive: { vehicule: false, loyer: false },
+        sectionsActive: { vehicule: false },
         activeCharges: [],
         chargeAmounts: {},
         materielAnnuel: 0,

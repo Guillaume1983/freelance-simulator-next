@@ -25,7 +25,7 @@ describe('UI : SimulationSection (libellé optimisations)', () => {
       vehiculeElectrique: false,
       loyerPercu: 0,
       activeCharges: [],
-      sectionsActive: { vehicule: true, loyer: false },
+      sectionsActive: { vehicule: true },
       portageComm: 5,
       chargeAmounts: {},
       acreEnabled: true,

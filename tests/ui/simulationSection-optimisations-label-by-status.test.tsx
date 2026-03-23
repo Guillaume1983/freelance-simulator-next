@@ -23,7 +23,7 @@ describe('UI : SimulationSection (simulateurs) - libellé optimisations par stat
     vehiculeElectrique: false,
     loyerPercu: 3000,
     activeCharges: [],
-    sectionsActive: { vehicule: true, loyer: true },
+    sectionsActive: { vehicule: true },
     portageComm: 10,
     chargeAmounts: {},
     acreEnabled: true,
@@ -59,7 +59,7 @@ describe('UI : SimulationSection (simulateurs) - libellé optimisations par stat
         activeRegime={activeRegime}
         setActiveRegime={() => {}}
         singleRegime
-        palierMode
+        palierMode={false}
         articleSplitLayout={false}
         growthByYear={[0, 0, 0, 0, 0]}
       />
@@ -82,6 +82,12 @@ describe('UI : SimulationSection (simulateurs) - libellé optimisations par stat
       expect(screen.queryAllByText(labelDefault).length).toBeGreaterThan(0);
       expect(screen.queryAllByText(labelIkRemb).length).toBe(0);
       expect(screen.queryAllByText(commissionLabel).length).toBe(0);
+    }
+
+    if (activeRegime === 'SASU') {
+      // Pour SASU, pas de cotisations sociales "classiques" dans le modèle
+      // => la ligne doit être masquée sur la simulation 5 ans.
+      expect(screen.queryAllByText('Cotisations sociales').length).toBe(0);
     }
 
     // garde-fou générique

@@ -19,7 +19,7 @@ function baseParams(): ProjectionParams {
     cvFiscaux: '6',
     loyerPercu: 0,
     activeCharges: [],
-    sectionsActive: { vehicule: false, loyer: false },
+    sectionsActive: { vehicule: false },
     portageComm: 5,
     chargeAmounts: makeChargeAmounts(),
     acreEnabled: true,
@@ -85,12 +85,8 @@ describe('Portage : IK, loyer, lignes', () => {
     pBase.kmAnnuel = 10000;
     pBase.sectionsActive.vehicule = true;
 
-    const pNoLoyer = { ...pBase, loyerPercu: 0, sectionsActive: { ...pBase.sectionsActive, loyer: false } };
-    const pWithLoyer = {
-      ...pBase,
-      loyerPercu: 350,
-      sectionsActive: { ...pBase.sectionsActive, loyer: true },
-    };
+    const pNoLoyer = { ...pBase, loyerPercu: 0 };
+    const pWithLoyer = { ...pBase, loyerPercu: 350 };
 
     const no = calculateRegimes(pNoLoyer).find((r) => r.id === 'Portage')!;
     const yes = calculateRegimes(pWithLoyer).find((r) => r.id === 'Portage')!;

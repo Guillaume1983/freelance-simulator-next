@@ -444,17 +444,14 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               value={loyerPercu}
               onChange={(v) => {
                 sim.setters.setLoyerPercu(v);
-                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: v > 0 }));
               }}
               onIncrement={() => {
                 const next = (loyerPercu ?? 0) + 50;
                 sim.setters.setLoyerPercu(next);
-                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: next > 0 }));
               }}
               onDecrement={() => {
                 const next = Math.max(0, (loyerPercu ?? 0) - 50);
                 sim.setters.setLoyerPercu(next);
-                sim.setters.setSectionsActive((prev: any) => ({ ...prev, loyer: next > 0 }));
               }}
               suffix="€"
               label="Loyer"

@@ -27,7 +27,7 @@ export default function TJMRevenuNetPage() {
       typeVehicule: 'voiture' as const,
       vehiculeElectrique: false,
       loyerPercu: 350,
-      sectionsActive: { vehicule: true, loyer: true },
+      sectionsActive: { vehicule: true },
       portageComm: 7,
       chargeAmounts: defaultChargeAmounts,
       activeCharges: ['compta', 'mutuelle', 'assurance', 'repas', 'tel'],
@@ -60,7 +60,7 @@ export default function TJMRevenuNetPage() {
             Retour aux outils
           </Link>
           <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shrink-0">
               <Calculator className="w-6 h-6 text-white" />
             </div>
             <div className="text-center md:text-left">
@@ -75,7 +75,7 @@ export default function TJMRevenuNetPage() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
-          <div className="px-6 py-5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white">
+          <div className="px-6 py-5 bg-linear-to-r from-indigo-500 to-indigo-600 text-white">
             <h2 className="text-xl font-bold">CA annuel</h2>
             <p className="text-3xl font-black mt-2 tabular-nums">{ca.toLocaleString('fr-FR')} €</p>
             <p className="text-white/80 text-sm mt-1">{tjm} € × {days} jours</p>

@@ -24,8 +24,8 @@ export const useSimulation = () => {
   const [vehiculeElectrique, setVehiculeElectrique] = useState(false);
   // Par défaut : pas de loyer / pas d'optimisation
   const [loyerPercu, setLoyerPercu] = useState(0);
-  // Par défaut : aucune optimisation (pas de véhicule, pas de loyer)
-  const [sectionsActive, setSectionsActive] = useState({ vehicule: false, loyer: false });
+  // Par défaut : aucune optimisation (pas de véhicule)
+  const [sectionsActive, setSectionsActive] = useState({ vehicule: false });
 
   // --- Charges ---
   // Par défaut : pas de charges déductibles
@@ -104,7 +104,10 @@ export const useSimulation = () => {
       if (data.portage_comm  != null) setPortageComm(parseFloat(data.portage_comm));
       if (data.active_charges)        setActiveCharges(data.active_charges);
       if (data.charge_amounts)        setChargeAmounts(data.charge_amounts);
-      if (data.sections_active)       setSectionsActive(data.sections_active);
+      if (data.sections_active) {
+        const vehicule = Boolean((data.sections_active as any)?.vehicule);
+        setSectionsActive({ vehicule });
+      }
       if (data.acre_enabled != null) setAcreEnabled(data.acre_enabled);
       if (data.city_size != null) setCitySize(data.city_size as CitySize);
       if (data.growth_rate != null) setGrowthRate(data.growth_rate);

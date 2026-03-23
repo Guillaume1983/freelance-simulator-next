@@ -48,8 +48,9 @@ create table public.simulation_settings (
   km_annuel        integer      default 10000,
   cv_fiscaux       text         default '6',
   loyer_percu      integer      default 350,
-  -- Par défaut : pas de véhicule / pas de loyer (donc pas d'optimisations)
-  sections_active  jsonb        default '{"vehicule": false, "loyer": false}',
+  -- Par défaut : pas de véhicule (donc pas d'optimisations IK)
+  -- Le loyer est activé uniquement via `loyer_percu > 0`.
+  sections_active  jsonb        default '{"vehicule": false}',
 
   -- Charges
   portage_comm     decimal(5,2) default 5,

@@ -43,7 +43,7 @@ export interface ProjectionParams {
   vehiculeElectrique?: boolean;
   loyerPercu: number;
   activeCharges: string[];
-  sectionsActive: { vehicule: boolean; loyer: boolean };
+  sectionsActive: { vehicule: boolean };
   portageComm: number;
   chargeAmounts: Record<string, number>;
   acreEnabled: boolean;
@@ -110,7 +110,9 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
     vehiculeElectrique: params.vehiculeElectrique ?? false,
     vehiculeActive: params.sectionsActive.vehicule,
     loyerPercu: params.loyerPercu,
-    loyerActive: params.sectionsActive.loyer,
+    // La présence du loyer dépend uniquement de la valeur saisie.
+    // `sectionsActive` ne sert qu'à activer/désactiver le véhicule.
+    loyerActive: params.loyerPercu > 0,
     avantagesOptimises: params.avantagesOptimises ?? 1500,
     taxParts: params.taxParts,
     spouseIncome: params.spouseIncome,

@@ -380,6 +380,11 @@ export default function SimulationSection({
     return sum > 0;
   });
 
+  const hasAnyCotis = yrsForUi.some(yr => {
+    const r = yr.find((x: any) => x.id === activeRegime) as any;
+    return r && typeof r.cotis === 'number' && r.cotis > 0;
+  });
+
   const currentGrowthIndex = openGrowthYear ?? 0;
   const currentGrowthValue = growthByYear[currentGrowthIndex] ?? 0;
 
@@ -407,6 +412,8 @@ export default function SimulationSection({
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
     // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
     if (row.key === 'fees' && activeRegime === 'Micro') return false;
+    // SASU : pas de cotisations sociales "classiques" => masquer la ligne
+    if (row.key === 'cotis') return hasAnyCotis;
     if (row.key === 'fees') return hasAnyFees;
     if (row.key === 'optimisations') return hasAnyOptimisations;
     return true;
@@ -1054,7 +1061,7 @@ export default function SimulationSection({
       {/* Modale de réglage de la croissance par année */}
       {openGrowthYear != null && onChangeGrowthYear && (
         <div
-          className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
+          className="fixed inset-0 z-9998 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4"
           onClick={() => setOpenGrowthYear(null)}
         >
           <div
