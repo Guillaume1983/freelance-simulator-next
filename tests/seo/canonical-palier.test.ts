@@ -10,8 +10,8 @@ describe('SEO : canonical pages palier', () => {
     const canonical = (res as any)?.alternates?.canonical;
     const ogUrl = (res as any)?.openGraph?.url;
 
-    expect(canonical).toBe('https://freelance-simulateur.fr/simulateur/portage/100000');
-    expect(ogUrl).toBe('https://freelance-simulateur.fr/simulateur/portage/100000');
+    expect(canonical).toBe('https://www.freelance-simulateur.fr/simulateur/portage/100000');
+    expect(ogUrl).toBe('https://www.freelance-simulateur.fr/simulateur/portage/100000');
   });
 });
 

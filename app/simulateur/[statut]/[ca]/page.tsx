@@ -8,7 +8,8 @@ import {
   VALID_PALIER_CA,
   VALID_STATUT_SLUGS,
 } from '@/lib/simulateur/paliers';
-import { SITE_URL } from '@/lib/seo/jsonLd';
+
+const CANONICAL_BASE = 'https://www.freelance-simulateur.fr';
 
 type PageProps = { params: Promise<{ statut: string; ca: string }> };
 
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!statutId || caNum == null) {
     return { title: 'Palier simulateur' };
   }
-  const canonical = `${SITE_URL}/simulateur/${encodeURIComponent(slug)}/${encodeURIComponent(ca)}`;
+  const canonical = `${CANONICAL_BASE}/simulateur/${encodeURIComponent(slug)}/${encodeURIComponent(ca)}`;
   const title = `${statutId} — ${Math.round(caNum / 1000)} k€ / an | Simulateur`;
   const description = getPalierSeoIntro(statutId, caNum);
   return {

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const BASE = 'https://freelance-simulateur.fr';
+const BASE = 'https://www.freelance-simulateur.fr';
 
 /** Métadonnées et canonical distincts par URL pour l’indexation (évite tout vers /simulateur). */
 const META_BY_SLUG: Record<
