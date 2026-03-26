@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props) {
       description: article.excerpt,
       images: [article.imageUrl],
     },
-    alternates: { canonical: `https://freelance-simulateur.fr/articles/${slug}` },
+    alternates: { canonical: `https://www.freelance-simulateur.fr/articles/${slug}` },
   };
 }
 

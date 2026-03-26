@@ -6,9 +6,9 @@ export const metadata: Metadata = {
     'Calculez votre taux effectif et votre tranche marginale d’impôt sur le revenu à partir de votre revenu imposable et du nombre de parts fiscales.',
   openGraph: {
     title: 'Taux effectif IR | Freelance Simulateur',
-    url: 'https://freelance-simulateur.fr/outils/taux-effectif-ir',
+    url: 'https://www.freelance-simulateur.fr/outils/taux-effectif-ir',
   },
-  alternates: { canonical: 'https://freelance-simulateur.fr/outils/taux-effectif-ir' },
+  alternates: { canonical: 'https://www.freelance-simulateur.fr/outils/taux-effectif-ir' },
 };
 
 export default function OutilsTauxEffectifIRLayout({

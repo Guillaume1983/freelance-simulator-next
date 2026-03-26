@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { ARTICLES } from '@/lib/articles';
 import { VALID_PALIER_CA, VALID_STATUT_SLUGS } from '@/lib/simulateur/paliers';
 
-const BASE_URL = 'https://freelance-simulateur.fr';
+const BASE_URL = 'https://www.freelance-simulateur.fr';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

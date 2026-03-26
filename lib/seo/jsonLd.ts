@@ -1,6 +1,6 @@
 import { FAQ_ITEMS } from '@/lib/faq';
 
-export const SITE_URL = 'https://freelance-simulateur.fr';
+export const SITE_URL = 'https://www.freelance-simulateur.fr';
 export const LOGO_URL = `${SITE_URL}/logo.png`;
 
 /** Organisation éditrice (E-E-A-T, liens avec WebApplication). */

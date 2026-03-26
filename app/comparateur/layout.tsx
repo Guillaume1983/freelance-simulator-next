@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Comparateur statuts freelance 2026 | Freelance Simulateur',
     description: 'Comparez Portage, Micro, EURL et SASU. Visualisez votre revenu net et vos charges selon chaque statut.',
-    url: 'https://freelance-simulateur.fr/comparateur',
+    url: 'https://www.freelance-simulateur.fr/comparateur',
   },
-  alternates: { canonical: 'https://freelance-simulateur.fr/comparateur' },
+  alternates: { canonical: 'https://www.freelance-simulateur.fr/comparateur' },
 };
 
 export default function ComparateurLayout({

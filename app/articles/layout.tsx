@@ -4,8 +4,8 @@ export const metadata: Metadata = {
   title: 'Guides et articles freelance',
   description:
     'Guides et articles pour freelances : statuts, fiscalité, portage salarial, micro-entreprise, EURL, SASU.',
-  openGraph: { url: 'https://freelance-simulateur.fr/articles' },
-  alternates: { canonical: 'https://freelance-simulateur.fr/articles' },
+  openGraph: { url: 'https://www.freelance-simulateur.fr/articles' },
+  alternates: { canonical: 'https://www.freelance-simulateur.fr/articles' },
 };
 
 export default function ArticlesLayout({

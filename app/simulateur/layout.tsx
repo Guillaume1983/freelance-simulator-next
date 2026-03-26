@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Simulateur freelance 5 ans | Freelance Simulateur',
     description: 'Simulation 5 ans par statut : Portage, Micro, EURL, SASU avec ACRE et CFE.',
-    url: 'https://freelance-simulateur.fr/simulateur',
+    url: 'https://www.freelance-simulateur.fr/simulateur',
   },
-  alternates: { canonical: 'https://freelance-simulateur.fr/simulateur' },
+  alternates: { canonical: 'https://www.freelance-simulateur.fr/simulateur' },
 };
 
 export default function SimulateurLayout({
