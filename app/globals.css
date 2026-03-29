@@ -528,6 +528,18 @@
   .animate-fade-up-2 { animation-delay: 0.12s; }
   .animate-fade-up-3 { animation-delay: 0.20s; }
 
+  /* ── Slide in animations ── */
+  @keyframes slide-in-from-right {
+    from { transform: translateX(100%); opacity: 0.5; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  .animate-in.slide-in-from-right {
+    animation: slide-in-from-right 0.3s cubic-bezier(0.22,0.61,0.36,1) both;
+  }
+  .duration-300 {
+    animation-duration: 0.3s;
+  }
+
   /* ── Bandeau comparatif hero ── */
   .section-comparatif-hero {
     min-height: 320px;

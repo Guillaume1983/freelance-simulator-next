@@ -258,97 +258,92 @@ export default function RegimeFinancialBreakdown({
       ?.amount ?? 0;
 
   return (
-    <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/80 overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50">
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-          Détail des montants
-        </p>
-        <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-          Même ventilation que la colonne du comparateur tableau
-        </p>
-      </div>
-      <div className="p-4 space-y-1.5">
-        {visibleRows.map((row) => {
-          const val = getDisplayValue(r, row);
-          const detailText = getDetailText(r, row.key, row.div === 12);
-          const tooltipColor = getTooltipColor(row.key);
-          const rowLabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label;
-          return (
-            <div key={`${row.label}-${row.div}`}>
-              <div
-                className={`flex items-baseline justify-between gap-3 rounded-xl px-3 py-2 ${getRowBgClassCard(row)}`}
-              >
-                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500 flex-1 min-w-0 leading-tight">
-                  {rowLabel}
-                </p>
-                <span
-                  className={`text-[11px] font-black shrink-0 text-right ${
-                    (row as RowDef & { isFinal?: boolean }).isFinal
-                      ? 'text-indigo-700 dark:text-indigo-300'
-                      : (row as RowDef & { color?: string }).color ||
-                        'text-slate-800 dark:text-slate-100'
-                  }`}
+    <div className="space-y-4">
+      {/* Détail des montants */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden">
+        <div className="px-3 py-2 border-b border-slate-200/50 dark:border-slate-700/50">
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            Ventilation détaillée
+          </p>
+        </div>
+        <div className="p-2 space-y-1">
+          {visibleRows.map((row) => {
+            const val = getDisplayValue(r, row);
+            const detailText = getDetailText(r, row.key, row.div === 12);
+            const tooltipColor = getTooltipColor(row.key);
+            const rowLabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label;
+            const isFinal = (row as RowDef & { isFinal?: boolean }).isFinal;
+            const rowColor = (row as RowDef & { color?: string }).color;
+            const rowPrefix = (row as RowDef & { prefix?: string }).prefix;
+            
+            return (
+              <div key={`${row.label}-${row.div}`}>
+                <div
+                  className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
                 >
-                  {val === null ? (
-                    '—'
-                  ) : (
-                    <AmountTooltip
-                      amount={val}
-                      ca={r.ca}
-                      detailText={detailText}
-                      label={row.label}
-                      color={tooltipColor}
-                      position="bottom"
-                    >
-                      {(row as RowDef & { prefix?: string }).prefix}{' '}
-                      {fmt(val)}
-                      <span className="text-[9px] text-slate-400 ml-1">{getMobileUnit(row)}</span>
-                    </AmountTooltip>
-                  )}
-                </span>
+                  <p className="text-[8px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
+                    {rowLabel}
+                  </p>
+                  <span
+                    className={`text-[10px] font-black shrink-0 text-right tabular-nums ${
+                      isFinal
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : rowColor || 'text-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {val === null ? (
+                      <span className="text-slate-300 dark:text-slate-600">—</span>
+                    ) : (
+                      <AmountTooltip
+                        amount={val}
+                        ca={r.ca}
+                        detailText={detailText}
+                        label={row.label}
+                        color={tooltipColor}
+                        position="bottom"
+                      >
+                        {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}
+                        {fmt(val)}
+                        <span className="text-[8px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
+                      </AmountTooltip>
+                    )}
+                  </span>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      </div>
 
-        <div className="pt-3 mt-2 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-            Trimestres retraite validés
+      {/* Retraite et légende */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Trimestres retraite */}
+        <div className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3">
+          <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+            Retraite
           </p>
           <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={r.id} />
         </div>
-
-        <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            Répartitions
+        
+        {/* Légende couleurs */}
+        <div className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3">
+          <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+            Légende
           </p>
-          <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-2 mb-3">
-            {CA_REPARTITION_HISTOGRAM_LEXICON.map((item) => (
+          <div className="flex flex-wrap gap-x-2 gap-y-1">
+            {CA_REPARTITION_HISTOGRAM_LEXICON.slice(0, 4).map((item) => (
               <span
                 key={item.key}
                 className="flex items-center gap-1 text-[7px] font-bold"
                 style={{ color: item.ink }}
               >
                 <span
-                  className="w-2 h-2 rounded-sm inline-block opacity-90"
+                  className="w-1.5 h-1.5 rounded-sm inline-block"
                   style={{ background: item.fill }}
                 />
                 {item.label}
               </span>
             ))}
-          </div>
-          <div className="flex justify-start">
-            <MiniStackedBar
-              ca={r.ca}
-              fees={r.fees}
-              cotis={r.cotis}
-              ir={r.ir}
-              net={r.net}
-              regimeId={r.id}
-              portageCommission={portageCommission}
-              lines={r.lines}
-              cashInCompany={r.cashInCompany}
-            />
           </div>
         </div>
       </div>
