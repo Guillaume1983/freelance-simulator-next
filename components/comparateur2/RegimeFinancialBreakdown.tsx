@@ -5,7 +5,6 @@ import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { getDetailTextFromLines } from '@/lib/financial';
 import {
   buildCaRepartitionSegments,
-  CA_REPARTITION_HISTOGRAM_LEXICON,
   tooltipColorForRowKey,
 } from '@/lib/simulateur/caRepartitionColors';
 import { fmtEur } from '@/lib/utils';
@@ -315,37 +314,12 @@ export default function RegimeFinancialBreakdown({
         </div>
       </div>
 
-      {/* Retraite et légende */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Trimestres retraite */}
-        <div className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3">
-          <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-            Retraite
-          </p>
-          <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={r.id} />
-        </div>
-        
-        {/* Légende couleurs */}
-        <div className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3">
-          <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-            Légende
-          </p>
-          <div className="flex flex-wrap gap-x-2 gap-y-1">
-            {CA_REPARTITION_HISTOGRAM_LEXICON.slice(0, 4).map((item) => (
-              <span
-                key={item.key}
-                className="flex items-center gap-1 text-[7px] font-bold"
-                style={{ color: item.ink }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-sm inline-block"
-                  style={{ background: item.fill }}
-                />
-                {item.label}
-              </span>
-            ))}
-          </div>
-        </div>
+      {/* Trimestres retraite */}
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3 flex items-center gap-3">
+        <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest shrink-0">
+          Retraite
+        </p>
+        <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={r.id} />
       </div>
     </div>
   );
