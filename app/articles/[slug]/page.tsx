@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ARTICLES, getArticleBySlug } from '@/lib/articles';
 import Footer from '@/components/Footer';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
+import { BookOpen } from 'lucide-react';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -41,17 +42,12 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-page-settings">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/articles"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Retour aux articles
-          </Link>
-        </div>
-      </header>
+      <PageSettingsPageHeader
+        backHref="/articles"
+        backLabel="Retour aux articles"
+        title={article.title}
+        subtitle={article.excerpt}
+      />
 
       <article className="max-w-3xl mx-auto px-4 md:px-6 py-8">
         <div className="relative h-48 md:h-64 w-full rounded-2xl overflow-hidden mb-6 bg-slate-200 dark:bg-slate-800">
@@ -64,7 +60,7 @@ export default async function ArticlePage({ params }: Props) {
             priority
           />
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 mb-2">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 mb-6">
           <span className="font-black uppercase tracking-[0.18em]">{article.category}</span>
           <span
             className="font-semibold"
@@ -78,12 +74,6 @@ export default async function ArticlePage({ params }: Props) {
           </span>
           <span>· {article.readingTime}</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-          {article.title}
-        </h1>
-        <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
-          {article.excerpt}
-        </p>
         <div className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 [&_strong]:font-bold [&_strong]:text-slate-900 dark:[&_strong]:text-white">
           {formatContent(article.content)}
         </div>

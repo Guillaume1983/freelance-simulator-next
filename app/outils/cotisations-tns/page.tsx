@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Wallet } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { computeTNSCotisations } from '@/lib/financial/rates';
 import Footer from '@/components/Footer';
+import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
 
 export default function CotisationsTNSPage() {
   const [benefice, setBenefice] = useState(45000);
@@ -17,28 +18,12 @@ export default function CotisationsTNSPage() {
 
   return (
     <main className="min-h-screen bg-page-settings">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/outils"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Retour aux outils
-          </Link>
-          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg shrink-0">
-              <Wallet className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Cotisations TNS</h1>
-              <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Estimation des cotisations sociales pour un gérant TNS (EURL IR, professions libérales, SSI).
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageSettingsPageHeader
+        backHref="/outils"
+        backLabel="Retour aux outils"
+        title="Cotisations TNS"
+        subtitle="Estimation des cotisations sociales pour un gérant TNS (EURL IR, professions libérales, SSI)."
+      />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">

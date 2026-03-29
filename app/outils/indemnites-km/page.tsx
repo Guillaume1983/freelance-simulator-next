@@ -3,11 +3,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Car, Bike, Circle, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Car, Bike, Circle, ExternalLink } from 'lucide-react';
 import { getIK, getIKDetail, type TypeVehiculeIK } from '@/lib/financial/rates';
 import { useSimulationContext } from '@/context/SimulationContext';
 import NumberInput from '@/components/NumberInput';
 import Footer from '@/components/Footer';
+import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
 import { cn } from '@/lib/utils';
 
 const BANDES_MOTO = ['1-2', '3-5', '5+'] as const;
@@ -76,30 +77,12 @@ export default function IndemnitesKmPage() {
   return (
     <main className="min-h-screen bg-page-settings">
 
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/reglages?from=outils"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Paramètres
-          </Link>
-          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center shadow-lg shadow-sky-200 dark:shadow-none shrink-0">
-              <Car className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Indemnités kilométriques
-              </h1>
-              <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023).
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageSettingsPageHeader
+        backHref="/reglages?from=outils"
+        backLabel="Paramètres"
+        title="Indemnités kilométriques"
+        subtitle="Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023)."
+      />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg shadow-slate-200/60 dark:shadow-none border border-slate-100 dark:border-slate-700 overflow-hidden">

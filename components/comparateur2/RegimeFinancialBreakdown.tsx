@@ -68,7 +68,13 @@ function MiniStackedBar({
   );
 }
 
-function RetirementBadge({ quarters, regimeId }: { quarters: number; regimeId: string }) {
+export function RetirementBadge({
+  quarters,
+  regimeId: _regimeId,
+}: {
+  quarters: number;
+  regimeId: string;
+}) {
   const validated = quarters >= 4;
   const label = validated ? '4 trim. retraite validés' : `~${quarters}/4 trim. retraite`;
   return (
@@ -246,6 +252,32 @@ export default function RegimeFinancialBreakdown({
     return true;
   });
 
+  const isDisponibleFinalRow = (row: RowDef) =>
+    (row as RowDef & { isFinal?: boolean }).isFinal === true && row.key === 'net';
+
+  const idxAnnuel = visibleRows.findIndex(
+    (row) => isDisponibleFinalRow(row) && row.div === 1,
+  );
+  const idxMensuel = visibleRows.findIndex(
+    (row) => isDisponibleFinalRow(row) && row.div === 12,
+  );
+
+  const hasPinnedDisponible =
+    idxAnnuel >= 0 &&
+    idxMensuel >= 0 &&
+    idxMensuel > idxAnnuel;
+
+  const scrollRows = hasPinnedDisponible
+    ? [
+        ...visibleRows.slice(0, idxAnnuel),
+        ...visibleRows.slice(idxAnnuel + 1, idxMensuel),
+      ]
+    : visibleRows;
+
+  const bottomRows = hasPinnedDisponible
+    ? [visibleRows[idxAnnuel]!, visibleRows[idxMensuel]!]
+    : [];
+
   const getDetailText = (r: any, key: string, monthly: boolean): string =>
     getDetailTextFromLines(r, key, sim, monthly);
 
@@ -257,16 +289,15 @@ export default function RegimeFinancialBreakdown({
       ?.amount ?? 0;
 
   return (
-    <div className="space-y-4">
-      {/* Détail des montants */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden">
-        <div className="px-3 py-2 border-b border-slate-200/50 dark:border-slate-700/50">
-          <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            Ventilation détaillée
-          </p>
-        </div>
-        <div className="p-2 space-y-1">
-          {visibleRows.map((row) => {
+    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden h-[min(52vh,420px)] flex flex-col">
+      <div className="px-3 py-2 border-b border-slate-200/50 dark:border-slate-700/50 shrink-0">
+        <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          Ventilation détaillée
+        </p>
+      </div>
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="p-2 space-y-1 overflow-y-auto min-h-0 flex-1">
+          {scrollRows.map((row) => {
             const val = getDisplayValue(r, row);
             const detailText = getDetailText(r, row.key, row.div === 12);
             const tooltipColor = getTooltipColor(row.key);
@@ -274,7 +305,7 @@ export default function RegimeFinancialBreakdown({
             const isFinal = (row as RowDef & { isFinal?: boolean }).isFinal;
             const rowColor = (row as RowDef & { color?: string }).color;
             const rowPrefix = (row as RowDef & { prefix?: string }).prefix;
-            
+
             return (
               <div key={`${row.label}-${row.div}`}>
                 <div
@@ -312,14 +343,55 @@ export default function RegimeFinancialBreakdown({
             );
           })}
         </div>
-      </div>
+        {bottomRows.length > 0 && (
+          <div className="shrink-0 border-t border-slate-200/70 dark:border-slate-600/50 bg-slate-50/80 dark:bg-slate-800/40 p-2 pt-2 space-y-1">
+            {bottomRows.map((row) => {
+              const val = getDisplayValue(r, row);
+              const detailText = getDetailText(r, row.key, row.div === 12);
+              const tooltipColor = getTooltipColor(row.key);
+              const rowLabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label;
+              const isFinal = (row as RowDef & { isFinal?: boolean }).isFinal;
+              const rowColor = (row as RowDef & { color?: string }).color;
+              const rowPrefix = (row as RowDef & { prefix?: string }).prefix;
 
-      {/* Trimestres retraite */}
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-3 flex items-center gap-3">
-        <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest shrink-0">
-          Retraite
-        </p>
-        <RetirementBadge quarters={r.retirementQuarters ?? 0} regimeId={r.id} />
+              return (
+                <div key={`${row.label}-${row.div}`}>
+                  <div
+                    className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
+                  >
+                    <p className="text-[8px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
+                      {rowLabel}
+                    </p>
+                    <span
+                      className={`text-[10px] font-black shrink-0 text-right tabular-nums ${
+                        isFinal
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : rowColor || 'text-slate-700 dark:text-slate-200'
+                      }`}
+                    >
+                      {val === null ? (
+                        <span className="text-slate-300 dark:text-slate-600">—</span>
+                      ) : (
+                        <AmountTooltip
+                          amount={val}
+                          ca={r.ca}
+                          detailText={detailText}
+                          label={row.label}
+                          color={tooltipColor}
+                          position="top"
+                        >
+                          {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}
+                          {fmt(val)}
+                          <span className="text-[8px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
+                        </AmountTooltip>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

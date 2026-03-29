@@ -3,36 +3,17 @@
 import Link from 'next/link';
 import { ARTICLES } from '@/lib/articles';
 import Footer from '@/components/Footer';
-import { ArrowLeft, BookOpen } from 'lucide-react';
+import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
 
 export default function ArticlesPage() {
   return (
     <main className="min-h-screen bg-page-settings">
-
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Retour à l&apos;accueil
-          </Link>
-          <div className="mt-6 flex flex-col md:flex-row items-center md:items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-200 dark:shadow-none">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Articles & guides
-              </h1>
-              <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Comprendre les statuts freelance en profondeur et tirer le meilleur de votre simulateur.
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageSettingsPageHeader
+        backHref="/"
+        backLabel="Retour à l'accueil"
+        title="Articles & guides"
+        subtitle="Comprendre les statuts freelance en profondeur et tirer le meilleur de votre simulateur."
+      />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,10 +64,7 @@ export default function ArticlesPage() {
         </section>
       </div>
 
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <Footer />
-      </div>
+      <Footer />
     </main>
   );
 }
-

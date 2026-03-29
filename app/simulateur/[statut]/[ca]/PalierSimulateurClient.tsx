@@ -107,11 +107,11 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
           <Link
-            href="/simulateur"
+            href={simulateurHref}
             className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
           >
             <ArrowLeft size={16} />
-            Simulateur
+            Simulation 5 ans
           </Link>
         </div>
       </header>

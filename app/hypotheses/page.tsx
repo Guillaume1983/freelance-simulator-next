@@ -144,10 +144,10 @@ export default function HypothesesPage() {
             ← Retour au comparateur
           </Link>
           <Link
-            href="/simulateur"
+            href="/simulateur/sasu"
             className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-black text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors"
           >
-            Voir les simulateurs
+            Voir un simulateur (ex. SASU)
           </Link>
         </div>
       </div>
