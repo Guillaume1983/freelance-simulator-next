@@ -15,17 +15,6 @@ const SIMULATEUR_LINKS = [
   { href: '/simulateur/sasu', label: 'SASU' },
 ] as const;
 
-const OUTILS_LINKS = [
-  { href: '/outils/indemnites-km', label: 'Indemnités kilométriques' },
-  { href: '/outils/cfe', label: 'CFE' },
-  { href: '/outils/acre', label: 'ACRE' },
-  { href: '/outils/plafonds-micro', label: 'Plafonds Micro' },
-  { href: '/outils/franchise-tva', label: 'Franchise TVA' },
-  { href: '/outils/tjm-revenu-net', label: 'TJM → Revenu net' },
-  { href: '/outils/taux-effectif-ir', label: 'Taux effectif IR' },
-  { href: '/outils/cotisations-tns', label: 'Cotisations TNS' },
-] as const;
-
 export default function Header({ isDark, setIsDark, saveStatus }: {
   isDark: boolean;
   setIsDark: (d: boolean) => void;
@@ -36,10 +25,8 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
   const [user, setUser] = useState<User | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [simulateurOpen, setSimulateurOpen] = useState(false);
-  const [outilsOpen, setOutilsOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const simulateurRef = useRef<HTMLDivElement>(null);
-  const outilsRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
 
   // Hauteur de la nav pour coller le bandeau TJM/Jours sans espace (--header-height)
@@ -74,7 +61,6 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
       const target = e.target as Node;
       if (userMenuRef.current && !userMenuRef.current.contains(target)) setUserMenuOpen(false);
       if (simulateurRef.current && !simulateurRef.current.contains(target)) setSimulateurOpen(false);
-      if (outilsRef.current && !outilsRef.current.contains(target)) setOutilsOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -168,39 +154,13 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
               </div>
             )}
           </div>
-          <div className="relative" ref={outilsRef}>
-            <button
-              type="button"
-              onClick={() => setOutilsOpen((o) => !o)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
-              aria-haspopup="menu"
-              aria-expanded={outilsOpen}
-              aria-controls="outils-menu"
-            >
-              <Wrench size={14} />
-              Outils
-              <ChevronDown size={12} className={outilsOpen ? 'rotate-180' : ''} />
-            </button>
-            {outilsOpen && (
-              <div
-                id="outils-menu"
-                role="menu"
-                className="absolute left-0 top-full mt-1 w-52 py-1 bg-white dark:bg-slate-900 rounded-xl shadow-xl border-2 border-slate-200 dark:border-slate-700 z-50"
-              >
-                {OUTILS_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    role="menuitem"
-                    className="block px-4 py-2 text-[12px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600"
-                    onClick={() => setOutilsOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+          <Link
+            href="/outils"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors"
+          >
+            <Wrench size={14} />
+            Outils
+          </Link>
           <Link href="/articles" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors">
             <BookOpen size={14} />
             Guides
@@ -342,13 +302,14 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
                 {link.label}
               </Link>
             ))}
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2 mb-1 px-1">Outils</p>
-            {OUTILS_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors pl-5" onClick={() => setMenuOpen(false)}>
-                <Wrench size={14} />
-                {link.label}
-              </Link>
-            ))}
+            <Link
+              href="/outils"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors pl-5 mt-2"
+              onClick={() => setMenuOpen(false)}
+            >
+              <Wrench size={16} />
+              Outils
+            </Link>
             <Link href="/articles" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors mt-1" onClick={() => setMenuOpen(false)}>
               <BookOpen size={16} />
               Guides & articles

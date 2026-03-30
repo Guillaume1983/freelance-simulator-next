@@ -144,7 +144,7 @@ export default function SimulateurHubPage() {
           Paliers CA (année 1)
         </h2>
         <p className="text-center text-[13px] text-slate-600 dark:text-slate-400 mb-4 max-w-2xl mx-auto">
-          Tableau et histogramme sur l&apos;année 1 pour un CA cible (ex.&nbsp;100&nbsp;k€) — même moteur que la simulation, sans projection multi-années.
+          Vue article année 1 — forfait 10&nbsp;% du CA en charges, foyer simplifié (voir chaque page). CA cible ex.&nbsp;100&nbsp;k€.
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 max-w-4xl mx-auto">
           {STATUTS.map(({ slug, label }) => (

@@ -7,6 +7,7 @@ import {
   Car,
   ChevronDown,
   Gift,
+  LineChart,
   Receipt,
   Settings2,
   ShieldCheck,
@@ -24,6 +25,15 @@ export const SIDEBAR_SECTIONS = [
     description: 'TJM et jours travaillés',
     icon: Briefcase,
     color: 'indigo',
+  },
+  // (Optionnel sur simulateur) : section insérée juste après "Activité"
+  {
+    id: 'croissance' as const,
+    label: 'Croissance',
+    description: 'Années 2 à 5',
+    icon: LineChart,
+    color: 'indigo',
+    hiddenByDefault: true,
   },
   {
     id: 'charges' as const,
@@ -144,6 +154,10 @@ export function SimulationSettingsSidebar({
   openSection,
   setOpenSection,
   filterByRegime = false,
+  suppressNonApplicablePanels = false,
+  showGrowthSection = false,
+  growthByYear,
+  onChangeGrowthYear,
 }: {
   sim: SimCtx;
   activeRegimeId: string | undefined;
@@ -151,10 +165,19 @@ export function SimulationSettingsSidebar({
   setOpenSection: (id: SidebarPanelId | 'regime_options' | null) => void;
   /** Filtre les panels pour ne garder que ceux pertinents au statut (utilisé sur simulateur). */
   filterByRegime?: boolean;
+  /** Cache le contenu de certains panels non pertinents (utilisé sur simulateur pour Micro). */
+  suppressNonApplicablePanels?: boolean;
+  /** Ajoute le panel "Croissance" (simulateur uniquement). */
+  showGrowthSection?: boolean;
+  /** Tableau de croissance par année (index 0..4). */
+  growthByYear?: number[];
+  /** Setter de croissance par année (index 0..4). */
+  onChangeGrowthYear?: (index: number, value: number) => void;
 }) {
   const hasRegimeOptions = activeRegimeId && REGIMES_WITH_OPTIONS.includes(activeRegimeId);
 
-  const regimeOptionsColors = COLOR_CLASSES.slate;
+  // Slate est trop neutre : on garde le style "Options" mais on lui donne une teinte visible comme les autres headers.
+  const regimeOptionsColors = COLOR_CLASSES.indigo;
 
   const regimeOptionsBlock =
     hasRegimeOptions && activeRegimeId ? (
@@ -216,8 +239,8 @@ export function SimulationSettingsSidebar({
           )}
         >
           <div className="overflow-hidden">
-            <div className="px-4 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
-              <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="left" variant="light" />
+            <div className="px-3 py-2">
+              <RegimeParamsInline sim={sim} regimeId={activeRegimeId} align="right" variant="light" />
             </div>
           </div>
         </div>
@@ -225,11 +248,16 @@ export function SimulationSettingsSidebar({
     ) : null;
 
   const visibleSections = useMemo(() => {
-    if (!filterByRegime || !activeRegimeId) return SIDEBAR_SECTIONS;
+    type SidebarSection = (typeof SIDEBAR_SECTIONS)[number];
+    const base: SidebarSection[] = showGrowthSection
+      ? Array.from(SIDEBAR_SECTIONS)
+      : (SIDEBAR_SECTIONS.filter((s) => !(s as SidebarSection & { hiddenByDefault?: boolean }).hiddenByDefault) as SidebarSection[]);
+
+    if (!filterByRegime || !activeRegimeId) return base;
     const allowed = REGIME_VISIBLE_SECTIONS[activeRegimeId];
-    if (!allowed) return SIDEBAR_SECTIONS;
-    return SIDEBAR_SECTIONS.filter((s) => allowed.includes(s.id));
-  }, [filterByRegime, activeRegimeId]);
+    if (!allowed) return base;
+    return base.filter((s) => allowed.includes(s.id as any));
+  }, [filterByRegime, activeRegimeId, showGrowthSection]);
 
   useEffect(() => {
     if (!filterByRegime) return;
@@ -269,7 +297,7 @@ export function SimulationSettingsSidebar({
               >
                 <div
                   className={cn(
-                    'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 border',
+                    'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 border',
                     isOpen
                       ? cn(colors.bg, colors.border, 'ring-2', colors.ring)
                       : cn('bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 group-hover:scale-105'),
@@ -277,7 +305,7 @@ export function SimulationSettingsSidebar({
                 >
                   <Icon
                     className={cn(
-                      'w-4 h-4 transition-colors',
+                      'w-5 h-5 transition-colors',
                       isOpen ? colors.text : 'text-slate-500 dark:text-slate-400',
                     )}
                   />
@@ -285,7 +313,7 @@ export function SimulationSettingsSidebar({
                 <div className="flex-1 min-w-0">
                   <p
                     className={cn(
-                      'text-sm font-bold leading-tight transition-colors',
+                      'text-base font-black leading-tight transition-colors',
                       isOpen
                         ? 'text-slate-900 dark:text-white'
                         : 'text-slate-700 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white',
@@ -293,7 +321,7 @@ export function SimulationSettingsSidebar({
                   >
                     {section.label}
                   </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
+                  <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
                     {section.description}
                   </p>
                 </div>
@@ -311,8 +339,15 @@ export function SimulationSettingsSidebar({
                 )}
               >
                 <div className="overflow-hidden">
-                  <div className="px-3 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 [&_input]:max-w-full [&_select]:max-w-full">
-                    <ExpandPanels activePanel={section.id} sim={sim} />
+                  <div className="px-3 py-2 [&_input]:max-w-full [&_select]:max-w-full">
+                    <ExpandPanels
+                      activePanel={section.id}
+                      sim={sim}
+                      activeRegimeId={activeRegimeId}
+                      suppressNonApplicablePanels={suppressNonApplicablePanels}
+                      growthByYear={growthByYear}
+                      onChangeGrowthYear={onChangeGrowthYear}
+                    />
                   </div>
                 </div>
               </div>

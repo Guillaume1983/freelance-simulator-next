@@ -281,7 +281,7 @@ export default function RegimeFinancialBreakdown({
   const getDetailText = (r: any, key: string, monthly: boolean): string =>
     getDetailTextFromLines(r, key, sim, monthly);
 
-  const getMobileUnit = (row: RowDef) => (row.div === 12 ? '/mois' : '/an');
+  const getMobileUnit = (row: RowDef) => (row.div === 12 ? '/m' : '/an');
 
   const r = regime;
   const portageCommission =

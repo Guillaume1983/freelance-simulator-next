@@ -229,7 +229,7 @@ export default function SimulationSection({
   activeRegime,
   setActiveRegime,
   singleRegime = false,
-  /** Pages SEO palier CA : une seule colonne (année 1), pas de réglage croissance multi-années */
+  /** Pages SEO palier CA : une seule colonne (année 1), même projection que le simulateur */
   palierMode = false,
   /** Tableau type « capture » à gauche, histogramme XXL à droite (desktop) */
   articleSplitLayout = false,
@@ -406,8 +406,6 @@ export default function SimulationSection({
   const rows = baseRows.filter(row => {
     if (row.key === 'cashInCompany') return hasAnyCashInCompany;
     if (row.key === 'portageCommission') return hasAnyPortageCommission;
-    // Pages palier « article » : pas de ligne optimisations (IK / loyer / avantages)
-    if (row.key === 'optimisations' && splitArticle) return false;
     // Micro : optimisations non déductibles → masquer totalement la ligne
     if (row.key === 'optimisations' && activeRegime === 'Micro') return false;
     // Micro : pas de ligne « Charges (dépenses + optimisations) » dans les simulations
@@ -855,7 +853,7 @@ export default function SimulationSection({
         <div className="hidden md:block border-t border-slate-200 dark:border-slate-700">
           <div className="p-4 md:p-5">
           <h3 className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] mb-1">
-            {palierMode ? 'Analyse indicative (année 1)' : 'Analyse sur 5 ans'}
+            {palierMode ? 'Analyse (année 1)' : 'Analyse sur 5 ans'}
           </h3>
           <p className="text-sm font-black text-slate-900 dark:text-slate-50 mb-3">
             Points forts & vigilances pour {activeRegime}
@@ -962,7 +960,7 @@ export default function SimulationSection({
                   }
                   <div className="text-3xl font-black mt-2 leading-none tracking-tighter" style={{ color: regimeColor }}>
                     {r ? fmt(r.net / 12) : '—'}
-                    <span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
+                    <span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
                   </div>
                   <div className="text-[10px] text-slate-400 font-bold mt-0.5">{r ? fmt(r.net) : '—'} /an</div>
                   {r && r.cashInCompany != null && r.cashInCompany > 0 && (
@@ -1017,7 +1015,7 @@ export default function SimulationSection({
                                 position="bottom"
                               >
                                 {row.prefix}{fmt(val)}
-                                {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/mois</span>}
+                                {row.monthly && <span className="text-[9px] text-slate-400 ml-1">/m</span>}
                               </AmountTooltip>
                             ) : '—'}
                           </span>
@@ -1086,13 +1084,14 @@ export default function SimulationSection({
             </p>
             <div className="flex items-center gap-3">
               <input
-                type="range"
+                type="number"
                 min={0}
                 max={50}
                 step={1}
+                inputMode="numeric"
                 value={currentGrowthValue}
                 onChange={(e) => handleChangeGrowth(Number(e.target.value))}
-                className="h-2 rounded-full cursor-pointer accent-emerald-600 dark:accent-emerald-400 bg-slate-200 dark:bg-slate-700 flex-1"
+                className="w-24 text-center text-sm font-bold py-2 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/50 transition-all"
                 aria-label={`Croissance CA année ${currentGrowthIndex + 1}`}
               />
               <span className="w-12 text-right text-sm font-bold text-slate-700 dark:text-slate-200 tabular-nums">
@@ -1183,7 +1182,7 @@ export default function SimulationSection({
                                 : 'inherit',
                         }}
                       >
-                        {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/mois' : ''}`}
+                        {val === null ? '—' : `${row.prefix}${fmt(val)}${row.monthly ? '/m' : ''}`}
                       </td>
                     );
                   })}

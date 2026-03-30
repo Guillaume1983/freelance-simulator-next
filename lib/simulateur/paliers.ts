@@ -1,17 +1,17 @@
 /**
  * Pages SEO « paliers CA » : /simulateur/{statut}/{ca}
  * CA cible = TJM × jours (jours fixés pour cohérence des paliers).
+ * Hypothèses dédiées palier (forfait charges, foyer) — distinctes de la simulation personnalisée.
  */
 
 export const DAYS_FOR_PALIER = 200;
 
-/** Hypothèse paliers SEO : charges professionnelles = ce ratio × CA annuel (hors IK / loyer / avantages). */
+/** Forfait paliers : charges pro ≈ ce ratio × CA annuel (hors IK / loyer / avantages). */
 export const PALIER_CHARGES_RATIO_CA = 0.1;
 
-/** Id catalogue charges (CHARGES_CATALOG) — `portageWarning: false` pour que le montant compte en portage salarial. */
+/** Id catalogue (CHARGES_CATALOG) — compatible portage salarial. */
 export const PALIER_CHARGE_CATALOG_ID = 'repas' as const;
 
-/** Montant mensuel (€) pour atteindre ~PALIER_CHARGES_RATIO_CA × CA sur l’année. */
 export function getPalierChargeMensuel(caAnnual: number): number {
   return Math.max(0, Math.round((PALIER_CHARGES_RATIO_CA * caAnnual) / 12));
 }
@@ -63,7 +63,7 @@ export function getPalierSeoIntro(statutLabel: string, ca: number): string {
     `Estimation du net pour un ${statutLabel} à environ ${k} de chiffre d’affaires annuel (année 1), ` +
     `avec TJM dérivé pour ${DAYS_FOR_PALIER} jours facturés, ` +
     `charges professionnelles forfaitaires à ${Math.round(PALIER_CHARGES_RATIO_CA * 100)} % du CA (sans indemnités kilométriques, loyer ni avantages), ` +
-    `impôt sur le revenu calculé pour une personne seule sans enfant (1 part fiscale, pas de revenu conjoint). ` +
-    `Ce palier ne remplace pas une configuration personnalisée dans les réglages.`
+    `impôt sur le revenu pour une personne seule sans enfant (1 part fiscale, pas de revenu conjoint). ` +
+    `Ce palier ne remplace pas une configuration personnalisée.`
   );
 }

@@ -1,11 +1,15 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useReactToPrint } from 'react-to-print';
 import { useSimulationContext } from '@/context/SimulationContext';
-import SimulationSection from '@/components/SimulationSection';
+import { useUser } from '@/hooks/useUser';
 import Footer from '@/components/Footer';
+import ConnectorModal from '@/components/ConnectorModal';
+import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur2/RegimeFinancialBreakdown';
+import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
+import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
 import {
   buildComparateurQuery,
   DAYS_FOR_PALIER,
@@ -14,7 +18,10 @@ import {
   PALIER_CHARGE_CATALOG_ID,
   STATUT_SLUG_TO_ID,
 } from '@/lib/simulateur/paliers';
+import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
+import { projeterSurNAns } from '@/lib/projections';
 import { ArrowLeft, Briefcase, Building2, Building, Store } from 'lucide-react';
+import { cn, fmtEur } from '@/lib/utils';
 
 const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
   Portage: { Icon: Briefcase, iconClass: 'bg-indigo-500 text-white' },
@@ -27,7 +34,6 @@ const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: st
 type Props = { statutSlug: string; caAnnual: number };
 
 export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) {
-  const router = useRouter();
   const ctx = useSimulationContext();
   const sim = ctx.sim ?? ctx;
   const {
@@ -42,15 +48,15 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
     setActiveCharges,
     setChargeAmounts,
   } = sim.setters;
+  const { isConnected } = useUser();
+  const [showConnectorModal, setShowConnectorModal] = useState(false);
 
   const statutId = STATUT_SLUG_TO_ID[statutSlug] ?? 'Portage';
-  const [activeRegime, setActiveRegimeState] = useState(statutId);
 
-  useEffect(() => {
-    setActiveRegimeState(statutId);
-  }, [statutId]);
-
-  /** Hypothèse palier : 10 % du CA en charges pro, pas d’optimisations (IK / loyer / avantages). */
+  /**
+   * Hypothèses palier SEO : CA = TJM × 200 j ; charges pro forfaitaires ~10 % du CA (catalogue `repas`) ;
+   * pas d’IK / loyer / avantages / matériel ; foyer 1 adulte, 0 enfant, pas de revenu conjoint.
+   */
   useEffect(() => {
     if (sim.isLoading) return;
     const tjm = Math.max(1, Math.round(caAnnual / DAYS_FOR_PALIER));
@@ -65,7 +71,6 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
       ...prev,
       [PALIER_CHARGE_CATALOG_ID]: mensuel,
     }));
-    /** IR / prélèvements : célibataire sans enfant (1 part), pas de revenu conjoint */
     setNbAdultes(1);
     setNbEnfants(0);
     setSpouseIncome(0);
@@ -86,17 +91,69 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
 
   const growthByYear = useMemo(() => [0, 0, 0, 0, 0], []);
 
-  const setActiveRegime = (id: string) => {
-    const newSlug = Object.entries(STATUT_SLUG_TO_ID).find(([, v]) => v === id)?.[0];
-    if (newSlug) router.push(`/simulateur/${newSlug}/${caAnnual}`);
-  };
+  const simulations = useMemo(
+    () =>
+      projeterSurNAns(
+        {
+          tjm: sim.state.tjm,
+          days: sim.state.days,
+          taxParts: sim.state.taxParts,
+          spouseIncome: sim.state.spouseIncome,
+          kmAnnuel: sim.state.kmAnnuel,
+          cvFiscaux: sim.state.cvFiscaux,
+          typeVehicule: sim.state.typeVehicule ?? 'voiture',
+          vehiculeElectrique: sim.state.vehiculeElectrique ?? false,
+          loyerPercu: sim.state.loyerPercu,
+          activeCharges: sim.state.activeCharges,
+          sectionsActive: sim.state.sectionsActive,
+          portageComm: sim.state.portageComm,
+          chargeAmounts: sim.state.chargeAmounts,
+          acreEnabled: sim.state.acreEnabled,
+          citySize: sim.state.citySize,
+          growthRate: sim.state.growthRate / 100,
+          materielAnnuel: sim.state.materielAnnuel,
+          avantagesOptimises: sim.state.avantagesOptimises,
+          typeActiviteMicro: sim.state.typeActiviteMicro,
+          prelevementLiberatoire: sim.state.prelevementLiberatoire,
+          remunerationDirigeantMensuelle: sim.state.remunerationDirigeantMensuelle,
+          repartitionRemuneration: sim.state.repartitionRemuneration,
+        },
+        growthByYear.map((v) => (v ?? 0) / 100),
+      ),
+    [sim.state, growthByYear],
+  );
+
+  const regime = simulations[0]?.find((x: { id: string }) => x.id === statutId);
+
+  const regimesForBreakdown = useMemo(() => {
+    const list = simulations
+      .map((yr) => yr.find((x: { id: string }) => x.id === statutId))
+      .filter(Boolean);
+    return list as NonNullable<(typeof list)[number]>[];
+  }, [simulations, statutId]);
+
+  const typeMicro = sim.state?.typeActiviteMicro ?? 'BNC';
+  const plafondMicro = typeMicro === 'BNC' ? PLAFOND_MICRO_BNC : PLAFOND_MICRO_BIC;
+  const microPlafondExceeded = regime?.id === 'Micro' && regime.ca > plafondMicro;
+
+  const colors = regime ? REGIME_COLORS[regime.id] ?? REGIME_COLORS.Portage : REGIME_COLORS.Portage;
 
   const comparateurHref = `/comparateur${buildComparateurQuery(caAnnual, statutSlug)}`;
   const simulateurHref = `/simulateur/${statutSlug}`;
 
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Palier-CA-${statutId}-FreelanceSimulateur`,
+    pageStyle: `
+      @page { size: A4 portrait; margin: 8mm; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    `,
+  });
+
   const handleExportPdf = () => {
     if (typeof document === 'undefined') return;
-    document.getElementById('simulateur-pdf-btn')?.click();
+    document.getElementById('palier-pdf-btn')?.click();
   };
 
   const headerIcon = STATUT_HEADER_ICON[statutId] ?? STATUT_HEADER_ICON.Portage;
@@ -104,6 +161,15 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
 
   return (
     <main className="min-h-screen bg-page-settings min-w-0">
+      <button
+        id="palier-pdf-btn"
+        type="button"
+        onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
+        className="sr-only"
+      >
+        PDF
+      </button>
+
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
         <div className="max-w-3xl mx-auto px-4 md:px-6 py-6">
           <Link
@@ -133,7 +199,7 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {statutId} à {Math.round(caAnnual / 1000)} k€ de CA : net et charges (année 1)
+              {statutId} à {Math.round(caAnnual / 1000)} k€ de CA : net et charges
             </h1>
             <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed text-[15px]">
               {getPalierSeoIntro(statutId, caAnnual)}
@@ -141,34 +207,69 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
             <p className="mt-4 text-sm text-slate-500 dark:text-slate-500 border-l-2 border-slate-300 dark:border-slate-600 pl-4">
               Hypothèses de ce palier : charges professionnelles forfaitaires à <strong>10 % du CA</strong> (sans
               indemnités kilométriques, loyer de bureau à domicile ni autres optimisations) ;{' '}
-              <strong>impôts</strong> calculés pour une personne <strong>célibataire sans enfant</strong> (1 part
-              fiscale, aucun revenu conjoint). Ce n&apos;est pas votre configuration personnalisée ({' '}
-              <Link href="/reglages" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
-                réglages
+              <strong>impôts</strong> pour une personne <strong>seule sans enfant</strong> (1 part fiscale, aucun
+              revenu conjoint). Rendu du tableau et de l&apos;histogramme comme dans l&apos;outil ; chiffres propres à
+              ces hypothèses. Pour votre configuration :{' '}
+              <Link href={simulateurHref} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+                simulation sur 5 ans
               </Link>
-              ).
+              .
             </p>
           </div>
         </div>
 
-        {/* Même largeur que le texte : tableau + histogramme fusionnés dans SimulationSection */}
         <div className="mt-2 w-full min-w-0">
-          <SimulationSection
-            sim={sim}
-            activeRegime={activeRegime}
-            setActiveRegime={setActiveRegime}
-            singleRegime
-            palierMode
-            articleSplitLayout
-            growthByYear={growthByYear}
-          />
+          {sim.isLoading || !regime ? (
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-8 text-center text-slate-500 text-sm">
+              Chargement des résultats…
+            </div>
+          ) : (
+            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col">
+              <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
+
+              <div className="p-5 md:p-6 flex flex-col gap-6">
+                <div className="flex items-start justify-center gap-2 sm:gap-4">
+                  <div className="flex-1 min-w-0 text-center px-1">
+                    {microPlafondExceeded && (
+                      <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                          Plafond micro dépassé
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-3xl md:text-4xl font-black tabular-nums text-emerald-600 dark:text-emerald-400">
+                      {fmtEur(regime.net / 12)}
+                      <span className="text-sm font-bold text-slate-400 dark:text-slate-500 ml-2">/ mois net</span>
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      {fmtEur(regime.net)} / an · CA {fmtEur(regime.ca)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                      <RetirementBadge quarters={regime.retirementQuarters ?? 0} regimeId={regime.id} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                  <div className="flex-1 min-w-0 lg:max-w-[min(100%,28rem)] lg:self-stretch flex min-h-0">
+                    <div className="w-full min-h-0">
+                      <RegimeFinancialBreakdown sim={sim} regime={regime} regimes={regimesForBreakdown} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center justify-end lg:justify-center shrink-0 w-full lg:w-[min(240px,30vw)]">
+                    <HistogramBarLabeled regime={regime} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 space-y-4 border-t border-slate-200 dark:border-slate-700 pt-8 mt-10">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Lire les résultats</h2>
           <p>
-            À gauche : le détail pour la première année avec charges à 10 % du CA (sans ligne « optimisations »). À
-            droite : la répartition du chiffre d&apos;affaires entre charges, cotisations, impôts et net.{' '}
+            À gauche : la ventilation détaillée ; à droite : la répartition du chiffre d&apos;affaires entre charges,
+            cotisations, impôts et net (même mise en page que dans l&apos;outil).{' '}
             <Link href="/hypotheses" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
               Méthodologie de calcul
             </Link>
@@ -202,6 +303,34 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
           </p>
         </div>
       </article>
+
+      <div className="sr-only" aria-hidden>
+        <div ref={printRef} className="p-6 text-slate-900">
+          <h1 className="text-lg font-black">
+            Palier CA — {statutId} ({fmtEur(caAnnual)} / an)
+          </h1>
+          {regime && (
+            <div className="mt-4 space-y-2 text-sm">
+              <p>
+                <strong>Net mensuel :</strong> {fmtEur(regime.net / 12)}
+              </p>
+              <p>
+                <strong>Net annuel :</strong> {fmtEur(regime.net)}
+              </p>
+              <p>
+                <strong>CA :</strong> {fmtEur(regime.ca)}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ConnectorModal
+        open={showConnectorModal}
+        onClose={() => setShowConnectorModal(false)}
+        title="Connectez-vous pour exporter en PDF"
+        message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
+      />
 
       <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
         <Footer />

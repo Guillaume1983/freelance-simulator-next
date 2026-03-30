@@ -11,6 +11,8 @@ import Footer from '@/components/Footer';
 import RegimeFinancialBreakdown, {
   RetirementBadge,
 } from '@/components/comparateur2/RegimeFinancialBreakdown';
+import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
+import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
 import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
@@ -21,15 +23,6 @@ import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
-
-// Couleurs par régime
-const REGIME_COLORS: Record<string, { gradient: string; bg: string; border: string; ring: string }> = {
-  Portage: { gradient: 'from-violet-500 to-indigo-600', bg: 'bg-violet-500', border: 'border-violet-400', ring: 'ring-violet-400' },
-  Micro:   { gradient: 'from-amber-400 to-orange-500',  bg: 'bg-amber-500',  border: 'border-amber-400',  ring: 'ring-amber-400'  },
-  'EURL IR': { gradient: 'from-emerald-400 to-teal-500', bg: 'bg-emerald-500', border: 'border-emerald-400', ring: 'ring-emerald-400' },
-  'EURL IS': { gradient: 'from-blue-400 to-cyan-500',    bg: 'bg-blue-500',    border: 'border-blue-400',    ring: 'ring-blue-400'    },
-  SASU:    { gradient: 'from-rose-400 to-pink-500',    bg: 'bg-rose-500',    border: 'border-rose-400',    ring: 'ring-rose-400'    },
-};
 
 /** Mini barre empilée pour la navigation entre régimes */
 function MiniNavBar({
@@ -123,87 +116,6 @@ function MiniNavStrip({
             />
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-/** Grande barre empilée avec labels et % inscrits dans chaque segment */
-function HistogramBarLabeled({
-  regime,
-}: {
-  regime: {
-    id: string; ca: number; fees: number; cotis: number; ir: number; net: number;
-    lines?: { id?: string; amount?: number }[]; cashInCompany?: number;
-  };
-}) {
-  const portageCommission = regime.lines?.find((l) => l.id === 'portage_commission')?.amount ?? 0;
-  const segs = buildCaRepartitionSegments(
-    regime.ca,
-    { fees: regime.fees, cotis: regime.cotis, ir: regime.ir, net: regime.net },
-    { regimeId: regime.id, portageCommission, lines: regime.lines, cashInCompany: regime.cashInCompany },
-  );
-  const colors = REGIME_COLORS[regime.id] ?? REGIME_COLORS.Portage;
-
-  return (
-    <div className="relative mx-auto w-[216px] max-w-[min(216px,45vw)] shrink-0 isolate">
-      <div
-        className={cn(
-          'absolute -inset-3 rounded-3xl opacity-10 blur-2xl pointer-events-none -z-10',
-          `bg-linear-to-b ${colors.gradient}`,
-        )}
-      />
-      <div
-        className={cn(
-          'relative flex flex-col-reverse overflow-hidden rounded-2xl border-2 shadow-xl w-full transition-all duration-500',
-          colors.border,
-          'bg-slate-50 dark:bg-slate-900/60',
-        )}
-        style={{ height: 'min(52vh, 420px)' }}
-      >
-        {segs.map((s) => (
-          <div
-            key={s.key}
-            style={{ height: `${Math.max(0, s.pct)}%`, background: s.fill }}
-            className="w-full min-h-0 transition-all duration-500 relative flex items-center justify-center overflow-hidden"
-          >
-            {s.pct >= 8 && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center px-1 pointer-events-none z-1">
-                <span
-                  className="text-[9px] sm:text-[10px] font-black leading-tight text-center line-clamp-2 wrap-break-word antialiased"
-                  style={{ color: s.ink }}
-                >
-                  {s.label}
-                </span>
-                <span
-                  className="text-[12px] font-black leading-none mt-0.5 antialiased tabular-nums"
-                  style={{ color: s.ink }}
-                >
-                  {Math.round(s.pct)}%
-                </span>
-              </div>
-            )}
-            {s.pct > 0 && s.pct < 8 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-1 px-1">
-                <div className="inline-flex max-w-[calc(100%-4px)] min-w-0 flex-row items-center justify-center gap-1">
-                  <span
-                    className="truncate text-left text-[7px] font-black leading-none antialiased"
-                    style={{ color: s.ink }}
-                    title={s.label}
-                  >
-                    {s.label}
-                  </span>
-                  <span
-                    className="shrink-0 text-[8px] font-black tabular-nums antialiased"
-                    style={{ color: s.ink }}
-                  >
-                    {Math.round(s.pct)}%
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -401,10 +313,10 @@ function Comparateur2ViewContent() {
               </div>
 
               <div className="min-w-0 w-full xl:row-start-2 xl:col-start-1 xl:self-start">
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col">
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col h-full max-h-[min(85vh,920px)]">
                   <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
 
-                  <div className="p-5 md:p-6 flex flex-col gap-6">
+                  <div className="p-5 md:p-6 flex flex-col gap-6 flex-1 min-h-0">
                     <div className="flex items-start justify-center gap-2 sm:gap-4">
                       <button
                         type="button"
@@ -490,7 +402,7 @@ function Comparateur2ViewContent() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-0 overscroll-contain">
+                  <div className="flex-1 min-h-0 p-0 overflow-y-auto">
                     <SimulationSettingsSidebar
                       sim={sim}
                       activeRegimeId={regime?.id}

@@ -247,7 +247,7 @@ export default function ComparisonTable({
     if (raw == null) return null;
     return raw / row.div;
   };
-  const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/mois' : '/an';
+  const getMobileUnit   = (row: typeof rows[number]) => row.div === 12 ? '/m' : '/an';
 
   const getDetailText = (r: any, key: string, monthly = false): string =>
     getDetailTextFromLines(r, key, sim, monthly);
@@ -551,7 +551,7 @@ export default function ComparisonTable({
                   {/* Montant net */}
                   <div className="text-3xl font-black dark:text-white leading-none tracking-tight mb-1">
                     <span className={isMicroPlafondExceeded(r) ? 'text-rose-500 dark:text-rose-400 line-through decoration-2' : ''}>
-                      {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/mois</span>
+                      {fmt(r.net / 12)}<span className="text-[11px] text-slate-400 font-bold ml-1">/m</span>
                     </span>
                   </div>
 
@@ -697,7 +697,7 @@ export default function ComparisonTable({
                         {sublabel ? (
                           <div style={{ fontSize: 7, color: '#94a3b8', marginBottom: 2 }}>{sublabel}</div>
                         ) : null}
-                        {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/mois' : ''}`}
+                        {val === null ? '—' : `${(row as any).prefix ?? ''}${fmt(val)}${row.div === 12 ? '/m' : ''}`}
                       </td>
                     );
                   })}
@@ -748,7 +748,7 @@ export default function ComparisonTable({
                             </div>
                           ))}
                         </div>
-                        <p style={{ fontSize: 9, fontWeight: 900, color: CA_REPARTITION_INK.net, margin: '4px 0 0' }}>{fmt(r.net / 12)}/mois</p>
+                        <p style={{ fontSize: 9, fontWeight: 900, color: CA_REPARTITION_INK.net, margin: '4px 0 0' }}>{fmt(r.net / 12)}/m</p>
                       </div>
                     );
                   })}

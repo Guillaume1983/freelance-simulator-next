@@ -216,8 +216,8 @@ export default function ReglagesPage() {
         );
         return {
           label: 'Total charges',
-          value: `${total.toLocaleString('fr-FR')} €/mois`,
-          sub: portage > 0 ? `Portage : ${portage} €/mois` : null,
+          value: `${total.toLocaleString('fr-FR')} €/m`,
+          sub: portage > 0 ? `Portage : ${portage} €/m` : null,
         };
       }
       case 'amortissement': {

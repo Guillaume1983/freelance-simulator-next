@@ -29,12 +29,15 @@ function FieldCard({
   description,
   children,
   color = 'slate',
+  showIcon = false,
 }: {
   icon: React.ElementType;
   label: string;
   description?: string;
   children: React.ReactNode;
   color?: 'slate' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet' | 'cyan' | 'blue';
+  /** Permet de supprimer l'icône si elle est déjà présente dans un header parent. */
+  showIcon?: boolean;
 }) {
   const colorClasses: Record<string, { bg: string; text: string }> = {
     slate: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-600 dark:text-slate-400' },
@@ -49,17 +52,19 @@ function FieldCard({
   const colors = colorClasses[color] ?? colorClasses.slate;
 
   return (
-    <div className="p-4 rounded-xl border transition-all bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3 min-w-0 flex-1">
-          <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', colors.bg)}>
-            <Icon className={cn('w-4 h-4', colors.text)} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm text-slate-900 dark:text-white leading-tight">{label}</p>
-            {description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">{description}</p>
-            )}
+    <div className="w-full p-1 rounded-lg">
+      <div className="flex items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3 min-w-0">
+          {showIcon && (
+            <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', colors.bg)}>
+              <Icon className={cn('w-4 h-4', colors.text)} />
+            </div>
+          )}
+          <div className="min-w-[150px] text-right pr-1 h-9 flex items-center justify-end">
+            <p className="font-medium text-[13px] text-slate-900 dark:text-white leading-none whitespace-nowrap">
+              {label}
+            </p>
+            {description ? null : null}
           </div>
         </div>
         <div className="shrink-0">{children}</div>
@@ -76,23 +81,31 @@ function InfoBox({
   variant?: 'info' | 'warning' | 'success';
 }) {
   const styles = {
-    info: 'bg-blue-50/80 dark:bg-blue-950/30 border-blue-200/60 dark:border-blue-800/60 text-blue-700 dark:text-blue-300',
+    info: 'text-blue-700 dark:text-blue-300',
     warning:
-      'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200/60 dark:border-amber-800/60 text-amber-700 dark:text-amber-300',
+      'text-amber-700 dark:text-amber-300',
     success:
-      'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/60 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300',
+      'text-emerald-700 dark:text-emerald-300',
   };
   return (
-    <div className={cn('p-3 rounded-lg border flex items-start gap-2.5', styles[variant])}>
-      <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-80" />
-      <p className="text-xs leading-relaxed">{children}</p>
+    <div className={cn('text-xs leading-relaxed', styles[variant])}>
+      {children}
     </div>
   );
 }
 
-export default function ExpandPanels({ activePanel, sim }: any) {
+export default function ExpandPanels({
+  activePanel,
+  sim,
+  activeRegimeId,
+  suppressNonApplicablePanels,
+  growthByYear,
+  onChangeGrowthYear,
+}: any) {
   if (!activePanel) return null;
   if (!sim?.state) return null;
+
+  const isMicro = Boolean(suppressNonApplicablePanels) && activeRegimeId === 'Micro';
 
   const materielAnnuel = sim.state.materielAnnuel ?? 0;
   const kmAnnuel = sim.state.kmAnnuel ?? 0;
@@ -122,58 +135,58 @@ export default function ExpandPanels({ activePanel, sim }: any) {
     return (
       <div
         key={item.id}
-        className="flex items-center justify-between p-4 rounded-xl border-2 transition-colors bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+        className="w-full flex items-center justify-end gap-3 p-1 rounded-lg"
       >
-        <div>
-          <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {safeAmount} €/mois
-          </p>
-        </div>
-        <NumberInput
-          value={safeAmount}
-          onChange={(v) => {
-            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
-              ...(prev || {}),
-              [item.id]: v,
-            }));
-            sim.setters.setActiveCharges((prevIds: string[]) => {
-              if (v > 0) {
+        <p className="min-w-[150px] font-medium text-[13px] text-slate-900 dark:text-white leading-none text-right pr-1 h-9 flex items-center justify-end">
+          {item.name}
+        </p>
+        <div className="shrink-0 flex items-center gap-2">
+          <NumberInput
+            value={safeAmount}
+            onChange={(v) => {
+              sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+                ...(prev || {}),
+                [item.id]: v,
+              }));
+              sim.setters.setActiveCharges((prevIds: string[]) => {
+                if (v > 0) {
+                  return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
+                }
+                return prevIds.filter((id) => id !== item.id);
+              });
+            }}
+            onIncrement={() => {
+              const next = safeAmount + 5;
+              sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+                ...(prev || {}),
+                [item.id]: next,
+              }));
+              sim.setters.setActiveCharges((prevIds: string[]) => {
                 return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
-              }
-              return prevIds.filter((id) => id !== item.id);
-            });
-          }}
-          onIncrement={() => {
-            const next = safeAmount + 5;
-            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
-              ...(prev || {}),
-              [item.id]: next,
-            }));
-            sim.setters.setActiveCharges((prevIds: string[]) => {
-              return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
-            });
-          }}
-          onDecrement={() => {
-            const next = Math.max(0, safeAmount - 5);
-            sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
-              ...(prev || {}),
-              [item.id]: next,
-            }));
-            sim.setters.setActiveCharges((prevIds: string[]) => {
-              if (next <= 0) return prevIds.filter((id) => id !== item.id);
-              return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
-            });
-          }}
-          suffix="€"
-          label={item.name}
-        />
+              });
+            }}
+            onDecrement={() => {
+              const next = Math.max(0, safeAmount - 5);
+              sim.setters.setChargeAmounts((prev: Record<string, number> | undefined) => ({
+                ...(prev || {}),
+                [item.id]: next,
+              }));
+              sim.setters.setActiveCharges((prevIds: string[]) => {
+                if (next <= 0) return prevIds.filter((id) => id !== item.id);
+                return prevIds.includes(item.id) ? prevIds : [...prevIds, item.id];
+              });
+            }}
+            suffix="€"
+            label={item.name}
+          />
+          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">/mois</span>
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-1.5 animate-in fade-in duration-300">
       {/* PANNEAU ACTIVITÉ */}
       {activePanel === 'activite' && (
         <>
@@ -213,10 +226,39 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         </>
       )}
 
-      {/* PANNEAU CHARGES */}
-      {activePanel === 'charges' && (
+      {/* PANNEAU CROISSANCE (simulateur) */}
+      {activePanel === 'croissance' && (
         <>
-          <div className="space-y-3">
+          <InfoBox variant="info">
+            Taux de croissance appliqué au CA de chaque année. La croissance de l&apos;année 1 reste la base.
+          </InfoBox>
+          <div className="grid gap-2">
+            {[1, 2, 3, 4].map((idx) => (
+              <FieldCard
+                key={idx}
+                icon={Zap}
+                label={`Taux de croissance année ${idx + 1}`}
+                description="Croissance du CA pour cette année"
+                color="indigo"
+              >
+                <NumberInput
+                  value={Math.max(0, Math.min(50, (growthByYear?.[idx] ?? 0)))}
+                  onChange={(v) => onChangeGrowthYear?.(idx, v)}
+                  onIncrement={() => onChangeGrowthYear?.(idx, (growthByYear?.[idx] ?? 0) + 1)}
+                  onDecrement={() => onChangeGrowthYear?.(idx, (growthByYear?.[idx] ?? 0) - 1)}
+                  suffix="%"
+                  label={`Croissance année ${idx + 1}`}
+                />
+              </FieldCard>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* PANNEAU CHARGES */}
+      {activePanel === 'charges' && !isMicro && (
+        <>
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2 px-1">
               <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -225,12 +267,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 Charges déductibles (toutes structures)
               </h3>
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-0.5">
               {nonWarning.map(renderChargeRow)}
             </div>
           </div>
           {warning.length > 0 && (
-            <div className="space-y-3 pt-2">
+            <div className="space-y-1.5 pt-2">
               <div className="flex items-center gap-2 px-1">
                 <div className="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
                   <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
@@ -239,7 +281,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   EURL / SASU uniquement
                 </h3>
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-0.5">
                 {warning.map(renderChargeRow)}
               </div>
               <InfoBox variant="warning">
@@ -250,8 +292,14 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         </>
       )}
 
+      {activePanel === 'charges' && isMicro && (
+        <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
+          Non disponible pour la micro-entreprise.
+        </div>
+      )}
+
       {/* PANNEAU AMORTISSEMENT */}
-      {activePanel === 'amortissement' && (
+      {activePanel === 'amortissement' && !isMicro && (
         <>
           <FieldCard
             icon={Calculator}
@@ -266,6 +314,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               onDecrement={() => sim.setters.setMaterielAnnuel((p: number) => Math.max(0, (p || 0) - 100))}
               suffix="€"
               label="Achat matériel"
+              inputClassName="w-40 min-w-[10rem] max-w-[min(100%,12rem)]"
             />
           </FieldCard>
           <InfoBox variant="info">
@@ -275,13 +324,19 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         </>
       )}
 
+      {activePanel === 'amortissement' && isMicro && (
+        <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
+          Non disponible pour la micro-entreprise.
+        </div>
+      )}
+
       {/* PANNEAU VÉHICULE */}
-      {activePanel === 'vehicule' && (() => {
+      {activePanel === 'vehicule' && !isMicro && (() => {
         return (
           <>
             <div className="space-y-3">
               {/* Activation IK */}
-              <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+              <div className="p-3 rounded-lg">
                 <div className="flex items-center gap-2 mb-3 px-1">
                   <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
                     <Car className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -326,7 +381,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
 
               <div className={vehiculeActive ? 'space-y-3' : 'hidden'}>
                 {/* Type véhicule */}
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <div className="p-3 rounded-lg">
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2 px-1">
                     Type de véhicule
                   </p>
@@ -363,7 +418,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </div>
 
                 {/* Électrique toggle */}
-                <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <div className="p-3 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
@@ -464,7 +519,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 </InfoBox>
 
                 <Link
-                  href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
+                  href={`/outils?outil=indemnites-km&ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 transition-colors"
                 >
                   <Calculator className="w-4 h-4" />
@@ -475,6 +530,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           </>
         );
       })()}
+
+      {activePanel === 'vehicule' && isMicro && (
+        <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
+          Non disponible pour la micro-entreprise.
+        </div>
+      )}
 
       {/* PANNEAU OPTIMISATIONS */}
       {activePanel === 'opti' && (
@@ -529,7 +590,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {activePanel === 'cotisations' && (
         <>
           {/* Ligne ACRE */}
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <div className="p-3 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center">
@@ -559,7 +620,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           </div>
 
           {/* Ligne CFE */}
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+          <div className="p-3 rounded-lg">
             <div className="flex items-center gap-2 mb-3 px-1">
               <div className="w-6 h-6 rounded-md bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
                 <Building2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
@@ -607,7 +668,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {/* PANNEAU FOYER (Situation familiale — IR) */}
       {activePanel === 'foyer' && (
         <>
-          <div className="w-full p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-4">
+          <div className="w-full p-3 rounded-lg space-y-4">
             {/* Composition du foyer */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 px-1">
@@ -669,45 +730,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                   className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
                   aria-label="Plus d'enfants"
                 >
-                    <User className="w-4 h-4" /> Célibataire
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => sim.setters.setNbAdultes(2)}
-                    className={cn(
-                      'flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors',
-                      sim.state.nbAdultes === 2
-                        ? 'bg-slate-700 dark:bg-slate-600 text-white'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    )}
-                  >
-                    <Users className="w-4 h-4" /> Couple
-                  </button>
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Enfants</span>
-                <div className="flex items-center gap-2 w-fit">
-                  <button
-                    type="button"
-                    onClick={() => sim.setters.setNbEnfants(Math.max(0, (sim.state.nbEnfants ?? 0) - 1))}
-                    className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
-                    aria-label="Moins d’enfants"
-                  >
-                    <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  </button>
-                  <span className="min-w-8 text-center font-semibold text-slate-900 dark:text-white tabular-nums">
-                    {sim.state.nbEnfants ?? 0}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => sim.setters.setNbEnfants(Math.min(6, (sim.state.nbEnfants ?? 0) + 1))}
-                    className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
-                    aria-label="Plus d’enfants"
-                  >
-                    <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  </button>
-                </div>
+                  <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                </button>
               </div>
             </div>
             {sim.state.nbAdultes < 2 && (
@@ -720,6 +744,7 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             icon={Users}
             label="Revenus du conjoint"
             description="Pour le calcul du quotient familial"
+            showIcon={false}
           >
             <NumberInput
               value={spouseIncome}

@@ -30,8 +30,12 @@ export async function generateMetadata({ params }: Props) {
 
 function formatContent(text: string) {
   return text.split(/\n\n+/).map((block, i) => {
-    const html = block.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    return <p key={i} className="mb-4 last:mb-0" dangerouslySetInnerHTML={{ __html: html }} />;
+    const plain = block.replace(/\*\*(.+?)\*\*/g, '$1');
+    return (
+      <p key={i} className="mb-4 last:mb-0">
+        {plain}
+      </p>
+    );
   });
 }
 
@@ -74,7 +78,7 @@ export default async function ArticlePage({ params }: Props) {
           </span>
           <span>· {article.readingTime}</span>
         </div>
-        <div className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300 [&_strong]:font-bold [&_strong]:text-slate-900 dark:[&_strong]:text-white">
+        <div className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
           {formatContent(article.content)}
         </div>
         <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700">

@@ -1,131 +1,114 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { InputNumber } from '@/components/input-number';
 
-const labelLight = 'text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wide';
-const labelDark = 'text-[8px] font-black text-white/90 uppercase tracking-wide';
-const inputLight = 'w-14 text-center text-[10px] font-bold py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50 transition-all';
-const inputDark = 'tjm-days-input w-16 py-1.5 px-2 text-xs font-bold rounded-lg bg-white/10 border border-white/20 text-white text-center focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition-all';
-const selectLight = 'w-auto min-w-[96px] text-[9px] py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 shrink-0 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50 transition-all';
-const selectDark = 'w-auto min-w-[96px] text-[9px] py-1.5 px-2 rounded-lg bg-white/10 border border-white/20 text-white shrink-0 [&_option]:text-slate-900 cursor-pointer hover:border-white/40 transition-all';
-const spanLight = 'text-[8px] text-slate-400 dark:text-slate-500';
-const spanDark = 'text-[8px] text-white/80';
-const spanValueLight = 'text-[9px] font-bold text-slate-600 dark:text-slate-300 tabular-nums';
-const spanValueDark = 'text-[9px] font-bold text-white/85 tabular-nums';
-
-const arrowBtn = 'w-5 h-3 rounded bg-white/10 border border-white/25 flex items-center justify-center text-[7px] text-white hover:bg-white/20';
-
-export default function RegimeParamsInline({ sim, regimeId, align = 'center', variant = 'light' }: { sim: any; regimeId: string; align?: 'center' | 'left'; variant?: 'light' | 'dark' }) {
+export default function RegimeParamsInline({ sim, regimeId, align = 'center', variant = 'light' }: { sim: any; regimeId: string; align?: 'center' | 'left' | 'right'; variant?: 'light' | 'dark' }) {
   const isDark = variant === 'dark';
-  const alignClass = align === 'center' ? 'justify-center' : 'justify-start';
-  const lbl = isDark ? labelDark : labelLight;
-  const sp = isDark ? spanDark : spanLight;
-  const spVal = isDark ? spanValueDark : spanValueLight;
-
-  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const holdDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startHold = (fn: () => void) => {
-    fn();
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    holdDelayRef.current = setTimeout(() => { holdTimerRef.current = setInterval(fn, 120); }, 300);
-  };
-  const stopHold = () => {
-    if (holdDelayRef.current) clearTimeout(holdDelayRef.current);
-    holdDelayRef.current = null;
-    if (holdTimerRef.current) clearInterval(holdTimerRef.current);
-    holdTimerRef.current = null;
-  };
-
-  const portageComm = sim.state.portageComm;
+  const portageComm = sim.state.portageComm ?? 0;
+  const rowClass = cn(
+    'w-full flex items-center gap-3',
+    align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start',
+  );
+  const labelClass = 'min-w-[150px] text-right pr-1 text-[13px] font-medium text-slate-900 dark:text-white leading-none h-9 flex items-center justify-end whitespace-nowrap';
+  const rightClass = 'shrink-0 flex items-center gap-2';
+  const selectClass =
+    'h-9 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 text-sm font-semibold text-slate-900 dark:text-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50 transition-all';
+  const checkboxClass =
+    'h-4 w-4 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/50';
 
   if (regimeId === 'Portage') return (
-    <div className="space-y-1">
-      <div className={`flex flex-col gap-1 ${alignClass === 'justify-center' ? 'items-center' : 'items-start'}`}>
-        <label className={`${lbl}`}>Frais gestion portage</label>
-        <div className="flex items-center gap-2 w-full">
-          <input
-            type="range"
+    <div className={cn('flex flex-col gap-1.5', align === 'center' ? 'items-stretch' : 'items-start')}>
+      <div className={rowClass}>
+        <span className={labelClass}>Frais gestion portage</span>
+        <div className={rightClass}>
+          <InputNumber
+            value={Math.max(0, Math.min(20, portageComm))}
+            onChange={(v) => sim.setters.setPortageComm(Math.max(0, Math.min(20, Math.round(v))))}
+            orientation="horizontal"
+            ariaLabel="Frais gestion portage"
             min={0}
             max={20}
             step={1}
-            value={Math.max(0, Math.min(20, portageComm ?? 0))}
-            onChange={e => {
-              const n = Number(e.target.value);
-              sim.setters.setPortageComm(Math.max(0, Math.min(20, n)));
-            }}
-            className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-violet-300' : 'accent-violet-500'}`}
-            onClick={e => e.stopPropagation()}
+            suffix="%"
           />
-          <span className={`${spVal} w-10 text-right`}>
-            {Math.round(portageComm ?? 0)}%
-          </span>
         </div>
-        <p className={`${sp} text-[7px]`}>
-          0% = aucune commission de portage
-        </p>
       </div>
     </div>
   );
   if (regimeId === 'Micro') return (
-    <div className={`space-y-1 flex flex-col ${alignClass === 'justify-center' ? 'items-center' : 'items-start'}`}>
-      <div className={`flex items-center gap-2 ${alignClass}`}>
-        <label className={`${lbl} shrink-0`}>Type</label>
-        <select
-          value={sim.state.typeActiviteMicro}
-          onChange={e => sim.setters.setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')}
-          className={isDark ? selectDark : selectLight}
-          onClick={e => e.stopPropagation()}
-        >
-          <option value="BNC">BNC</option>
-          <option value="BIC_SERVICE">BIC Service</option>
-          <option value="BIC_COMMERCE">BIC Commerce</option>
-        </select>
+    <div className={cn('flex flex-col gap-1.5', align === 'center' ? 'items-center' : 'items-start')}>
+      <div className={rowClass}>
+        <span className={labelClass}>Type</span>
+        <div className={rightClass}>
+          <select
+            value={sim.state.typeActiviteMicro}
+            onChange={(e) =>
+              sim.setters.setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')
+            }
+            className={selectClass}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <option value="BNC">BNC</option>
+            <option value="BIC_SERVICE">BIC Service</option>
+            <option value="BIC_COMMERCE">BIC Commerce</option>
+          </select>
+        </div>
       </div>
-      <label className={`flex items-center gap-1.5 mt-1 cursor-pointer ${alignClass === 'justify-center' ? 'justify-center' : ''}`}>
-        <input
-          type="checkbox"
-          checked={sim.state.prelevementLiberatoire}
-          onChange={() => sim.setters.setPrelevementLiberatoire(!sim.state.prelevementLiberatoire)}
-          className="rounded"
-          onClick={e => e.stopPropagation()}
-        />
-        <span className={spVal}>Prélèv. libératoire</span>
-      </label>
+      <div className={rowClass}>
+        <span className={labelClass}>Prélèv. libératoire</span>
+        <div className={rightClass}>
+          <input
+            type="checkbox"
+            checked={Boolean(sim.state.prelevementLiberatoire)}
+            onChange={() => sim.setters.setPrelevementLiberatoire(!sim.state.prelevementLiberatoire)}
+            className={checkboxClass}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Prélèvement libératoire"
+          />
+        </div>
+      </div>
     </div>
   );
   if (regimeId === 'EURL IS') return (
-    <div className="space-y-1.5 min-w-[120px]">
-      <label className={`${lbl} block`}>Rémunération TNS</label>
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={0} max={100} step={5}
-          value={(sim.state.remunerationDirigeantMensuelle ?? 1) * 100}
-          onChange={e => sim.setters.setRemunerationDirigeantMensuelle(Number(e.target.value) / 100)}
-          className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-blue-400' : 'accent-blue-500'}`}
-          onClick={e => e.stopPropagation()}
-        />
-        <span className={`${spVal} w-12 text-right`}>{Math.round((sim.state.remunerationDirigeantMensuelle ?? 1) * 100)}%</span>
+    <div className={cn('flex flex-col gap-1.5', align === 'center' ? 'items-center' : 'items-start')}>
+      <div className={rowClass}>
+        <span className={labelClass}>Rémunération TNS</span>
+        <div className={rightClass}>
+          <InputNumber
+            value={Math.round((sim.state.remunerationDirigeantMensuelle ?? 1) * 100)}
+            onChange={(v) => {
+              const safe = Math.max(0, Math.min(100, Math.round(v)));
+              sim.setters.setRemunerationDirigeantMensuelle(safe / 100);
+            }}
+            orientation="horizontal"
+            ariaLabel="Rémunération TNS"
+            min={0}
+            max={100}
+            step={5}
+            suffix="%"
+          />
+        </div>
       </div>
-      <p className={`${sp} text-[7px]`}>Reste en trésorerie société</p>
     </div>
   );
   if (regimeId === 'SASU') return (
-    <div className="space-y-1.5 min-w-[120px]">
-      <label className={`${lbl} block`}>Dividendes</label>
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={0} max={100} step={5}
-          value={sim.state.repartitionRemuneration ?? 100}
-          onChange={e => sim.setters.setRepartitionRemuneration(Number(e.target.value))}
-          className={`flex-1 h-2 rounded-full cursor-pointer ${isDark ? 'accent-violet-400' : 'accent-violet-500'}`}
-          onClick={e => e.stopPropagation()}
-        />
-        <span className={`${spVal} w-12 text-right`}>{sim.state.repartitionRemuneration ?? 100}%</span>
+    <div className={cn('flex flex-col gap-1.5', align === 'center' ? 'items-center' : 'items-start')}>
+      <div className={rowClass}>
+        <span className={labelClass}>Dividendes</span>
+        <div className={rightClass}>
+          <InputNumber
+            value={Math.max(0, Math.min(100, sim.state.repartitionRemuneration ?? 100))}
+            onChange={(v) => sim.setters.setRepartitionRemuneration(Math.max(0, Math.min(100, Math.round(v))))}
+            orientation="horizontal"
+            ariaLabel="Dividendes"
+            min={0}
+            max={100}
+            step={5}
+            suffix="%"
+          />
+        </div>
       </div>
-      <p className={`${sp} text-[7px]`}>Part du bénéfice en dividendes</p>
     </div>
   );
   return <p className={`text-[8px] italic ${isDark ? 'text-white/70' : 'text-slate-400'}`}>—</p>;

@@ -24,6 +24,8 @@ import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import NumberInput from '@/components/NumberInput';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur2/RegimeFinancialBreakdown';
+import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
+import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
 import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
@@ -33,14 +35,6 @@ import { projeterSurNAns } from '@/lib/projections';
 import { buildCaRepartitionSegments } from '@/lib/simulateur/caRepartitionColors';
 import { buildComparateurQuery, STATUT_SLUG_TO_ID, VALID_STATUT_SLUGS } from '@/lib/simulateur/paliers';
 import { cn, fmtEur } from '@/lib/utils';
-
-const REGIME_COLORS: Record<string, { gradient: string; bg: string; border: string; ring: string }> = {
-  Portage: { gradient: 'from-violet-500 to-indigo-600', bg: 'bg-violet-500', border: 'border-violet-400', ring: 'ring-violet-400' },
-  Micro: { gradient: 'from-amber-400 to-orange-500', bg: 'bg-amber-500', border: 'border-amber-400', ring: 'ring-amber-400' },
-  'EURL IR': { gradient: 'from-emerald-400 to-teal-500', bg: 'bg-emerald-500', border: 'border-emerald-400', ring: 'ring-emerald-400' },
-  'EURL IS': { gradient: 'from-blue-400 to-cyan-500', bg: 'bg-blue-500', border: 'border-blue-400', ring: 'ring-blue-400' },
-  SASU: { gradient: 'from-rose-400 to-pink-500', bg: 'bg-rose-500', border: 'border-rose-400', ring: 'ring-rose-400' },
-};
 
 const REGIME_HEX: Record<string, string> = {
   Portage: '#6366f1',
@@ -57,89 +51,6 @@ const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: st
   'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
   SASU: { Icon: Building, iconClass: 'bg-violet-500 text-white' },
 };
-
-function HistogramBarLabeled({
-  regime,
-}: {
-  regime: {
-    id: string;
-    ca: number;
-    fees: number;
-    cotis: number;
-    ir: number;
-    net: number;
-    lines?: { id?: string; amount?: number }[];
-    cashInCompany?: number;
-  };
-}) {
-  const portageCommission = regime.lines?.find((l) => l.id === 'portage_commission')?.amount ?? 0;
-  const segs = buildCaRepartitionSegments(
-    regime.ca,
-    { fees: regime.fees, cotis: regime.cotis, ir: regime.ir, net: regime.net },
-    { regimeId: regime.id, portageCommission, lines: regime.lines, cashInCompany: regime.cashInCompany },
-  );
-  const colors = REGIME_COLORS[regime.id] ?? REGIME_COLORS.Portage;
-
-  return (
-    <div className="relative mx-auto w-[216px] max-w-[min(216px,45vw)] shrink-0 isolate">
-      <div
-        className={cn(
-          'absolute -inset-3 rounded-3xl opacity-10 blur-2xl pointer-events-none -z-10',
-          `bg-linear-to-b ${colors.gradient}`,
-        )}
-      />
-      <div
-        className={cn(
-          'relative flex flex-col-reverse overflow-hidden rounded-2xl border-2 shadow-xl w-full transition-all duration-500',
-          colors.border,
-          'bg-slate-50 dark:bg-slate-900/60',
-        )}
-        style={{ height: 'min(52vh, 420px)' }}
-      >
-        {segs.map((s) => (
-          <div
-            key={s.key}
-            style={{ height: `${Math.max(0, s.pct)}%`, background: s.fill }}
-            className="w-full min-h-0 transition-all duration-500 relative flex items-center justify-center overflow-hidden"
-          >
-            {s.pct >= 8 && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center px-1 pointer-events-none z-1">
-                <span
-                  className="text-[9px] sm:text-[10px] font-black leading-tight text-center line-clamp-2 wrap-break-word antialiased"
-                  style={{ color: s.ink }}
-                >
-                  {s.label}
-                </span>
-                <span
-                  className="text-[12px] font-black leading-none mt-0.5 antialiased tabular-nums"
-                  style={{ color: s.ink }}
-                >
-                  {Math.round(s.pct)}%
-                </span>
-              </div>
-            )}
-            {s.pct > 0 && s.pct < 8 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-1 px-1">
-                <div className="inline-flex max-w-[calc(100%-4px)] min-w-0 flex-row items-center justify-center gap-1">
-                  <span
-                    className="truncate text-left text-[7px] font-black leading-none antialiased"
-                    style={{ color: s.ink }}
-                    title={s.label}
-                  >
-                    {s.label}
-                  </span>
-                  <span className="shrink-0 text-[8px] font-black tabular-nums antialiased" style={{ color: s.ink }}>
-                    {Math.round(s.pct)}%
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function YearNavButton({
   regime,
@@ -489,10 +400,10 @@ function SimulateurStatutViewContent() {
               </div>
 
               <div className="min-w-0 w-full xl:row-start-2 xl:col-start-1 xl:self-start">
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col">
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col h-full max-h-[min(85vh,920px)]">
                   <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
 
-                  <div className="p-5 md:p-6 flex flex-col gap-6">
+                  <div className="p-5 md:p-6 flex flex-col gap-6 flex-1 min-h-0">
                     <div className="flex items-start justify-center gap-2 sm:gap-4">
                       <button
                         type="button"
@@ -520,28 +431,6 @@ function SimulateurStatutViewContent() {
                               Plafond micro dépassé
                             </span>
                           )}
-                        </div>
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                          Croissance du CA appliquée à cette année :{' '}
-                          <span className="font-black text-slate-800 dark:text-slate-200">{growthByYear[safeYear] ?? 0} %</span>
-                        </p>
-                        <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-                          <div className="flex flex-col items-center gap-0.5">
-                            <span className="text-[9px] font-bold uppercase text-slate-400">Ajuster la croissance (cette année)</span>
-                            <NumberInput
-                              value={growthByYear[safeYear] ?? 0}
-                              onChange={(v) => updateGrowthYear(safeYear, v)}
-                              onIncrement={() =>
-                                updateGrowthYear(safeYear, (growthByYear[safeYear] ?? 0) + 1)
-                              }
-                              onDecrement={() =>
-                                updateGrowthYear(safeYear, (growthByYear[safeYear] ?? 0) - 1)
-                              }
-                              suffix="%"
-                              label="Croissance"
-                              inputClassName="bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white w-16"
-                            />
-                          </div>
                         </div>
                         <p className="mt-2 text-3xl md:text-4xl font-black tabular-nums text-emerald-600 dark:text-emerald-400">
                           {fmtEur(regime.net / 12)}
@@ -596,13 +485,16 @@ function SimulateurStatutViewContent() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto p-0 overscroll-contain">
+                  <div className="flex-1 min-h-0 p-0 overflow-y-auto">
                     <SimulationSettingsSidebar
                       sim={ctx}
                       activeRegimeId={statutId}
                       openSection={openSection}
                       setOpenSection={setOpenSection}
-                      filterByRegime
+                      suppressNonApplicablePanels
+                      showGrowthSection
+                      growthByYear={growthByYear}
+                      onChangeGrowthYear={updateGrowthYear}
                     />
                   </div>
                 </div>
@@ -682,7 +574,7 @@ function SimulateurStatutViewContent() {
                 activeRegimeId={statutId}
                 openSection={openSection}
                 setOpenSection={setOpenSection}
-                filterByRegime
+                suppressNonApplicablePanels
               />
             </div>
           </div>
