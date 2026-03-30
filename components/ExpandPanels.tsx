@@ -28,23 +28,37 @@ function FieldCard({
   label,
   description,
   children,
+  color = 'slate',
 }: {
   icon: React.ElementType;
   label: string;
   description?: string;
   children: React.ReactNode;
+  color?: 'slate' | 'indigo' | 'emerald' | 'amber' | 'rose' | 'violet' | 'cyan' | 'blue';
 }) {
+  const colorClasses: Record<string, { bg: string; text: string }> = {
+    slate: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-600 dark:text-slate-400' },
+    indigo: { bg: 'bg-indigo-100 dark:bg-indigo-900/50', text: 'text-indigo-600 dark:text-indigo-400' },
+    emerald: { bg: 'bg-emerald-100 dark:bg-emerald-900/50', text: 'text-emerald-600 dark:text-emerald-400' },
+    amber: { bg: 'bg-amber-100 dark:bg-amber-900/50', text: 'text-amber-600 dark:text-amber-400' },
+    rose: { bg: 'bg-rose-100 dark:bg-rose-900/50', text: 'text-rose-600 dark:text-rose-400' },
+    violet: { bg: 'bg-violet-100 dark:bg-violet-900/50', text: 'text-violet-600 dark:text-violet-400' },
+    cyan: { bg: 'bg-cyan-100 dark:bg-cyan-900/50', text: 'text-cyan-600 dark:text-cyan-400' },
+    blue: { bg: 'bg-blue-100 dark:bg-blue-900/50', text: 'text-blue-600 dark:text-blue-400' },
+  };
+  const colors = colorClasses[color] ?? colorClasses.slate;
+
   return (
-    <div className="p-5 rounded-xl border-2 transition-all bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-slate-100 dark:bg-slate-700">
-            <Icon className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+    <div className="p-4 rounded-xl border transition-all bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
+          <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', colors.bg)}>
+            <Icon className={cn('w-4 h-4', colors.text)} />
           </div>
-          <div>
-            <p className="font-semibold text-slate-900 dark:text-white">{label}</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-sm text-slate-900 dark:text-white leading-tight">{label}</p>
             {description && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">{description}</p>
             )}
           </div>
         </div>
@@ -62,16 +76,16 @@ function InfoBox({
   variant?: 'info' | 'warning' | 'success';
 }) {
   const styles = {
-    info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
+    info: 'bg-blue-50/80 dark:bg-blue-950/30 border-blue-200/60 dark:border-blue-800/60 text-blue-700 dark:text-blue-300',
     warning:
-      'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300',
+      'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200/60 dark:border-amber-800/60 text-amber-700 dark:text-amber-300',
     success:
-      'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300',
+      'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200/60 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300',
   };
   return (
-    <div className={cn('p-4 rounded-xl border-2 flex items-start gap-3', styles[variant])}>
-      <Info className="w-5 h-5 shrink-0 mt-0.5" />
-      <p className="text-sm">{children}</p>
+    <div className={cn('p-3 rounded-lg border flex items-start gap-2.5', styles[variant])}>
+      <Info className="w-4 h-4 shrink-0 mt-0.5 opacity-80" />
+      <p className="text-xs leading-relaxed">{children}</p>
     </div>
   );
 }
@@ -166,7 +180,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           <FieldCard
             icon={Zap}
             label="Taux Journalier Moyen (TJM)"
-            description="Votre tarif journalier facturé"
+            description="Votre tarif journalier facturé aux clients"
+            color="indigo"
           >
             <NumberInput
               value={sim.state.tjm ?? 0}
@@ -180,7 +195,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           <FieldCard
             icon={Receipt}
             label="Jours travaillés par an"
-            description="Nombre de jours facturés annuellement"
+            description="Nombre de jours facturés sur l'année"
+            color="indigo"
           >
             <NumberInput
               value={sim.state.days ?? 0}
@@ -191,30 +207,44 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               label="Jours"
             />
           </FieldCard>
+          <InfoBox variant="info">
+            Votre chiffre d&apos;affaires est calculé automatiquement : TJM × Jours = CA annuel.
+          </InfoBox>
         </>
       )}
 
       {/* PANNEAU CHARGES */}
       {activePanel === 'charges' && (
         <>
-          <div>
-            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-              Charges déductibles (toutes structures)
-            </h3>
-            <div className="grid gap-3">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                Charges déductibles (toutes structures)
+              </h3>
+            </div>
+            <div className="grid gap-2">
               {nonWarning.map(renderChargeRow)}
             </div>
           </div>
           {warning.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <Info className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                EURL / SASU uniquement (non déductible en portage)
-              </h3>
-              <div className="grid gap-3">
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+                  <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  EURL / SASU uniquement
+                </h3>
+              </div>
+              <div className="grid gap-2">
                 {warning.map(renderChargeRow)}
               </div>
+              <InfoBox variant="warning">
+                Ces charges ne sont pas déductibles en portage salarial.
+              </InfoBox>
             </div>
           )}
         </>
@@ -226,7 +256,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           <FieldCard
             icon={Calculator}
             label="Achat matériel (année 1)"
-            description="Ordinateur, équipement… amorti sur 3 ans (EURL/SASU)"
+            description="Ordinateur, écran, téléphone pro, mobilier…"
+            color="amber"
           >
             <NumberInput
               value={materielAnnuel}
@@ -238,8 +269,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
             />
           </FieldCard>
           <InfoBox variant="info">
-            L’achat de matériel (PC, écran, téléphone pro…) peut être amorti sur 3 ans en EURL ou SASU.
-            La déduction est répartie sur 3 exercices. En micro-entreprise et en portage, ce poste n’est pas déductible.
+            Le matériel professionnel est amorti sur 3 ans en EURL/SASU (déduction répartie sur 3 exercices).
+            Non applicable en micro-entreprise ou en portage.
           </InfoBox>
         </>
       )}
@@ -248,24 +279,32 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {activePanel === 'vehicule' && (() => {
         return (
           <>
-            <div className="space-y-4">
-              <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-                <p className="font-semibold text-slate-900 dark:text-white mb-3">Indemnités kilométriques</p>
-                <div className="flex gap-3 flex-wrap">
+            <div className="space-y-3">
+              {/* Activation IK */}
+              <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                    <Car className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                    Indemnités kilométriques
+                  </p>
+                </div>
+                <div className="flex gap-2 flex-wrap">
                   <button
                     type="button"
                     onClick={() => {
                       sim.setters.setSectionsActive((prev: any) => ({ ...prev, vehicule: true }));
                     }}
                     className={cn(
-                      'flex-1 min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                      'flex-1 min-w-[120px] p-3 rounded-lg border flex flex-col items-center gap-1.5 transition-all text-sm',
                       vehiculeActive
-                        ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
                     )}
                   >
-                    <Car className="w-5 h-5" />
-                    Véhicule (IK)
+                    <Car className="w-4 h-4" />
+                    <span className="font-semibold">Avec IK</span>
                   </button>
                   <button
                     type="button"
@@ -273,154 +312,166 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                       sim.setters.setSectionsActive((prev: any) => ({ ...prev, vehicule: false }));
                     }}
                     className={cn(
-                      'flex-1 min-w-[140px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
+                      'flex-1 min-w-[120px] p-3 rounded-lg border flex flex-col items-center gap-1.5 transition-all text-sm',
                       !vehiculeActive
-                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-700 dark:text-emerald-300'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                        ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-500'
                     )}
                   >
-                    <Circle className="w-5 h-5" />
-                    Sans véhicule
+                    <Circle className="w-4 h-4" />
+                    <span className="font-semibold">Sans IK</span>
                   </button>
                 </div>
               </div>
 
-              <div className={vehiculeActive ? 'space-y-4' : 'hidden'}>
-                <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-                <p className="font-semibold text-slate-900 dark:text-white mb-3">Type de véhicule</p>
-                <div className="flex gap-3 flex-wrap">
-                  {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
-                    const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
-                    const Icon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
-                    return (
-                      <button
-                        key={t}
-                        type="button"
+              <div className={vehiculeActive ? 'space-y-3' : 'hidden'}>
+                {/* Type véhicule */}
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2 px-1">
+                    Type de véhicule
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {(['voiture', 'moto', 'cyclo50'] as const).map((t) => {
+                      const label = t === 'voiture' ? 'Voiture' : t === 'moto' ? 'Moto' : 'Cyclo 50';
+                      const VIcon = t === 'voiture' ? Car : t === 'moto' ? Bike : Circle;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          disabled={!vehiculeActive}
+                          onClick={() => {
+                            sim.setters.setTypeVehicule(t);
+                            if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any))
+                              sim.setters.setCvFiscaux('3-5');
+                            if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any))
+                              sim.setters.setCvFiscaux('6');
+                          }}
+                          className={cn(
+                            'flex-1 min-w-[80px] p-3 rounded-lg border flex flex-col items-center gap-1.5 transition-all',
+                            typeVehicule === t
+                              ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300',
+                            !vehiculeActive && 'opacity-50 pointer-events-none'
+                          )}
+                        >
+                          <VIcon className="w-5 h-5" />
+                          <span className="font-medium text-xs">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Électrique toggle */}
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-slate-900 dark:text-white">Véhicule électrique</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Majoration +20% sur les IK</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
                       disabled={!vehiculeActive}
-                        onClick={() => {
-                          sim.setters.setTypeVehicule(t);
-                          if (t === 'moto' && !BANDES_MOTO.includes(cvFiscauxRaw as any))
-                            sim.setters.setCvFiscaux('3-5');
-                          if (t === 'voiture' && BANDES_MOTO.includes(cvFiscauxRaw as any))
-                            sim.setters.setCvFiscaux('6');
-                        }}
+                      onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
+                      className={cn(
+                        'w-12 h-7 rounded-full transition-colors relative shrink-0',
+                        sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600',
+                        !vehiculeActive && 'opacity-50 pointer-events-none'
+                      )}
+                    >
+                      <span
                         className={cn(
-                          'flex-1 min-w-[100px] p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all',
-                          typeVehicule === t
-                            ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 text-indigo-700 dark:text-indigo-300'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-300',
-                          !vehiculeActive && 'opacity-50 pointer-events-none'
+                          'absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                          sim.state.vehiculeElectrique ? 'left-0.5 translate-x-5' : 'left-0.5 translate-x-0'
                         )}
-                      >
-                        <Icon className="w-6 h-6" />
-                        <span className="font-medium text-sm">{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                    <Circle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">Véhicule électrique</p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Majoration de 20 % sur les IK</p>
+                      />
+                    </button>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  disabled={!vehiculeActive}
-                  onClick={() => sim.setters.setVehiculeElectrique(!sim.state.vehiculeElectrique)}
-                  className={cn(
-                    'w-14 h-8 rounded-full transition-colors relative p-1 shrink-0',
-                    sim.state.vehiculeElectrique ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'
-                    , !vehiculeActive && 'opacity-50 pointer-events-none'
-                  )}
+
+                {/* Km annuels */}
+                <FieldCard
+                  icon={Car}
+                  label="Kilomètres annuels"
+                  description="Trajets clients, réunions, formations…"
+                  color="emerald"
                 >
-                  <span
-                    className={cn(
-                      'absolute top-1 w-6 h-6 rounded-full bg-white shadow transition-transform',
-                      sim.state.vehiculeElectrique ? 'left-1 translate-x-6' : 'left-1 translate-x-0'
-                    )}
+                  <NumberInput
+                    value={vehiculeActive ? kmAnnuel : 0}
+                    disabled={!vehiculeActive}
+                    onChange={(v) => sim.setters.setKmAnnuel(v)}
+                    onIncrement={() => sim.setters.setKmAnnuel((p: number) => (p || 0) + 500)}
+                    onDecrement={() => sim.setters.setKmAnnuel((p: number) => Math.max(0, (p || 0) - 500))}
+                    suffix="km"
+                    label="Km"
                   />
-                </button>
+                </FieldCard>
+
+                {/* Puissance fiscale voiture */}
+                {typeVehicule === 'voiture' && (
+                  <FieldCard
+                    icon={Car}
+                    label="Puissance fiscale"
+                    description="Chevaux fiscaux pour le barème"
+                    color="emerald"
+                  >
+                    <select
+                      value={cvFiscauxRaw}
+                      disabled={!vehiculeActive}
+                      onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
+                      className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30"
+                    >
+                      {[3, 4, 5, 6, 7].map((cv) => (
+                        <option key={cv} value={cv}>
+                          {cv} CV
+                        </option>
+                      ))}
+                    </select>
+                  </FieldCard>
+                )}
+
+                {/* Bande moto */}
+                {typeVehicule === 'moto' && (
+                  <FieldCard
+                    icon={Bike}
+                    label="Bande moto"
+                    description="Catégorie pour le barème IK"
+                    color="emerald"
+                  >
+                    <select
+                      value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
+                      disabled={!vehiculeActive}
+                      onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
+                      className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30"
+                    >
+                      {BANDES_MOTO.map((b) => (
+                        <option key={b} value={b}>
+                          {BANDE_MOTO_LABEL[b]}
+                        </option>
+                      ))}
+                    </select>
+                  </FieldCard>
+                )}
+
+                {/* Info + lien */}
+                <InfoBox variant="info">
+                  Les IK suivent le barème URSSAF : déductibles en EURL/SASU, exonérées de cotisations et d&apos;IR pour vous.
+                </InfoBox>
+
+                <Link
+                  href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-600 hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30 transition-colors"
+                >
+                  <Calculator className="w-4 h-4" />
+                  Simuler le barème en détail
+                </Link>
               </div>
             </div>
-            <FieldCard
-              icon={Car}
-              label="Kilomètres professionnels annuels"
-              description="Trajets clients, réunions, etc."
-            >
-              <NumberInput
-                value={vehiculeActive ? kmAnnuel : 0}
-                disabled={!vehiculeActive}
-                onChange={(v) => sim.setters.setKmAnnuel(v)}
-                onIncrement={() => sim.setters.setKmAnnuel((p: number) => (p || 0) + 500)}
-                onDecrement={() => sim.setters.setKmAnnuel((p: number) => Math.max(0, (p || 0) - 500))}
-                suffix="km"
-                label="Km"
-              />
-            </FieldCard>
-            {typeVehicule === 'voiture' && (
-              <FieldCard
-                icon={Car}
-                label="Puissance fiscale"
-                description="Chevaux fiscaux (barème IK)"
-              >
-                <select
-                  value={cvFiscauxRaw}
-                  disabled={!vehiculeActive}
-                  onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
-                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30"
-                >
-                  {[3, 4, 5, 6, 7].map((cv) => (
-                    <option key={cv} value={cv}>
-                      {cv} CV
-                    </option>
-                  ))}
-                </select>
-              </FieldCard>
-            )}
-            {typeVehicule === 'moto' && (
-              <FieldCard
-                icon={Bike}
-                label="Bande moto"
-                description="Barème IK"
-              >
-                <select
-                  value={BANDES_MOTO.includes(cvFiscauxRaw as any) ? cvFiscauxRaw : '3-5'}
-                  disabled={!vehiculeActive}
-                  onChange={(e) => sim.setters.setCvFiscaux(e.target.value)}
-                  className="px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:border-indigo-500"
-                >
-                  {BANDES_MOTO.map((b) => (
-                    <option key={b} value={b}>
-                      {BANDE_MOTO_LABEL[b]}
-                    </option>
-                  ))}
-                </select>
-              </FieldCard>
-            )}
-            <div className="mt-4">
-              <InfoBox variant="info">
-                Les indemnités kilométriques suivent le barème URSSAF : déductibles pour l&apos;entreprise (EURL/SASU) et
-                exonérées de cotisations et d&apos;impôt sur le revenu pour vous.
-              </InfoBox>
-            </div>
-            <div className="mt-4 flex items-center justify-center">
-              <Link
-                href={`/outils/indemnites-km?ik_km=${kmAnnuel}&ik_type=${typeVehicule}&ik_cv=${encodeURIComponent(cvFiscauxRaw ?? (typeVehicule === 'voiture' ? '6' : '3-5'))}&ik_elec=${sim.state.vehiculeElectrique ? '1' : '0'}`}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-600 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 transition-colors"
-              >
-                <Calculator className="w-4 h-4" />
-                Simuler le barème en détail
-              </Link>
-            </div>
-            </div>
-          </div>
           </>
         );
       })()}
@@ -430,8 +481,9 @@ export default function ExpandPanels({ activePanel, sim }: any) {
         <>
           <FieldCard
             icon={Home}
-            label="Loyer perçu (sous-location bureau)"
-            description="Si vous louez une partie de votre domicile à votre société"
+            label="Loyer perçu mensuel"
+            description="Sous-location d'une partie de votre domicile à votre société"
+            color="violet"
           >
             <NumberInput
               value={loyerPercu}
@@ -452,8 +504,9 @@ export default function ExpandPanels({ activePanel, sim }: any) {
           </FieldCard>
           <FieldCard
             icon={Gift}
-            label="Avantages optimisés"
-            description="CE, CSE, chèques vacances…"
+            label="Avantages annuels"
+            description="CE, CSE, chèques vacances, culture…"
+            color="violet"
           >
             <NumberInput
               value={avantagesOptimises}
@@ -466,9 +519,8 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               label="Avantages"
             />
           </FieldCard>
-          <InfoBox variant="info">
-            Loyer perçu (location à son entreprise) et avantages CE/CSE (chèques vacances, etc.) sont
-            des leviers d&apos;optimisation — réinjectés en revenu net dans les plafonds légaux.
+          <InfoBox variant="success">
+            Ces leviers d&apos;optimisation sont réinjectés en revenu net, dans les plafonds légaux.
           </InfoBox>
         </>
       )}
@@ -477,49 +529,46 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {activePanel === 'cotisations' && (
         <>
           {/* Ligne ACRE */}
-          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center">
+                  <ShieldCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-slate-900 dark:text-white">ACRE</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">≈ −50% cotisations an 1</p>
+                </div>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">ACRE</h3>
-            </div>
-            <div
-              onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
-              className="flex items-center justify-between rounded-xl px-4 py-3 border-2 cursor-pointer transition-colors bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600"
-            >
-              <p className="font-semibold text-slate-900 dark:text-white">Allègement an 1</p>
-              <div
+              <button
+                type="button"
+                onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
                 className={cn(
-                  'w-12 h-7 rounded-full flex items-center transition-colors',
-                  sim.state.acreEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+                  'w-12 h-7 rounded-full transition-colors relative shrink-0',
+                  sim.state.acreEnabled ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-600'
                 )}
               >
-                <div
+                <span
                   className={cn(
-                    'w-5 h-5 bg-white rounded-full shadow mx-0.5 transition-transform',
-                    sim.state.acreEnabled ? 'translate-x-6' : 'translate-x-0.5'
+                    'absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                    sim.state.acreEnabled ? 'left-0.5 translate-x-5' : 'left-0.5 translate-x-0'
                   )}
                 />
-              </div>
+              </button>
             </div>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              ≈ −50 % cotis. an 1 (hors CSG/CRDS)
-            </p>
           </div>
 
           {/* Ligne CFE */}
-          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+          <div className="p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <div className="w-6 h-6 rounded-md bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
+                <Building2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">CFE</h3>
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                CFE (taille de la ville)
+              </p>
             </div>
-            <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
-              Taille de la ville (CFE)
-            </p>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               {CITY_OPTIONS.map(({ key, label, amount }) => {
                 const isSelected = currentCity === key;
                 return (
@@ -528,16 +577,16 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                     type="button"
                     onClick={() => sim.setters.setCitySize(key)}
                     className={cn(
-                      'flex-1 min-w-[100px] p-4 rounded-xl border-2 text-left transition-all',
+                      'flex-1 min-w-[90px] p-3 rounded-lg border text-left transition-all',
                       isSelected
-                        ? 'bg-violet-50 dark:bg-violet-950/30 border-violet-500 dark:border-violet-400 text-violet-700 dark:text-violet-300'
+                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 dark:border-rose-600 text-rose-700 dark:text-rose-300'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
                     )}
                   >
-                    <p className="font-semibold">{label}</p>
+                    <p className="font-semibold text-sm">{label}</p>
                     <p className={cn(
-                      'text-sm mt-0.5',
-                      isSelected ? 'text-violet-600 dark:text-violet-400' : 'text-slate-500 dark:text-slate-400'
+                      'text-xs mt-0.5',
+                      isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'
                     )}>
                       {amount}
                     </p>
@@ -545,13 +594,12 @@ export default function ExpandPanels({ activePanel, sim }: any) {
                 );
               })}
             </div>
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-              0 € an 1 (création), puis selon ville.
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              0 € la 1ère année (création), puis selon la ville.
             </p>
           </div>
           <InfoBox variant="info">
-            Les cotisations sociales sont calculées selon la structure choisie. ACRE et CFE
-            s&apos;appliquent aux créations et reprises d&apos;entreprise.
+            ACRE et CFE s&apos;appliquent aux créations et reprises d&apos;entreprise.
           </InfoBox>
         </>
       )}
@@ -559,21 +607,68 @@ export default function ExpandPanels({ activePanel, sim }: any) {
       {/* PANNEAU FOYER (Situation familiale — IR) */}
       {activePanel === 'foyer' && (
         <>
-          <div className="w-full p-5 rounded-xl bg-white dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Composition du foyer</span>
-                <div className="inline-flex w-fit rounded-xl bg-slate-100 dark:bg-slate-700 p-1 gap-0.5">
-                  <button
-                    type="button"
-                    onClick={() => sim.setters.setNbAdultes(1)}
-                    className={cn(
-                      'flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors',
-                      sim.state.nbAdultes === 1
-                        ? 'bg-slate-700 dark:bg-slate-600 text-white'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                    )}
-                  >
+          <div className="w-full p-4 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-4">
+            {/* Composition du foyer */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                  <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  Composition du foyer
+                </span>
+              </div>
+              <div className="inline-flex w-fit rounded-lg bg-slate-100 dark:bg-slate-700 p-0.5 gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setNbAdultes(1)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition-colors',
+                    sim.state.nbAdultes === 1
+                      ? 'bg-blue-500 text-white'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  )}
+                >
+                  <User className="w-3.5 h-3.5" /> Célibataire
+                </button>
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setNbAdultes(2)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition-colors',
+                    sim.state.nbAdultes === 2
+                      ? 'bg-blue-500 text-white'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  )}
+                >
+                  <Users className="w-3.5 h-3.5" /> Couple
+                </button>
+              </div>
+            </div>
+
+            {/* Enfants */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide px-1">
+                Enfants à charge
+              </span>
+              <div className="flex items-center gap-2 w-fit">
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setNbEnfants(Math.max(0, (sim.state.nbEnfants ?? 0) - 1))}
+                  className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                  aria-label="Moins d'enfants"
+                >
+                  <Minus className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                </button>
+                <span className="min-w-8 text-center font-bold text-slate-900 dark:text-white tabular-nums">
+                  {sim.state.nbEnfants ?? 0}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setNbEnfants(Math.min(6, (sim.state.nbEnfants ?? 0) + 1))}
+                  className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
+                  aria-label="Plus d'enfants"
+                >
                     <User className="w-4 h-4" /> Célibataire
                   </button>
                   <button
