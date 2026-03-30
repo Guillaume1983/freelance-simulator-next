@@ -291,7 +291,7 @@ export default function RegimeFinancialBreakdown({
   return (
     <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden h-[min(52vh,420px)] flex flex-col">
       <div className="px-3 py-2 border-b border-slate-200/50 dark:border-slate-700/50 shrink-0">
-        <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+        <p className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Ventilation détaillée
         </p>
       </div>
@@ -311,11 +311,11 @@ export default function RegimeFinancialBreakdown({
                 <div
                   className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
                 >
-                  <p className="text-[8px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
                     {rowLabel}
                   </p>
                   <span
-                    className={`text-[10px] font-black shrink-0 text-right tabular-nums ${
+                    className={`text-[12px] font-black shrink-0 text-right tabular-nums ${
                       isFinal
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : rowColor || 'text-slate-700 dark:text-slate-200'
@@ -334,7 +334,7 @@ export default function RegimeFinancialBreakdown({
                       >
                         {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}
                         {fmt(val)}
-                        <span className="text-[8px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
+                        <span className="text-[9px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
                       </AmountTooltip>
                     )}
                   </span>
@@ -359,11 +359,11 @@ export default function RegimeFinancialBreakdown({
                   <div
                     className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
                   >
-                    <p className="text-[8px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
                       {rowLabel}
                     </p>
                     <span
-                      className={`text-[10px] font-black shrink-0 text-right tabular-nums ${
+                    className={`text-[12px] font-black shrink-0 text-right tabular-nums ${
                         isFinal
                           ? 'text-emerald-600 dark:text-emerald-400'
                           : rowColor || 'text-slate-700 dark:text-slate-200'
@@ -382,7 +382,7 @@ export default function RegimeFinancialBreakdown({
                         >
                           {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}
                           {fmt(val)}
-                          <span className="text-[8px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
+                        <span className="text-[9px] text-slate-400 ml-0.5 font-semibold">{getMobileUnit(row)}</span>
                         </AmountTooltip>
                       )}
                     </span>

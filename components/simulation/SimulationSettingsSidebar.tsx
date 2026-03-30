@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { ChevronRight } from 'lucide-react';
 import ExpandPanels from '@/components/ExpandPanels';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -21,6 +21,18 @@ export type SidebarPanelId = (typeof SIDEBAR_SECTIONS)[number]['id'];
 
 const REGIMES_WITH_OPTIONS = ['Portage', 'Micro', 'EURL IS', 'SASU'];
 
+const REGIME_VISIBLE_SECTIONS: Partial<Record<string, SidebarPanelId[]>> = {
+  // Micro : calcul simplifié (pas de charges réelles, pas d’amortissement, pas d’IK/optimisations)
+  Micro: ['activite', 'cotisations', 'foyer'],
+  // Portage : charges déductibles, IK et avantages (pas de CFE/ACRE dans le modèle actuel)
+  Portage: ['activite', 'charges', 'vehicule', 'opti', 'foyer'],
+  // EURL : charges, IK, optimisations, amortissement + cotisations
+  'EURL IR': ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations', 'foyer'],
+  'EURL IS': ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations', 'foyer'],
+  // SASU : charges, IK, optimisations, amortissement + CFE (pas de foyer IR dans le modèle)
+  SASU: ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations'],
+};
+
 type SimCtx = ReturnType<typeof useSimulationContext>;
 
 export function SimulationSettingsSidebar({
@@ -28,11 +40,14 @@ export function SimulationSettingsSidebar({
   activeRegimeId,
   openSection,
   setOpenSection,
+  filterByRegime = false,
 }: {
   sim: SimCtx;
   activeRegimeId: string | undefined;
   openSection: SidebarPanelId | 'regime_options' | null;
   setOpenSection: (id: SidebarPanelId | 'regime_options' | null) => void;
+  /** Filtre les panels pour ne garder que ceux pertinents au statut (utilisé sur simulateur). */
+  filterByRegime?: boolean;
 }) {
   const hasRegimeOptions = activeRegimeId && REGIMES_WITH_OPTIONS.includes(activeRegimeId);
 
@@ -71,9 +86,31 @@ export function SimulationSettingsSidebar({
       </div>
     ) : null;
 
+  const visibleSections = useMemo(() => {
+    if (!filterByRegime || !activeRegimeId) return SIDEBAR_SECTIONS;
+    const allowed = REGIME_VISIBLE_SECTIONS[activeRegimeId];
+    if (!allowed) return SIDEBAR_SECTIONS;
+    return SIDEBAR_SECTIONS.filter((s) => allowed.includes(s.id));
+  }, [filterByRegime, activeRegimeId]);
+
+  useEffect(() => {
+    if (!filterByRegime) return;
+    const firstVisible = visibleSections[0]?.id ?? 'activite';
+
+    if (openSection === 'regime_options') {
+      if (!hasRegimeOptions) setOpenSection(null);
+      return;
+    }
+
+    if (!openSection) return;
+    if (!visibleSections.some((s) => s.id === openSection)) {
+      setOpenSection(firstVisible);
+    }
+  }, [filterByRegime, visibleSections, openSection, setOpenSection, hasRegimeOptions]);
+
   return (
     <div className="divide-y divide-slate-200 dark:divide-slate-700">
-      {SIDEBAR_SECTIONS.map((section) => {
+      {visibleSections.map((section) => {
         const isOpen = openSection === section.id;
         return (
           <Fragment key={section.id}>

@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Car, Bike, Circle, ExternalLink } from 'lucide-react';
+import { Car, Bike, Circle } from 'lucide-react';
 import { getIK, getIKDetail, type TypeVehiculeIK } from '@/lib/financial/rates';
 import { useSimulationContext } from '@/context/SimulationContext';
 import NumberInput from '@/components/NumberInput';
@@ -63,23 +62,12 @@ export default function IndemnitesKmPage() {
     [km, type, cvOrBande, electrique]
   );
 
-  const applyToReglages = () => {
-    const params = new URLSearchParams();
-    params.set('from', 'outils');
-    params.set('panel', 'vehicule');
-    params.set('ik_km', String(km));
-    params.set('ik_type', type);
-    params.set('ik_cv', cvOrBande);
-    params.set('ik_elec', electrique ? '1' : '0');
-    window.location.href = `/reglages?${params.toString()}`;
-  };
-
   return (
     <main className="min-h-screen bg-page-settings">
 
       <PageSettingsPageHeader
-        backHref="/reglages?from=outils"
-        backLabel="Paramètres"
+        backHref="/outils"
+        backLabel="Retour aux outils"
         title="Indemnités kilométriques"
         subtitle="Même réglages que l’onglet Véhicule — barème URSSAF (arr. 27 mars 2023)."
       />
@@ -271,22 +259,6 @@ export default function IndemnitesKmPage() {
           </p>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <button
-              type="button"
-              onClick={applyToReglages}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 text-white font-bold text-sm hover:bg-indigo-700 transition-colors"
-            >
-              <ExternalLink size={16} />
-              Appliquer à mes paramètres (onglet Véhicule)
-            </button>
-            <Link
-              href="/reglages?from=outils"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
-            >
-              Modifier les paramètres
-            </Link>
-          </div>
         </div>
       </div>
       </div>

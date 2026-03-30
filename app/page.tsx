@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3, TrendingUp, BookOpen, ArrowRight, Settings, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2, X, Trash2 } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, ArrowRight, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2, X, Trash2 } from 'lucide-react';
 import Footer from '@/components/Footer';
 import FaqSection from '@/components/FaqSection';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -209,13 +209,6 @@ export default function Home() {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <Link
-                    href="/reglages"
-                    className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-sm border border-white/30 hover:bg-white/20 transition-all"
-                  >
-                    <Settings className="w-5 h-5" />
-                    Paramètres
-                  </Link>
-                  <Link
                     href="/articles"
                     className="group flex items-center gap-2.5 w-full sm:w-auto justify-center px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-sm border border-white/30 hover:bg-white/20 transition-all"
                   >
@@ -306,18 +299,6 @@ export default function Home() {
 
             {/* Ligne 2 : 2 cartes centrées */}
             <div className="flex flex-col sm:flex-row items-stretch justify-center gap-6 md:gap-6 mt-6 md:mt-6 max-w-[700px] mx-auto">
-              <Link
-                href="/reglages"
-                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-sky-300 dark:hover:border-sky-600 hover:shadow-md transition-all block flex-1 min-w-0"
-              >
-                <div className="w-12 h-12 mx-auto rounded-xl bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3">
-                  <Settings className="w-6 h-6" />
-                </div>
-                <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">Paramètres</h3>
-                <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                  TJM, jours, véhicule, charges… Configurez votre profil pour les comparaisons et simulations.
-                </p>
-              </Link>
               <Link
                 href="/articles"
                 className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-amber-300 dark:hover:border-amber-600 hover:shadow-md transition-all block flex-1 min-w-0"

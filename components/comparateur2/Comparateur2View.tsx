@@ -475,7 +475,7 @@ function Comparateur2ViewContent() {
 
               <aside className="hidden xl:flex min-h-0 w-full max-h-[min(85vh,920px)] flex-col overflow-hidden xl:row-start-2 xl:col-start-2 xl:sticky xl:top-6 xl:self-start">
                 <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm w-full">
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/50 shrink-0">
+                  <div className="hidden px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/50 shrink-0">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
                         <Settings2 className="w-4 h-4 text-white" />
@@ -531,7 +531,7 @@ function Comparateur2ViewContent() {
       <button
         type="button"
         onClick={() => setMobileSettingsOpen(true)}
-        className="xl:hidden fixed bottom-5 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-violet-600 text-white shadow-xl shadow-indigo-300/40 dark:shadow-indigo-900/40 font-bold text-sm"
+        className="xl:hidden fixed bottom-20 right-5 z-40 flex items-center gap-2 px-4 py-3 rounded-2xl bg-linear-to-r from-indigo-500 to-violet-600 text-white shadow-xl shadow-indigo-300/40 dark:shadow-indigo-900/40 font-bold text-sm"
         aria-label="Ouvrir les paramètres"
       >
         <PanelRightOpen className="w-4 h-4" />
@@ -553,7 +553,7 @@ function Comparateur2ViewContent() {
           />
           <div className="relative w-[min(100%,min(420px,100vw))] h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-700 overflow-y-auto overscroll-y-contain">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0 sticky top-0 bg-white dark:bg-slate-900 z-10">
-              <p className="font-bold text-slate-900 dark:text-white">Paramètres</p>
+              <span className="sr-only">Paramètres</span>
               <button
                 type="button"
                 onClick={() => setMobileSettingsOpen(false)}

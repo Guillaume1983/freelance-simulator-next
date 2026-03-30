@@ -1,7 +1,7 @@
 'use client';
 
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { cn, fmtEur } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import {
   Car,
@@ -158,8 +158,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
     );
   };
 
-  const annualRevenue = (sim.state.tjm || 0) * (sim.state.days || 0);
-
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
       {/* PANNEAU ACTIVITÉ */}
@@ -193,11 +191,6 @@ export default function ExpandPanels({ activePanel, sim }: any) {
               label="Jours"
             />
           </FieldCard>
-          <InfoBox variant="info">
-            Avec un TJM de {sim.state.tjm} € sur {sim.state.days} jours, vous générez un CA annuel de{' '}
-            {fmtEur(annualRevenue)}. En micro-entreprise, le plafond est de 77 700 € pour les
-            services.
-          </InfoBox>
         </>
       )}
 
