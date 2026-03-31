@@ -4,7 +4,7 @@ import { Suspense, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
-import Footer from '@/components/Footer';
+
 import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
 import { cn } from '@/lib/utils';
 import {
@@ -198,9 +198,6 @@ function OutilsUnifiedInner() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <Footer />
-      </div>
     </main>
   );
 }

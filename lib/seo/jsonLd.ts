@@ -58,6 +58,38 @@ export function getFaqPageJsonLd() {
   };
 }
 
+/** Données structurées Article pour les guides. */
+export function getArticleJsonLd(article: {
+  title: string;
+  excerpt: string;
+  date: string;
+  imageUrl: string;
+  slug: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.excerpt,
+    image: article.imageUrl,
+    datePublished: article.date,
+    dateModified: article.date,
+    url: `${SITE_URL}/articles/${article.slug}`,
+    author: { '@type': 'Organization', name: 'Freelance Simulateur', url: SITE_URL },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Freelance Simulateur',
+      url: SITE_URL,
+      logo: { '@type': 'ImageObject', url: LOGO_URL },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/articles/${article.slug}`,
+    },
+    inLanguage: 'fr-FR',
+  };
+}
+
 /** Page institutionnelle À propos. */
 export function getAboutPageJsonLd() {
   return {

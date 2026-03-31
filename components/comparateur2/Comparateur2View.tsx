@@ -7,12 +7,12 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Crown, PanelRightOpen, Settings2,
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useComparateurUrlSync } from '@/hooks/useComparateurUrlSync';
 import { useUser } from '@/hooks/useUser';
-import Footer from '@/components/Footer';
+
 import RegimeFinancialBreakdown, {
   RetirementBadge,
 } from '@/components/comparateur2/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
-import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
+import { REGIME_COLORS, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
@@ -136,10 +136,7 @@ function Comparateur2ViewContent() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: 'Comparatif-Statuts-FreelanceSimulateur',
-    pageStyle: `
-      @page { size: A4 portrait; margin: 8mm; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    `,
+    pageStyle: PDF_PAGE_STYLE,
   });
 
   const safeIndex = Math.min(Math.max(index, 0), Math.max(regimes.length - 1, 0));
@@ -493,9 +490,6 @@ function Comparateur2ViewContent() {
         title="Connectez-vous pour exporter en PDF"
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 shrink-0">
-        <Footer />
-      </div>
     </main>
   );
 }

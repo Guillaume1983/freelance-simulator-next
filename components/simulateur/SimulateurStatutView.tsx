@@ -7,25 +7,21 @@ import { useReactToPrint } from 'react-to-print';
 import {
   ArrowLeft,
   BarChart3,
-  Briefcase,
-  Building,
-  Building2,
   ChevronLeft,
   ChevronRight,
   PanelRightOpen,
   Rocket,
   Settings2,
-  Store,
 } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useUser } from '@/hooks/useUser';
-import Footer from '@/components/Footer';
+
 import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import NumberInput from '@/components/NumberInput';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur2/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
-import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
+import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
@@ -44,13 +40,6 @@ const REGIME_HEX: Record<string, string> = {
   SASU: '#8b5cf6',
 };
 
-const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
-  Portage: { Icon: Briefcase, iconClass: 'bg-indigo-500 text-white' },
-  Micro: { Icon: Store, iconClass: 'bg-amber-500 text-white' },
-  'EURL IR': { Icon: Building2, iconClass: 'bg-emerald-500 text-white' },
-  'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
-  SASU: { Icon: Building, iconClass: 'bg-violet-500 text-white' },
-};
 
 function YearNavButton({
   regime,
@@ -249,10 +238,7 @@ function SimulateurStatutViewContent() {
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Simulation-5-ans-${statutId ?? 'statut'}-FreelanceSimulateur`,
-    pageStyle: `
-      @page { size: A4 portrait; margin: 8mm; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    `,
+    pageStyle: PDF_PAGE_STYLE,
   });
 
   const triggerPdf = () => document.getElementById('simulateur-pdf-btn')?.click();
@@ -588,9 +574,6 @@ function SimulateurStatutViewContent() {
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
 
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 shrink-0">
-        <Footer />
-      </div>
     </main>
   );
 }

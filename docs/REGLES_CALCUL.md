@@ -199,8 +199,8 @@ Barème progressif 2026 (après abattement 10 %) :
 
 | Type | Plafond 2026 |
 |------|--------------|
-| BNC | 77 700 € |
-| BIC | 188 700 € |
+| BNC | 83 600 € |
+| BIC | 203 100 € |
 
 - **Modifier :** `PLAFOND_MICRO_BNC`, `PLAFOND_MICRO_BIC`
 

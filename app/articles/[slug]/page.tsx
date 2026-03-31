@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation';
 import { ARTICLES, getArticleBySlug } from '@/lib/articles';
 import Footer from '@/components/Footer';
 import { PageSettingsPageHeader } from '@/components/PageSettingsPageHeader';
-import { BookOpen } from 'lucide-react';
+import { getArticleJsonLd } from '@/lib/seo/jsonLd';
+import { BookOpen, TrendingUp, BarChart3 } from 'lucide-react';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -28,6 +29,18 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
+const ARTICLE_CTA: Record<string, { simulateur?: string; label: string; outils?: string; outilLabel?: string }> = {
+  'portage-salarial-freelance-guide-complet-2026': { simulateur: '/simulateur/portage', label: 'Simuler votre revenu en portage salarial' },
+  'micro-entreprise-auto-entrepreneur-guide-2026': { simulateur: '/simulateur/micro', label: 'Simuler votre revenu en micro-entreprise' },
+  'eurl-ir-freelance-impot-revenu-guide-2026': { simulateur: '/simulateur/eurl-ir', label: 'Simuler votre revenu en EURL IR' },
+  'eurl-is-freelance-impot-societes-guide-2026': { simulateur: '/simulateur/eurl-is', label: 'Simuler votre revenu en EURL IS' },
+  'sasu-freelance-president-dividendes-guide-2026': { simulateur: '/simulateur/sasu', label: 'Simuler votre revenu en SASU' },
+  'optimiser-indemnites-kilometriques': { outils: '/outils?outil=indemnites-km', outilLabel: 'Calculer vos indemnités kilométriques', label: 'Comparer les statuts freelance' },
+  'se-remunerer-en-sasu-vs-eurl': { label: 'Comparer SASU et EURL dans le comparateur' },
+  'choisir-statut-freelance-2026': { label: 'Comparer les statuts dans le comparateur' },
+  'plan-de-tresorerie-freelance': { label: 'Simuler votre trésorerie sur 5 ans' },
+};
+
 function formatContent(text: string) {
   return text.split(/\n\n+/).map((block, i) => {
     const plain = block.replace(/\*\*(.+?)\*\*/g, '$1');
@@ -44,8 +57,16 @@ export default async function ArticlePage({ params }: Props) {
   const article = getArticleBySlug(slug);
   if (!article) notFound();
 
+  const cta = ARTICLE_CTA[article.slug];
+  const jsonLd = getArticleJsonLd(article);
+
   return (
     <main className="min-h-screen bg-page-settings">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <PageSettingsPageHeader
         backHref="/articles"
         backLabel="Retour aux articles"
@@ -81,6 +102,41 @@ export default async function ArticlePage({ params }: Props) {
         <div className="text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
           {formatContent(article.content)}
         </div>
+
+        {cta && (
+          <div className="mt-8 p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50">
+            <p className="text-xs font-black uppercase tracking-widest text-indigo-500 dark:text-indigo-400 mb-3">
+              Aller plus loin
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {cta.simulateur && (
+                <Link
+                  href={cta.simulateur}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors"
+                >
+                  <TrendingUp size={15} />
+                  {cta.label}
+                </Link>
+              )}
+              {cta.outils && cta.outilLabel && (
+                <Link
+                  href={cta.outils}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors"
+                >
+                  {cta.outilLabel}
+                </Link>
+              )}
+              <Link
+                href="/comparateur"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 text-sm font-bold border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                <BarChart3 size={15} />
+                Comparer les statuts
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-700">
           <Link
             href="/articles"

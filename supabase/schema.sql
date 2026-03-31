@@ -14,12 +14,12 @@ drop function if exists public.handle_new_user  cascade;
 drop table if exists public.contact_messages    cascade;
 drop table if exists public.simulation_settings cascade;
 drop table if exists public.user_profiles       cascade;
+drop table if exists public.subscriptions       cascade;
 
 
 -- ────────────────────────────────────────────────────────────
 -- 1. TABLES
 -- ────────────────────────────────────────────────────────────
-
 -- Profils utilisateurs
 create table public.user_profiles (
   id          uuid        references auth.users(id) on delete cascade primary key,
@@ -88,6 +88,14 @@ create table public.contact_messages (
   created_at  timestamptz default now()
 );
 
+-- Abonnement / palier (1 ligne par utilisateur, rempli au signup par le trigger)
+create table public.subscriptions (
+  user_id    uuid        references auth.users(id) on delete cascade primary key,
+  plan       text        not null default 'decouverte',
+  status     text        not null default 'active',
+  created_at timestamptz default now()
+);
+
 
 -- ────────────────────────────────────────────────────────────
 -- 2. ROW LEVEL SECURITY
@@ -96,6 +104,7 @@ create table public.contact_messages (
 alter table public.user_profiles       enable row level security;
 alter table public.simulation_settings enable row level security;
 alter table public.contact_messages    enable row level security;
+alter table public.subscriptions       enable row level security;
 
 -- user_profiles : chaque user ne voit et ne modifie que son propre profil
 create policy "Voir son profil"
@@ -128,6 +137,11 @@ create policy "Messages non lisibles via client"
   on public.contact_messages for select
   using (false);
 
+-- subscriptions : lecture du propre enregistrement (écriture par trigger / admin uniquement)
+create policy "Voir son abonnement"
+  on public.subscriptions for select
+  using (auth.uid() = user_id);
+
 
 -- ────────────────────────────────────────────────────────────
 -- 3. TRIGGER : création automatique au signup
@@ -150,6 +164,10 @@ begin
 
   insert into public.simulation_settings (user_id)
   values (new.id)
+  on conflict (user_id) do nothing;
+
+  insert into public.subscriptions (user_id, plan, status)
+  values (new.id, 'decouverte', 'active')
   on conflict (user_id) do nothing;
 
   return new;

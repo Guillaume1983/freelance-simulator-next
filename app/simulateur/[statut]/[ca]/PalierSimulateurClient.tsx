@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useUser } from '@/hooks/useUser';
-import Footer from '@/components/Footer';
+
 import ConnectorModal from '@/components/ConnectorModal';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur2/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
-import { REGIME_COLORS } from '@/components/simulateur/regimeVisualTokens';
+import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import {
   buildComparateurQuery,
   DAYS_FOR_PALIER,
@@ -20,16 +20,8 @@ import {
 } from '@/lib/simulateur/paliers';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { projeterSurNAns } from '@/lib/projections';
-import { ArrowLeft, Briefcase, Building2, Building, Store } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { cn, fmtEur } from '@/lib/utils';
-
-const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
-  Portage: { Icon: Briefcase, iconClass: 'bg-indigo-500 text-white' },
-  Micro: { Icon: Store, iconClass: 'bg-amber-500 text-white' },
-  'EURL IR': { Icon: Building2, iconClass: 'bg-emerald-500 text-white' },
-  'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
-  SASU: { Icon: Building, iconClass: 'bg-violet-500 text-white' },
-};
 
 type Props = { statutSlug: string; caAnnual: number };
 
@@ -145,10 +137,7 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Palier-CA-${statutId}-FreelanceSimulateur`,
-    pageStyle: `
-      @page { size: A4 portrait; margin: 8mm; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    `,
+    pageStyle: PDF_PAGE_STYLE,
   });
 
   const handleExportPdf = () => {
@@ -332,9 +321,6 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
 
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
-        <Footer />
-      </div>
     </main>
   );
 }

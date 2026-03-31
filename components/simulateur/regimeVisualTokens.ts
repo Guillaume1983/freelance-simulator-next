@@ -1,4 +1,21 @@
-/** Styles de bordure / halo par régime — histogramme, mini-nav, pastilles d’année. */
+import { Briefcase, Store, Building2, Building } from 'lucide-react';
+
+/** Icône + couleur du header par régime (simulateur, palier). */
+export const STATUT_HEADER_ICON: Record<string, { Icon: typeof Briefcase; iconClass: string }> = {
+  Portage: { Icon: Briefcase, iconClass: 'bg-indigo-500 text-white' },
+  Micro: { Icon: Store, iconClass: 'bg-amber-500 text-white' },
+  'EURL IR': { Icon: Building2, iconClass: 'bg-emerald-500 text-white' },
+  'EURL IS': { Icon: Building2, iconClass: 'bg-blue-500 text-white' },
+  SASU: { Icon: Building, iconClass: 'bg-violet-500 text-white' },
+};
+
+/** Style CSS pour l'impression PDF (partagé par comparateur, simulateur, palier). */
+export const PDF_PAGE_STYLE = `
+  @page { size: A4 portrait; margin: 8mm; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+`;
+
+/** Styles de bordure / halo par régime — histogramme, mini-nav, pastilles d'année. */
 export const REGIME_COLORS: Record<string, { gradient: string; bg: string; border: string; ring: string }> = {
   Portage: {
     gradient: 'from-violet-500 to-indigo-600',

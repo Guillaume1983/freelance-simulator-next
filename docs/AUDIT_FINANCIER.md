@@ -48,7 +48,7 @@
 - En réalité, l’ACRE peut être dégressive au‑delà de 75 % du PASS (ex. 35 325 € en 2025). Le simulateur retient une réduction fixe (50 %) pour la 1ʳᵉ année ; c’est une simplification volontaire.
 
 ### Plafonds micro
-- `PLAFOND_MICRO_BNC` (77 700 €) et `PLAFOND_MICRO_BIC` (188 700 €) : vérifier chaque année (souvent publiés au JO / impots.gouv).
+- `PLAFOND_MICRO_BNC` (83 600 €) et `PLAFOND_MICRO_BIC` (203 100 €) : vérifier chaque année (souvent publiés au JO / impots.gouv). Mis à jour pour 2026-2028 (URSSAF autoentrepreneur, 20/02/2026).
 
 ### Libellés EURL IR et SASU (corrigés)
 - **EURL IR** : la ligne affiche désormais « Revenu imposable (avant IR) » (bénéfice − cotis déductibles ; le cash avant IR est plus bas à cause de la CSG non déductible + CRDS).
