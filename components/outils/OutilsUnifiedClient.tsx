@@ -39,7 +39,7 @@ function buildOutilQuery(id: OutilId, current: URLSearchParams): string {
   return q.toString();
 }
 
-function OutilsUnifiedInner() {
+function OutilsUnifiedInner({ children }: { children?: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -197,12 +197,12 @@ function OutilsUnifiedInner() {
           </div>
         </div>
       </div>
-
+      {children}
     </main>
   );
 }
 
-export default function OutilsUnifiedClient() {
+export default function OutilsUnifiedClient({ children }: { children?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -211,7 +211,7 @@ export default function OutilsUnifiedClient() {
         </main>
       }
     >
-      <OutilsUnifiedInner />
+      <OutilsUnifiedInner>{children}</OutilsUnifiedInner>
     </Suspense>
   );
 }

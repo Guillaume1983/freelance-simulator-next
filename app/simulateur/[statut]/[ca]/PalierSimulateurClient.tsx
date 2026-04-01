@@ -23,9 +23,9 @@ import { projeterSurNAns } from '@/lib/projections';
 import { ArrowLeft } from 'lucide-react';
 import { cn, fmtEur } from '@/lib/utils';
 
-type Props = { statutSlug: string; caAnnual: number };
+type Props = { statutSlug: string; caAnnual: number; children?: React.ReactNode };
 
-export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) {
+export default function PalierSimulateurClient({ statutSlug, caAnnual, children }: Props) {
   const ctx = useSimulationContext();
   const sim = ctx.sim ?? ctx;
   const {
@@ -320,7 +320,7 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual }: Props) 
         title="Connectez-vous pour exporter en PDF"
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
-
+      {children}
     </main>
   );
 }

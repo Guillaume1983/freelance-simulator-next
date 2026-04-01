@@ -1,0 +1,36 @@
+---
+description: Toujours lire les constantes financières avant d'écrire un montant, taux ou plafond
+alwaysApply: true
+---
+
+# Constantes financières — source unique de vérité
+
+Avant d'écrire un montant, un taux, un plafond ou un seuil fiscal dans du code OU du texte (articles, FAQ, SEO, commentaires, descriptions), tu DOIS :
+
+1. Lire `lib/constants.ts` et `lib/financial/rates.ts`
+2. Utiliser les valeurs exactes de ces fichiers
+3. Ne JAMAIS écrire un montant de mémoire
+
+## Fichiers de référence
+
+- `lib/constants.ts` : plafonds micro (BNC, BIC), CFE, portage, retraite
+- `lib/financial/rates.ts` : PASS, barème IR, taux micro, taux portage, IS, flat tax, IK, cotisations TNS
+
+## Exemples de valeurs à ne JAMAIS deviner
+
+```
+Plafond micro BNC  → PLAFOND_MICRO_BNC (lib/constants.ts)
+Plafond micro BIC  → PLAFOND_MICRO_BIC (lib/constants.ts)
+PASS               → PASS (lib/financial/rates.ts)
+Barème IR          → RATES_2026.ir.tranches (lib/financial/rates.ts)
+Taux micro BNC     → RATES_2026.micro.BNC.cotis (lib/financial/rates.ts)
+Taux ACRE          → RATES_2026.micro.acre (lib/financial/rates.ts)
+IS SASU            → RATES_2026.isSasu (lib/financial/rates.ts)
+Flat tax           → RATES_2026.flatTaxDividendes (lib/financial/rates.ts)
+```
+
+## Dans du texte (articles, FAQ, SEO)
+
+- Préférer des formulations sans montant en dur (ex. « les plafonds en vigueur » plutôt que « 83 600 € »)
+- Si un montant précis est nécessaire, le copier EXACTEMENT depuis les fichiers ci-dessus
+- Ne jamais utiliser de valeurs d'années précédentes (77 700 €, 188 700 €, 46 368 €, etc.)

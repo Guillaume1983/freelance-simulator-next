@@ -121,7 +121,7 @@ function MiniNavStrip({
   );
 }
 
-function Comparateur2ViewContent() {
+function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
   const sim = useSimulationContext();
   const urlFocus = useComparateurUrlSync(sim.setters);
   const { isConnected } = useUser();
@@ -490,11 +490,12 @@ function Comparateur2ViewContent() {
         title="Connectez-vous pour exporter en PDF"
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
+      {children}
     </main>
   );
 }
 
-export default function Comparateur2View() {
+export default function Comparateur2View({ children }: { children?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -503,7 +504,7 @@ export default function Comparateur2View() {
         </main>
       }
     >
-      <Comparateur2ViewContent />
+      <Comparateur2ViewContent>{children}</Comparateur2ViewContent>
     </Suspense>
   );
 }

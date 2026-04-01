@@ -139,7 +139,7 @@ function YearNavStrip({
   );
 }
 
-function SimulateurStatutViewContent() {
+function SimulateurStatutViewContent({ children }: { children?: React.ReactNode }) {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -573,12 +573,12 @@ function SimulateurStatutViewContent() {
         title="Connectez-vous pour exporter en PDF"
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
       />
-
+      {children}
     </main>
   );
 }
 
-export default function SimulateurStatutView() {
+export default function SimulateurStatutView({ children }: { children?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -587,7 +587,7 @@ export default function SimulateurStatutView() {
         </main>
       }
     >
-      <SimulateurStatutViewContent />
+      <SimulateurStatutViewContent>{children}</SimulateurStatutViewContent>
     </Suspense>
   );
 }
