@@ -296,7 +296,7 @@ export default function RegimeFinancialBreakdown({
         </p>
       </div>
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="p-2 space-y-1 overflow-y-auto min-h-0 flex-1">
+        <div className="p-2 space-y-0.5 lg:space-y-1 overflow-y-auto min-h-0 flex-1">
           {scrollRows.map((row) => {
             const val = getDisplayValue(r, row);
             const detailText = getDetailText(r, row.key, row.div === 12);
@@ -309,7 +309,7 @@ export default function RegimeFinancialBreakdown({
             return (
               <div key={`${row.label}-${row.div}`}>
                 <div
-                  className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
+                  className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1 lg:py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
                 >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
                     {rowLabel}
@@ -344,7 +344,7 @@ export default function RegimeFinancialBreakdown({
           })}
         </div>
         {bottomRows.length > 0 && (
-          <div className="shrink-0 border-t border-slate-200/70 dark:border-slate-600/50 bg-slate-50/80 dark:bg-slate-800/40 p-2 pt-2 space-y-1">
+          <div className="shrink-0 border-t border-slate-200/70 dark:border-slate-600/50 bg-slate-50/80 dark:bg-slate-800/40 p-2 pt-1.5 space-y-0.5 lg:space-y-1">
             {bottomRows.map((row) => {
               const val = getDisplayValue(r, row);
               const detailText = getDetailText(r, row.key, row.div === 12);
@@ -357,7 +357,7 @@ export default function RegimeFinancialBreakdown({
               return (
                 <div key={`${row.label}-${row.div}`}>
                   <div
-                    className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
+                    className={`flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1 lg:py-1.5 transition-colors ${getRowBgClassCard(row)} ${isFinal ? 'ring-1 ring-emerald-200 dark:ring-emerald-800' : ''}`}
                   >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 flex-1 min-w-0 leading-tight">
                       {rowLabel}
