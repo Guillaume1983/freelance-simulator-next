@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
-import { ArrowLeft, ChevronLeft, ChevronRight, Crown, PanelRightOpen, Settings2, TrendingUp } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Crown, PanelRightOpen, Settings2, TrendingUp, X } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useComparateurUrlSync } from '@/hooks/useComparateurUrlSync';
 import { useUser } from '@/hooks/useUser';
@@ -449,7 +449,7 @@ function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
 
       {mobileSettingsOpen && (
         <div
-          className="xl:hidden fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+          className="xl:hidden fixed inset-0 z-[110] flex justify-end bg-black/40 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-label="Paramètres"
@@ -462,14 +462,15 @@ function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
           />
           <div className="relative w-[min(100%,min(420px,100vw))] h-full bg-white dark:bg-slate-900 shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-700 overflow-y-auto overscroll-y-contain">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0 sticky top-0 bg-white dark:bg-slate-900 z-10">
-              <span className="sr-only">Paramètres</span>
+              <span className="text-sm font-black text-slate-900 dark:text-white">Réglages</span>
               <button
                 type="button"
                 onClick={() => setMobileSettingsOpen(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600"
-                aria-label="Fermer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold transition-colors"
+                aria-label="Fermer les réglages"
               >
-                ✕
+                <X size={14} />
+                Fermer
               </button>
             </div>
             <div className="p-0 pb-8">
