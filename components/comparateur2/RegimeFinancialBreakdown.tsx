@@ -289,14 +289,14 @@ export default function RegimeFinancialBreakdown({
       ?.amount ?? 0;
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden h-[min(52vh,420px)] flex flex-col">
+    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 overflow-hidden lg:h-[min(52vh,420px)] flex flex-col">
       <div className="px-3 py-2 border-b border-slate-200/50 dark:border-slate-700/50 shrink-0">
         <p className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Ventilation détaillée
         </p>
       </div>
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="p-2 space-y-0.5 lg:space-y-1 overflow-y-auto min-h-0 flex-1">
+        <div className="p-2 space-y-0.5 lg:space-y-1 lg:overflow-y-auto min-h-0 lg:flex-1">
           {scrollRows.map((row) => {
             const val = getDisplayValue(r, row);
             const detailText = getDetailText(r, row.key, row.div === 12);
@@ -344,7 +344,7 @@ export default function RegimeFinancialBreakdown({
           })}
         </div>
         {bottomRows.length > 0 && (
-          <div className="shrink-0 border-t border-slate-200/70 dark:border-slate-600/50 bg-slate-50/80 dark:bg-slate-800/40 p-2 pt-1.5 space-y-0.5 lg:space-y-1">
+          <div className="shrink-0 lg:border-t lg:border-slate-200/70 lg:dark:border-slate-600/50 lg:bg-slate-50/80 lg:dark:bg-slate-800/40 px-2 pb-2 lg:p-2 lg:pt-1.5 space-y-0.5 lg:space-y-1">
             {bottomRows.map((row) => {
               const val = getDisplayValue(r, row);
               const detailText = getDetailText(r, row.key, row.div === 12);
