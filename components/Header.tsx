@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Moon, Sun, LineChart, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, BarChart3, TrendingUp, BookOpen, Wrench } from 'lucide-react';
+import Image from 'next/image';
+import { Moon, Sun, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, BarChart3, TrendingUp, BookOpen, Wrench } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { SaveStatus } from '@/hooks/useSimulation';
@@ -104,12 +105,19 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-2 flex justify-between items-center gap-4">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2.5 group cursor-pointer min-w-0 shrink">
-          <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-200 transition-transform group-hover:rotate-12 shrink-0">
-            <LineChart className="w-4 h-4 md:w-5 md:h-5 text-white" />
+          <div className="shrink-0 w-9 h-9 md:w-10 md:h-10 flex items-center justify-center transition-transform group-hover:scale-105 p-0.5">
+            <Image
+              src="/logo-icon.png"
+              alt=""
+              width={74}
+              height={64}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
-          <h1 className="text-base md:text-xl font-800 text-slate-900 dark:text-white tracking-tighter truncate">
+          <span className="text-base md:text-xl font-800 text-slate-900 dark:text-white tracking-tighter truncate">
             freelance-<span className="text-indigo-600">simulateur</span>
-          </h1>
+          </span>
         </Link>
 
         {/* NAV desktop */}

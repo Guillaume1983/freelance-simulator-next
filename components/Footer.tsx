@@ -1,15 +1,13 @@
 'use client';
 import Link from 'next/link';
-import { LineChart } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
     <footer className="border-t border-slate-200 dark:border-slate-800 py-6 px-4 md:px-6 mt-10">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="bg-slate-900 dark:bg-indigo-600 p-1.5 rounded-lg">
-            <LineChart className="w-3.5 h-3.5 text-white" />
-          </div>
+        <div className="flex items-center gap-2">
+          <Image src="/logo-icon.png" alt="" width={20} height={20} className="opacity-60" />
           <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
             © 2026 freelance-simulateur.fr
           </span>
