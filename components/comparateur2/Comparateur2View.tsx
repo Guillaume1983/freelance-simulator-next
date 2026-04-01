@@ -382,7 +382,7 @@ function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
                 </div>
               </div>
 
-              <aside className="hidden xl:flex min-h-0 w-full max-h-[min(85vh,920px)] flex-col overflow-hidden xl:row-start-2 xl:col-start-2 xl:sticky xl:top-6 xl:self-start">
+              <aside className="hidden xl:flex min-h-0 w-full max-h-[min(85vh,920px)] flex-col overflow-hidden xl:row-start-2 xl:col-start-2 xl:sticky xl:self-start" style={{ top: 'calc(var(--header-height, 0px) + 1.5rem)' }}>
                 <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm w-full">
                   <div className="hidden px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/50 shrink-0">
                     <div className="flex items-center gap-2">

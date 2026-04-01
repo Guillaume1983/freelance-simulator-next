@@ -15,6 +15,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         setIsDark={setIsDark}
         saveStatus={saveStatus}
       />
+      <div style={{ height: 'var(--header-height, 0px)' }} aria-hidden />
       {children}
     </>
   );
