@@ -4,93 +4,26 @@ import { LineChart } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-8 md:py-10 px-4 md:px-6 mt-12">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-10 md:items-end">
-
-          {/* Logo & Description */}
-          <div className="col-span-1 md:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-slate-900 dark:bg-indigo-600 p-2 rounded-xl">
-                <LineChart className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-black text-slate-900 dark:text-white text-xl tracking-tighter">
-                freelance-<span className="text-indigo-600">simulateur</span>
-              </span>
-            </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-md font-medium">
-              Simulez et comparez votre revenu net selon votre statut juridique.
-              Calculs indicatifs basés sur la Loi de Finances 2026 et les barèmes de référence (
-              <a
-                href="https://www.urssaf.fr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                Urssaf
-              </a>
-              ,{' '}
-              <a
-                href="https://www.impots.gouv.fr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 dark:text-indigo-400 hover:underline"
-              >
-                impots.gouv.fr
-              </a>
-              ). Pas un conseil fiscal personnalisé — voir{' '}
-              <Link href="/a-propos" className="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
-                À propos
-              </Link>
-              .
-            </p>
+    <footer className="border-t border-slate-200 dark:border-slate-800 py-6 px-4 md:px-6 mt-10">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <div className="bg-slate-900 dark:bg-indigo-600 p-1.5 rounded-lg">
+            <LineChart className="w-3.5 h-3.5 text-white" />
           </div>
-
-          {/* Accès rapide — 2 colonnes, aligné en bas (md:items-end sur la grille) */}
-          <div className="flex flex-col gap-4 pt-4 md:pt-0">
-            <div>
-              <h4 className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-[0.2em] mb-2">Accès rapide</h4>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-                <Link href="/comparateur" className="footer-link">Comparateur</Link>
-                <Link href="/simulateur/sasu" className="footer-link">Simulateur</Link>
-                <Link href="/articles" className="footer-link">Articles</Link>
-                <Link href="/contact" className="footer-link">Contact</Link>
-                <Link href="/connexion" className="footer-link">Se connecter</Link>
-                <Link href="/inscription" className="footer-link">Créer un compte</Link>
-                <Link href="/hypotheses" className="footer-link">Méthodologie</Link>
-                <Link href="/a-propos" className="footer-link">À propos</Link>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Bottom Bar : © + lien légal (Contact déjà dans Accès rapide) */}
-        <div className="border-t border-slate-100 dark:border-slate-800/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em] text-center md:text-left">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
             © 2026 freelance-simulateur.fr
-          </p>
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 md:gap-4 text-[10px] font-black uppercase tracking-widest">
-            <Link
-              href="/cgu"
-              className="text-slate-400 hover:text-indigo-600 transition-colors"
-            >
-              CGU
-            </Link>
-            <Link
-              href="/mentions-legales"
-              className="text-slate-400 hover:text-indigo-600 transition-colors"
-            >
-              Mentions légales
-            </Link>
-            <Link
-              href="/confidentialite"
-              className="text-slate-400 hover:text-indigo-600 transition-colors"
-            >
-              Confidentialité
-            </Link>
-          </div>
+          </span>
         </div>
+
+        <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-bold text-slate-400 dark:text-slate-500">
+          <Link href="/a-propos" className="hover:text-indigo-600 transition-colors">À propos</Link>
+          <Link href="/hypotheses" className="hover:text-indigo-600 transition-colors">Méthodologie</Link>
+          <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
+          <span className="hidden sm:inline text-slate-200 dark:text-slate-700">|</span>
+          <Link href="/cgu" className="hover:text-indigo-600 transition-colors">CGU</Link>
+          <Link href="/mentions-legales" className="hover:text-indigo-600 transition-colors">Mentions légales</Link>
+          <Link href="/confidentialite" className="hover:text-indigo-600 transition-colors">Confidentialité</Link>
+        </nav>
       </div>
     </footer>
   );
