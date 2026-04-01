@@ -261,18 +261,24 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
 
       <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800 shrink-0">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
-          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-x-3">
+          <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-3">
             <Link
               href={backLink.href}
-              className="inline-flex w-fit items-center gap-2 justify-self-start text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
             >
               <ArrowLeft size={16} className="shrink-0" />
-              {backLink.label}
+              <span className="hidden sm:inline">{backLink.label}</span>
             </Link>
-            <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 sm:justify-center">
+            <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1">
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
-                Simulation 5 ans — {statutId}
+                Simulation — {statutId}
               </h1>
+              {regime && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-black tabular-nums text-slate-700 dark:text-slate-200 sm:hidden">
+                  {fmtEur(regime.ca)}
+                  <span className="text-[9px] font-bold text-slate-400">/an</span>
+                </span>
+              )}
               <span className="hidden md:inline-flex items-center gap-1">
                 <button
                   type="button"
@@ -295,10 +301,8 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
             </div>
             <div
               className={cn(
-                'justify-self-end text-right',
-                regime
-                  ? 'justify-self-center border-t border-slate-200/80 pt-3 text-center dark:border-slate-700 sm:justify-self-end sm:border-0 sm:pt-0'
-                  : 'hidden sm:block sm:min-h-0',
+                'hidden sm:block justify-self-end text-right',
+                !regime && 'sm:min-h-0',
               )}
               aria-hidden={!regime}
             >
