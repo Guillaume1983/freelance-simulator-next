@@ -22,6 +22,7 @@ import PdfIcon from '@/components/PdfIcon';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur/RegimeFinancialBreakdown';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
+import { AnnualGrowthBand } from '@/components/simulateur/AnnualGrowthBand';
 import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import {
   SimulationSettingsSidebar,
@@ -237,7 +238,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
     : '/comparateur';
 
   const printRef = useRef<HTMLDivElement>(null);
-  const growthInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (safeYear > 0 && typeof window !== 'undefined' && window.innerWidth >= 768) {
@@ -379,6 +379,12 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 </Link>
               </div>
 
+              <AnnualGrowthBand
+                yearIndex={safeYear}
+                growthRate={growthByYear[safeYear]}
+                onGrowthChange={(value) => updateGrowthYear(safeYear, value)}
+              />
+
               <div className="hidden xl:block min-w-0 xl:row-start-1 xl:col-start-1 xl:self-stretch">
                 <YearNavStrip
                   simulations={simulations}
@@ -427,27 +433,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                             <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                               Année {safeYear + 1}
                             </h2>
-                            {safeYear > 0 && (
-                              <span
-                                className="inline-flex items-center gap-1 rounded-lg border border-emerald-300/90 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/40 px-2 py-1 shadow-sm"
-                                title="Taux de croissance du CA par rapport à l'année précédente"
-                              >
-                                <input
-                                  ref={growthInputRef}
-                                  type="number"
-                                  min={0}
-                                  max={50}
-                                  step={1}
-                                  inputMode="numeric"
-                                  value={(growthByYear[safeYear] ?? 0) || ''}
-                                  placeholder="0"
-                                  onChange={(e) => updateGrowthYear(safeYear, Number(e.target.value))}
-                                  className="w-10 min-w-0 text-center text-[12px] font-bold py-0.5 rounded border-0 bg-transparent text-emerald-900 dark:text-emerald-100 placeholder:text-emerald-400/70 focus:outline-none focus:bg-emerald-100/30 dark:focus:bg-emerald-900/40 tabular-nums"
-                                  aria-label={`Croissance du chiffre d'affaires pour l'année ${safeYear + 1} (par rapport à l'année précédente)`}
-                                />
-                                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap">% CA</span>
-                              </span>
-                            )}
                           </div>
                           {microPlafondExceeded && (
                             <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
