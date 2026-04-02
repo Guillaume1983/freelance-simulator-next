@@ -99,8 +99,6 @@ export default function ExpandPanels({
   sim,
   activeRegimeId,
   suppressNonApplicablePanels,
-  growthByYear,
-  onChangeGrowthYear,
 }: any) {
   if (!activePanel) return null;
   if (!sim?.state) return null;
@@ -223,35 +221,6 @@ export default function ExpandPanels({
           <InfoBox variant="info">
             Votre chiffre d&apos;affaires est calculé automatiquement : TJM × Jours = CA annuel.
           </InfoBox>
-        </>
-      )}
-
-      {/* PANNEAU CROISSANCE (simulateur) */}
-      {activePanel === 'croissance' && (
-        <>
-          <InfoBox variant="info">
-            Taux de croissance appliqué au CA de chaque année. La croissance de l&apos;année 1 reste la base.
-          </InfoBox>
-          <div className="grid gap-2">
-            {[1, 2, 3, 4].map((idx) => (
-              <FieldCard
-                key={idx}
-                icon={Zap}
-                label={`Taux de croissance année ${idx + 1}`}
-                description="Croissance du CA pour cette année"
-                color="indigo"
-              >
-                <NumberInput
-                  value={Math.max(0, Math.min(50, (growthByYear?.[idx] ?? 0)))}
-                  onChange={(v) => onChangeGrowthYear?.(idx, v)}
-                  onIncrement={() => onChangeGrowthYear?.(idx, (growthByYear?.[idx] ?? 0) + 1)}
-                  onDecrement={() => onChangeGrowthYear?.(idx, (growthByYear?.[idx] ?? 0) - 1)}
-                  suffix="%"
-                  label={`Croissance année ${idx + 1}`}
-                />
-              </FieldCard>
-            ))}
-          </div>
         </>
       )}
 

@@ -10,11 +10,12 @@ import { useUser } from '@/hooks/useUser';
 
 import RegimeFinancialBreakdown, {
   RetirementBadge,
-} from '@/components/comparateur2/RegimeFinancialBreakdown';
+} from '@/components/comparateur/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
 import { REGIME_COLORS, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
+import RegimeParamsInline from '@/components/RegimeParamsInline';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { buildCaRepartitionSegments } from '@/lib/simulateur/caRepartitionColors';
 import { regimeIdToStatutSlug } from '@/lib/simulateur/paliers';
@@ -121,7 +122,7 @@ function MiniNavStrip({
   );
 }
 
-function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
+function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
   const sim = useSimulationContext();
   const urlFocus = useComparateurUrlSync(sim.setters);
   const { isConnected } = useUser();
@@ -359,6 +360,9 @@ function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
                             regimeId={regime.id}
                           />
                         </div>
+                        <div className="mt-3">
+                          <RegimeParamsInline sim={sim} regimeId={regime.id} align="center" />
+                        </div>
                       </div>
 
                       <button
@@ -500,7 +504,7 @@ function Comparateur2ViewContent({ children }: { children?: React.ReactNode }) {
   );
 }
 
-export default function Comparateur2View({ children }: { children?: React.ReactNode }) {
+export default function ComparateurView({ children }: { children?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -509,7 +513,7 @@ export default function Comparateur2View({ children }: { children?: React.ReactN
         </main>
       }
     >
-      <Comparateur2ViewContent>{children}</Comparateur2ViewContent>
+      <ComparateurViewContent>{children}</ComparateurViewContent>
     </Suspense>
   );
 }

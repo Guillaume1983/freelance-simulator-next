@@ -7,7 +7,7 @@ import { useSimulationContext } from '@/context/SimulationContext';
 import { useUser } from '@/hooks/useUser';
 
 import ConnectorModal from '@/components/ConnectorModal';
-import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur2/RegimeFinancialBreakdown';
+import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
 import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import {

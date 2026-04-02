@@ -6,7 +6,6 @@ import { ArrowLeft, TrendingUp, Briefcase, Store, Building2, Building, Settings,
 import { useSimulationContext } from '@/context/SimulationContext';
 import Footer from '@/components/Footer';
 
-/* Couleurs alignées sur SimulationSection (REGIME_COLORS) */
 const STATUTS = [
   { href: '/simulateur/portage', slug: 'portage', label: 'Portage salarial', desc: 'Salarié du cabinet de portage, cotisations et net sur 5 ans', icon: Briefcase, iconClass: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' },
   { href: '/simulateur/micro', slug: 'micro', label: 'Micro-entreprise', desc: 'BNC / BIC, plafonds, ACRE et CFE sur 5 ans', icon: Store, iconClass: 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400' },

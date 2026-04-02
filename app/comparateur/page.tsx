@@ -1,10 +1,10 @@
-import Comparateur2View from '@/components/comparateur2/Comparateur2View';
+import ComparateurView from '@/components/comparateur/ComparateurView';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 export default function ComparateurPage() {
   return (
-    <Comparateur2View>
+    <ComparateurView>
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-10 text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">
         <h1 className="sr-only">Comparateur de statuts freelance 2026</h1>
 
@@ -50,6 +50,6 @@ export default function ComparateurPage() {
       </section>
 
       <Footer />
-    </Comparateur2View>
+    </ComparateurView>
   );
 }
