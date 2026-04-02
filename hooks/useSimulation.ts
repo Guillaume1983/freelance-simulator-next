@@ -55,7 +55,7 @@ export const useSimulation = () => {
   const [avantagesOptimises, setAvantagesOptimises] = useState(0);
 
   // --- Paramètres projection ---
-  const [acreEnabled, setAcreEnabled] = useState(true);
+  const [acreEnabled, setAcreEnabled] = useState(false);
   const [citySize, setCitySize] = useState<CitySize>('moyenne');
   const [growthRate, setGrowthRate] = useState(2);
 
