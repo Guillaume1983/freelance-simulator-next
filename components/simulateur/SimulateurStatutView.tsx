@@ -373,11 +373,14 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 </Link>
               </div>
 
-              <AnnualGrowthBand
-                yearIndex={safeYear}
-                growthRate={growthByYear[safeYear]}
-                onGrowthChange={(value) => updateGrowthYear(safeYear, value)}
-              />
+              {/* Growth band: visible on mobile/tablet only (xl handled separately in the grid) */}
+              <div className="xl:hidden">
+                <AnnualGrowthBand
+                  yearIndex={safeYear}
+                  growthRate={growthByYear[safeYear]}
+                  onGrowthChange={(value) => updateGrowthYear(safeYear, value)}
+                />
+              </div>
 
               <div className="hidden xl:block min-w-0 xl:row-start-1 xl:col-start-1 xl:self-stretch">
                 <YearNavStrip
@@ -399,7 +402,17 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 </Link>
               </div>
 
-              <div className="min-w-0 w-full xl:row-start-2 xl:col-start-1 xl:self-start">
+              {/* Growth band: desktop grid row 2, col 1 */}
+              <div className="hidden xl:block min-w-0 xl:row-start-2 xl:col-start-1">
+                <AnnualGrowthBand
+                  yearIndex={safeYear}
+                  growthRate={growthByYear[safeYear]}
+                  onGrowthChange={(value) => updateGrowthYear(safeYear, value)}
+                />
+              </div>
+
+              {/* Main results card: desktop row 3, col 1 */}
+              <div className="min-w-0 w-full xl:row-start-3 xl:col-start-1 xl:self-start">
                 <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col h-full">
                   <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
 
@@ -473,7 +486,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 </div>
               </div>
 
-              <aside className="hidden xl:flex min-h-0 w-full max-h-[min(85vh,920px)] flex-col overflow-hidden xl:row-start-2 xl:col-start-2 xl:sticky xl:self-start" style={{ top: 'calc(var(--header-height, 0px) + 1.5rem)' }}>
+              <aside className="hidden xl:flex min-h-0 w-full max-h-[min(85vh,920px)] flex-col overflow-hidden xl:row-start-2 xl:row-span-2 xl:col-start-2 xl:sticky xl:self-start" style={{ top: 'calc(var(--header-height, 0px) + 1.5rem)' }}>
                 <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm w-full">
                   <div className="hidden px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50/90 dark:bg-slate-800/50 shrink-0">
                     <div className="flex items-center gap-2">
@@ -502,7 +515,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 </div>
               </aside>
 
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 min-w-0 xl:row-start-3 xl:col-start-1">
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 min-w-0 xl:row-start-4 xl:col-start-1">
                 Hypothèses détaillées&nbsp;:{' '}
                 <Link href="/hypotheses" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
                   voir la méthodologie
