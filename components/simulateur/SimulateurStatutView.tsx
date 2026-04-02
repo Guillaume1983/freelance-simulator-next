@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   PanelRightOpen,
+  Percent,
   Rocket,
   Settings2,
   X,
@@ -21,6 +22,7 @@ import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur/RegimeFinancialBreakdown';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
+import { GrowthRatesModal } from '@/components/simulateur/GrowthRatesModal';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
 import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
 import {
@@ -114,15 +116,27 @@ function YearNavStrip({
   statutId,
   yearIndex,
   setYearIndex,
+  onOpenGrowthModal,
 }: {
   simulations: ReturnType<typeof projeterSurNAns>;
   statutId: string;
   yearIndex: number;
   setYearIndex: (i: number) => void;
+  onOpenGrowthModal: () => void;
 }) {
   return (
-    <div className="p-2.5 rounded-2xl bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50 w-full min-w-0">
-      <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
+    <div className="relative min-w-0 flex-1 w-full rounded-2xl border border-slate-200/50 bg-slate-100/50 p-2.5 dark:border-slate-700/50 dark:bg-slate-800/30">
+      <button
+        type="button"
+        onClick={onOpenGrowthModal}
+        className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200/80 bg-white/90 text-slate-600 shadow-sm hover:bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        title="Réglages de la croissance du CA"
+        aria-label="Ouvrir les réglages de croissance du chiffre d'affaires"
+      >
+        <Percent className="h-4 w-4" aria-hidden />
+      </button>
+      {/* px symétrique : même centrage qu’avec une 3e colonne, sans pousser le bloc vers la gauche */}
+      <div className="flex min-w-0 flex-wrap items-center justify-center gap-1 px-10 sm:gap-2 sm:px-11">
         {simulations.map((yr, idx) => {
           const r = yr.find((x: { id: string }) => x.id === statutId);
           if (!r) return null;
@@ -159,6 +173,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
   const [growthByYear, setGrowthByYear] = useState<number[]>(() =>
     Array.from({ length: 5 }, () => sim.state.growthRate ?? 0),
   );
+  const [growthModalOpen, setGrowthModalOpen] = useState(false);
 
   const updateGrowthYear = useCallback((index: number, next: number) => {
     setGrowthByYear((prev) =>
@@ -237,13 +252,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
     : '/comparateur';
 
   const printRef = useRef<HTMLDivElement>(null);
-  const growthInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (safeYear > 0 && typeof window !== 'undefined' && window.innerWidth >= 768) {
-      growthInputRef.current?.focus();
-    }
-  }, [safeYear]);
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
@@ -362,16 +370,17 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
             </div>
           ) : (
             <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_min(460px,42vw)] xl:items-start xl:gap-x-8 xl:gap-y-5">
-              <div className="flex flex-col md:flex-row md:items-stretch gap-4 xl:hidden">
+              <div className="flex flex-col md:flex-row md:items-start gap-4 xl:hidden">
                 <YearNavStrip
                   simulations={simulations}
                   statutId={statutId}
                   yearIndex={safeYear}
                   setYearIndex={setYearIndex}
+                  onOpenGrowthModal={() => setGrowthModalOpen(true)}
                 />
                 <Link
                   href={`/partenaires?regime=${encodeURIComponent(statutId)}`}
-                  className="shrink-0 inline-flex items-center justify-center gap-2.5 px-5 py-3.5 md:py-3 rounded-xl font-black text-sm text-white shadow-lg hover:opacity-90 transition-opacity min-h-[48px] self-stretch text-center md:max-w-[220px] w-full md:w-auto whitespace-normal"
+                  className="inline-flex shrink-0 items-center justify-center gap-2.5 self-start rounded-xl px-5 py-3 text-center text-sm font-black text-white shadow-lg transition-opacity hover:opacity-90 md:max-w-[220px] md:py-3 min-h-[48px] w-full md:w-auto whitespace-normal"
                   style={{ backgroundColor: REGIME_HEX[statutId] ?? '#6366f1' }}
                 >
                   <Rocket size={20} className="shrink-0" />
@@ -385,6 +394,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                   statutId={statutId}
                   yearIndex={safeYear}
                   setYearIndex={setYearIndex}
+                  onOpenGrowthModal={() => setGrowthModalOpen(true)}
                 />
               </div>
 
@@ -400,7 +410,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
               </div>
 
               <div className="min-w-0 w-full xl:row-start-2 xl:col-start-1 xl:self-start">
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col h-full">
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg flex flex-col h-full">
                   <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
 
                   <div className="p-5 md:p-6 flex flex-col gap-6 flex-1 min-h-0">
@@ -429,23 +439,12 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                             </h2>
                             {safeYear > 0 && (
                               <span
-                                className="inline-flex items-center gap-1 rounded-lg border border-emerald-300/90 dark:border-emerald-700 bg-emerald-50/90 dark:bg-emerald-950/40 px-2 py-1 shadow-sm"
-                                title="Taux de croissance du CA par rapport à l'année précédente"
+                                className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400"
+                                title="Rappel : croissance du CA vs année précédente — icône % en haut à droite du bandeau des années"
+                                role="note"
+                                aria-label={`Croissance du CA vers l'année ${safeYear + 1} : +${growthByYear[safeYear] ?? 0} %`}
                               >
-                                <input
-                                  ref={growthInputRef}
-                                  type="number"
-                                  min={0}
-                                  max={50}
-                                  step={1}
-                                  inputMode="numeric"
-                                  value={(growthByYear[safeYear] ?? 0) || ''}
-                                  placeholder="0"
-                                  onChange={(e) => updateGrowthYear(safeYear, Number(e.target.value))}
-                                  className="w-10 min-w-0 text-center text-[12px] font-bold py-0.5 rounded border-0 bg-transparent text-emerald-900 dark:text-emerald-100 placeholder:text-emerald-400/70 focus:outline-none focus:bg-emerald-100/30 dark:focus:bg-emerald-900/40 tabular-nums"
-                                  aria-label={`Croissance du chiffre d'affaires pour l'année ${safeYear + 1} (par rapport à l'année précédente)`}
-                                />
-                                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap">% CA</span>
+                                +{growthByYear[safeYear] ?? 0}% CA
                               </span>
                             )}
                           </div>
@@ -610,6 +609,12 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
         onClose={() => setShowConnectorModal(false)}
         title="Connectez-vous pour exporter en PDF"
         message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
+      />
+      <GrowthRatesModal
+        open={growthModalOpen}
+        onClose={() => setGrowthModalOpen(false)}
+        growthByYear={growthByYear}
+        onUpdateYear={updateGrowthYear}
       />
       {children}
     </main>

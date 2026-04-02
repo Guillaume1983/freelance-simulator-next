@@ -41,7 +41,15 @@ export function InputNumber({
   const containerClass =
     orientation === 'horizontal'
       ? 'flex items-start justify-between gap-2'
-      : 'flex flex-col gap-1';
+      : cn('flex flex-col gap-1', suffix && 'items-center');
+
+  /** Sans suffixe : champ pleine largeur ; avec suffixe (ex. %) : largeur du champ seule pour ne pas éloigner le suffixe */
+  const inputWrapClass =
+    orientation === 'horizontal'
+      ? 'shrink-0'
+      : suffix
+        ? 'inline-block max-w-full'
+        : 'w-full';
 
   return (
     <div className={cn('w-full', disabled && 'opacity-60 pointer-events-none')}>
@@ -58,7 +66,7 @@ export function InputNumber({
           </div>
         )}
 
-        <div className={cn('relative', orientation === 'horizontal' ? 'shrink-0' : 'w-full')}>
+        <div className={cn('relative', inputWrapClass)}>
           <input
             id={id}
             type="number"
