@@ -315,7 +315,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
               </div>
 
               <div className="min-w-0 w-full xl:row-start-2 xl:col-start-1 xl:self-start">
-                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-visible xl:overflow-hidden flex flex-col h-full xl:max-h-[min(85vh,920px)]">
+                <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col h-full">
                   <div className={cn('h-1.5 w-full bg-linear-to-r shrink-0', colors.gradient)} />
 
                   <div className="p-5 md:p-6 flex flex-col gap-6 flex-1 min-h-0">
