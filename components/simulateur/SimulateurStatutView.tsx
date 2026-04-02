@@ -239,12 +239,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
 
   const printRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (safeYear > 0 && typeof window !== 'undefined' && window.innerWidth >= 768) {
-      growthInputRef.current?.focus();
-    }
-  }, [safeYear]);
-
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `Simulation-5-ans-${statutId ?? 'statut'}-FreelanceSimulateur`,
