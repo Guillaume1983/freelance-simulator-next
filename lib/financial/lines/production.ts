@@ -5,7 +5,9 @@ export function buildProductionLines(
   tjm: number,
   days: number,
   growthRate: number,
-  annee: number
+  annee: number,
+  /** Produit des (1+t%) par année — affichage lorsque le CA vient d’une croissance variable année par année */
+  cumulativeGrowthFormula?: string,
 ): FinancialLine[] {
   return [
     {
@@ -17,9 +19,12 @@ export function buildProductionLines(
       fiscalImpact: ca,
       socialImpact: 0,
       applicableStatuses: [],
-      formula: annee === 1
-        ? `${tjm} € × ${days} jours`
-        : `${tjm} € × ${days} jours × (1 + ${(growthRate * 100).toFixed(0)}%)^${annee - 1}`,
+      formula:
+        annee === 1
+          ? `${tjm} € × ${days} jours`
+          : cumulativeGrowthFormula
+            ? `${tjm} € × ${days} jours × ${cumulativeGrowthFormula}`
+            : `${tjm} € × ${days} jours × (1 + ${(growthRate * 100).toFixed(0)}%)^${annee - 1}`,
     },
     {
       id: 'tjm',

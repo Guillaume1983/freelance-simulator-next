@@ -17,6 +17,10 @@ export interface PipelineInput {
   days: number;
   growthRate: number;
   annee?: number;
+  /** Multiplicateur cumulé sur le CA (simulateur 5 ans, taux distincts par année). Si défini, remplace (1+croissance)^(année-1). */
+  caMultiplier?: number;
+  /** Suffixe d’affichage pour la ligne CA (ex. (1+2%)×(1+3%)) */
+  caFormulaSuffix?: string;
   activeCharges: string[];
   chargeAmounts: Record<string, number>;
   materielAnnuel: number;
@@ -84,7 +88,11 @@ function buildStatutContext(input: PipelineInput): {
   repartitionRemuneration: number;
 } {
   const annee = input.annee ?? 1;
-  const ca = input.tjm * input.days * Math.pow(1 + input.growthRate, annee - 1);
+  const baseCa = input.tjm * input.days;
+  const ca =
+    input.caMultiplier != null
+      ? baseCa * input.caMultiplier
+      : baseCa * Math.pow(1 + input.growthRate, annee - 1);
   // Les IK sont utilisées pour tous les régimes (y compris Portage) : on doit appliquer la majoration
   // "véhicule électrique" de façon cohérente, comme pour la ligne d'optimisations.
   const indemnitesKm = input.vehiculeActive
@@ -141,7 +149,8 @@ export function runPipeline(input: PipelineInput): PipelineResult[] {
     input.tjm,
     input.days,
     input.growthRate,
-    annee
+    annee,
+    input.caFormulaSuffix,
   );
   const depensesLines = buildDepensesLines(
     input.activeCharges,

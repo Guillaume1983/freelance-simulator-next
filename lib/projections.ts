@@ -56,6 +56,9 @@ export interface ProjectionParams {
   prelevementLiberatoire?: boolean;
   remunerationDirigeantMensuelle?: number;
   repartitionRemuneration?: number;
+  /** Réservé au moteur (croissance cumulée par année) */
+  caMultiplier?: number;
+  caFormulaSuffix?: string;
 }
 
 export interface RegimeResult {
@@ -100,6 +103,8 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
     days: params.days,
     growthRate: params.growthRate,
     annee: params.annee ?? 1,
+    caMultiplier: params.caMultiplier,
+    caFormulaSuffix: params.caFormulaSuffix,
     activeCharges: params.activeCharges,
     chargeAmounts: params.chargeAmounts,
     materielAnnuel: params.materielAnnuel ?? 0,
@@ -127,7 +132,7 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
 }
 
 export function calculateRegimes(
-  params: ProjectionParams & { annee?: number }
+  params: ProjectionParams & { annee?: number; caMultiplier?: number; caFormulaSuffix?: string }
 ): RegimeResult[] {
   const pipelineInput = toPipelineInput(params);
   const ctx = buildContextFromInput(pipelineInput);
@@ -223,10 +228,39 @@ export function calculateRegimes(
   });
 }
 
+/**
+ * Projection sur 5 ans.
+ * Si `growthRates` est fourni (une valeur par « slot » 0–4, indices 1–4 = taux vers Année 2…5) :
+ * CA(Année 1) = TJM×jours ; CA(Année k) = base × ∏(1 + gⱼ) pour j = 1 … k−1.
+ * Sinon : CA = TJM×jours×(1+croissance globale)^(année−1) (comportement historique).
+ */
 export function projeterSurNAns(params: ProjectionParams, growthRates?: number[]): RegimeResult[][] {
   return [1, 2, 3, 4, 5].map((annee, index) => {
-    const growth = growthRates && growthRates[index] != null ? growthRates[index]! : params.growthRate;
-    return calculateRegimes({ ...params, growthRate: growth, annee });
+    if (growthRates == null) {
+      return calculateRegimes({ ...params, growthRate: params.growthRate, annee });
+    }
+
+    let mult = 1;
+    const parts: string[] = [];
+    for (let j = 1; j <= index; j++) {
+      const raw = growthRates[j];
+      const g =
+        raw != null && !Number.isNaN(Number(raw)) ? Number(raw) : params.growthRate;
+      mult *= 1 + g;
+      parts.push(`(1+${(g * 100).toFixed(0)}%)`);
+    }
+
+    const rawIndex = growthRates[index];
+    const growthRateForPipeline =
+      rawIndex != null && !Number.isNaN(Number(rawIndex)) ? Number(rawIndex) : params.growthRate;
+
+    return calculateRegimes({
+      ...params,
+      annee,
+      growthRate: growthRateForPipeline,
+      caMultiplier: mult,
+      caFormulaSuffix: index >= 1 ? parts.join('×') : undefined,
+    });
   });
 }
 
