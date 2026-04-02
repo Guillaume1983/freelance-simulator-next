@@ -18,17 +18,17 @@ export function AnnualGrowthBand({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOutOfRange, setIsOutOfRange] = useState(false);
 
-  // Year 1 (index 0) doesn't have growth control
-  if (yearIndex === 0) {
-    return null;
-  }
-
   const currentValue = growthRate ?? 0;
   const isInvalid = currentValue < 0 || currentValue > 50;
 
   useEffect(() => {
     setIsOutOfRange(isInvalid);
   }, [isInvalid]);
+
+  // Year 1 (index 0) doesn't have growth control
+  if (yearIndex === 0) {
+    return null;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === '' ? 0 : Number(e.target.value);
