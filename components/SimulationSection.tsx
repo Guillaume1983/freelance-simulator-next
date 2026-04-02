@@ -326,7 +326,7 @@ export default function SimulationSection({
 
   const getBeforeTaxRowLabel = (regimeId: string) => {
     if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
-    if (regimeId === 'SASU') return 'Dividendes bruts (avant PFU)';
+    if (regimeId === 'SASU') return 'Revenu brut (avant IR/PFU)';
     return 'Rémunération nette (avant IR)';
   };
 
@@ -690,7 +690,6 @@ export default function SimulationSection({
                           else val = r?.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
                         }
                         if (row.key === 'fees' && r?.id === 'Micro') val = null;
-                        if (row.key === 'cotis' && r?.id === 'SASU') val = null;
                         if (row.key === 'cashInCompany' && (r?.cashInCompany == null || r?.cashInCompany === 0)) val = null;
                         const detailText = r ? getDetailText(r, row.key, row.monthly) : '';
                         const tooltipColor = getTooltipColor(row.key);
@@ -996,7 +995,6 @@ export default function SimulationSection({
                       else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
                     }
                     if (r && row.key === 'fees' && r.id === 'Micro') val = null;
-                    if (r && row.key === 'cotis' && r.id === 'SASU') val = null;
                     if (r && row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                     const detailText = r ? getDetailText(r, row.key, row.monthly) : '';
                     const tooltipColor = getTooltipColor(row.key);
@@ -1162,7 +1160,6 @@ export default function SimulationSection({
                       else val = r.lines?.find((l: any) => l.id === 'portage_commission')?.amount ?? 0;
                     }
                     if (row.key === 'fees' && r.id === 'Micro') val = null;
-                    if (row.key === 'cotis' && r.id === 'SASU') val = null;
                     if (row.key === 'cashInCompany' && (r.cashInCompany == null || r.cashInCompany === 0)) val = null;
                     return (
                       <td
@@ -1251,7 +1248,7 @@ export default function SimulationSection({
               Micro:    { forts: ['Création instantanée, formalités nulles','Comptabilité ultra simplifiée','Charges proportionnelles au CA réel'], vigilance: "Plafond de CA à 83 600 € en BNC (2026). Pas de déduction des charges réelles." },
               'EURL IR':{ forts: ['Déduction des charges professionnelles réelles','IR progressif : avantageux si revenus modérés','Structure souple'], vigilance: "Cotisations TNS calculées selon le barème réel (URSSAF/CIPAV). Comptabilité obligatoire." },
               'EURL IS':{ forts: ["Bénéfice non versé en salaire taxé à l'IS 25 %","Pilotage précis de la part en salaire TNS vs capitalisation en société","Création d’une trésorerie de société mobilisable plus tard"], vigilance: "IS 25 % sur le bénéfice restant + impôt sur le revenu sur le salaire TNS. Comptabilité exigeante." },
-              SASU:     { forts: ['Protection assimilé-salarié (retraite, prévoyance)','Dividendes au PFU 30 %','Statut reconnu pour missions premium'], vigilance: "Bénéfice taxé à l'IS 20 % puis dividendes imposés au PFU 30 % (dont 17,2 % prélèvements sociaux). Pas d'accès à l'ARE en fin de mandat de président." },
+              SASU:     { forts: ['Protection assimilé-salarié (retraite, prévoyance)','Mix salaire + dividendes optimisable','Dividendes au PFU 30 % avantageux à haut CA'], vigilance: "Cotisations assimilé-salarié élevées (~82 % du net) sur la part salaire. IS PME (15 %/25 %) + PFU 30 % sur la part dividendes." },
             };
             const data = analysis[activeRegime];
             if (!data) return null;

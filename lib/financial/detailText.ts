@@ -117,7 +117,14 @@ export function getDetailTextFromLines(
       }
       if (r.id === 'SASU') {
         const cfe = getLine('sasu_cfe')?.amount ?? 0;
-        const baseText = `Base avant impôt = dividendes bruts.\nDividendes bruts = résultat après IS × % distribué.`;
+        const salaire = getLine('sasu_remuneration')?.amount ?? 0;
+        const divBruts = (getLine('sasu_dividendes')?.amount ?? 0) > 0
+          ? (getLine('sasu_dividendes')!.amount / 0.70)
+          : 0;
+        const parts: string[] = [];
+        if (salaire > 0) parts.push(`Salaire net ${fmt(salaire)}`);
+        if (divBruts > 0) parts.push(`Dividendes bruts ${fmt(divBruts)}`);
+        const baseText = `Revenu brut = ${parts.join(' + ')}.`;
         return monthly12(
           cfe > 0
             ? `${baseText}\nCFE annuelle prise en compte dans le calcul du résultat société : ${fmt(cfe)}.`
@@ -130,6 +137,7 @@ export function getDetailTextFromLines(
         getLine('micro_remuneration') ??
         getLine('eurl_ir_remuneration') ??
         getLine('eurl_is_remuneration') ??
+        getLine('sasu_remuneration') ??
         getLine('sasu_dividendes');
       if (line?.formula) return monthly12(line.formula);
 
@@ -148,10 +156,17 @@ export function getDetailTextFromLines(
       return monthly12(terms.join(' '));
     }
     case 'ir': {
-      const line = getLine('portage_ir') ?? getLine('micro_ir') ?? getLine('eurl_ir_ir') ?? getLine('eurl_is_ir') ?? getLine('sasu_ir');
+      if (r.id === 'SASU') {
+        const pfuLine = getLine('sasu_pfu');
+        const irLine = getLine('sasu_ir');
+        const parts: string[] = [];
+        if (pfuLine?.formula) parts.push(pfuLine.formula);
+        if (irLine?.formula) parts.push(irLine.formula);
+        return parts.join('\n\n') || 'PFU 30 % sur dividendes';
+      }
+      const line = getLine('portage_ir') ?? getLine('micro_ir') ?? getLine('eurl_ir_ir') ?? getLine('eurl_is_ir');
       if (line?.formula) return line.formula;
       if (r.id === 'Micro') return 'Barème IR (base = CA × 66%)';
-      if (r.id === 'SASU') return 'Rémunération × 30% (PFU)';
       return `Barème progressif IR — ${sim.state.taxParts} parts`;
     }
     case 'net': {

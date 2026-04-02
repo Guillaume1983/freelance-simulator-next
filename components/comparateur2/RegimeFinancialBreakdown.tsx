@@ -159,7 +159,7 @@ type RowDef = (typeof ROWS)[number];
 
 function getBeforeTaxRowLabel(regimeId: string) {
   if (regimeId === 'EURL IR') return 'Revenu imposable (avant IR)';
-  if (regimeId === 'SASU') return 'Dividendes bruts (avant PFU)';
+  if (regimeId === 'SASU') return 'Revenu brut (avant IR/PFU)';
   return 'Rémunération nette (avant IR)';
 }
 
@@ -189,7 +189,6 @@ function getDisplayValue(r: Record<string, unknown>, row: RowDef): number | null
     return sum / row.div;
   }
   if (row.key === 'fees' && r.id === 'Micro') return null;
-  if (row.key === 'cotis' && r.id === 'SASU') return null;
   const raw = r[row.key] as number | undefined;
   if (raw == null) return null;
   return raw / row.div;

@@ -102,7 +102,7 @@ export default function ControlsBar({
       );
     }
     if (activeRegimeId === 'SASU') {
-      const v = Math.max(0, Math.min(100, s.repartitionRemuneration ?? 100));
+      const v = Math.max(0, Math.min(100, s.repartitionRemuneration ?? 0));
       return (
         <NumberInput
           value={v}
@@ -110,7 +110,7 @@ export default function ControlsBar({
           onIncrement={() => sim.setters.setRepartitionRemuneration((p: number) => Math.min(100, (p ?? 0) + 5))}
           onDecrement={() => sim.setters.setRepartitionRemuneration((p: number) => Math.max(0, (p ?? 0) - 5))}
           suffix="%"
-          label="Dividendes"
+          label="Part salaire"
           inputClassName={inputOpaqueClass}
         />
       );

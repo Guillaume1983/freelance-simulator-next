@@ -50,7 +50,7 @@ export const useSimulation = () => {
   const [typeActiviteMicro, setTypeActiviteMicro] = useState<'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'>('BNC');
   const [prelevementLiberatoire, setPrelevementLiberatoire] = useState(false);
   const [remunerationDirigeantMensuelle, setRemunerationDirigeantMensuelle] = useState(1);
-  const [repartitionRemuneration, setRepartitionRemuneration] = useState(100);
+  const [repartitionRemuneration, setRepartitionRemuneration] = useState(0);
   // Par défaut : aucun avantage optimisé
   const [avantagesOptimises, setAvantagesOptimises] = useState(0);
 

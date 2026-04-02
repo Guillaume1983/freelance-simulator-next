@@ -95,13 +95,13 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
   if (regimeId === 'SASU') return (
     <div className={cn('flex flex-col gap-1.5', align === 'center' ? 'items-center' : 'items-start')}>
       <div className={rowClass}>
-        <span className={labelClass}>Dividendes</span>
+        <span className={labelClass}>Part salaire</span>
         <div className={rightClass}>
           <InputNumber
-            value={Math.max(0, Math.min(100, sim.state.repartitionRemuneration ?? 100))}
+            value={Math.max(0, Math.min(100, sim.state.repartitionRemuneration ?? 0))}
             onChange={(v) => sim.setters.setRepartitionRemuneration(Math.max(0, Math.min(100, Math.round(v))))}
             orientation="horizontal"
-            ariaLabel="Dividendes"
+            ariaLabel="Part salaire président"
             min={0}
             max={100}
             step={5}

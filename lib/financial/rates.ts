@@ -26,12 +26,16 @@ export const RATES_2026 = {
     // comme 75 % du taux normal (réforme 2026-69). Simplification : taux constant sur l'année 1.
     acre: 0.75,
   },
-  // Cotisations assimilé salarié (SASU / Portage, ordre 45 % charges patronales)
+  // Cotisations assimilé salarié (Portage : cotis = base × 45 %, net = base × 55 %)
   // ACRE : exonération ramenée de 50 % à 25 % → on passe de 0,5 à 0,75 (on paie 75 % du taux).
   portage: { cotis: 0.45, acre: 0.75 },
-  eurlIs: { cotis: 0.45, acre: 0.75 }, // ACRE : ~25 % d'exonération de cotisations an 1 (hors CSG/CRDS)
+  // EURL IS : gérant TNS, cotis exprimées « en plus du net » → net = enveloppe / (1 + cotis)
+  eurlIs: { cotis: 0.45, acre: 0.75 },
+  // SASU : président assimilé salarié, cotis ≈ 82 % du net (patron + salarié)
+  // → total coût = net × 1,82, soit net/enveloppe ≈ 55 % (cohérent avec le portage)
+  sasu: { cotis: 0.82, acre: 0.75 },
   is: { taux: 0.25 },
-  /** SASU / PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
+  /** IS PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
   isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
   flatTaxDividendes: 0.30,
   /** Barème kilométrique voiture (URSSAF, arr. 27 mars 2023). Tranches : 0–5k, 5k–20k, >20k km. */

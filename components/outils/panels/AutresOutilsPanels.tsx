@@ -237,7 +237,7 @@ export function TjmRevenuNetOutilPanel() {
       typeActiviteMicro: 'BNC' as const,
       prelevementLiberatoire: false,
       remunerationDirigeantMensuelle: 1,
-      repartitionRemuneration: 100,
+      repartitionRemuneration: 0,
     }),
     [tjm, days],
   );

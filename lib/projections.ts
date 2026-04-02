@@ -122,7 +122,7 @@ function toPipelineInput(params: ProjectionParams & { annee?: number }) {
     typeActiviteMicro: params.typeActiviteMicro ?? 'BNC',
     prelevementLiberatoire: params.prelevementLiberatoire ?? false,
     remunerationDirigeantMensuelle: params.remunerationDirigeantMensuelle ?? 1,
-    repartitionRemuneration: params.repartitionRemuneration ?? 100,
+    repartitionRemuneration: params.repartitionRemuneration ?? 0,
   };
 }
 
@@ -148,9 +148,12 @@ export function calculateRegimes(
 
     const getAmt = (id: string) => lines.find(l => l.id === id)?.amount ?? 0;
 
-    const cotis = getAmt('portage_cotis') || getAmt('micro_cotis') || getAmt('eurl_ir_cotis') || getAmt('eurl_is_cotis');
-    const beforeTax = getAmt('portage_remuneration') || getAmt('micro_remuneration') || getAmt('eurl_ir_remuneration') || getAmt('eurl_is_remuneration') || (getAmt('sasu_dividendes') ? getAmt('sasu_dividendes') / 0.70 : 0);
-    const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || getAmt('sasu_ir');
+    const cotis = getAmt('portage_cotis') || getAmt('micro_cotis') || getAmt('eurl_ir_cotis') || getAmt('eurl_is_cotis') || getAmt('sasu_cotis');
+    const sasuSalaireNet = getAmt('sasu_remuneration');
+    const sasuDivNets = getAmt('sasu_dividendes');
+    const sasuDivBruts = sasuDivNets > 0 ? sasuDivNets / 0.70 : 0;
+    const beforeTax = getAmt('portage_remuneration') || getAmt('micro_remuneration') || getAmt('eurl_ir_remuneration') || getAmt('eurl_is_remuneration') || (sasuSalaireNet + sasuDivBruts) || 0;
+    const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || (getAmt('sasu_ir') + getAmt('sasu_pfu'));
 
     // "Charges" = dépenses pro + coût des optimisations utilisées comme charges
     // (IK, loyer, avantages exonérés). On laisse la micro à 0 car les charges réelles ne sont pas déductibles.
@@ -200,14 +203,18 @@ export function calculateRegimes(
     } else if (r.id === 'SASU') {
       const resultatSociete = ctx.ca - (ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises + ctx.cfe);
       const isSociete = getAmt('sasu_is');
-      const apresIS = resultatSociete - isSociete;
+      const salaireNetSasu = getAmt('sasu_remuneration');
+      const cotisSasu = getAmt('sasu_cotis');
+      const enveloppeSalaire = salaireNetSasu + cotisSasu;
+      const baseIS = Math.max(0, resultatSociete - enveloppeSalaire);
+      const apresIS = baseIS - isSociete;
       const dividendesNets = getAmt('sasu_dividendes');
-      const dividendesBruts = dividendesNets > 0 ? dividendesNets / 0.70 : 0; // PFU 30 %
+      const dividendesBruts = dividendesNets > 0 ? dividendesNets / 0.70 : 0;
       const resteEnSociete = Math.max(0, apresIS - dividendesBruts);
 
       res.resultatSociete = resultatSociete;
       res.isSociete = isSociete;
-      res.salaireNet = 0;
+      res.salaireNet = salaireNetSasu;
       res.dividendesNets = dividendesNets;
       res.cashInCompany = Math.round(resteEnSociete);
     }
