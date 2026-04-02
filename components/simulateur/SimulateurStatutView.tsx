@@ -49,6 +49,7 @@ function SimulatorYearNavButton({
   yearLabel,
   isActive,
   onClick,
+  growthRate,
 }: {
   regime: {
     id: string;
@@ -63,6 +64,7 @@ function SimulatorYearNavButton({
   yearLabel: string;
   isActive: boolean;
   onClick: () => void;
+  growthRate?: number;
 }) {
   const portageCommission = regime.lines?.find((l) => l.id === 'portage_commission')?.amount ?? 0;
   const segs = buildCaRepartitionSegments(
@@ -71,13 +73,14 @@ function SimulatorYearNavButton({
     { regimeId: regime.id, portageCommission, lines: regime.lines, cashInCompany: regime.cashInCompany },
   );
   const colors = REGIME_COLORS[regime.id] ?? REGIME_COLORS.Portage;
+  const showGrowth = typeof growthRate === 'number' && growthRate > 0;
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'relative group flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl transition-all duration-200 min-w-[52px]',
+        'relative group flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-200 min-w-[52px]',
         isActive
           ? `bg-white dark:bg-slate-800 shadow-md ring-2 ${colors.ring} scale-105`
           : 'hover:bg-white/60 dark:hover:bg-slate-800/60 hover:shadow-sm',
@@ -106,6 +109,11 @@ function SimulatorYearNavButton({
       >
         {yearLabel}
       </span>
+      {showGrowth && (
+        <span className="text-[7.5px] font-semibold leading-none text-emerald-600 dark:text-emerald-400 tabular-nums">
+          +{growthRate}%
+        </span>
+      )}
     </button>
   );
 }
