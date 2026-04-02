@@ -28,11 +28,19 @@ export default function ComparateurPage() {
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment sont calculées les cotisations ?</dt>
-            <dd className="mt-0.5">Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise, assiettes TNS pour l&apos;EURL, régime général assimilé salarié pour la SASU, et frais de gestion + cotisations salariales pour le portage. Chaque moteur de calcul intègre l&apos;ACRE si activée.</dd>
+            <dd className="mt-0.5">Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise, barème TNS détaillé pour l&apos;EURL IR, cotisations TNS forfaitaires (~45&nbsp;%) pour l&apos;EURL IS, cotisations assimilé salarié (~82&nbsp;% du net) pour la SASU et le portage. L&apos;ACRE est désactivée par défaut (régime de croisière) mais peut être activée dans les réglages.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment fonctionne la SASU dans le comparateur ?</dt>
+            <dd className="mt-0.5">Le président de SASU peut mixer salaire (soumis aux cotisations assimilé salarié + IR progressif) et dividendes (soumis à l&apos;IS PME 15&nbsp;%/25&nbsp;% puis au PFU 30&nbsp;%). Le curseur &laquo;&nbsp;Part salaire&nbsp;&raquo; permet d&apos;ajuster ce mix. À haut CA, les dividendes au PFU fixe deviennent plus avantageux que les tranches IR élevées.</dd>
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Puis-je simuler sur plusieurs années ?</dt>
             <dd className="mt-0.5">Oui. Le <Link href="/simulateur" className="text-indigo-600 dark:text-indigo-400 hover:underline">simulateur 5 ans</Link> projette votre activité avec un taux de croissance du CA, l&apos;ACRE la première année et la CFE à partir de la deuxième.</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-600 dark:text-slate-300">La CFE est-elle prise en compte ?</dt>
+            <dd className="mt-0.5">Oui. Le comparateur calcule en régime de croisière (année&nbsp;2) : la CFE est incluse selon la taille de ville sélectionnée (300&nbsp;€ à 900&nbsp;€/an). Elle est exonérée la première année uniquement.</dd>
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment personnaliser les paramètres ?</dt>

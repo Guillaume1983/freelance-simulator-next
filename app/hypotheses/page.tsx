@@ -33,6 +33,27 @@ export default function HypothesesPage() {
                 Au-delà de la première année, les cotisations reviennent sur un niveau &laquo;&nbsp;plein&nbsp;&raquo;
                 selon les barèmes 2026.
               </li>
+              <li>
+                L&apos;ACRE est <strong>désactivée par défaut</strong> dans le comparateur et le simulateur,
+                car elle ne concerne que la première année de création. Les résultats affichés reflètent
+                ainsi le régime de croisière. Vous pouvez l&apos;activer manuellement dans les réglages.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              CFE & année de référence
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Le comparateur calcule en <strong>année&nbsp;2</strong> (régime de croisière)&nbsp;:
+                la CFE est prise en compte, sans application du taux de croissance sur le CA.
+              </li>
+              <li>
+                Le simulateur 5&nbsp;ans projette les 5&nbsp;premières années avec la CFE
+                à partir de l&apos;année&nbsp;2 et le taux de croissance paramétré.
+              </li>
             </ul>
           </div>
 
@@ -67,13 +88,19 @@ export default function HypothesesPage() {
                 fiscales saisi, sur la base d&apos;un revenu imposable simplifié.
               </li>
               <li>
-                Pour les sociétés à l&apos;IS (EURL IS, SASU), l&apos;IS est appliqué à 25&nbsp;% sur
-                le bénéfice modélisé, sans intégration de tous les dispositifs spécifiques
-                (taux réduits, crédits d&apos;impôt, etc.).
+                <strong>EURL IS</strong>&nbsp;: IS appliqué à 25&nbsp;% sur le bénéfice non versé en salaire.
+                Le gérant TNS perçoit un salaire (cotisations ~45&nbsp;% du net) soumis à l&apos;IR
+                progressif. Part du résultat affectée au salaire paramétrable (défaut&nbsp;: 100&nbsp;%).
               </li>
               <li>
-                Dividendes de SASU supposés imposés au PFU 30&nbsp;% (12,8&nbsp;% IR + 17,2&nbsp;% prélèvements
-                sociaux) sans simulation d&apos;arbitrage détaillé PFU / barème.
+                <strong>SASU</strong>&nbsp;: le président (assimilé salarié) peut mixer salaire et dividendes
+                via le curseur &laquo;&nbsp;Part salaire&nbsp;&raquo;. Le salaire supporte des cotisations
+                d&apos;environ 82&nbsp;% du net et est soumis à l&apos;IR progressif. Le bénéfice non versé
+                en salaire est taxé à l&apos;IS PME (15&nbsp;% jusqu&apos;à 42&nbsp;500&nbsp;€, 25&nbsp;% au-delà)
+                puis distribué en dividendes au PFU 30&nbsp;% (12,8&nbsp;% IR + 17,2&nbsp;% prélèvements sociaux).
+              </li>
+              <li>
+                Pas de simulation d&apos;arbitrage PFU / barème progressif pour les dividendes.
               </li>
             </ul>
           </div>

@@ -24,7 +24,7 @@ const SEO_CONTENT: Record<string, { h1: string; intro: string; faq: { q: string;
     intro: 'L\'EURL soumise à l\'impôt sur le revenu permet de déduire les charges professionnelles au réel et de piloter sa rémunération en tant que gérant TNS. Le bénéfice est intégré au barème progressif de l\'IR du foyer. Ce simulateur projette votre revenu net sur 5 ans après cotisations TNS, IR et charges, avec ACRE et CFE.',
     faq: [
       { q: 'Quelle différence entre EURL IR et EURL IS ?', a: 'En EURL IR, le bénéfice est imposé directement au barème de l\'IR du foyer. En EURL IS, la société paie l\'impôt sur les sociétés et le dirigeant est imposé sur sa rémunération et ses dividendes.' },
-      { q: 'Les cotisations TNS sont-elles plus basses qu\'en SASU ?', a: 'Globalement oui : les cotisations TNS représentent environ 45 % du revenu net, contre environ 65 à 80 % de charges patronales et salariales sur la rémunération en SASU (assimilé salarié).' },
+      { q: 'Les cotisations TNS sont-elles plus basses qu\'en SASU ?', a: 'Globalement oui : les cotisations TNS représentent environ 45 % du revenu net, contre environ 82 % de charges patronales et salariales sur la rémunération en SASU (assimilé salarié). C\'est pourquoi la SASU devient avantageuse à haut CA grâce aux dividendes au PFU 30 %.' },
     ],
   },
   'eurl-is': {
