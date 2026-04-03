@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/hypotheses',
     '/a-propos',
     '/glossaire',
+    '/bareme',
   ];
 
   const articlePaths = ARTICLES.map((a) => `/articles/${a.slug}`);

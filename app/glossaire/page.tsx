@@ -84,6 +84,10 @@ export default function GlossairePage() {
         <div className="rounded-xl border border-slate-200 bg-white/60 p-4 dark:border-slate-700 dark:bg-slate-800/40">
           <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             Passer à l’action :{' '}
+            <Link href="/bareme" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              barèmes utilisés dans l’outil
+            </Link>
+            ,{' '}
             <Link href="/comparateur" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               comparateur de statuts
             </Link>

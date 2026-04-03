@@ -17,6 +17,7 @@ export default function Footer() {
           <Link href="/a-propos" className="hover:text-indigo-600 transition-colors">À propos</Link>
           <Link href="/hypotheses" className="hover:text-indigo-600 transition-colors">Méthodologie</Link>
           <Link href="/glossaire" className="hover:text-indigo-600 transition-colors">Glossaire</Link>
+          <Link href="/bareme" className="hover:text-indigo-600 transition-colors">Barèmes</Link>
           <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
           <span className="hidden sm:inline text-slate-200 dark:text-slate-700">|</span>
           <Link href="/cgu" className="hover:text-indigo-600 transition-colors">CGU</Link>
