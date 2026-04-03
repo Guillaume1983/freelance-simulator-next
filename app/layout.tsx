@@ -23,11 +23,11 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   title: {
-    default: 'Freelance Simulateur — Comparateur & simulateur de revenus freelance 2026',
+    default: 'Comparateur & simulateur sur mesure de revenus freelance 2026',
     template: '%s | Freelance Simulateur',
   },
   description:
-    'Comparez les 5 régimes fiscaux (Portage, Micro, EURL IR, EURL IS, SASU) et optimisez votre revenu net en tant que freelance. Données certifiées Loi de Finances 2026.',
+    'Comparez votre revenu net selon le statut : Portage, Micro, EURL IR, EURL IS, SASU. Projections sur plusieurs années, simulations indicatives, barèmes 2026.',
   metadataBase: new URL(SITE_URL),
   keywords: [
     'simulateur freelance',
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: SITE_URL },
   openGraph: {
-    title: 'Freelance Simulateur — Comparateur & simulateur de revenus 2026',
+    title: 'Comparateur & simulateur sur mesure de revenus freelance 2026',
     description:
       'Simulez et comparez votre revenu net en portage salarial, micro-entreprise, EURL et SASU avec les barèmes 2026.',
     url: SITE_URL,
@@ -59,13 +59,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Freelance Simulateur — Comparateur & simulateur de revenus freelance 2026',
+        alt: 'Comparateur et simulateur sur mesure de revenus freelance — barèmes 2026',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Freelance Simulateur — Comparateur & simulateur de revenus 2026',
+    title: 'Comparateur & simulateur sur mesure de revenus freelance 2026',
     description:
       'Simulez et comparez votre revenu net selon votre statut freelance avec les barèmes 2026.',
     images: ['/og-image.png'],
