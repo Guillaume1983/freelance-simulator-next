@@ -16,6 +16,7 @@ export default function Footer() {
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-bold text-slate-400 dark:text-slate-500">
           <Link href="/a-propos" className="hover:text-indigo-600 transition-colors">À propos</Link>
           <Link href="/hypotheses" className="hover:text-indigo-600 transition-colors">Méthodologie</Link>
+          <Link href="/glossaire" className="hover:text-indigo-600 transition-colors">Glossaire</Link>
           <Link href="/contact" className="hover:text-indigo-600 transition-colors">Contact</Link>
           <span className="hidden sm:inline text-slate-200 dark:text-slate-700">|</span>
           <Link href="/cgu" className="hover:text-indigo-600 transition-colors">CGU</Link>
