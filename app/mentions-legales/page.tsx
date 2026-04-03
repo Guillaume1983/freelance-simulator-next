@@ -1,28 +1,13 @@
-import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { SitePageHeader } from '@/components/SitePageHeader';
 
 export default function MentionsLegalesPage() {
   return (
     <main className="min-h-screen bg-page-settings">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <span>←</span>
-            <span>Retour à l&apos;accueil</span>
-          </Link>
-          <div className="mt-6">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Mentions légales
-            </h1>
-            <p className="mt-1 text-slate-500 dark:text-slate-400">
-              Informations sur l&apos;éditeur du site, l&apos;hébergeur et les droits applicables.
-            </p>
-          </div>
-        </div>
-      </header>
+      <SitePageHeader
+        title="Mentions légales"
+        description="Éditeur, hébergement et cadre juridique du site."
+      />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-8 text-sm text-slate-700 dark:text-slate-300">
         <section>
@@ -30,21 +15,16 @@ export default function MentionsLegalesPage() {
             1. Éditeur du site
           </h2>
           <p className="mt-2">
-            Ce site est édité par&nbsp;:
-          </p>
-          <p className="mt-1">
-            <span className="font-semibold">[Raison sociale / Nom Prénom]</span>
-            <br />
-            [Forme juridique le cas échéant]
-            <br />
-            [Adresse postale]
-            <br />
-            [Numéro SIREN / SIRET]
-            <br />
-            [Adresse e-mail de contact]
-          </p>
-          <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-            Remplacez ces crochets par vos informations légales exactes (ou celles de votre entreprise).
+            <span className="font-semibold">GILLE GUILLAUME CONSULTING</span>, EURL — siège&nbsp;: 9007 chemin de
+            Fouillusant, 69140 Rillieux-la-Pape — SIREN&nbsp;920&nbsp;812&nbsp;476, RCS Lyon — capital social&nbsp;:
+            1&nbsp;000&nbsp;€. Contact&nbsp;:{' '}
+            <a
+              href="mailto:contact@freelance-simulateur.fr"
+              className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              contact@freelance-simulateur.fr
+            </a>
+            .
           </p>
         </section>
 
@@ -53,14 +33,15 @@ export default function MentionsLegalesPage() {
             2. Hébergement
           </h2>
           <p className="mt-2">
-            Le site est hébergé par&nbsp;:
-          </p>
-          <p className="mt-1">
-            <span className="font-semibold">[Nom de l&apos;hébergeur]</span>
-            <br />
-            [Adresse de l&apos;hébergeur]
-            <br />
-            [Site web de l&apos;hébergeur]
+            <span className="font-semibold">Vercel Inc.</span>, 650 7th Street, San Francisco, CA 94103, États-Unis —{' '}
+            <a
+              href="https://vercel.com"
+              className="text-indigo-600 dark:text-indigo-400 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              vercel.com
+            </a>
           </p>
         </section>
 

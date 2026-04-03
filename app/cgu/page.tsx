@@ -1,28 +1,13 @@
-import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { SitePageHeader } from '@/components/SitePageHeader';
 
 export default function CGUPage() {
   return (
     <main className="min-h-screen bg-page-settings">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-indigo-100 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors"
-          >
-            <span>←</span>
-            <span>Retour à l&apos;accueil</span>
-          </Link>
-          <div className="mt-6">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              Conditions d&apos;utilisation &amp; avertissements
-            </h1>
-            <p className="mt-1 text-slate-500 dark:text-slate-400">
-              Simulateurs et comparateurs freelances — informations importantes à lire avant utilisation.
-            </p>
-          </div>
-        </div>
-      </header>
+      <SitePageHeader
+        title={"Conditions d'utilisation & avertissements"}
+        description="Simulateurs et comparateurs freelances — informations importantes à lire avant utilisation."
+      />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-8 text-sm text-slate-700 dark:text-slate-300">
         <section>

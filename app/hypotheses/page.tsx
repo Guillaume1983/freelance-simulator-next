@@ -1,23 +1,16 @@
-'use client';
-
 import Link from 'next/link';
+import Footer from '@/components/Footer';
+import { SitePageHeader } from '@/components/SitePageHeader';
 
 export default function HypothesesPage() {
   return (
-    <main className="min-h-screen bg-page-settings px-4 md:px-6 py-10">
-      <div className="max-w-3xl mx-auto">
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 mb-3">
-          Méthodologie
-        </p>
-        <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-4">
-          Hypothèses de calcul & limites du simulateur
-        </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-          Cette page décrit les principales hypothèses simplifiées utilisées pour le comparateur
-          et les simulateurs de statuts freelance. Elle ne remplace pas un conseil personnalisé
-          par un expert-comptable.
-        </p>
+    <main className="min-h-screen bg-page-settings">
+      <SitePageHeader
+        title={"Hypothèses de calcul & limites du simulateur"}
+        description="Principales hypothèses du comparateur et des simulateurs — ne remplace pas un conseil d'expert-comptable."
+      />
 
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">
         <section className="space-y-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           <div>
             <h2 className="font-bold text-slate-900 dark:text-white mb-1">
@@ -178,6 +171,8 @@ export default function HypothesesPage() {
           </Link>
         </div>
       </div>
+
+      <Footer />
     </main>
   );
 }

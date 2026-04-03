@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { SitePageHeader } from '@/components/SitePageHeader';
 import { getAboutPageJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
 
 export const metadata: Metadata = {
@@ -27,14 +28,13 @@ export default function AProposPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutLd) }}
       />
-      <main className="min-h-screen bg-page-settings px-4 md:px-6 py-10">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 mb-3">
-            Transparence & confiance
-          </p>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-4">
-            À propos de Freelance Simulateur
-          </h1>
+      <main className="min-h-screen bg-page-settings">
+        <SitePageHeader
+          title="À propos de Freelance Simulateur"
+          description="Transparence sur les barèmes, sources officielles et limites des résultats — outil d'aide à la décision pour indépendants."
+        />
+
+        <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">
           <p className="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
             Freelance Simulateur est un outil d&apos;aide à la décision pour les travailleurs
             indépendants et les futurs freelances. Il permet de{' '}
@@ -147,10 +147,9 @@ export default function AProposPage() {
             </Link>
           </div>
         </div>
-      </main>
-      <div className="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+
         <Footer />
-      </div>
+      </main>
     </>
   );
 }
