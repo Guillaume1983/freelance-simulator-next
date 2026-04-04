@@ -269,7 +269,7 @@ export default function BaremePage() {
           </div>
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
             Pour le détail moto et cyclomoteur (tranches et coefficients), utilisez l’outil{' '}
-            <Link href="/outils/indemnites-km" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link href="/outils?outil=indemnites-km" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               Indemnités km
             </Link>
             .
@@ -290,7 +290,7 @@ export default function BaremePage() {
               Glossaire
             </Link>
             {' · '}
-            <Link href="/outils/plafonds-micro" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+            <Link href="/outils?outil=plafonds-micro" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
               Outil plafonds micro
             </Link>
             {' · '}
