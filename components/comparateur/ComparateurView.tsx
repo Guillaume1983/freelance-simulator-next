@@ -452,6 +452,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
                       activeRegimeId={regime?.id}
                       openSection={openSection}
                       setOpenSection={setOpenSection}
+                      settingsContext="comparateur"
                     />
                   </div>
                 </div>
@@ -526,6 +527,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
                 activeRegimeId={regime?.id}
                 openSection={openSection}
                 setOpenSection={setOpenSection}
+                settingsContext="comparateur"
               />
             </div>
           </div>

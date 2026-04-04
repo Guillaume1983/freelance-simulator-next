@@ -5,7 +5,7 @@ import Link from 'next/link';
 const SEO_CONTENT: Record<string, { h1: string; intro: string; faq: { q: string; a: string }[] }> = {
   portage: {
     h1: 'Simulateur portage salarial — revenu net sur 5 ans',
-    intro: 'Le portage salarial permet de facturer comme indépendant tout en conservant le statut de salarié : couverture sociale, assurance chômage (sous conditions) et bulletin de paie. En contrepartie, des frais de gestion (généralement 5 à 10 % du CA HT) et des cotisations salariales et patronales s\'appliquent. Ce simulateur projette votre revenu net après ces prélèvements sur 5 ans, en intégrant l\'ACRE et la croissance de votre chiffre d\'affaires.',
+    intro: 'Le portage salarial permet de facturer comme indépendant tout en conservant le statut de salarié : couverture sociale, assurance chômage (sous conditions) et bulletin de paie. En contrepartie, des frais de gestion (généralement 5 à 10 % du CA HT) et des cotisations salariales et patronales s\'appliquent. Ce simulateur projette votre revenu net après ces prélèvements sur 5 ans, avec la croissance de votre chiffre d\'affaires (l\'ACRE et la CFE ne concernent pas ce statut dans le modèle).',
     faq: [
       { q: 'Quels frais sont prélevés en portage salarial ?', a: 'La société de portage prélève des frais de gestion (en général 5 à 10 % du CA HT), auxquels s\'ajoutent les cotisations salariales et patronales calculées sur votre salaire brut.' },
       { q: 'Le portage est-il intéressant à haut chiffre d\'affaires ?', a: 'Le portage reste pertinent pour sécuriser une activité ou tester un marché, mais à CA élevé, les cotisations et frais cumulés peuvent rendre une société (EURL, SASU) plus avantageuse en net.' },

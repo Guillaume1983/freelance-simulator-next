@@ -1,13 +1,12 @@
 'use client';
 
-import { CHARGES_CATALOG } from '@/lib/constants';
+import { CHARGES_CATALOG, CHARGES_CATALOG_DISPLAY_ORDER } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import {
   Car,
   Bike,
   Home,
-  CheckCircle2,
   Circle,
   Users,
   Zap,
@@ -19,7 +18,6 @@ import {
   Calculator,
   Plus,
   Minus,
-  Info,
 } from 'lucide-react';
 import NumberInput from '@/components/NumberInput';
 
@@ -98,12 +96,17 @@ export default function ExpandPanels({
   activePanel,
   sim,
   activeRegimeId,
-  suppressNonApplicablePanels,
+  /** Comparateur : textes de rappel (ex. autres statuts). Simulateur : vue centrée sur le statut courant. */
+  settingsContext = 'simulateur',
 }: any) {
   if (!activePanel) return null;
   if (!sim?.state) return null;
 
-  const isMicro = Boolean(suppressNonApplicablePanels) && activeRegimeId === 'Micro';
+  const isMicroRegime = activeRegimeId === 'Micro';
+  const isPortage = activeRegimeId === 'Portage';
+  const isEurlSasu =
+    activeRegimeId === 'EURL IR' || activeRegimeId === 'EURL IS' || activeRegimeId === 'SASU';
+  const isComparateur = settingsContext === 'comparateur';
 
   const materielAnnuel = sim.state.materielAnnuel ?? 0;
   const kmAnnuel = sim.state.kmAnnuel ?? 0;
@@ -124,19 +127,27 @@ export default function ExpandPanels({
   ];
   const currentCity: string = sim.state.citySize ?? 'petite';
 
-  const nonWarning = CHARGES_CATALOG.filter(c => !c.portageWarning);
-  const warning    = CHARGES_CATALOG.filter(c =>  c.portageWarning);
+  const nonWarning = CHARGES_CATALOG_DISPLAY_ORDER.filter((c) => !c.portageWarning);
 
-  const renderChargeRow = (item: (typeof CHARGES_CATALOG)[number]) => {
+  const renderChargeRow = (
+    item: (typeof CHARGES_CATALOG)[number],
+    opts?: { portageAsterisk?: boolean },
+  ) => {
     const raw = sim.state.chargeAmounts?.[item.id] ?? 0;
     const safeAmount = typeof raw === 'number' && !Number.isNaN(raw) ? raw : 0;
+    const showStar = Boolean(opts?.portageAsterisk && !item.portageWarning);
     return (
       <div
         key={item.id}
         className="w-full flex items-center justify-end gap-3 p-1 rounded-lg"
       >
         <p className="min-w-[150px] font-medium text-[13px] text-slate-900 dark:text-white leading-none text-right pr-1 h-9 flex items-center justify-end">
-          {item.name}
+          <span>{item.name}</span>
+          {showStar ? (
+            <sup className="ml-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400" aria-hidden>
+              *
+            </sup>
+          ) : null}
         </p>
         <div className="shrink-0 flex items-center gap-2">
           <NumberInput
@@ -224,51 +235,56 @@ export default function ExpandPanels({
         </>
       )}
 
-      {/* PANNEAU CHARGES */}
-      {activePanel === 'charges' && !isMicro && (
+      {/* PANNEAU CHARGES — comparateur : liste unique + * portage ; simulateur : selon statut */}
+      {activePanel === 'charges' && isComparateur && (
         <>
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 px-1">
-              <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                Charges déductibles (toutes structures)
-              </h3>
-            </div>
-            <div className="grid gap-0.5">
-              {nonWarning.map(renderChargeRow)}
-            </div>
+          <div className="grid gap-0.5">
+            {CHARGES_CATALOG_DISPLAY_ORDER.map((c) => renderChargeRow(c, { portageAsterisk: true }))}
           </div>
-          {warning.length > 0 && (
-            <div className="space-y-1.5 pt-2">
-              <div className="flex items-center gap-2 px-1">
-                <div className="w-6 h-6 rounded-md bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                  <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                  EURL / SASU uniquement
-                </h3>
-              </div>
-              <div className="grid gap-0.5">
-                {warning.map(renderChargeRow)}
-              </div>
-              <InfoBox variant="warning">
-                Ces charges ne sont pas déductibles en portage salarial.
-              </InfoBox>
-            </div>
-          )}
+          <InfoBox variant="info">
+            <p>
+              <span className="font-bold text-emerald-700 dark:text-emerald-300">*</span> Postes généralement repris dans
+              le périmètre « frais de mission » en portage salarial (modèle du simulateur).
+            </p>
+            <p className="mt-1.5">
+              En micro-entreprise, ces montants ne sont pas déductibles du régime (abattement forfaitaire sur le CA) ; ils
+              sont pris en compte pour le revenu disponible (trésorerie) dans les résultats affichés.
+            </p>
+          </InfoBox>
         </>
       )}
 
-      {activePanel === 'charges' && isMicro && (
-        <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
-          Non disponible pour la micro-entreprise.
+      {activePanel === 'charges' && !isComparateur && isMicroRegime && (
+        <>
+          <InfoBox variant="info">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Charges non déductibles (trésorerie).</span>{' '}
+            Ces montants ne réduisent pas la base des cotisations ni l&apos;impôt (abattement forfaitaire sur le CA). Ils
+            réduisent le disponible après impôt (trésorerie), comme la CFE dans le tableau.
+          </InfoBox>
+          <div className="grid gap-0.5 pt-1">
+            {CHARGES_CATALOG_DISPLAY_ORDER.map((c) => renderChargeRow(c))}
+          </div>
+        </>
+      )}
+
+      {activePanel === 'charges' && !isComparateur && isPortage && (
+        <>
+          <InfoBox variant="info">
+            Seuls les trois postes ci-dessous sont pris en compte comme frais de mission en portage ; les autres postes du
+            catalogue sont traités comme non déductibles dans ce modèle et ne sont pas saisissables ici.
+          </InfoBox>
+          <div className="grid gap-0.5 pt-1">{nonWarning.map((c) => renderChargeRow(c))}</div>
+        </>
+      )}
+
+      {activePanel === 'charges' && !isComparateur && !isMicroRegime && !isPortage && (isEurlSasu || !activeRegimeId) && (
+        <div className="grid gap-0.5">
+          {CHARGES_CATALOG_DISPLAY_ORDER.map((c) => renderChargeRow(c))}
         </div>
       )}
 
       {/* PANNEAU AMORTISSEMENT */}
-      {activePanel === 'amortissement' && !isMicro && (
+      {activePanel === 'amortissement' && !isMicroRegime && (
         <>
           <FieldCard
             icon={Calculator}
@@ -293,14 +309,14 @@ export default function ExpandPanels({
         </>
       )}
 
-      {activePanel === 'amortissement' && isMicro && (
+      {activePanel === 'amortissement' && isMicroRegime && (
         <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
           Non disponible pour la micro-entreprise.
         </div>
       )}
 
       {/* PANNEAU VÉHICULE */}
-      {activePanel === 'vehicule' && !isMicro && (() => {
+      {activePanel === 'vehicule' && !isMicroRegime && (() => {
         return (
           <>
             <div className="space-y-3">
@@ -500,38 +516,46 @@ export default function ExpandPanels({
         );
       })()}
 
-      {activePanel === 'vehicule' && isMicro && (
+      {activePanel === 'vehicule' && isMicroRegime && (
         <div className="p-4 text-xs text-slate-500 dark:text-slate-400">
           Non disponible pour la micro-entreprise.
         </div>
       )}
 
-      {/* PANNEAU OPTIMISATIONS */}
+      {/* PANNEAU OPTIMISATIONS — loyer masqué en simulateur portage uniquement (comparateur = panneau commun, tout afficher) */}
       {activePanel === 'opti' && (
         <>
-          <FieldCard
-            icon={Home}
-            label="Loyer perçu mensuel"
-            description="Sous-location d'une partie de votre domicile à votre société"
-            color="violet"
-          >
-            <NumberInput
-              value={loyerPercu}
-              onChange={(v) => {
-                sim.setters.setLoyerPercu(v);
-              }}
-              onIncrement={() => {
-                const next = (loyerPercu ?? 0) + 50;
-                sim.setters.setLoyerPercu(next);
-              }}
-              onDecrement={() => {
-                const next = Math.max(0, (loyerPercu ?? 0) - 50);
-                sim.setters.setLoyerPercu(next);
-              }}
-              suffix="€"
-              label="Loyer"
-            />
-          </FieldCard>
+          {isPortage && !isComparateur ? (
+            <InfoBox variant="info">
+              En portage salarial, vous n&apos;êtes pas à la tête de votre propre société : le mécanisme « loyer perçu /
+              sous-location du domicile à la société » (comme pour un gérant ou président) ne s&apos;applique pas ici. Le
+              simulateur ne l&apos;intègre pas pour le statut Portage.
+            </InfoBox>
+          ) : (
+            <FieldCard
+              icon={Home}
+              label="Loyer perçu mensuel"
+              description="Sous-location d'une partie de votre domicile à votre société"
+              color="violet"
+            >
+              <NumberInput
+                value={loyerPercu}
+                onChange={(v) => {
+                  sim.setters.setLoyerPercu(v);
+                }}
+                onIncrement={() => {
+                  const next = (loyerPercu ?? 0) + 50;
+                  sim.setters.setLoyerPercu(next);
+                }}
+                onDecrement={() => {
+                  const next = Math.max(0, (loyerPercu ?? 0) - 50);
+                  sim.setters.setLoyerPercu(next);
+                }}
+                suffix="€"
+                label="Loyer"
+              />
+            </FieldCard>
+          )}
           <FieldCard
             icon={Gift}
             label="Avantages annuels"

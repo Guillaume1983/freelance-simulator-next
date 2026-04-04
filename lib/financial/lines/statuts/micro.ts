@@ -26,7 +26,9 @@ export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
     ? ctx.ca * microRates.pl
     : computeIR(ctx.ca * (1 - microRates.abattement) + ctx.spouseIncome, ctx.taxParts);
 
-  return [
+  const depensesReelles = Math.max(0, ctx.depensesPro);
+
+  const lines: FinancialLine[] = [
     {
       id: 'micro_cfe',
       label: 'CFE',
@@ -73,4 +75,22 @@ export function buildMicroLines(ctx: StatutContext): FinancialLine[] {
         : computeIRDetail(ctx.ca * (1 - microRates.abattement) + ctx.spouseIncome, ctx.taxParts),
     },
   ];
+
+  /** Catalogue + matériel (amorti) : pas dans la base cotisations / IR ; réduit le disponible (trésorerie). */
+  if (depensesReelles > 0) {
+    lines.push({
+      id: 'micro_depenses_reelles',
+      label: 'Dépenses professionnelles (trésorerie)',
+      category: 'depense',
+      amount: depensesReelles,
+      cashImpact: -depensesReelles,
+      fiscalImpact: 0,
+      socialImpact: 0,
+      applicableStatuses: ['Micro'],
+      formula:
+        'Montants saisis (charges récurrentes + matériel amorti le cas échéant). Non déductibles du CA en micro : ils ne diminuent pas cotisations ni IR ; ils diminuent le revenu disponible après impôt.',
+    });
+  }
+
+  return lines;
 }

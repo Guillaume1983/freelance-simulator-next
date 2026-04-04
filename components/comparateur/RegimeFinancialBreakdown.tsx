@@ -102,6 +102,11 @@ function getBeforeTaxRowLabel(regimeId: string) {
   return 'Rémunération nette (avant IR)';
 }
 
+function getFeesRowLabel(regimeId: string) {
+  if (regimeId === 'Micro') return 'Charges non déductibles';
+  return "Charges d'exploitation";
+}
+
 function getRowBgClassCard(row: RowDef, forPrint: boolean) {
   const r = row as RowDef & { highlight?: boolean; isFinal?: boolean; key?: string };
   if (forPrint) {
@@ -134,12 +139,14 @@ function getDisplayValue(r: Record<string, unknown>, row: RowDef): number | null
     if (sum === 0) return null;
     return sum / row.div;
   }
-  /** Micro : `regime.fees` vaut 0 (dépenses non déductibles) ; la CFE est dans les lignes et suit cette ligne. */
+  /** Micro : CFE + dépenses catalogue (lignes) — affichage ; le net retranche les dépenses en trésorerie. */
   if (row.key === 'fees' && r.id === 'Micro') {
     const lines = r.lines as { id?: string; amount?: number }[] | undefined;
     const cfe = lines?.find((l) => l.id === 'micro_cfe')?.amount ?? 0;
-    if (cfe <= 0) return null;
-    return cfe / row.div;
+    const dep = lines?.find((l) => l.id === 'micro_depenses_reelles')?.amount ?? 0;
+    const sum = cfe + dep;
+    if (sum <= 0) return null;
+    return sum / row.div;
   }
   const raw = r[row.key] as number | undefined;
   if (raw == null) return null;
@@ -176,7 +183,7 @@ function getVisibleRowsForRegime(regime: any): RowDef[] {
 
   const hasFees =
     (regime.fees ?? 0) > 0 ||
-    ['sasu_cfe', 'eurl_ir_cfe', 'eurl_is_cfe', 'micro_cfe'].some((id) => {
+    ['sasu_cfe', 'eurl_ir_cfe', 'eurl_is_cfe', 'micro_cfe', 'micro_depenses_reelles'].some((id) => {
       const a = lines.find((l) => l.id === id)?.amount;
       return typeof a === 'number' && a > 0;
     });
@@ -304,7 +311,12 @@ export default function RegimeFinancialBreakdown({
             const val = getDisplayValue(r, row);
             const detailText = getDetailText(r, row.key, row.div === 12);
             const tooltipColor = getTooltipColor(row.key);
-            const rowLabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label;
+            const rowLabel =
+              row.key === 'beforeTax'
+                ? getBeforeTaxRowLabel(r.id)
+                : row.key === 'fees'
+                  ? getFeesRowLabel(r.id)
+                  : row.label;
             const isFinal = (row as RowDef & { isFinal?: boolean }).isFinal;
             const rowColor = (row as RowDef & { color?: string }).color;
             const rowPrefix = (row as RowDef & { prefix?: string }).prefix;
@@ -347,7 +359,7 @@ export default function RegimeFinancialBreakdown({
                         amount={val}
                         ca={r.ca}
                         detailText={detailText}
-                        label={row.label}
+                        label={rowLabel}
                         color={tooltipColor}
                         position="bottom"
                       >
@@ -377,7 +389,12 @@ export default function RegimeFinancialBreakdown({
               const val = getDisplayValue(r, row);
               const detailText = getDetailText(r, row.key, row.div === 12);
               const tooltipColor = getTooltipColor(row.key);
-              const rowLabel = row.key === 'beforeTax' ? getBeforeTaxRowLabel(r.id) : row.label;
+              const rowLabel =
+                row.key === 'beforeTax'
+                  ? getBeforeTaxRowLabel(r.id)
+                  : row.key === 'fees'
+                    ? getFeesRowLabel(r.id)
+                    : row.label;
               const isFinal = (row as RowDef & { isFinal?: boolean }).isFinal;
               const rowColor = (row as RowDef & { color?: string }).color;
               const rowPrefix = (row as RowDef & { prefix?: string }).prefix;
@@ -420,7 +437,7 @@ export default function RegimeFinancialBreakdown({
                           amount={val}
                           ca={r.ca}
                           detailText={detailText}
-                          label={row.label}
+                          label={rowLabel}
                           color={tooltipColor}
                           position="top"
                         >

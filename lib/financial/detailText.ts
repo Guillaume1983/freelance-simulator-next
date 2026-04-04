@@ -37,12 +37,19 @@ export function getDetailTextFromLines(
         const type = sim.state.typeActiviteMicro ?? 'BNC';
         const abattements = { BNC: 34, BIC_SERVICE: 50, BIC_COMMERCE: 71 };
         const labels = { BNC: 'BNC', BIC_SERVICE: 'BIC services', BIC_COMMERCE: 'BIC commerce' };
-        const base = `Non déductibles en Micro — abattement forfaitaire de ${abattements[type]} % (${labels[type]}) appliqué sur le CA`;
+        const base = `Cotisations et IR : base sur le CA avec abattement forfaitaire (${abattements[type]} % ${labels[type]}) — les dépenses catalogue ci-dessous ne réduisent pas cette base.`;
         const cfe = getLine('micro_cfe')?.amount ?? 0;
+        const dep = getLine('micro_depenses_reelles')?.amount ?? 0;
+        const parts: string[] = [base];
         if (cfe > 0) {
-          return `${base}\n\nCFE (cotisation foncière des entreprises), distincte de l’abattement : ${fmt(cfe)} / an.`;
+          parts.push(`CFE (hors abattement, payée sur trésorerie) : ${fmt(cfe)} / an.`);
         }
-        return base;
+        if (dep > 0) {
+          parts.push(
+            `Dépenses professionnelles saisies : ${fmt(dep)} / an — sorties de trésorerie après impôt ; elles réduisent le « disponible » sans modifier cotisations ni IR.`
+          );
+        }
+        return parts.join('\n\n');
       }
       // Portage : toujours afficher le calcul explicite (dépenses pro + IK + avantages, pas de loyer)
       if (r.id === 'Portage') {
@@ -180,6 +187,14 @@ export function getDetailTextFromLines(
       return `Barème progressif IR — ${sim.state.taxParts} parts`;
     }
     case 'net': {
+      if (r.id === 'Micro') {
+        const dep = getLine('micro_depenses_reelles')?.amount ?? 0;
+        const base = `${fmt(r.beforeTax)} − ${fmt(r.ir)}`;
+        if (dep > 0) {
+          return monthly12(`${base} − ${fmt(dep)} (dépenses professionnelles, trésorerie)`);
+        }
+        return monthly12(base);
+      }
       const ik = getLine('indemnites_km')?.amount ?? 0;
       const loyerPercu = getLine('loyer_percu')?.amount ?? 0;
       const avantages = getLine('avantages')?.amount ?? 0;

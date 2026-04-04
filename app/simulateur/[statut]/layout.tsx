@@ -10,7 +10,7 @@ const META_BY_SLUG: Record<
   portage: {
     title: 'Simulateur portage salarial — revenu net sur 5 ans',
     description:
-      'Simulez votre salaire net en portage salarial sur 5 ans : frais de gestion, cotisations, ACRE et évolution du chiffre d’affaires. Indicatif, barèmes 2026.',
+      'Simulez votre salaire net en portage salarial sur 5 ans : frais de gestion, cotisations et évolution du chiffre d’affaires. Indicatif, barèmes 2026.',
   },
   micro: {
     title: 'Simulateur micro-entreprise — net après cotisations et impôt',
@@ -37,7 +37,7 @@ const META_BY_SLUG: Record<
 const DEFAULT_META = {
   title: 'Simulateur par statut freelance — Portage, Micro, EURL, SASU',
   description:
-    'Simulateur détaillé par statut (portage salarial, micro-entreprise, EURL IR/IS, SASU) avec projection 5 ans, ACRE, CFE et options de rémunération.',
+    'Simulateur détaillé par statut (portage salarial, micro-entreprise, EURL IR/IS, SASU) avec projection 5 ans et options selon le cas.',
 };
 
 type Props = { params: Promise<{ statut: string }> };

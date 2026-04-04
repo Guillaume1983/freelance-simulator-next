@@ -26,7 +26,7 @@ export const SIDEBAR_SECTIONS = [
   {
     id: 'charges' as const,
     label: 'Charges',
-    description: 'Frais professionnels déductibles',
+    description: 'Frais professionnels',
     icon: Receipt,
     color: 'rose',
   },
@@ -122,18 +122,34 @@ export type SidebarPanelId = (typeof SIDEBAR_SECTIONS)[number]['id'];
 
 
 const REGIME_VISIBLE_SECTIONS: Partial<Record<string, SidebarPanelId[]>> = {
-  // Micro : calcul simplifié (pas de charges réelles, pas d’amortissement, pas d’IK/optimisations)
-  Micro: ['activite', 'cotisations', 'foyer'],
-  // Portage : charges déductibles, IK et avantages (pas de CFE/ACRE dans le modèle actuel)
+  // Micro : charges = trésorerie uniquement (pas d’amortissement / IK / optimisations dans ce gabarit)
+  Micro: ['activite', 'charges', 'cotisations', 'foyer'],
+  // Portage : pas de panneau Cotisations (ACRE/CFE réservés aux statuts d’entreprise / micro dans le modèle)
   Portage: ['activite', 'charges', 'vehicule', 'opti', 'foyer'],
   // EURL : charges, IK, optimisations, amortissement + cotisations
   'EURL IR': ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations', 'foyer'],
   'EURL IS': ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations', 'foyer'],
-  // SASU : charges, IK, optimisations, amortissement + CFE (pas de foyer IR dans le modèle)
-  SASU: ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations'],
+  // SASU : IR sur salaire du président via le barème foyer (quotient + revenu conjoint) ; PFU sur dividendes
+  SASU: ['activite', 'charges', 'amortissement', 'vehicule', 'opti', 'cotisations', 'foyer'],
 };
 
 type SimCtx = ReturnType<typeof useSimulationContext>;
+
+/**
+ * Sous-titre du bloc « Charges ».
+ * - Comparateur : toujours « Frais professionnels » (les statuts ne sont pas déductibles de la même façon).
+ * - Simulateur : micro = non déductibles ; portage = frais de mission ; autres = déductibles.
+ */
+function chargesSidebarDescription(
+  activeRegimeId: string | undefined,
+  settingsContext: 'simulateur' | 'comparateur',
+): string {
+  if (settingsContext === 'comparateur') return 'Frais professionnels';
+  if (!activeRegimeId) return 'Frais professionnels';
+  if (activeRegimeId === 'Micro') return 'Frais professionnels non déductibles';
+  if (activeRegimeId === 'Portage') return 'Frais de mission';
+  return 'Frais professionnels déductibles';
+}
 
 export function SimulationSettingsSidebar({
   sim,
@@ -141,16 +157,19 @@ export function SimulationSettingsSidebar({
   openSection,
   setOpenSection,
   filterByRegime = false,
-  suppressNonApplicablePanels = false,
+  settingsContext = 'simulateur',
 }: {
   sim: SimCtx;
   activeRegimeId: string | undefined;
   openSection: SidebarPanelId | 'regime_options' | null;
   setOpenSection: (id: SidebarPanelId | 'regime_options' | null) => void;
-  /** Filtre les panels pour ne garder que ceux pertinents au statut (utilisé sur simulateur). */
+  /**
+   * Filtre les sections selon le statut (REGIME_VISIBLE_SECTIONS). À activer **uniquement** sur le simulateur par URL ;
+   * sur le **comparateur**, laisser `false` : le panneau latéral est commun et doit lister toutes les sections.
+   */
   filterByRegime?: boolean;
-  /** Cache le contenu de certains panels non pertinents (utilisé sur simulateur pour Micro). */
-  suppressNonApplicablePanels?: boolean;
+  /** Contexte d’affichage des panneaux détaillés (ex. comparateur vs simulateur). */
+  settingsContext?: 'simulateur' | 'comparateur';
 }) {
   // Les options spécifiques au statut (part salaire SASU, frais portage, etc.)
   // sont affichées inline dans la carte du statut, pas dans ce panneau.
@@ -183,6 +202,10 @@ export function SimulationSettingsSidebar({
         const isOpen = openSection === section.id;
         const colors = COLOR_CLASSES[section.color] ?? COLOR_CLASSES.slate;
         const Icon = section.icon;
+        const sectionDescription =
+          section.id === 'charges'
+            ? chargesSidebarDescription(activeRegimeId, settingsContext)
+            : section.description;
 
         return (
           <Fragment key={section.id}>
@@ -225,7 +248,7 @@ export function SimulationSettingsSidebar({
                     {section.label}
                   </p>
                   <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
-                    {section.description}
+                    {sectionDescription}
                   </p>
                 </div>
                 <ChevronDown
@@ -247,7 +270,7 @@ export function SimulationSettingsSidebar({
                       activePanel={section.id}
                       sim={sim}
                       activeRegimeId={activeRegimeId}
-                      suppressNonApplicablePanels={suppressNonApplicablePanels}
+                      settingsContext={settingsContext}
                     />
                   </div>
                 </div>

@@ -76,6 +76,12 @@ export function shouldShowRepartitionPctLabel(pct: number): boolean {
   return Math.round(pct) > 0;
 }
 
+/** Libellé segment « charges » : en micro le segment regroupe surtout la CFE (non « exploitation » au sens réel). */
+export function feesSegmentLabel(regimeId: string | undefined): string {
+  if (regimeId === 'Micro') return 'Charges non déductibles';
+  return CA_REPARTITION_SEGMENTS[0].label;
+}
+
 type LineLike = { id?: string; amount?: number };
 
 function lineAmount(lines: LineLike[] | undefined, ids: string[]): number {
@@ -105,10 +111,15 @@ export function buildCaRepartitionSegments(
   const regimeId = opts?.regimeId ?? '';
   const lines = opts?.lines;
 
-  const cfeFromLines = lineAmount(lines, ['sasu_cfe', 'eurl_ir_cfe', 'eurl_is_cfe', 'micro_cfe']);
-  /** Micro : `data.fees` = 0, on ajoute la CFE depuis les lignes. Autres : `data.fees` inclut déjà la CFE (projections). */
+  /** Micro : CFE + dépenses catalogue (lignes). Autres : `data.fees` agrégé (projections). */
   const feesInclCfe =
-    regimeId === 'Micro' ? Math.max(0, data.fees + cfeFromLines) : Math.max(0, data.fees);
+    regimeId === 'Micro'
+      ? Math.max(
+          0,
+          (lines?.find((l) => l.id === 'micro_cfe')?.amount ?? 0) +
+            (lines?.find((l) => l.id === 'micro_depenses_reelles')?.amount ?? 0),
+        )
+      : Math.max(0, data.fees);
   const cotisAmt = Math.max(0, data.cotis);
   const irAmt = Math.max(0, data.ir);
   const companyIsAmt = lineAmount(lines, ['sasu_is', 'eurl_is_is']);
@@ -134,7 +145,7 @@ export function buildCaRepartitionSegments(
       key: 'fees',
       fill: CA_REPARTITION_SEGMENTS[0].fill,
       ink: CA_REPARTITION_SEGMENTS[0].ink,
-      label: CA_REPARTITION_SEGMENTS[0].label,
+      label: feesSegmentLabel(regimeId),
       pct: (feesInclCfe / total) * 100,
     });
   }

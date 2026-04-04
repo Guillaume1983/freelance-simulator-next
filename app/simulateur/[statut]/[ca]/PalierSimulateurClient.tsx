@@ -260,7 +260,9 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
             >
               Ouvrir la simulation sur 5 ans pour {statutId}
             </Link>
-            {' — projection multi-années avec croissance et CFE. '}
+            {statutId === 'Portage'
+              ? ' — projection multi-années avec croissance du CA. '
+              : ' — projection multi-années avec croissance et CFE. '}
             <Link
               href={comparateurHref}
               className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"

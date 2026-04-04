@@ -506,7 +506,8 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                       activeRegimeId={statutId}
                       openSection={openSection}
                       setOpenSection={setOpenSection}
-                      suppressNonApplicablePanels
+                      filterByRegime
+                      settingsContext="simulateur"
                     />
                   </div>
                 </div>
@@ -587,7 +588,8 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 activeRegimeId={statutId}
                 openSection={openSection}
                 setOpenSection={setOpenSection}
-                suppressNonApplicablePanels
+                filterByRegime
+                settingsContext="simulateur"
               />
             </div>
           </div>

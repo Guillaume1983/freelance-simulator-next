@@ -161,11 +161,12 @@ export function calculateRegimes(
     const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || (getAmt('sasu_ir') + getAmt('sasu_pfu'));
 
     // « Charges » alignées sur les lignes par statut : EURL / SASU = dépenses + IK + loyer + avantages + CFE
-    // (voir buildEurlIrLines, buildEurlIsLines, buildSasuLines). Micro : 0 (dépenses non déductibles ; CFE via lignes).
+    // (voir buildEurlIrLines, buildEurlIsLines, buildSasuLines). Micro : CFE + dépenses catalogue (affichage / histogramme ;
+    // le net fiscal utilise l’abattement ; le disponible retranche les dépenses en trésorerie — voir micro_depenses_reelles).
     // Portage : pas de CFE dans ce périmètre.
     let fees = 0;
     if (r.id === 'Micro') {
-      fees = 0;
+      fees = ctx.cfe + ctx.depensesPro;
     } else if (r.id === 'Portage') {
       fees = ctx.depensesProPortage + ctx.indemnitesKm + ctx.avantagesOptimises;
     } else {

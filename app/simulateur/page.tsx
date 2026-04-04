@@ -33,7 +33,7 @@ export default function SimulateurHubPage() {
                 Simulation 5 ans
               </h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Choisissez un statut pour lancer une simulation sur 5 ans (ACRE, CFE, croissance du CA).
+                Choisissez un statut pour lancer une simulation sur 5 ans (croissance du CA ; ACRE, CFE, etc. selon le statut).
               </p>
               <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
                 Ces projections sont indicatives et reposent sur des hypothèses simplifiées. Pour valider un choix de statut, rapprochez-vous d&apos;un expert-comptable.
