@@ -27,7 +27,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/outils/cotisations-tns',
     '/articles',
     '/contact',
-    '/tarifs',
     '/cgu',
     '/mentions-legales',
     '/confidentialite',
