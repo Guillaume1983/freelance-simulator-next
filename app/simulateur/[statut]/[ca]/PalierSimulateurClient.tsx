@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useReactToPrint } from 'react-to-print';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useUser } from '@/hooks/useUser';
 
-import ConnectorModal from '@/components/ConnectorModal';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
 import { REGIME_COLORS, STATUT_HEADER_ICON, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
@@ -40,8 +38,6 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
     setActiveCharges,
     setChargeAmounts,
   } = sim.setters;
-  const { isConnected } = useUser();
-  const [showConnectorModal, setShowConnectorModal] = useState(false);
 
   const statutId = STATUT_SLUG_TO_ID[statutSlug] ?? 'Portage';
 
@@ -153,7 +149,7 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
       <button
         id="palier-pdf-btn"
         type="button"
-        onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
+        onClick={() => { handlePrint(); }}
         className="sr-only"
       >
         PDF
@@ -288,7 +284,6 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
             >
               Exporter cette vue en PDF
             </button>
-            <span className="text-slate-500 dark:text-slate-500"> (connexion requise pour l&apos;export)</span>
           </p>
         </div>
       </article>
@@ -314,12 +309,6 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
         </div>
       </div>
 
-      <ConnectorModal
-        open={showConnectorModal}
-        onClose={() => setShowConnectorModal(false)}
-        title="Connectez-vous pour exporter en PDF"
-        message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
-      />
       {children}
     </main>
   );

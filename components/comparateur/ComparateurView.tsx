@@ -7,14 +7,12 @@ import { useReactToPrint } from 'react-to-print';
 import { ArrowLeft, ChevronLeft, ChevronRight, Crown, PanelRightOpen, Settings2, TrendingUp, X } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
 import { useComparateurUrlSync } from '@/hooks/useComparateurUrlSync';
-import { useUser } from '@/hooks/useUser';
 
 import RegimeFinancialBreakdown, {
   RetirementBadge,
 } from '@/components/comparateur/RegimeFinancialBreakdown';
 import { HistogramBarLabeled } from '@/components/simulateur/HistogramBarLabeled';
 import { REGIME_COLORS, PDF_PAGE_STYLE } from '@/components/simulateur/regimeVisualTokens';
-import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
@@ -129,12 +127,10 @@ function MiniNavStrip({
 function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
   const sim = useSimulationContext();
   const urlFocus = useComparateurUrlSync(sim.setters);
-  const { isConnected } = useUser();
 
   const regimes = sim.resultats ?? [];
   const [index, setIndex] = useState(0);
   const [openSection, setOpenSection] = useState<SidebarPanelId | 'regime_options' | null>('activite');
-  const [showConnectorModal, setShowConnectorModal] = useState(false);
   const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
 
   const searchParams = useSearchParams();
@@ -231,7 +227,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
       <button
         id="comparateur-pdf-btn"
         type="button"
-        onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
+        onClick={() => { handlePrint(); }}
         className="sr-only"
       >
         PDF
@@ -536,12 +532,6 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
         </div>
       )}
 
-      <ConnectorModal
-        open={showConnectorModal}
-        onClose={() => setShowConnectorModal(false)}
-        title="Connectez-vous pour exporter en PDF"
-        message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
-      />
       {children}
     </main>
   );

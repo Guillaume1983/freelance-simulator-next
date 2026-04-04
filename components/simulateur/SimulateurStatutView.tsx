@@ -16,9 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
-import { useUser } from '@/hooks/useUser';
 
-import ConnectorModal from '@/components/ConnectorModal';
 import PdfIcon from '@/components/PdfIcon';
 import RegimeFinancialBreakdown, { RetirementBadge } from '@/components/comparateur/RegimeFinancialBreakdown';
 import RegimeParamsInline from '@/components/RegimeParamsInline';
@@ -167,8 +165,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
   const [yearIndex, setYearIndex] = useState(0);
   const [openSection, setOpenSection] = useState<SidebarPanelId | 'regime_options' | null>('activite');
   const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
-  const [showConnectorModal, setShowConnectorModal] = useState(false);
-  const { isConnected } = useUser();
 
   const [growthByYear, setGrowthByYear] = useState<number[]>(() =>
     Array.from({ length: 5 }, () => sim.state.growthRate ?? 0),
@@ -270,7 +266,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
       <button
         id="simulateur-pdf-btn"
         type="button"
-        onClick={() => (isConnected ? handlePrint() : setShowConnectorModal(true))}
+        onClick={() => { handlePrint(); }}
         className="sr-only"
       >
         PDF
@@ -604,12 +600,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
         </div>
       )}
 
-      <ConnectorModal
-        open={showConnectorModal}
-        onClose={() => setShowConnectorModal(false)}
-        title="Connectez-vous pour exporter en PDF"
-        message="Connectez-vous ou créez un compte pour exporter en PDF et sauvegarder vos paramètres."
-      />
       <GrowthRatesModal
         open={growthModalOpen}
         onClose={() => setGrowthModalOpen(false)}

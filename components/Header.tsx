@@ -380,7 +380,7 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
                       </li>
                       <li className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                         <Check size={12} className="text-emerald-500 shrink-0" />
-                        <span>Export PDF de vos simulations</span>
+                        <span>PDF sans compte (comparateur et simulateur)</span>
                       </li>
                       <li className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                         <Check size={12} className="text-emerald-500 shrink-0" />
