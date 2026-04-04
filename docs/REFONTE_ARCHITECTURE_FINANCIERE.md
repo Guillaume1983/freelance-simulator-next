@@ -14,7 +14,7 @@
 | `lib/projections.ts` | Moteur unique (250 lignes) | Formules dispersées, pas de traçabilité, calculs directs du net |
 | `lib/constants.ts` | Constantes (CFE, IK, plafonds, catalogue) | Taux fiscaux dupliqués dans projections.ts |
 | `hooks/useSimulation.ts` | État + appel calculateRegimes | Dépend du format RegimeResult actuel |
-| `components/ComparisonTable.tsx` | Affichage tableau + getDetailText | **Logique de détail du calcul dans l'UI** (lignes 168-189) |
+| `components/comparateur/ComparateurView.tsx` | Comparateur principal (histogramme, panneau réglages) | Détail des calculs dans l’UI à rapprocher du pipeline si refonte |
 | `components/ProjectionSection.tsx` | Affichage projection + getDetailText | **Duplication de getDetailText** (lignes 147-168) |
 | `components/ExpandPanels.tsx` | computeRecap | **Calcul IK/dépenses dans l'UI** (lignes 10-24) |
 | `components/TopCards.tsx` | Affichage fees | Utilise sim.resultats[0].fees (hardcodé Portage) |
@@ -256,7 +256,7 @@ export const RATES_2026 = {
 |---------|---------------|
 | `lib/projections.ts` | Adapter pour appeler `runPipeline`, mapper `PipelineResult` → `RegimeResult` (rétrocompat) |
 | `hooks/useSimulation.ts` | Adapter si signature de calculateRegimes change ; garder même interface |
-| `components/ComparisonTable.tsx` | Remplacer `getDetailText` par lecture des `sourceLines` / `formula` des FinancialLine |
+| `components/comparateur/ComparateurView.tsx` | Remplacer toute logique résiduelle par lecture des `sourceLines` / `formula` des FinancialLine |
 | `components/ProjectionSection.tsx` | Idem |
 | `components/ExpandPanels.tsx` | computeRecap : utiliser les lignes du pipeline ou un helper dédié |
 
