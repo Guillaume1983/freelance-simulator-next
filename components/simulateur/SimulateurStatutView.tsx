@@ -230,12 +230,6 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
 
   const safeYear = Math.min(Math.max(yearIndex, 0), 4);
   const regime = simulations[safeYear]?.find((x: { id: string }) => x.id === statutId);
-  const regimesForBreakdown = useMemo(() => {
-    const list = simulations
-      .map((yr) => yr.find((x: { id: string }) => x.id === statutId))
-      .filter(Boolean);
-    return list as NonNullable<(typeof list)[number]>[];
-  }, [simulations, statutId]);
 
   const typeMicro = sim.state?.typeActiviteMicro ?? 'BNC';
   const plafondMicro = typeMicro === 'BNC' ? PLAFOND_MICRO_BNC : PLAFOND_MICRO_BIC;
@@ -478,7 +472,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                     <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                       <div className="flex-1 min-w-0 lg:max-w-[min(100%,28rem)] lg:self-stretch flex min-h-0">
                         <div className="w-full min-h-0">
-                          <RegimeFinancialBreakdown sim={sim} regime={regime} regimes={regimesForBreakdown} />
+                          <RegimeFinancialBreakdown sim={sim} regime={regime} />
                         </div>
                       </div>
                       <div className="flex flex-col items-center justify-end lg:justify-center shrink-0 w-full lg:w-[min(240px,30vw)]">

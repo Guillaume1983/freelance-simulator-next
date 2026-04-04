@@ -4,7 +4,8 @@
  * Commission portage → cyan. IS société → rose (distinct des charges). Trésorerie société → violet.
  */
 export const CA_REPARTITION_SEGMENTS = [
-  { key: 'fees' as const, fill: '#f43f5e', ink: '#be123c', label: 'Charges' },
+  /** Hors micro : inclut dépenses + CFE (cf. projections). Micro : CFE agrégée ici dans le segment. */
+  { key: 'fees' as const, fill: '#f43f5e', ink: '#be123c', label: "Charges d'exploitation" },
   { key: 'cotis' as const, fill: '#f59e0b', ink: '#b45309', label: 'Cotisations' },
   { key: 'ir' as const, fill: '#6366f1', ink: '#4338ca', label: 'Impôts' },
   { key: 'net' as const, fill: '#10b981', ink: '#047857', label: 'Net' },
@@ -67,6 +68,14 @@ export type CaRepartitionSegment = {
   pct: number;
 };
 
+/**
+ * Libellés histogramme / légende : masquer les parts qui s’affichent en « 0 % » après arrondi
+ * (ex. charges résiduelles &lt; 0,5 pt du CA).
+ */
+export function shouldShowRepartitionPctLabel(pct: number): boolean {
+  return Math.round(pct) > 0;
+}
+
 type LineLike = { id?: string; amount?: number };
 
 function lineAmount(lines: LineLike[] | undefined, ids: string[]): number {
@@ -80,7 +89,7 @@ function lineAmount(lines: LineLike[] | undefined, ids: string[]): number {
 
 /**
  * Segments histogramme (ordre) : commission portage → charges (dont CFE) → IS société → cotisations → impôts → net → trésorerie société.
- * Sans `lines` / trésorerie, se comporte comme avant (4 segments + commission portage).
+ * Les segments à montant nul (charges, cotisations, impôts…) ne sont pas ajoutés : pas de tranche « 0 % ».
  */
 export function buildCaRepartitionSegments(
   ca: number,
@@ -96,8 +105,12 @@ export function buildCaRepartitionSegments(
   const regimeId = opts?.regimeId ?? '';
   const lines = opts?.lines;
 
-  const cfe = lineAmount(lines, ['sasu_cfe', 'eurl_ir_cfe', 'eurl_is_cfe', 'micro_cfe']);
-  const feesInclCfe = data.fees + cfe;
+  const cfeFromLines = lineAmount(lines, ['sasu_cfe', 'eurl_ir_cfe', 'eurl_is_cfe', 'micro_cfe']);
+  /** Micro : `data.fees` = 0, on ajoute la CFE depuis les lignes. Autres : `data.fees` inclut déjà la CFE (projections). */
+  const feesInclCfe =
+    regimeId === 'Micro' ? Math.max(0, data.fees + cfeFromLines) : Math.max(0, data.fees);
+  const cotisAmt = Math.max(0, data.cotis);
+  const irAmt = Math.max(0, data.ir);
   const companyIsAmt = lineAmount(lines, ['sasu_is', 'eurl_is_is']);
   const treasuryAmt = Math.max(0, opts?.cashInCompany ?? 0);
 
@@ -116,13 +129,15 @@ export function buildCaRepartitionSegments(
     });
   }
 
-  out.push({
-    key: 'fees',
-    fill: CA_REPARTITION_SEGMENTS[0].fill,
-    ink: CA_REPARTITION_SEGMENTS[0].ink,
-    label: CA_REPARTITION_SEGMENTS[0].label,
-    pct: (feesInclCfe / total) * 100,
-  });
+  if (feesInclCfe > 0) {
+    out.push({
+      key: 'fees',
+      fill: CA_REPARTITION_SEGMENTS[0].fill,
+      ink: CA_REPARTITION_SEGMENTS[0].ink,
+      label: CA_REPARTITION_SEGMENTS[0].label,
+      pct: (feesInclCfe / total) * 100,
+    });
+  }
 
   if (companyIsAmt > 0) {
     out.push({
@@ -134,29 +149,33 @@ export function buildCaRepartitionSegments(
     });
   }
 
-  out.push(
-    {
+  if (cotisAmt > 0) {
+    out.push({
       key: 'cotis',
       fill: CA_REPARTITION_SEGMENTS[1].fill,
       ink: CA_REPARTITION_SEGMENTS[1].ink,
       label: CA_REPARTITION_SEGMENTS[1].label,
-      pct: (data.cotis / total) * 100,
-    },
-    {
+      pct: (cotisAmt / total) * 100,
+    });
+  }
+
+  if (irAmt > 0) {
+    out.push({
       key: 'ir',
       fill: CA_REPARTITION_SEGMENTS[2].fill,
       ink: CA_REPARTITION_SEGMENTS[2].ink,
       label: CA_REPARTITION_SEGMENTS[2].label,
-      pct: (data.ir / total) * 100,
-    },
-    {
-      key: 'net',
-      fill: CA_REPARTITION_SEGMENTS[3].fill,
-      ink: CA_REPARTITION_SEGMENTS[3].ink,
-      label: CA_REPARTITION_SEGMENTS[3].label,
-      pct: (data.net / total) * 100,
-    },
-  );
+      pct: (irAmt / total) * 100,
+    });
+  }
+
+  out.push({
+    key: 'net',
+    fill: CA_REPARTITION_SEGMENTS[3].fill,
+    ink: CA_REPARTITION_SEGMENTS[3].ink,
+    label: CA_REPARTITION_SEGMENTS[3].label,
+    pct: (Math.max(0, data.net) / total) * 100,
+  });
 
   if (treasuryAmt > 0) {
     out.push({

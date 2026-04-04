@@ -85,7 +85,7 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
             ariaLabel="Rémunération TNS"
             min={0}
             max={100}
-            step={5}
+            step={1}
             suffix="%"
           />
         </div>
@@ -104,7 +104,7 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
             ariaLabel="Part salaire président"
             min={0}
             max={100}
-            step={5}
+            step={1}
             suffix="%"
           />
         </div>

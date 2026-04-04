@@ -160,15 +160,16 @@ export function calculateRegimes(
     const beforeTax = getAmt('portage_remuneration') || getAmt('micro_remuneration') || getAmt('eurl_ir_remuneration') || getAmt('eurl_is_remuneration') || (sasuSalaireNet + sasuDivBruts) || 0;
     const ir = getAmt('portage_ir') || getAmt('micro_ir') || getAmt('eurl_ir_ir') || getAmt('eurl_is_ir') || (getAmt('sasu_ir') + getAmt('sasu_pfu'));
 
-    // "Charges" = dépenses pro + coût des optimisations utilisées comme charges
-    // (IK, loyer, avantages exonérés). On laisse la micro à 0 car les charges réelles ne sont pas déductibles.
+    // « Charges » alignées sur les lignes par statut : EURL / SASU = dépenses + IK + loyer + avantages + CFE
+    // (voir buildEurlIrLines, buildEurlIsLines, buildSasuLines). Micro : 0 (dépenses non déductibles ; CFE via lignes).
+    // Portage : pas de CFE dans ce périmètre.
     let fees = 0;
     if (r.id === 'Micro') {
       fees = 0;
     } else if (r.id === 'Portage') {
       fees = ctx.depensesProPortage + ctx.indemnitesKm + ctx.avantagesOptimises;
     } else {
-      fees = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises;
+      fees = ctx.depensesPro + ctx.indemnitesKm + ctx.loyer + ctx.avantagesOptimises + ctx.cfe;
     }
 
     const res: RegimeResult = {

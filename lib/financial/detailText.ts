@@ -37,7 +37,12 @@ export function getDetailTextFromLines(
         const type = sim.state.typeActiviteMicro ?? 'BNC';
         const abattements = { BNC: 34, BIC_SERVICE: 50, BIC_COMMERCE: 71 };
         const labels = { BNC: 'BNC', BIC_SERVICE: 'BIC services', BIC_COMMERCE: 'BIC commerce' };
-        return `Non déductibles en Micro — abattement forfaitaire de ${abattements[type]} % (${labels[type]}) appliqué sur le CA`;
+        const base = `Non déductibles en Micro — abattement forfaitaire de ${abattements[type]} % (${labels[type]}) appliqué sur le CA`;
+        const cfe = getLine('micro_cfe')?.amount ?? 0;
+        if (cfe > 0) {
+          return `${base}\n\nCFE (cotisation foncière des entreprises), distincte de l’abattement : ${fmt(cfe)} / an.`;
+        }
+        return base;
       }
       // Portage : toujours afficher le calcul explicite (dépenses pro + IK + avantages, pas de loyer)
       if (r.id === 'Portage') {
@@ -54,11 +59,13 @@ export function getDetailTextFromLines(
         if (avantages > 0) parts.push(`• Avantages exonérés : ${fmt(avantages)}`);
         return parts.join('\n');
       }
-      // EURL / SASU : détail depuis les lignes (dépenses pro + IK + loyer + avantages)
+      // EURL / SASU : détail depuis les lignes (dépenses + IK + loyer + avantages + CFE dans le total r.fees)
       const depenseLines = lines.filter((l: FinancialLine) => l.category === 'depense');
       const ikLine = getLine('indemnites_km');
       const loyerLine = getLine('loyer_percu');
       const avantagesLine = getLine('avantages');
+      const cfeLine =
+        getLine('sasu_cfe') ?? getLine('eurl_ir_cfe') ?? getLine('eurl_is_cfe');
       const parts: string[] = [];
       if (depenseLines.length > 0) {
         const totalDepenses = depenseLines.reduce((s, l) => s + l.amount, 0);
@@ -74,8 +81,11 @@ export function getDetailTextFromLines(
       if (avantagesLine && avantagesLine.amount > 0) {
         parts.push(`Avantages exonérés : ${fmt(avantagesLine.amount)}`);
       }
+      if (cfeLine && cfeLine.amount > 0) {
+        parts.push(`CFE (cotisation foncière des entreprises) : ${fmt(cfeLine.amount)} / an`);
+      }
       if (parts.length === 0 && r.fees > 0) {
-        return `Charges déductibles : ${fmt(r.fees)} (détail non disponible pour ce statut)`;
+        return `Charges d’exploitation : ${fmt(r.fees)} / an (détail non disponible pour ce statut)`;
       }
       if (parts.length === 0) return 'Aucune charge professionnelle';
       return parts.join('\n');
