@@ -16,7 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/simulateur/eurl-ir',
     '/simulateur/eurl-is',
     '/simulateur/sasu',
-    '/reglages',
     '/outils',
     '/outils/indemnites-km',
     '/outils/cfe',

@@ -30,7 +30,7 @@ Google va alors explorer les URLs listées dans ton sitemap. L’indexation peut
 - Colle une URL (ex. `https://freelance-simulateur.fr/` ou `https://freelance-simulateur.fr/comparateur`).
 - Si la page est connue, clique sur **« Demander une indexation »** pour prioriser son passage.
 
-Tu peux le faire pour : `/`, `/comparateur`, `/simulateur`, `/reglages`, `/outils`.
+Tu peux le faire pour : `/`, `/comparateur`, `/simulateur`, `/outils`.
 
 ## 5. Suivre les résultats
 

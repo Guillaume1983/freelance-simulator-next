@@ -44,7 +44,7 @@ export default function ComparateurPage() {
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment personnaliser les paramètres ?</dt>
-            <dd className="mt-0.5">Ajustez directement le TJM, les jours travaillés, les charges et la situation fiscale depuis le panneau de réglages intégré au comparateur, ou via la page <Link href="/reglages" className="text-indigo-600 dark:text-indigo-400 hover:underline">Réglages</Link>.</dd>
+            <dd className="mt-0.5">Ajustez directement le TJM, les jours travaillés, les charges et la situation fiscale depuis le panneau de réglages à droite (bouton <span className="font-semibold text-slate-600 dark:text-slate-300">Réglages</span> sur mobile).</dd>
           </div>
         </dl>
       </section>

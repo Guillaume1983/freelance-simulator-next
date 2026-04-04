@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useReactToPrint } from 'react-to-print';
 import { ArrowLeft, ChevronLeft, ChevronRight, Crown, PanelRightOpen, Settings2, TrendingUp, X } from 'lucide-react';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -21,9 +22,12 @@ import { buildCaRepartitionSegments } from '@/lib/simulateur/caRepartitionColors
 import { regimeIdToStatutSlug } from '@/lib/simulateur/paliers';
 import { cn, fmtEur } from '@/lib/utils';
 import {
+  SIDEBAR_SECTIONS,
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
+
+const VALID_SETTINGS_PANEL_IDS = new Set<string>(SIDEBAR_SECTIONS.map((s) => s.id));
 
 /** Mini barre empilée pour la navigation entre régimes */
 function MiniNavBar({
@@ -132,6 +136,45 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
   const [openSection, setOpenSection] = useState<SidebarPanelId | 'regime_options' | null>('activite');
   const [showConnectorModal, setShowConnectorModal] = useState(false);
   const [mobileSettingsOpen, setMobileSettingsOpen] = useState(false);
+
+  const searchParams = useSearchParams();
+  const ikAppliedRef = useRef(false);
+
+  useEffect(() => {
+    const panel = searchParams.get('panel');
+    if (!panel || !VALID_SETTINGS_PANEL_IDS.has(panel)) return;
+    queueMicrotask(() => {
+      setOpenSection(panel as SidebarPanelId);
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches) {
+        setMobileSettingsOpen(true);
+      }
+    });
+  }, [searchParams]);
+
+  useEffect(() => {
+    const ikKm = searchParams.get('ik_km');
+    if (ikKm == null || !sim.setters || ikAppliedRef.current) return;
+    ikAppliedRef.current = true;
+    const ikType = searchParams.get('ik_type');
+    const ikCv = searchParams.get('ik_cv');
+    const ikElec = searchParams.get('ik_elec');
+    const km = Math.max(0, parseInt(ikKm, 10) || 0);
+    sim.setters.setKmAnnuel(km);
+    if (ikType === 'voiture' || ikType === 'moto' || ikType === 'cyclo50') {
+      sim.setters.setTypeVehicule(ikType);
+    }
+    if (ikCv != null) sim.setters.setCvFiscaux(ikCv);
+    if (ikElec === '1' || ikElec === 'true') sim.setters.setVehiculeElectrique(true);
+    else if (ikElec === '0' || ikElec === 'false') sim.setters.setVehiculeElectrique(false);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete('ik_km');
+    next.delete('ik_type');
+    next.delete('ik_cv');
+    next.delete('ik_elec');
+    const qs = next.toString();
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, '', url);
+  }, [searchParams, sim.setters]);
 
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({

@@ -1,5 +1,5 @@
 /**
- * Répartition du CA — couleurs alignées sur les onglets Réglages (app/reglages/page.tsx) :
+ * Répartition du CA — couleurs alignées sur les sections du panneau paramètres (SimulationSettingsSidebar) :
  * Charges → rose, Cotisations → ambre/orange, Impôts → indigo (foyer), Net → émeraude (activité).
  * Commission portage → cyan. IS société → rose (distinct des charges). Trésorerie société → violet.
  */
