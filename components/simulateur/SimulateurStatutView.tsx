@@ -27,6 +27,8 @@ import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
+import { PdfPrintHost } from '@/components/pdf/PdfPrintHost';
+import { PdfSimulateurDocument } from '@/components/pdf/PdfSimulateurDocument';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { projeterSurNAns } from '@/lib/projections';
 import { buildCaRepartitionSegments } from '@/lib/simulateur/caRepartitionColors';
@@ -524,27 +526,16 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
         </div>
       </div>
 
-      <div className="sr-only" aria-hidden>
-        <div ref={printRef} className="p-6 text-slate-900">
-          <h1 className="text-lg font-black">Freelance Simulateur — Simulation 5 ans ({statutId})</h1>
-          {regime && (
-            <div className="mt-4 space-y-2 text-sm">
-              <p>
-                <strong>Année :</strong> {safeYear + 1}
-              </p>
-              <p>
-                <strong>Net mensuel :</strong> {fmtEur(regime.net / 12)}
-              </p>
-              <p>
-                <strong>Net annuel :</strong> {fmtEur(regime.net)}
-              </p>
-              <p>
-                <strong>CA :</strong> {fmtEur(regime.ca)}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <PdfPrintHost printRef={printRef}>
+        {statutId ? (
+          <PdfSimulateurDocument
+            sim={sim}
+            simulations={simulations}
+            growthByYear={growthByYear}
+            statutId={statutId}
+          />
+        ) : null}
+      </PdfPrintHost>
 
       <button
         type="button"

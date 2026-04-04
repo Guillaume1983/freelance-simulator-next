@@ -19,6 +19,8 @@ import {
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { projeterSurNAns } from '@/lib/projections';
 import { ArrowLeft } from 'lucide-react';
+import { PdfPalierDocument } from '@/components/pdf/PdfPalierDocument';
+import { PdfPrintHost } from '@/components/pdf/PdfPrintHost';
 import { cn, fmtEur } from '@/lib/utils';
 
 type Props = { statutSlug: string; caAnnual: number; children?: React.ReactNode };
@@ -283,26 +285,11 @@ export default function PalierSimulateurClient({ statutSlug, caAnnual, children 
         </div>
       </article>
 
-      <div className="sr-only" aria-hidden>
-        <div ref={printRef} className="p-6 text-slate-900">
-          <h1 className="text-lg font-black">
-            Palier CA — {statutId} ({fmtEur(caAnnual)} / an)
-          </h1>
-          {regime && (
-            <div className="mt-4 space-y-2 text-sm">
-              <p>
-                <strong>Net mensuel :</strong> {fmtEur(regime.net / 12)}
-              </p>
-              <p>
-                <strong>Net annuel :</strong> {fmtEur(regime.net)}
-              </p>
-              <p>
-                <strong>CA :</strong> {fmtEur(regime.ca)}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      {regime && (
+        <PdfPrintHost printRef={printRef}>
+          <PdfPalierDocument sim={sim} regime={regime} statutId={statutId} caAnnual={caAnnual} />
+        </PdfPrintHost>
+      )}
 
       {children}
     </main>

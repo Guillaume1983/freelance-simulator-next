@@ -550,3 +550,42 @@
     }
   }
 }
+
+/*
+ * Portail PDF (PdfPrintHost → document.body) : hors @layer pour gagner sur la cascade Tailwind.
+ * Sans positionnement hors flux, le nœud s’affiche en bloc à la fin du body (visible en bas de page).
+ */
+@media screen {
+  .pdf-print-host,
+  [data-pdf-print-host] {
+    position: fixed !important;
+    left: -10000px !important;
+    top: 0 !important;
+    width: 210mm !important;
+    max-width: 100vw !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: -2147483648 !important;
+  }
+}
+
+@media print {
+  .pdf-print-host,
+  [data-pdf-print-host] {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}

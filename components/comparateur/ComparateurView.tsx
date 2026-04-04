@@ -24,6 +24,8 @@ import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
+import { PdfComparateurDocument } from '@/components/pdf/PdfComparateurDocument';
+import { PdfPrintHost } from '@/components/pdf/PdfPrintHost';
 
 const VALID_SETTINGS_PANEL_IDS = new Set<string>(SIDEBAR_SECTIONS.map((s) => s.id));
 
@@ -469,20 +471,9 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
         </div>
       </div>
 
-      {/* Impression PDF */}
-      <div className="sr-only" aria-hidden>
-        <div ref={printRef} className="p-6 text-slate-900">
-          <h1 className="text-lg font-black">Freelance Simulateur — Comparateur (histogramme)</h1>
-          {regime && (
-            <div className="mt-4 space-y-2 text-sm">
-              <p><strong>Statut :</strong> {regime.id}</p>
-              <p><strong>Net mensuel :</strong> {fmtEur(regime.net / 12)}</p>
-              <p><strong>Net annuel :</strong> {fmtEur(regime.net)}</p>
-              <p><strong>CA :</strong> {fmtEur(regime.ca)}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <PdfPrintHost printRef={printRef}>
+        <PdfComparateurDocument sim={sim} regimes={regimes} />
+      </PdfPrintHost>
 
       {/* Mobile / tablette : accès paramètres */}
       <button
