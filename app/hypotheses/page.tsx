@@ -78,7 +78,15 @@ export default function HypothesesPage() {
             <ul className="list-disc pl-4 space-y-1">
               <li>
                 Impôt sur le revenu calculé à partir du barème progressif 2026 et du nombre de parts
-                fiscales saisi, sur la base d&apos;un revenu imposable simplifié.
+                fiscales saisi, sur la base d&apos;un revenu imposable simplifié (quotient classique :
+                impôt par part × nombre de parts).
+              </li>
+              <li>
+                <strong>Non modélisé</strong> : le <strong>plafonnement du quotient familial</strong> (avantage
+                fiscal par enfant et demi-parts plafonné chaque année au regard d&apos;une imposition de
+                référence), ni les autres réductions / crédits d&apos;impôt au titre des enfants ou du
+                garde d&apos;enfants. Pour un foyer avec enfants et revenus élevés, l&apos;IR réel peut donc
+                être <strong>plus élevé</strong> que l&apos;ordre de grandeur affiché.
               </li>
               <li>
                 <strong>EURL IS</strong>&nbsp;: IS appliqué à 25&nbsp;% sur le bénéfice non versé en salaire.

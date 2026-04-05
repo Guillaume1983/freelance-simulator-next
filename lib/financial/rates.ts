@@ -196,6 +196,51 @@ export function computeIR(base: number, parts: number): number {
   return Math.max(0, r * parts);
 }
 
+/** Détail par tranche (barème aligné sur `computeIR`) : revenu imposable *par part* après abattement 10 %. */
+export interface IRBracketSliceDetail {
+  seuilBas: number;
+  seuilHaut: number;
+  taux: number;
+  baseDansTranche: number;
+  impotParPart: number;
+}
+
+/**
+ * Découpe le revenu imposable par part dans les tranches du barème progressif (même logique que `computeIR`).
+ */
+export function computeIRBracketSlices(revenuImposableParPart: number): IRBracketSliceDetail[] {
+  const P = Math.max(0, revenuImposableParPart);
+  const out: IRBracketSliceDetail[] = [];
+
+  {
+    const bas = 0;
+    const haut = 11294;
+    const cap = Math.min(P, haut);
+    const base = cap - bas;
+    if (base > 0) {
+      out.push({ seuilBas: bas, seuilHaut: haut, taux: 0, baseDansTranche: base, impotParPart: 0 });
+    }
+  }
+  if (P > 11294) {
+    const base = Math.min(P, 28797) - 11294;
+    out.push({ seuilBas: 11294, seuilHaut: 28797, taux: 0.11, baseDansTranche: base, impotParPart: base * 0.11 });
+  }
+  if (P > 28797) {
+    const base = Math.min(P, 82341) - 28797;
+    out.push({ seuilBas: 28797, seuilHaut: 82341, taux: 0.3, baseDansTranche: base, impotParPart: base * 0.3 });
+  }
+  if (P > 82341) {
+    const base = Math.min(P, 177106) - 82341;
+    out.push({ seuilBas: 82341, seuilHaut: 177106, taux: 0.41, baseDansTranche: base, impotParPart: base * 0.41 });
+  }
+  if (P > 177106) {
+    const base = P - 177106;
+    out.push({ seuilBas: 177106, seuilHaut: Infinity, taux: 0.45, baseDansTranche: base, impotParPart: base * 0.45 });
+  }
+
+  return out;
+}
+
 export type TypeVehiculeIK = 'voiture' | 'moto' | 'cyclo50';
 
 /**

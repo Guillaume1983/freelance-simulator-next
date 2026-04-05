@@ -7,7 +7,7 @@ import { CFE_PAR_VILLE, type CitySize } from '@/lib/constants';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { calculateRegimes, computeTaxParts } from '@/lib/projections';
 import { CHARGES_CATALOG } from '@/lib/constants';
-import { computeIR, RATES_2026 } from '@/lib/financial/rates';
+import { computeIR, computeIRBracketSlices, RATES_2026 } from '@/lib/financial/rates';
 import { computeTNSCotisations } from '@/lib/financial/rates';
 
 const CITY_LABELS: Record<CitySize, string> = {
@@ -22,9 +22,15 @@ export function CfeOutilPanel() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-violet-500 to-violet-600 text-white">
-        <h2 className="text-xl font-bold">Montant estimé</h2>
-        <p className="text-white/80 text-sm mt-1">La CFE est due à partir de la 2ᵉ année (exonération possible an 1).</p>
-        <p className="text-3xl font-black mt-4 tabular-nums">{cfe.toLocaleString('fr-FR')} €/an</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Montant estimé</h2>
+            <p className="text-white/80 text-sm mt-1">La CFE est due à partir de la 2ᵉ année (exonération possible an 1).</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{cfe.toLocaleString('fr-FR')} €/an</p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <label className="block font-semibold text-slate-700 dark:text-slate-300">Taille de la commune</label>
@@ -58,9 +64,17 @@ export function AcreOutilPanel() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-emerald-500 to-emerald-600 text-white">
-        <h2 className="text-xl font-bold">Économie estimée (an 1)</h2>
-        <p className="text-white/80 text-sm mt-1">Si vous étiez redevable de ces cotisations sans ACRE.</p>
-        <p className="text-3xl font-black mt-4 tabular-nums">− {Math.round(economie).toLocaleString('fr-FR')} €</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Économie estimée (an 1)</h2>
+            <p className="text-white/80 text-sm mt-1">Si vous étiez redevable de ces cotisations sans ACRE.</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">
+              {Math.round(economie).toLocaleString('fr-FR')} €
+            </p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <label className="block font-semibold text-slate-700 dark:text-slate-300">
@@ -110,11 +124,17 @@ export function PlafondsMicroOutilPanel() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-amber-500 to-amber-600 text-white">
-        <h2 className="text-xl font-bold">Plafond et reste à facturer</h2>
-        <p className="text-3xl font-black mt-4 tabular-nums">
-          {depasse ? 'Dépassement' : 'Reste'} : {Math.abs(reste).toLocaleString('fr-FR')} €
-        </p>
-        {depasse && <p className="text-sm text-amber-100 mt-1">Vous dépassez le plafond micro.</p>}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Plafond et reste à facturer</h2>
+            {depasse && <p className="text-sm text-amber-100 mt-1">Vous dépassez le plafond micro.</p>}
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">
+              {depasse ? 'Dépassement' : 'Reste'} : {Math.abs(reste).toLocaleString('fr-FR')} €
+            </p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <label className="block font-semibold text-slate-700 dark:text-slate-300">Régime micro</label>
@@ -161,11 +181,24 @@ export function FranchiseTvaOutilPanel() {
       <div
         className={`px-6 py-5 text-white ${enFranchise ? 'bg-linear-to-r from-sky-500 to-sky-600' : 'bg-linear-to-r from-amber-500 to-amber-600'}`}
       >
-        <h2 className="text-xl font-bold">{enFranchise ? 'En franchise de TVA' : 'Au-delà de la franchise'}</h2>
-        <p className="text-white/80 text-sm mt-1">
-          Seuil {typeActivite === 'ventes' ? 'ventes' : 'prestations'} : {seuil.toLocaleString('fr-FR')} €.
-        </p>
-        {enFranchise && <p className="text-sm mt-2">Marge avant dépassement : {marge.toLocaleString('fr-FR')} €</p>}
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">{enFranchise ? 'En franchise de TVA' : 'Au-delà de la franchise'}</h2>
+            <p className="text-white/80 text-sm mt-1">
+              Seuil {typeActivite === 'ventes' ? 'ventes' : 'prestations'} : {seuil.toLocaleString('fr-FR')} €.
+            </p>
+          </div>
+          {enFranchise ? (
+            <div className="shrink-0 text-right">
+              <p className="text-3xl font-black tabular-nums leading-tight">{marge.toLocaleString('fr-FR')} €</p>
+              <p className="text-sm text-white/80 mt-0.5">Marge avant dépassement</p>
+            </div>
+          ) : (
+            <div className="shrink-0 text-right self-center">
+              <p className="text-lg font-bold leading-tight">Hors franchise</p>
+            </div>
+          )}
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <label className="block font-semibold text-slate-700 dark:text-slate-300">Type d’activité</label>
@@ -246,11 +279,17 @@ export function TjmRevenuNetOutilPanel() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-indigo-500 to-indigo-600 text-white">
-        <h2 className="text-xl font-bold">CA annuel</h2>
-        <p className="text-3xl font-black mt-2 tabular-nums">{ca.toLocaleString('fr-FR')} €</p>
-        <p className="text-white/80 text-sm mt-1">
-          {tjm} € × {days} jours
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">CA annuel</h2>
+            <p className="text-white/80 text-sm mt-1">
+              {tjm} € × {days} jours
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{ca.toLocaleString('fr-FR')} €</p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -315,19 +354,27 @@ export function TjmRevenuNetOutilPanel() {
   );
 }
 
-const TRANCHES_IR = [
+const TRANCHES_IR_MARGINALE = [
   { seuil: 11294, taux: 0, label: '0 %' },
   { seuil: 28797, taux: 0.11, label: '11 %' },
   { seuil: 82341, taux: 0.3, label: '30 %' },
   { seuil: 177106, taux: 0.41, label: '41 %' },
   { seuil: Infinity, taux: 0.45, label: '45 %' },
-];
+] as const;
 
 function getTrancheMarginale(revenuParPart: number): { taux: number; label: string } {
-  for (let i = TRANCHES_IR.length - 1; i >= 0; i--) {
-    if (revenuParPart > TRANCHES_IR[i].seuil) return { taux: TRANCHES_IR[i].taux, label: TRANCHES_IR[i].label };
+  for (let i = TRANCHES_IR_MARGINALE.length - 1; i >= 0; i--) {
+    const t = TRANCHES_IR_MARGINALE[i]!;
+    if (revenuParPart > t.seuil) return { taux: t.taux, label: t.label };
   }
   return { taux: 0, label: '0 %' };
+}
+
+function libelleTrancheIR(s: { seuilBas: number; seuilHaut: number }): string {
+  if (s.seuilHaut === Infinity) {
+    return `Au-delà de ${s.seuilBas.toLocaleString('fr-FR')} €`;
+  }
+  return `${s.seuilBas.toLocaleString('fr-FR')} € – ${s.seuilHaut.toLocaleString('fr-FR')} €`;
 }
 
 export function TauxEffectifIrOutilPanel() {
@@ -338,13 +385,22 @@ export function TauxEffectifIrOutilPanel() {
   const impôt = useMemo(() => computeIR(revenuImposable, parts), [revenuImposable, parts]);
   const tauxEffectif = useMemo(() => (revenuImposable <= 0 ? 0 : impôt / revenuImposable), [revenuImposable, impôt]);
   const trancheMarginale = useMemo(() => getTrancheMarginale(parPart), [parPart]);
+  const tranchesDetail = useMemo(() => computeIRBracketSlices(parPart), [parPart]);
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-rose-500 to-rose-600 text-white">
-        <h2 className="text-xl font-bold">Résumé</h2>
-        <p className="text-3xl font-black mt-4 tabular-nums">{Math.round(impôt).toLocaleString('fr-FR')} €</p>
-        <p className="text-white/80 text-sm mt-1">Impôt annuel · Taux effectif : {(tauxEffectif * 100).toFixed(1)} %</p>
-        <p className="text-sm mt-2">Tranche marginale : {trancheMarginale.label}</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Résumé</h2>
+            <p className="text-white/80 text-sm mt-1">
+              Taux effectif : {(tauxEffectif * 100).toFixed(1)} %
+            </p>
+            <p className="text-sm mt-1">Tranche marginale : {trancheMarginale.label}</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{Math.round(impôt).toLocaleString('fr-FR')} €</p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -375,15 +431,36 @@ export function TauxEffectifIrOutilPanel() {
           Base après abattement 10 % : {Math.round(baseNet).toLocaleString('fr-FR')} € ; par part : {Math.round(parPart).toLocaleString('fr-FR')} €.
         </p>
         <div className="text-sm">
-          <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">Tranches du barème (par part)</p>
-          <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-0.5">
-            {TRANCHES_IR.filter((t) => t.seuil !== Infinity).map((t, i) => (
-              <li key={i}>
-                Jusqu’à {t.seuil.toLocaleString('fr-FR')} € : {t.label}
-              </li>
-            ))}
-            <li>Au-delà de 177 106 € : 45 %</li>
-          </ul>
+          <p className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Détail du barème (revenu imposable par part)</p>
+          <div className="space-y-0 rounded-xl border border-slate-200 dark:border-slate-600 divide-y divide-slate-200 dark:divide-slate-600 overflow-hidden">
+            {tranchesDetail.map((s, i) => {
+              const pct = (s.taux * 100).toFixed(0);
+              const baseR = Math.round(s.baseDansTranche);
+              const impPart = Math.round(s.impotParPart);
+              const impFoyer = Math.round(s.impotParPart * parts);
+              const detail = `${baseR.toLocaleString('fr-FR')} € × ${pct} % = ${impPart.toLocaleString('fr-FR')} € / part`;
+              const foyer =
+                parts !== 1 ? ` → ${impFoyer.toLocaleString('fr-FR')} € (foyer)` : '';
+              return (
+                <div
+                  key={i}
+                  className="flex flex-col gap-1 px-3 py-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4 bg-slate-50/80 dark:bg-slate-800/40"
+                >
+                  <span className="text-slate-800 dark:text-slate-200 font-medium shrink-0">
+                    {libelleTrancheIR(s)}
+                    <span className="text-slate-500 dark:text-slate-400 font-normal"> · {pct} %</span>
+                  </span>
+                  <span className="text-slate-600 dark:text-slate-400 tabular-nums text-xs sm:text-sm text-left sm:text-right min-w-0 wrap-break-word">
+                    {detail}
+                    {foyer}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {tranchesDetail.length === 0 && (
+            <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Aucun revenu imposable par part.</p>
+          )}
         </div>
       </div>
     </div>
@@ -397,10 +474,16 @@ export function CotisationsTnsOutilPanel() {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-slate-500 to-slate-600 text-white">
-        <h2 className="text-xl font-bold">Total cotisations</h2>
-        <p className="text-white/80 text-sm mt-1">{acreActive ? 'An 1 avec ACRE (~−25 % hors CSG/CRDS)' : 'Sans ACRE'}</p>
-        <p className="text-3xl font-black mt-4 tabular-nums">{Math.round(result.total).toLocaleString('fr-FR')} €</p>
-        <p className="text-sm mt-1">Dont déductibles IR : {Math.round(result.deductible).toLocaleString('fr-FR')} €</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Total cotisations</h2>
+            <p className="text-white/80 text-sm mt-1">{acreActive ? 'An 1 avec ACRE (~−25 % hors CSG/CRDS)' : 'Sans ACRE'}</p>
+            <p className="text-sm mt-1">Dont déductibles IR : {Math.round(result.deductible).toLocaleString('fr-FR')} €</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{Math.round(result.total).toLocaleString('fr-FR')} €</p>
+          </div>
+        </div>
       </div>
       <div className="p-6 space-y-4">
         <div>
