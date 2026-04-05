@@ -34,7 +34,11 @@
     color: #e2e8f0;
   }
   /* Couleur de l’ombre du bandeau sticky (comble l’interstice avec la nav) */
-  :root { --bandeau-sticky-bg: #eef2ff; }
+  :root {
+    --bandeau-sticky-bg: #eef2ff;
+    /* Repli SSR / avant mesure : évite que le contenu passe sous la nav fixe (titres de pages, etc.) */
+    --header-height: 56px;
+  }
   .dark { --bandeau-sticky-bg: #0f172a; }
   p {
     overflow-wrap: normal;
