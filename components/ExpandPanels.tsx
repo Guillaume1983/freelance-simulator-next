@@ -10,13 +10,14 @@ import {
   Circle,
   Users,
   Zap,
-  Building2,
   Gift,
   Receipt,
   User,
   Calculator,
   Plus,
   Minus,
+  BadgePercent,
+  Building2,
 } from 'lucide-react';
 import NumberInput from '@/components/NumberInput';
 
@@ -321,14 +322,6 @@ export default function ExpandPanels({
             <div className="space-y-3">
               {/* Activation IK */}
               <div className="p-3 rounded-lg">
-                <div className="flex items-center gap-2 mb-3 px-1">
-                  <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
-                    <Car className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                    Indemnités kilométriques
-                  </p>
-                </div>
                 <div className="flex gap-2 flex-wrap">
                   <button
                     type="button"
@@ -581,12 +574,20 @@ export default function ExpandPanels({
       {/* PANNEAU COTISATIONS (ACRE + CFE) — ACRE réservé au simulateur : le comparateur calcule en année 2, l’ACRE ne s’applique pas */}
       {activePanel === 'cotisations' && (
         <>
-          {!isComparateur && (
-            <div className="p-3 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm text-slate-900 dark:text-white">ACRE</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">≈ −50% cotisations an 1</p>
+          <div className="p-3 rounded-lg space-y-4">
+            {!isComparateur && (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className="h-8 w-8 shrink-0 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center"
+                    aria-hidden
+                  >
+                    <BadgePercent className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-slate-900 dark:text-white">ACRE</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">≈ −25 % cotisations an 1</p>
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -604,48 +605,55 @@ export default function ExpandPanels({
                   />
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Ligne CFE */}
-          <div className="p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <div className="w-6 h-6 rounded-md bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center">
-                <Building2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+            <div
+              className={cn(
+                'space-y-3',
+                !isComparateur && 'border-t border-slate-100 pt-4 dark:border-slate-800',
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-8 w-8 shrink-0 rounded-lg bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center"
+                  aria-hidden
+                >
+                  <Building2 className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                </div>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  CFE (taille de la ville)
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                CFE (taille de la ville)
+              <div className="flex gap-2 flex-wrap">
+                {CITY_OPTIONS.map(({ key, label, amount }) => {
+                  const isSelected = currentCity === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => sim.setters.setCitySize(key)}
+                      className={cn(
+                        'flex-1 min-w-[90px] p-3 rounded-lg border text-left transition-all',
+                        isSelected
+                          ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 dark:border-rose-600 text-rose-700 dark:text-rose-300'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
+                      )}
+                    >
+                      <p className="font-semibold text-sm">{label}</p>
+                      <p className={cn(
+                        'text-xs mt-0.5',
+                        isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'
+                      )}>
+                        {amount}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                0 € la 1ère année (création), puis selon la ville.
               </p>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              {CITY_OPTIONS.map(({ key, label, amount }) => {
-                const isSelected = currentCity === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => sim.setters.setCitySize(key)}
-                    className={cn(
-                      'flex-1 min-w-[90px] p-3 rounded-lg border text-left transition-all',
-                      isSelected
-                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-400 dark:border-rose-600 text-rose-700 dark:text-rose-300'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500'
-                    )}
-                  >
-                    <p className="font-semibold text-sm">{label}</p>
-                    <p className={cn(
-                      'text-xs mt-0.5',
-                      isSelected ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'
-                    )}>
-                      {amount}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              0 € la 1ère année (création), puis selon la ville.
-            </p>
           </div>
           <InfoBox variant="info">
             {isComparateur ? (
