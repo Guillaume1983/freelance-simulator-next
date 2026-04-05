@@ -62,7 +62,7 @@ export default function InscriptionPage() {
 
   const perks = [
     { text: 'Sauvegarde automatique de vos paramètres sur tous vos appareils', highlight: true },
-    { text: 'Export PDF : déjà disponible sans compte sur le site', highlight: false },
+    { text: 'Comparateur et simulation 5 ans avec export PDF', highlight: false },
     { text: 'Simulation complète des 5 régimes fiscaux 2026', highlight: false },
     { text: 'Accès 100% gratuit, sans engagement', highlight: false },
     { text: 'Seule une adresse email est requise', highlight: false },

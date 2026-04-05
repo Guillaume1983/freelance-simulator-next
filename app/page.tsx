@@ -236,8 +236,7 @@ export default function Home() {
                     <div>
                       <p className="font-black text-sm">Créez un compte gratuit pour aller plus loin</p>
                       <p className="text-[12px] md:text-[13px] text-white/80 mt-0.5">
-                        Export PDF sans inscription sur le comparateur et le simulateur. Un compte gratuit sauvegarde vos
-                        paramètres sur tous vos appareils.
+                        Un compte gratuit sauvegarde vos paramètres sur tous vos appareils.
                         <span className="font-bold text-white"> Seule votre adresse email pour le compte.</span>
                       </p>
                     </div>
@@ -343,8 +342,7 @@ export default function Home() {
                   Créez votre compte et profitez de plus de fonctionnalités
                 </h2>
                 <p className="mt-3 text-[15px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-                  L&apos;export PDF est disponible sans compte. Un compte gratuit synchronise vos réglages (TJM, charges,
-                  foyer…) sur tous vos appareils.
+                  Un compte gratuit synchronise vos réglages (TJM, charges, foyer…) sur tous vos appareils.
                   <span className="font-bold text-slate-700 dark:text-slate-300"> Une adresse email suffit pour le compte.</span>
                 </p>
               </div>
@@ -363,9 +361,9 @@ export default function Home() {
                   <div className="w-12 h-12 mx-auto rounded-xl bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-3">
                     <FileDown className="w-6 h-6" />
                   </div>
-                  <h4 className="font-black text-slate-900 dark:text-white text-sm">PDF pour tous</h4>
+                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Export PDF</h4>
                   <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
-                    Comparateur et simulateur : export PDF directement depuis l&apos;outil, sans créer de compte.
+                    Document détaillé depuis le comparateur ou la simulation sur 5 ans.
                   </p>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-slate-100 dark:border-slate-700">
@@ -390,8 +388,7 @@ export default function Home() {
                       Sauvegardez vos réglages dans le cloud
                     </h3>
                     <p className="mt-2 text-[13px] text-slate-600 dark:text-slate-400">
-                      Les PDF sont déjà accessibles sans compte. Inscrivez-vous pour retrouver vos paramètres sur chaque
-                      appareil.
+                      Inscrivez-vous pour retrouver vos paramètres sur chaque appareil.
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
