@@ -64,7 +64,7 @@ export function AcreOutilPanel() {
       </div>
       <div className="p-6 space-y-4">
         <label className="block font-semibold text-slate-700 dark:text-slate-300">
-          Cotisations sociales annuelles (TNS / Micro) sans ACRE — an 1
+          Cotisations sociales annuelles (TNS / Micro) sans ACRE, an 1
         </label>
         <input
           type="number"
@@ -125,7 +125,7 @@ export function PlafondsMicroOutilPanel() {
         >
           {REGIMES.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.label} — plafond {r.plafond.toLocaleString('fr-FR')} €
+              {r.label}, plafond {r.plafond.toLocaleString('fr-FR')} €
             </option>
           ))}
         </select>
@@ -303,7 +303,7 @@ export function TjmRevenuNetOutilPanel() {
                   <td className="py-2 text-slate-900 dark:text-white">{r.id}</td>
                   <td className="py-2 text-right tabular-nums font-medium">{Math.round(r.net).toLocaleString('fr-FR')} €</td>
                   <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">
-                    {r.tauxNet != null ? `${Number(r.tauxNet).toFixed(1)} %` : '—'}
+                    {r.tauxNet != null ? `${Number(r.tauxNet).toFixed(1)} %` : '–'}
                   </td>
                 </tr>
               ))}

@@ -347,7 +347,7 @@ export default function RegimeFinancialBreakdown({
                     }`}
                   >
                     {val === null ? (
-                      <span className={forPrint ? 'text-slate-300' : 'text-slate-300 dark:text-slate-600'}>—</span>
+                      <span className={forPrint ? 'text-slate-300' : 'text-slate-300 dark:text-slate-600'}>–</span>
                     ) : forPrint ? (
                       <span>
                         {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}
@@ -425,7 +425,7 @@ export default function RegimeFinancialBreakdown({
                       }`}
                     >
                       {val === null ? (
-                        <span className={forPrint ? 'text-slate-300' : 'text-slate-300 dark:text-slate-600'}>—</span>
+                        <span className={forPrint ? 'text-slate-300' : 'text-slate-300 dark:text-slate-600'}>–</span>
                       ) : forPrint ? (
                         <span>
                           {rowPrefix && <span className="opacity-60">{rowPrefix}</span>}{' '}

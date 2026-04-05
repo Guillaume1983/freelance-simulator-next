@@ -7,7 +7,7 @@ import { getAboutPageJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
 export const metadata: Metadata = {
   title: 'À propos',
   description:
-    'Mission de Freelance Simulateur, transparence sur les calculs (barèmes 2026, sources Urssaf et impots.gouv.fr) et limites des résultats — thématique finance et indépendants.',
+    'Mission de Freelance Simulateur, transparence sur les calculs (barèmes 2026, sources Urssaf et impots.gouv.fr) et limites des résultats. Thématique finance et indépendants.',
   alternates: { canonical: `${SITE_URL}/a-propos` },
   openGraph: {
     title: 'À propos | Freelance Simulateur',
@@ -31,7 +31,7 @@ export default function AProposPage() {
       <main className="min-h-screen bg-page-settings">
         <SitePageHeader
           title="À propos de Freelance Simulateur"
-          description="Transparence sur les barèmes, sources officielles et limites des résultats — outil d'aide à la décision pour indépendants."
+          description="Transparence sur les barèmes, sources officielles et limites des résultats : outil d'aide à la décision pour indépendants."
         />
 
         <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">
@@ -114,7 +114,7 @@ export default function AProposPage() {
                 pédagogique pour les indépendants, avec une attention particulière à la performance
                 (Next.js), à l&apos;accessibilité des parcours et à la clarté des écrans. Une partie
                 de l&apos;équipe a une expérience directe du travail en freelance et de la vie
-                d&apos;entreprise, ce qui nourrit les choix produit — sans remplacer une expertise
+                d&apos;entreprise, ce qui nourrit les choix produit, sans remplacer une expertise
                 comptable ou juridique.
               </p>
             </div>

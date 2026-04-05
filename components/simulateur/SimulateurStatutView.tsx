@@ -280,7 +280,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
             </Link>
             <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1">
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">
-                Simulation — {statutId}
+                Simulation : {statutId}
               </h1>
               {regime && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-black tabular-nums text-slate-700 dark:text-slate-200 sm:hidden">
@@ -432,7 +432,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                             {safeYear > 0 && (
                               <span
                                 className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400"
-                                title="Rappel : croissance du CA vs année précédente — icône % en haut à droite du bandeau des années"
+                                title="Rappel : croissance du CA vs année précédente (icône % en haut à droite du bandeau des années)"
                                 role="note"
                                 aria-label={`Croissance du CA vers l'année ${safeYear + 1} : +${growthByYear[safeYear] ?? 0} %`}
                               >

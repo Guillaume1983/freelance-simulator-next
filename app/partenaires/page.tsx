@@ -208,7 +208,7 @@ function PartenairesContent() {
             <Rocket size={12} /> Partenaires sélectionnés
           </div>
           <h1 className="text-3xl font-900 text-slate-900 dark:text-white tracking-tight mb-2">
-            Je me lance — par où commencer ?
+            Je me lance : par où commencer ?
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-xl">
             Une sélection d&apos;outils et de services pour démarrer sereinement votre activité freelance.

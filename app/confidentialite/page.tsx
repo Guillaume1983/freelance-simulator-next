@@ -7,7 +7,7 @@ export default function ConfidentialitePage() {
     <main className="min-h-screen bg-page-settings">
       <SitePageHeader
         title="Politique de confidentialité"
-        description="Données personnelles, compte utilisateur et cookies — transparence sur les traitements."
+        description="Données personnelles, compte utilisateur et cookies : transparence sur les traitements."
       />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-4 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">

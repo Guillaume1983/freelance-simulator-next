@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Comparateur statuts freelance 2026 — Portage, Micro, EURL, SASU',
+  title: 'Comparateur statuts freelance 2026 : Portage, Micro, EURL, SASU',
   description:
     'Comparez en temps réel votre revenu net en portage salarial, micro-entreprise, EURL IR/IS et SASU : histogramme interactif, paramètres intégrés, même moteur que les simulations détaillées.',
   openGraph: {

@@ -73,7 +73,7 @@ export function buildEurlIrLines(ctx: StatutContext): FinancialLine[] {
       formula: [
         `Revenu imposable = bénéfice − cotisations déductibles`,
         `${e(benefice)} − ${e(tns.deductible)} = ${e(irBase)}`,
-        `(Cash avant IR : ${e(cashBeforeIR)} — écart CSG non-déd. + CRDS = ${e(tns.total - tns.deductible)})`,
+        `(Cash avant IR : ${e(cashBeforeIR)} ; écart CSG non-déd. + CRDS = ${e(tns.total - tns.deductible)})`,
       ].join('\n'),
     },
     {

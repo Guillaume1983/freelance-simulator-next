@@ -242,7 +242,7 @@ export function IndemnitesKmOutilPanel() {
 
         <p className="text-xs text-slate-500 dark:text-slate-400">
           Barème URSSAF · charge entreprise, net pour vous (exonéré cotis. et IR). Même réglages que l’onglet Véhicule du
-          simulateur — arr. 27 mars 2023.
+          simulateur (arr. 27 mars 2023).
         </p>
       </div>
     </div>

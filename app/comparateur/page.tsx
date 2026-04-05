@@ -28,7 +28,7 @@ export default function ComparateurPage() {
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment sont calculées les cotisations ?</dt>
-            <dd className="mt-0.5">Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise, barème TNS détaillé pour l&apos;EURL IR, cotisations TNS forfaitaires (~45&nbsp;%) pour l&apos;EURL IS, cotisations assimilé salarié (~82&nbsp;% du net) pour la SASU et le portage. Le comparateur part d&apos;une situation type <strong>année&nbsp;2</strong>&nbsp;: l&apos;ACRE (réservée à la première année) n&apos;y est pas appliquée — utilisez le simulateur 5 ans pour la modéliser.</dd>
+            <dd className="mt-0.5">Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise, barème TNS détaillé pour l&apos;EURL IR, cotisations TNS forfaitaires (~45&nbsp;%) pour l&apos;EURL IS, cotisations assimilé salarié (~82&nbsp;% du net) pour la SASU et le portage. Le comparateur part d&apos;une situation type <strong>année&nbsp;2</strong>&nbsp;: l&apos;ACRE (réservée à la première année) n&apos;y est pas appliquée. Utilisez le simulateur 5 ans pour la modéliser.</dd>
           </div>
           <div>
             <dt className="font-semibold text-slate-600 dark:text-slate-300">Comment fonctionne la SASU dans le comparateur ?</dt>

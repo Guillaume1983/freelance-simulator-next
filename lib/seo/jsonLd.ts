@@ -16,7 +16,7 @@ export function getOrganizationJsonLd() {
   };
 }
 
-/** Application web / « calculatrice » fiscale — thématique finance (YMYL). */
+/** Application web / « calculatrice » fiscale, thématique finance (YMYL). */
 export function getWebApplicationJsonLd() {
   return {
     '@context': 'https://schema.org',
@@ -95,7 +95,7 @@ export function getAboutPageJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
-    name: 'À propos — Freelance Simulateur',
+    name: 'À propos · Freelance Simulateur',
     url: `${SITE_URL}/a-propos`,
     isPartOf: {
       '@type': 'WebSite',

@@ -7,7 +7,7 @@ export default function HypothesesPage() {
     <main className="min-h-screen bg-page-settings">
       <SitePageHeader
         title={"Hypothèses de calcul & limites du simulateur"}
-        description="Principales hypothèses du comparateur et des simulateurs — ne remplace pas un conseil d'expert-comptable."
+        description="Principales hypothèses du comparateur et des simulateurs. Ne remplace pas un conseil d'expert-comptable."
       />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">

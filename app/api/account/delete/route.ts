@@ -32,7 +32,7 @@ function escapeHtml(s: string): string {
 async function sendAccountDeletedConfirmation(userEmail: string | undefined): Promise<void> {
   if (!userEmail || !process.env.RESEND_API_KEY) {
     if (!process.env.RESEND_API_KEY) {
-      console.warn('[account/delete] RESEND_API_KEY absent — pas d’e-mail de confirmation envoyé');
+      console.warn('[account/delete] RESEND_API_KEY absent : pas d’e-mail de confirmation envoyé');
     }
     return;
   }
@@ -42,7 +42,7 @@ async function sendAccountDeletedConfirmation(userEmail: string | undefined): Pr
     await resend.emails.send({
       from: EMAIL_FROM_TRANSACTIONAL,
       to: userEmail,
-      subject: 'Votre compte a été supprimé — Freelance Simulateur',
+      subject: 'Votre compte a été supprimé · Freelance Simulateur',
       html: `
         <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
           <p style="font-size: 16px; margin: 0 0 16px;">Bonjour,</p>
@@ -57,7 +57,7 @@ async function sendAccountDeletedConfirmation(userEmail: string | undefined): Pr
             <a href="mailto:${escapeHtml(SITE_CONTACT_EMAIL)}" style="color: #4f46e5;">${escapeHtml(SITE_CONTACT_EMAIL)}</a>.
           </p>
           <p style="font-size: 13px; color: #64748b; margin: 0;">
-            — L’équipe Freelance Simulateur
+            L’équipe Freelance Simulateur
           </p>
         </div>
       `,
@@ -93,7 +93,7 @@ export async function POST() {
   // Erreur typique AuthApiError not_admin (403) : clé anon ou mauvaise clé à la place du service_role
   if (serviceKey === anon) {
     console.error(
-      '[account/delete] SUPABASE_SERVICE_ROLE_KEY est identique à NEXT_PUBLIC_SUPABASE_ANON_KEY — utiliser la clé service_role (secrète) du dashboard Supabase.'
+      '[account/delete] SUPABASE_SERVICE_ROLE_KEY est identique à NEXT_PUBLIC_SUPABASE_ANON_KEY : utiliser la clé service_role (secrète) du dashboard Supabase.'
     );
     return NextResponse.json(
       {
@@ -163,7 +163,7 @@ export async function POST() {
         (delUserErr as { status?: number }).status === 403);
     if (isNotAdmin) {
       console.error(
-        '[account/delete] Droits admin refusés — vérifier que SUPABASE_SERVICE_ROLE_KEY est la clé « service_role » du bon projet Supabase (copier depuis Settings → API, jamais la clé anon).'
+        '[account/delete] Droits admin refusés : vérifier que SUPABASE_SERVICE_ROLE_KEY est la clé « service_role » du bon projet Supabase (copier depuis Settings → API, jamais la clé anon).'
       );
       return NextResponse.json(
         {

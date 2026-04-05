@@ -59,7 +59,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Comparateur et simulateur sur mesure de revenus freelance — barèmes 2026',
+        alt: 'Comparateur et simulateur sur mesure de revenus freelance, barèmes 2026',
       },
     ],
   },

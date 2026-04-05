@@ -57,7 +57,7 @@ export async function POST(request: Request) {
             <table style="width: 100%; border-collapse: collapse;">
               <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Nom</td><td>${name}</td></tr>
               <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Email</td><td><a href="mailto:${email}">${email}</a></td></tr>
-              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Sujet</td><td>${subject || '—'}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #64748b;">Sujet</td><td>${subject || '–'}</td></tr>
             </table>
             <hr style="margin: 16px 0; border-color: #e2e8f0;">
             <p style="white-space: pre-wrap; color: #1e293b;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       });
     } catch (emailError) {
       console.error('Resend error:', emailError);
-      // Ne pas bloquer la réponse si l'email échoue — le message est déjà en base
+      // Ne pas bloquer la réponse si l'email échoue : le message est déjà en base
     }
   }
 

@@ -168,7 +168,7 @@ export default function AmountTooltip({
           </div>
 
           {/* Détail du calcul */}
-          {detailText && detailText !== '—' && (
+          {detailText && detailText !== '–' && detailText !== '—' && (
             <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
                 Détail du calcul

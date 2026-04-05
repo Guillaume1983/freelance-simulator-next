@@ -206,7 +206,7 @@ export function SimulationSettingsSidebar({
           section.id === 'charges'
             ? chargesSidebarDescription(activeRegimeId, settingsContext)
             : section.id === 'cotisations' && settingsContext === 'comparateur'
-              ? 'CFE (année type établie — pas d’ACRE)'
+              ? 'CFE (année type établie, sans ACRE)'
               : section.description;
 
         return (

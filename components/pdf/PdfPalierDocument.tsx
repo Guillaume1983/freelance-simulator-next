@@ -32,7 +32,7 @@ export function PdfPalierDocument({
       <section className="pdf-print-page pdf-print-page--statut">
         <div className="flex flex-col gap-2">
           <PdfCoverHeader
-            title={`Palier CA SEO — ${statutId}`}
+            title={`Palier CA SEO : ${statutId}`}
             badge="Palier SEO"
             subtitle={`Ordre de grandeur ~${Math.round(caAnnual / 1000)} k€ / an · généré le ${now}. Hypothèses forfaitaires (charges, foyer simplifié). Pour votre cas, privilégiez la simulation sur 5 ans.`}
           />

@@ -34,8 +34,8 @@ export function PdfSimulateurDocument({
       >
         <div className="pdf-print-page-fill">
           <PdfCoverHeader
-            title={`Simulation sur 5 ans — ${statutId}`}
-            subtitle={`Généré le ${now}. Projection multi-annuelle indicative (ACRE, CFE, croissance du CA). Résultats non contractuels — valider avec un expert-comptable.`}
+            title={`Simulation sur 5 ans : ${statutId}`}
+            subtitle={`Généré le ${now}. Projection multi-annuelle indicative (ACRE, CFE, croissance du CA). Résultats non contractuels ; valider avec un expert-comptable.`}
           />
           <SimulationParamsPdfSummary
             state={state}
@@ -65,7 +65,7 @@ export function PdfSimulateurDocument({
                 barClassName={barTone}
                 title={
                   <>
-                    {statutId} — année {yearIdx + 1} / 5
+                    {statutId} · année {yearIdx + 1} / 5
                   </>
                 }
                 caRight={

@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: 'Palier simulateur' };
   }
   const canonical = `${CANONICAL_BASE}/simulateur/${encodeURIComponent(slug)}/${encodeURIComponent(ca)}`;
-  const title = `${statutId} — ${Math.round(caNum / 1000)} k€ / an | Simulateur`;
+  const title = `${statutId} · ${Math.round(caNum / 1000)} k€ / an | Simulateur`;
   const description = getPalierSeoIntro(statutId, caNum);
   return {
     title,

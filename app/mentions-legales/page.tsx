@@ -15,8 +15,8 @@ export default function MentionsLegalesPage() {
             1. Éditeur du site
           </h2>
           <p className="mt-2">
-            <span className="font-semibold">GILLE GUILLAUME CONSULTING</span>, EURL — siège&nbsp;: 9007 chemin de
-            Fouillusant, 69140 Rillieux-la-Pape — SIREN&nbsp;920&nbsp;812&nbsp;476, RCS Lyon — capital social&nbsp;:
+            <span className="font-semibold">GILLE GUILLAUME CONSULTING</span>, EURL, siège&nbsp;: 9007 chemin de
+            Fouillusant, 69140 Rillieux-la-Pape, SIREN&nbsp;920&nbsp;812&nbsp;476, RCS Lyon, capital social&nbsp;:
             1&nbsp;000&nbsp;€. Contact&nbsp;:{' '}
             <a
               href="mailto:contact@freelance-simulateur.fr"
@@ -33,7 +33,7 @@ export default function MentionsLegalesPage() {
             2. Hébergement
           </h2>
           <p className="mt-2">
-            <span className="font-semibold">Vercel Inc.</span>, 650 7th Street, San Francisco, CA 94103, États-Unis —{' '}
+            <span className="font-semibold">Vercel Inc.</span>, 650 7th Street, San Francisco, CA 94103, États-Unis :{' '}
             <a
               href="https://vercel.com"
               className="text-indigo-600 dark:text-indigo-400 hover:underline"

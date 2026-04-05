@@ -290,7 +290,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
           </div>
           <div className="mt-1 flex flex-col items-center text-center">
             <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm leading-snug">
-              Histogramme interactif et paramètres intégrés — comparez les 5 statuts en temps réel
+              Histogramme interactif et paramètres intégrés : comparez les 5 statuts en temps réel
             </p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-2 md:hidden">
               <button

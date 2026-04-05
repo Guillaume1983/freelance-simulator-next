@@ -31,7 +31,7 @@ export default function BaremePage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: 'Barèmes et plafonds — Freelance Simulateur',
+    name: 'Barèmes et plafonds · Freelance Simulateur',
     url: `${SITE_URL}/bareme`,
     isPartOf: { '@type': 'WebSite', name: 'Freelance Simulateur', url: SITE_URL },
     description:
@@ -64,7 +64,7 @@ export default function BaremePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">Plafonds de chiffre d’affaires — micro-entreprise</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Plafonds de chiffre d’affaires (micro-entreprise)</h2>
           <p className="mt-2 mb-3 text-slate-600 dark:text-slate-400">
             Prestations de services (BNC / BIC services) et vente / réservation d’hébergement (BIC).
           </p>
@@ -91,7 +91,7 @@ export default function BaremePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">Micro-entreprise — cotisations et abattements</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Micro-entreprise : cotisations et abattements</h2>
           <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
             <table className="w-full min-w-[360px] text-left text-xs sm:text-sm">
               <thead className="bg-slate-100/80 dark:bg-slate-800/80">
@@ -149,7 +149,7 @@ export default function BaremePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">Impôt sur le revenu — barème par part</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Impôt sur le revenu : barème par part</h2>
           <p className="mt-2 mb-3">
             Abattement forfaitaire sur la base foyer (professions non salariées, modèle simplifié) :{' '}
             <strong>{pct(ir.abattement, 0)}</strong>. Tranches sur le revenu imposable <em>par part</em> (après
@@ -197,7 +197,7 @@ export default function BaremePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">Flat tax — dividendes</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">Flat tax et dividendes</h2>
           <p className="mt-2">
             Taux forfaitaire retenu pour la composante « flat tax » sur dividendes : <strong>{pct(RATES_2026.flatTaxDividendes, 0)}</strong>.
           </p>
@@ -205,7 +205,7 @@ export default function BaremePage() {
 
         <section>
           <h2 className="text-base font-bold text-slate-900 dark:text-white">
-            ACRE (année 1) et cotisations — micro, portage, sociétés
+            ACRE (année 1) et cotisations : micro, portage, sociétés
           </h2>
           <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
             Synthèse du <strong>facteur ACRE</strong> appliqué au <strong>taux de cotisations</strong> en première année
@@ -232,7 +232,7 @@ export default function BaremePage() {
                   <td className="px-3 py-2">Portage</td>
                   <td className="px-3 py-2 font-mono tabular-nums">{pct(portage.cotis, 0)} de la base</td>
                   <td className="px-3 py-2 text-slate-500 dark:text-slate-400">
-                    — (ACRE non appliquée, salarié)
+                    Non (ACRE non appliquée, salarié)
                   </td>
                 </tr>
                 <tr className="border-t border-slate-200 dark:border-slate-700">

@@ -6,7 +6,7 @@ export default function CGUPage() {
     <main className="min-h-screen bg-page-settings">
       <SitePageHeader
         title={"Conditions d'utilisation & avertissements"}
-        description="Simulateurs et comparateurs freelances — informations importantes à lire avant utilisation."
+        description="Simulateurs et comparateurs freelances : informations importantes à lire avant utilisation."
       />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-8 text-sm text-slate-700 dark:text-slate-300">

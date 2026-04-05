@@ -4,7 +4,7 @@ import { SITE_URL } from '@/lib/seo/jsonLd';
 export const metadata: Metadata = {
   title: 'Glossaire freelance & fiscal',
   description:
-    'Définitions courtes : TJM, micro-entreprise, EURL, SASU, portage, IR, IS, cotisations — pour décrypter le comparateur et les simulateurs.',
+    'Définitions courtes : TJM, micro-entreprise, EURL, SASU, portage, IR, IS, cotisations. Pour décrypter le comparateur et les simulateurs.',
   openGraph: {
     url: `${SITE_URL}/glossaire`,
     title: 'Glossaire freelance & fiscal | Freelance Simulateur',

@@ -37,7 +37,7 @@ export function getDetailTextFromLines(
         const type = sim.state.typeActiviteMicro ?? 'BNC';
         const abattements = { BNC: 34, BIC_SERVICE: 50, BIC_COMMERCE: 71 };
         const labels = { BNC: 'BNC', BIC_SERVICE: 'BIC services', BIC_COMMERCE: 'BIC commerce' };
-        const base = `Cotisations et IR : base sur le CA avec abattement forfaitaire (${abattements[type]} % ${labels[type]}) — les dépenses catalogue ci-dessous ne réduisent pas cette base.`;
+        const base = `Cotisations et IR : base sur le CA avec abattement forfaitaire (${abattements[type]} % ${labels[type]}). Les dépenses catalogue ci-dessous ne réduisent pas cette base.`;
         const cfe = getLine('micro_cfe')?.amount ?? 0;
         const dep = getLine('micro_depenses_reelles')?.amount ?? 0;
         const parts: string[] = [base];
@@ -46,7 +46,7 @@ export function getDetailTextFromLines(
         }
         if (dep > 0) {
           parts.push(
-            `Dépenses professionnelles saisies : ${fmt(dep)} / an — sorties de trésorerie après impôt ; elles réduisent le « disponible » sans modifier cotisations ni IR.`
+            `Dépenses professionnelles saisies : ${fmt(dep)} / an (sorties de trésorerie après impôt ; elles réduisent le « disponible » sans modifier cotisations ni IR).`
           );
         }
         return parts.join('\n\n');
@@ -102,9 +102,9 @@ export function getDetailTextFromLines(
       const loyer = getLine('loyer_percu')?.amount ?? 0;
       const avantages = getLine('avantages')?.amount ?? 0;
       const parts: string[] = [];
-      if (ik > 0) parts.push(`Indemnités kilométriques : ${fmt(ik)}\n  Coût pour l'entreprise (inclus dans "Charges") et remboursement net — exonéré de cotisations et d'IR.`);
+      if (ik > 0) parts.push(`Indemnités kilométriques : ${fmt(ik)}\n  Coût pour l'entreprise (inclus dans "Charges") et remboursement net, exonéré de cotisations et d'IR.`);
       if (loyer > 0) parts.push(`Loyer perçu (location bureau) : ${fmt(loyer)}\n  Coût pour la société (inclus dans "Charges") et revenu foncier pour le foyer.`);
-      if (avantages > 0) parts.push(`Avantages exonérés (CE, chèques vacances, mutuelle…) : ${fmt(avantages)}\n  Coût employeur (inclus dans "Charges") mais avantage net pour vous — sans cotisations sociales ni IR dans les plafonds légaux.`);
+      if (avantages > 0) parts.push(`Avantages exonérés (CE, chèques vacances, mutuelle…) : ${fmt(avantages)}\n  Coût employeur (inclus dans "Charges") mais avantage net pour vous, sans cotisations sociales ni IR dans les plafonds légaux.`);
       if (parts.length === 0) return 'Aucune optimisation activée (IK, loyer, avantages)';
       return parts.join('\n');
     }
@@ -184,7 +184,7 @@ export function getDetailTextFromLines(
       const line = getLine('portage_ir') ?? getLine('micro_ir') ?? getLine('eurl_ir_ir') ?? getLine('eurl_is_ir');
       if (line?.formula) return line.formula;
       if (r.id === 'Micro') return 'Barème IR (base = CA × 66%)';
-      return `Barème progressif IR — ${sim.state.taxParts} parts`;
+      return `Barème progressif IR (${sim.state.taxParts} parts)`;
     }
     case 'net': {
       if (r.id === 'Micro') {

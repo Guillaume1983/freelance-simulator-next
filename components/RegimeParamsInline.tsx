@@ -111,5 +111,5 @@ export default function RegimeParamsInline({ sim, regimeId, align = 'center', va
       </div>
     </div>
   );
-  return <p className={`text-[8px] italic ${isDark ? 'text-white/70' : 'text-slate-400'}`}>—</p>;
+  return <p className={`text-[8px] italic ${isDark ? 'text-white/70' : 'text-slate-400'}`}>–</p>;
 }
