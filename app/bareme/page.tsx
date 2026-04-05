@@ -258,9 +258,9 @@ export default function BaremePage() {
         <section>
           <h2 className="text-base font-bold text-slate-900 dark:text-white">Indemnités kilométriques (URSSAF)</h2>
           <p className="mt-2 mb-3">
-            Barème voiture (référence technique alignée sur l’arrêté URSSAF intégré au site) : tranches 0–5\u00a0000 km,
-            5\u00a0001–20\u00a0000 km, au-delà de 20\u00a0000 km. Coefficients en euros par km et montant de raccordement par
-            tranche, selon la puissance fiscale :
+            Barème voiture (référence technique alignée sur l’arrêté URSSAF intégré au site) : tranches 0–5{'\u00a0'}
+            000 km, 5{'\u00a0'}001–20{'\u00a0'}000 km, au-delà de 20{'\u00a0'}000 km. Coefficients en euros par km et montant de
+            raccordement par tranche, selon la puissance fiscale :
           </p>
           <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
             <table className="w-full min-w-[400px] text-left text-[11px] sm:text-sm">
