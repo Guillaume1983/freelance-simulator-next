@@ -27,9 +27,9 @@ export default function HypothesesPage() {
                 selon les barèmes 2026.
               </li>
               <li>
-                L&apos;ACRE est <strong>désactivée par défaut</strong> dans le comparateur et le simulateur,
-                car elle ne concerne que la première année de création. Les résultats affichés reflètent
-                ainsi le régime de croisière. Vous pouvez l&apos;activer manuellement dans les réglages.
+                Le <strong>comparateur</strong> calcule en année&nbsp;2 (régime établi)&nbsp;: l&apos;ACRE n&apos;y est pas
+                prise en compte. Le <strong>simulateur 5 ans</strong> permet d&apos;activer l&apos;ACRE pour la
+                première année de projection dans les réglages.
               </li>
             </ul>
           </div>

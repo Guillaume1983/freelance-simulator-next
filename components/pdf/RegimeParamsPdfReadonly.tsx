@@ -86,7 +86,6 @@ export function SimulationParamsPdfSummary({
   const loyer = Number(state.loyerPercu ?? 0);
   const mat = Number(state.materielAnnuel ?? 0);
   const av = Number(state.avantagesOptimises ?? 0);
-  const acre = Boolean(state.acreEnabled);
   const citySize = String(state.citySize ?? 'moyenne');
   const baseGrowth = Number(state.growthRate ?? 0);
   const chargeAmounts = state.chargeAmounts as Record<string, number> | undefined;
@@ -162,10 +161,12 @@ export function SimulationParamsPdfSummary({
               <span className="text-slate-600">Matériel (amortissement an 1)</span>
               <span className="font-bold tabular-nums">{fmtEur(mat)}/an</span>
             </li>
-            <li className="flex justify-between gap-3">
-              <span className="text-slate-600">ACRE (exonération / réduction an 1)</span>
-              <span className="font-bold">{acre ? 'Activée' : 'Désactivée'}</span>
-            </li>
+            {variant === 'simulateur' && (
+              <li className="flex justify-between gap-3">
+                <span className="text-slate-600">ACRE (exonération / réduction an 1)</span>
+                <span className="font-bold">{Boolean(state.acreEnabled) ? 'Activée' : 'Désactivée'}</span>
+              </li>
+            )}
             <li className="flex justify-between gap-3">
               <span className="text-slate-600">CFE (taille de commune)</span>
               <span className="font-bold text-right">{cityLabel(citySize)}</span>

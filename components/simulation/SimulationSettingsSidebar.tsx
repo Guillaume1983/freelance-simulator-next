@@ -205,7 +205,9 @@ export function SimulationSettingsSidebar({
         const sectionDescription =
           section.id === 'charges'
             ? chargesSidebarDescription(activeRegimeId, settingsContext)
-            : section.description;
+            : section.id === 'cotisations' && settingsContext === 'comparateur'
+              ? 'CFE (année type établie — pas d’ACRE)'
+              : section.description;
 
         return (
           <Fragment key={section.id}>

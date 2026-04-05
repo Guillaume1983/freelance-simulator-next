@@ -14,7 +14,6 @@ import {
   Gift,
   Receipt,
   User,
-  ShieldCheck,
   Calculator,
   Plus,
   Minus,
@@ -579,38 +578,34 @@ export default function ExpandPanels({
         </>
       )}
 
-      {/* PANNEAU COTISATIONS (ACRE + CFE) */}
+      {/* PANNEAU COTISATIONS (ACRE + CFE) — ACRE réservé au simulateur : le comparateur calcule en année 2, l’ACRE ne s’applique pas */}
       {activePanel === 'cotisations' && (
         <>
-          {/* Ligne ACRE */}
-          <div className="p-3 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center">
-                  <ShieldCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-                </div>
-                <div>
+          {!isComparateur && (
+            <div className="p-3 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
                   <p className="font-semibold text-sm text-slate-900 dark:text-white">ACRE</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">≈ −50% cotisations an 1</p>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
-                className={cn(
-                  'w-12 h-7 rounded-full transition-colors relative shrink-0',
-                  sim.state.acreEnabled ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-600'
-                )}
-              >
-                <span
+                <button
+                  type="button"
+                  onClick={() => sim.setters.setAcreEnabled(!sim.state.acreEnabled)}
                   className={cn(
-                    'absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform',
-                    sim.state.acreEnabled ? 'left-0.5 translate-x-5' : 'left-0.5 translate-x-0'
+                    'w-12 h-7 rounded-full transition-colors relative shrink-0',
+                    sim.state.acreEnabled ? 'bg-cyan-500' : 'bg-slate-200 dark:bg-slate-600'
                   )}
-                />
-              </button>
+                >
+                  <span
+                    className={cn(
+                      'absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform',
+                      sim.state.acreEnabled ? 'left-0.5 translate-x-5' : 'left-0.5 translate-x-0'
+                    )}
+                  />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Ligne CFE */}
           <div className="p-3 rounded-lg">
@@ -653,7 +648,18 @@ export default function ExpandPanels({
             </p>
           </div>
           <InfoBox variant="info">
-            ACRE et CFE s&apos;appliquent aux créations et reprises d&apos;entreprise.
+            {isComparateur ? (
+              <>
+                Le comparateur part d&apos;une situation type <strong>année&nbsp;2</strong> (régime établi)&nbsp;: la CFE
+                est prise en compte selon la ville ; l&apos;ACRE (première année) se modélise dans le{' '}
+                <Link href="/simulateur" className="font-bold text-indigo-600 dark:text-indigo-400 underline">
+                  simulateur 5 ans
+                </Link>
+                .
+              </>
+            ) : (
+              <>ACRE et CFE s&apos;appliquent aux créations et reprises d&apos;entreprise.</>
+            )}
           </InfoBox>
         </>
       )}
@@ -664,14 +670,9 @@ export default function ExpandPanels({
           <div className="w-full p-3 rounded-lg space-y-4">
             {/* Composition du foyer */}
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 px-1">
-                <div className="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                  <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                  Composition du foyer
-                </span>
-              </div>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide px-1">
+                Composition du foyer
+              </span>
               <div className="inline-flex w-fit rounded-lg bg-slate-100 dark:bg-slate-700 p-0.5 gap-0.5">
                 <button
                   type="button"
