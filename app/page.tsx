@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3, TrendingUp, BookOpen, ArrowRight, Wrench, Sparkles, Save, FileDown, Lock, Gift, CheckCircle2, X, Trash2, Info } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, ArrowRight, Wrench, Sparkles, Save, Lock, Gift, CheckCircle2, X, Trash2, Info } from 'lucide-react';
 import Footer from '@/components/Footer';
 import FaqSection from '@/components/FaqSection';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -234,9 +234,10 @@ export default function Home() {
                       <Gift className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
                     <div>
-                      <p className="font-black text-sm">Créez un compte gratuit pour aller plus loin</p>
+                      <p className="font-black text-sm">Compte gratuit : synchronisez vos réglages</p>
                       <p className="text-[12px] md:text-[13px] text-white/80 mt-0.5">
-                        Un compte gratuit sauvegarde vos paramètres sur tous vos appareils.
+                        Tous les outils sont utilisables sans inscription ; avec un compte, vos paramètres suivent sur
+                        chaque appareil.
                         <span className="font-bold text-white"> Seule votre adresse email pour le compte.</span>
                       </p>
                     </div>
@@ -339,40 +340,32 @@ export default function Home() {
                   100% Gratuit
                 </span>
                 <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Créez votre compte et profitez de plus de fonctionnalités
+                  Optionnel : retrouvez vos réglages sur tous vos appareils
                 </h2>
                 <p className="mt-3 text-[15px] text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-                  Un compte gratuit synchronise vos réglages (TJM, charges, foyer…) sur tous vos appareils.
-                  <span className="font-bold text-slate-700 dark:text-slate-300"> Une adresse email suffit pour le compte.</span>
+                  Le comparateur et le simulateur fonctionnent sans compte. Si vous vous inscrivez, vos paramètres (TJM,
+                  charges, foyer, etc.) sont enregistrés dans le cloud et se synchronisent entre ordinateur et mobile.
+                  <span className="font-bold text-slate-700 dark:text-slate-300"> Une adresse email suffit.</span>
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10 max-w-2xl mx-auto">
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-slate-100 dark:border-slate-700">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
                     <Save className="w-6 h-6" />
                   </div>
-                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Sauvegarde automatique</h4>
+                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Sauvegarde dans le cloud</h4>
                   <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
-                    Vos paramètres sont sauvegardés automatiquement et synchronisés sur tous vos appareils.
-                  </p>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-slate-100 dark:border-slate-700">
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-3">
-                    <FileDown className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Export PDF</h4>
-                  <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
-                    Document détaillé depuis le comparateur ou la simulation sur 5 ans.
+                    Reprenez une simulation au même réglage que sur un autre appareil, sans tout ressaisir.
                   </p>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 text-center border border-slate-100 dark:border-slate-700">
                   <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
                     <Lock className="w-6 h-6" />
                   </div>
-                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Données privées</h4>
+                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Compte minimal</h4>
                   <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
-                    Aucune donnée personnelle collectée. Seule votre adresse email est requise.
+                    Pas de profil fiscal détaillé : seule une adresse email pour créer le compte et lier la sauvegarde.
                   </p>
                 </div>
               </div>
@@ -382,13 +375,13 @@ export default function Home() {
                   <div className="flex-1 text-center md:text-left">
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                      <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">Compte recommandé</span>
+                      <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">Utile si vous changez souvent d’appareil</span>
                     </div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                      Sauvegardez vos réglages dans le cloud
+                      Créer un compte gratuit
                     </h3>
                     <p className="mt-2 text-[13px] text-slate-600 dark:text-slate-400">
-                      Inscrivez-vous pour retrouver vos paramètres sur chaque appareil.
+                      Un seul avantage : la synchronisation de vos réglages. Pas d’obligation pour utiliser le site.
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
