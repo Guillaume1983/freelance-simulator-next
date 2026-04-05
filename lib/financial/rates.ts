@@ -3,6 +3,12 @@
 /** Plafond Annuel de la Sécurité Sociale 2025 (valeur officielle, à mettre à jour en 2026) */
 export const PASS = 47_100;
 
+/**
+ * An 1 avec ACRE : part conservée du taux ou des cotisations « sociales » modélisée (exonération ≈ 25 % → 0,75).
+ * Aligné sur la réforme 2026-69 (simplifications du moteur : micro / TNS hors CSG+CRDS / taux forfaitaires sociétés).
+ */
+export const ACRE_COTISATION_FACTOR = 0.75;
+
 export const RATES_2026 = {
   /** Barème IR par part (seuils 2025 ; 2026 revalorisés ~+1 à 2 %, à mettre à jour si besoin) */
   ir: {
@@ -22,18 +28,17 @@ export const RATES_2026 = {
     BIC_SERVICE:  { cotis: 0.212, abattement: 0.50, pl: 0.017 },
     // Micro-BIC commerce : ~12,3 % de cotisations sociales
     BIC_COMMERCE: { cotis: 0.123, abattement: 0.71, pl: 0.010 },
-    // ACRE micro : exonération ramenée de 50 % à 25 % au 1ᵉʳ juillet 2026 → on modélise un taux "ACRE"
-    // comme 75 % du taux normal (réforme 2026-69). Simplification : taux constant sur l'année 1.
-    acre: 0.75,
+    // ACRE micro : même facteur que le reste du moteur (taux URSSAF × ACRE_COTISATION_FACTOR sur l’an 1).
+    acre: ACRE_COTISATION_FACTOR,
   },
   // Cotisations assimilé salarié (Portage : cotis = base × 45 %, net = base × 55 %)
-  // ACRE : exonération ramenée de 50 % à 25 % → on passe de 0,5 à 0,75 (on paie 75 % du taux).
-  portage: { cotis: 0.45, acre: 0.75 },
+  // `acre` stocké pour affichage barème uniquement — le calcul portage n’applique pas l’ACRE (salarié).
+  portage: { cotis: 0.45, acre: ACRE_COTISATION_FACTOR },
   // EURL IS : gérant TNS, cotis exprimées « en plus du net » → net = enveloppe / (1 + cotis)
-  eurlIs: { cotis: 0.45, acre: 0.75 },
+  eurlIs: { cotis: 0.45, acre: ACRE_COTISATION_FACTOR },
   // SASU : président assimilé salarié, cotis ≈ 82 % du net (patron + salarié)
   // → total coût = net × 1,82, soit net/enveloppe ≈ 55 % (cohérent avec le portage)
-  sasu: { cotis: 0.82, acre: 0.75 },
+  sasu: { cotis: 0.82, acre: ACRE_COTISATION_FACTOR },
   is: { taux: 0.25 },
   /** IS PME : 15 % jusqu'à 42 500 €, 25 % au-delà (art. 219-I-b CGI) */
   isSasu: { tauxReduit: 0.15, seuilTauxReduit: 42_500, tauxNormal: 0.25 },
@@ -110,9 +115,8 @@ export function computeTNSCotisations(benefice: number, acreActive = false): TNS
   const cotisHorsCsg = retBase + retCompl + invalDeces + maladie + allocFam + formation;
 
   if (acreActive) {
-    // ACRE : depuis 2026-69, exonération ramenée de 50 % à 25 %.
-    // On modélise une réduction globale à 25 % ≈ on paie 75 % des cotisations hors CSG/CRDS.
-    const cotisAcre = cotisHorsCsg * 0.75;
+    // ACRE : CSG/CRDS non réduites ; seules les cotisations « sociales » hors CSG/CRDS × ACRE_COTISATION_FACTOR.
+    const cotisAcre = cotisHorsCsg * ACRE_COTISATION_FACTOR;
     return {
       total: cotisAcre + csgDed + csgNonDed,
       deductible: cotisAcre + csgDed,

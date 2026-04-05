@@ -125,8 +125,10 @@ export default function BaremePage() {
             </table>
           </div>
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Facteur ACRE micro (fraction du taux payée la 1ʳᵉ année si option active) :{' '}
-            <strong>{pct(micro.acre, 0)}</strong> du taux normal.
+            <strong>ACRE (première année)</strong> : si l’option est activée dans le simulateur, le taux de
+            cotisations URSSAF ci-dessus est multiplié par <strong>{pct(micro.acre, 0)}</strong> (exonération modélisée
+            ≈ 25&nbsp;% du taux ; prélèvement libératoire inchangé). Même facteur numérique que pour l’EURL IS, la SASU
+            et le barème TNS EURL IR (voir tableau suivant).
           </p>
         </section>
 
@@ -202,7 +204,13 @@ export default function BaremePage() {
         </section>
 
         <section>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white">Portage, EURL IS, SASU — taux retenus</h2>
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            ACRE (année 1) et cotisations — micro, portage, sociétés
+          </h2>
+          <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+            Synthèse du <strong>facteur ACRE</strong> appliqué au <strong>taux de cotisations</strong> en première année
+            de projection (simulateur 5 ans). Le détail des taux micro par activité est dans le tableau précédent.
+          </p>
           <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
             <table className="w-full min-w-[280px] text-left text-xs sm:text-sm">
               <thead className="bg-slate-100/80 dark:bg-slate-800/80">
@@ -214,9 +222,18 @@ export default function BaremePage() {
               </thead>
               <tbody>
                 <tr className="border-t border-slate-200 dark:border-slate-700">
+                  <td className="px-3 py-2">Micro-entreprise</td>
+                  <td className="px-3 py-2 text-slate-600 dark:text-slate-400">
+                    CA × taux selon BNC / BIC (tableau ci-dessus)
+                  </td>
+                  <td className="px-3 py-2 font-mono tabular-nums">{pct(micro.acre, 0)} du taux</td>
+                </tr>
+                <tr className="border-t border-slate-200 dark:border-slate-700">
                   <td className="px-3 py-2">Portage</td>
                   <td className="px-3 py-2 font-mono tabular-nums">{pct(portage.cotis, 0)} de la base</td>
-                  <td className="px-3 py-2 font-mono tabular-nums">{pct(portage.acre, 0)} du taux</td>
+                  <td className="px-3 py-2 text-slate-500 dark:text-slate-400">
+                    — (ACRE non appliquée, salarié)
+                  </td>
                 </tr>
                 <tr className="border-t border-slate-200 dark:border-slate-700">
                   <td className="px-3 py-2">EURL IS (gérant)</td>
@@ -232,7 +249,9 @@ export default function BaremePage() {
             </table>
           </div>
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Commission de portage par défaut dans l’interface : <strong>{DEFAULT_PORTAGE_COMM}&nbsp;%</strong> du CA.
+            Commission de portage par défaut : <strong>{DEFAULT_PORTAGE_COMM}&nbsp;%</strong> du CA. Micro, EURL IS et
+            SASU partagent le même <strong className="font-mono tabular-nums">{pct(micro.acre, 0)}</strong> sur le taux
+            de cotisations lorsque l’ACRE est activée (l’EURL IR utilise le même ordre de grandeur via le détail TNS).
           </p>
         </section>
 
