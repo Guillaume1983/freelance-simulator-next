@@ -158,8 +158,8 @@ export function IndemnitesKmOutilPanel() {
               <NumberInput
                 value={km}
                 onChange={setKm}
-                onIncrement={() => setKm((p) => p + 500)}
-                onDecrement={() => setKm((p) => Math.max(0, p - 500))}
+                min={0}
+                step={1}
                 suffix="km"
                 label="Km"
               />

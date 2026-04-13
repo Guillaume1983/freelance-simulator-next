@@ -6,20 +6,25 @@ import { InputNumber } from '@/components/input-number';
 export default function NumberInput({
   value,
   onChange,
-  onIncrement,
-  onDecrement,
+  onIncrement: _onIncrement,
+  onDecrement: _onDecrement,
   suffix = '',
   min = 0,
+  max,
+  step = 1,
   label,
   disabled = false,
   inputClassName,
 }: {
   value: number;
   onChange: (v: number) => void;
-  onIncrement: () => void;
-  onDecrement: () => void;
+  /** Conservé pour compatibilité ; les flèches du navigateur utilisent `step`. */
+  onIncrement?: () => void;
+  onDecrement?: () => void;
   suffix?: string;
   min?: number;
+  max?: number;
+  step?: number;
   label?: string;
   disabled?: boolean;
   inputClassName?: string;
@@ -36,6 +41,9 @@ export default function NumberInput({
         hint={undefined}
         isRequired={false}
         disabled={disabled}
+        min={min}
+        max={max}
+        step={step}
         suffix={suffix || undefined}
         inputClassName={inputClassName}
       />

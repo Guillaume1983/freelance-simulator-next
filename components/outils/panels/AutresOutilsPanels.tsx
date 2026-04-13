@@ -3,10 +3,15 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
-import { CFE_PAR_VILLE, type CitySize } from '@/lib/constants';
-import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
+import {
+  CFE_PAR_VILLE,
+  type CitySize,
+  PLAFOND_MICRO_BNC,
+  PLAFOND_MICRO_BIC,
+  CHARGES_CATALOG,
+  DEFAULT_PORTAGE_COMM,
+} from '@/lib/constants';
 import { calculateRegimes, computeTaxParts } from '@/lib/projections';
-import { CHARGES_CATALOG } from '@/lib/constants';
 import { computeIR, computeIRBracketSlices, RATES_2026 } from '@/lib/financial/rates';
 import { computeTNSCotisations } from '@/lib/financial/rates';
 
@@ -83,7 +88,7 @@ export function AcreOutilPanel() {
         <input
           type="number"
           min={0}
-          step={500}
+          step={1}
           value={cotisationsAn1}
           onChange={(e) => setCotisationsAn1(Math.max(0, Number(e.target.value) || 0))}
           className="w-full max-w-xs px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -153,7 +158,7 @@ export function PlafondsMicroOutilPanel() {
         <input
           type="number"
           min={0}
-          step={1000}
+          step={1}
           value={caDejaFacture || ''}
           onChange={(e) => setCaDejaFacture(Math.max(0, Number(e.target.value) || 0))}
           className="w-full max-w-xs px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -222,7 +227,7 @@ export function FranchiseTvaOutilPanel() {
         <input
           type="number"
           min={0}
-          step={1000}
+          step={1}
           value={caPrevu || ''}
           onChange={(e) => setCaPrevu(Math.max(0, Number(e.target.value) || 0))}
           className="w-full max-w-xs px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -235,47 +240,56 @@ export function FranchiseTvaOutilPanel() {
   );
 }
 
-const defaultChargeAmountsTJm = CHARGES_CATALOG.reduce(
+/** Même base que `useSimulation` → `calculateRegimes` (comparateur par défaut). */
+const zeroChargeAmountsComparateur = CHARGES_CATALOG.reduce(
   (acc, c) => {
-    acc[c.id] = c.amount;
+    acc[c.id] = 0;
     return acc;
   },
   {} as Record<string, number>,
 );
 
+function plafondMicroPourType(type: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'): number {
+  return type === 'BIC_COMMERCE' ? PLAFOND_MICRO_BIC : PLAFOND_MICRO_BNC;
+}
+
 export function TjmRevenuNetOutilPanel() {
   const [tjm, setTjm] = useState(600);
   const [days, setDays] = useState(210);
+  const [typeActiviteMicro, setTypeActiviteMicro] = useState<'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'>('BNC');
   const params = useMemo(
     () => ({
       tjm,
       days,
       taxParts: computeTaxParts(1, 0),
       spouseIncome: 0,
-      kmAnnuel: 10000,
+      kmAnnuel: 0,
       cvFiscaux: '6',
       typeVehicule: 'voiture' as const,
       vehiculeElectrique: false,
-      loyerPercu: 350,
-      sectionsActive: { vehicule: true },
-      portageComm: 7,
-      chargeAmounts: defaultChargeAmountsTJm,
-      activeCharges: ['compta', 'mutuelle', 'assurance', 'repas', 'tel'],
-      acreEnabled: true,
+      loyerPercu: 0,
+      sectionsActive: { vehicule: false },
+      portageComm: DEFAULT_PORTAGE_COMM,
+      chargeAmounts: zeroChargeAmountsComparateur,
+      activeCharges: [],
+      acreEnabled: false,
       citySize: 'moyenne' as const,
-      growthRate: 0.02,
-      annee: 1,
+      growthRate: 0,
+      annee: 2,
       materielAnnuel: 0,
-      avantagesOptimises: 1500,
-      typeActiviteMicro: 'BNC' as const,
+      avantagesOptimises: 0,
+      typeActiviteMicro,
       prelevementLiberatoire: false,
       remunerationDirigeantMensuelle: 1,
       repartitionRemuneration: 0,
     }),
-    [tjm, days],
+    [tjm, days, typeActiviteMicro],
   );
   const resultats = useMemo(() => calculateRegimes(params), [params]);
   const ca = tjm * days;
+  const plafondMicro = plafondMicroPourType(typeActiviteMicro);
+  const microDepasse = ca > plafondMicro;
+  const depassementMicro = microDepasse ? ca - plafondMicro : 0;
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
       <div className="px-6 py-5 bg-linear-to-r from-indigo-500 to-indigo-600 text-white">
@@ -298,7 +312,7 @@ export function TjmRevenuNetOutilPanel() {
             <input
               type="number"
               min={0}
-              step={50}
+              step={1}
               value={tjm || ''}
               onChange={(e) => setTjm(Math.max(0, Number(e.target.value) || 0))}
               className="w-full mt-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -317,7 +331,8 @@ export function TjmRevenuNetOutilPanel() {
           </div>
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Profil type (charges, véhicule, loyer, 1 part, ACRE an 1). Personnaliser :{' '}
+          Mêmes hypothèses que le comparateur par défaut : année 2 (régime établi), sans ACRE, sans charges ni optimisations,
+          commune moyenne, {DEFAULT_PORTAGE_COMM} % de frais de gestion en portage, 1 part fiscale. Pour affiner :{' '}
           <Link href="/comparateur" className="text-indigo-600 dark:text-indigo-400 hover:underline">
             comparateur
           </Link>{' '}
@@ -339,7 +354,37 @@ export function TjmRevenuNetOutilPanel() {
             <tbody>
               {resultats.map((r) => (
                 <tr key={r.id} className="border-b border-slate-100 dark:border-slate-700">
-                  <td className="py-2 text-slate-900 dark:text-white">{r.id}</td>
+                  <td className="py-2 text-slate-900 dark:text-white align-top">
+                    {r.id === 'Micro' ? (
+                      <div className="flex flex-col gap-2 min-w-0 sm:min-w-[220px]">
+                        <span className="font-semibold">Micro</span>
+                        <label htmlFor="tjm-revenu-net-type-micro" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                          Type d’activité (plafond micro)
+                        </label>
+                        <select
+                          id="tjm-revenu-net-type-micro"
+                          value={typeActiviteMicro}
+                          onChange={(e) =>
+                            setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')
+                          }
+                          className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                        >
+                          {REGIMES.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        {microDepasse && (
+                          <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                            Plafond micro dépassé (+{Math.round(depassementMicro).toLocaleString('fr-FR')} €)
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span>{r.id}</span>
+                    )}
+                  </td>
                   <td className="py-2 text-right tabular-nums font-medium">{Math.round(r.net).toLocaleString('fr-FR')} €</td>
                   <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">
                     {r.tauxNet != null ? `${Number(r.tauxNet).toFixed(1)} %` : '–'}
@@ -409,7 +454,7 @@ export function TauxEffectifIrOutilPanel() {
             <input
               type="number"
               min={0}
-              step={1000}
+              step={1}
               value={revenuImposable || ''}
               onChange={(e) => setRevenuImposable(Math.max(0, Number(e.target.value) || 0))}
               className="w-full mt-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
@@ -491,7 +536,7 @@ export function CotisationsTnsOutilPanel() {
           <input
             type="number"
             min={0}
-            step={1000}
+            step={1}
             value={benefice || ''}
             onChange={(e) => setBenefice(Math.max(0, Number(e.target.value) || 0))}
             className="w-full max-w-xs mt-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
