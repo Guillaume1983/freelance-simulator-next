@@ -30,10 +30,11 @@ export default function SimulateurHubPage() {
             </div>
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                Simulation 5 ans
+                Simulations freelance par statut (5 ans)
               </h1>
               <p className="mt-1 text-slate-500 dark:text-slate-400">
-                Choisissez un statut pour lancer une simulation sur 5 ans (croissance du CA ; ACRE, CFE, etc. selon le statut).
+                Simulation portage salarial, micro-entreprise, EURL à l’IR ou à l’IS, SASU : même outil, paramètres adaptés à
+                chaque régime (croissance du CA, ACRE, CFE, etc. selon le cas).
               </p>
               <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
                 Ces projections sont indicatives et reposent sur des hypothèses simplifiées. Pour valider un choix de statut, rapprochez-vous d&apos;un expert-comptable.

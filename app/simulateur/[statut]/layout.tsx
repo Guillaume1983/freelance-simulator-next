@@ -1,77 +1,72 @@
 import type { Metadata } from 'next';
+import { getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
+import {
+  getSimulateurStatutSeo,
+  isSimulateurStatutSlug,
+} from '@/lib/seo/simulateurStatutContent';
 
-const BASE = 'https://www.freelance-simulateur.fr';
+const ogImage = {
+  url: '/og-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'Freelance Simulateur — simulateur par statut',
+} as const;
 
-/** Métadonnées et canonical distincts par URL pour l’indexation (évite tout vers /simulateur). */
-const META_BY_SLUG: Record<
-  string,
-  { title: string; description: string }
-> = {
-  portage: {
-    title: 'Simulateur portage salarial : revenu net sur 5 ans',
-    description:
-      'Simulez votre salaire net en portage salarial sur 5 ans : frais de gestion, cotisations et évolution du chiffre d’affaires. Indicatif, barèmes 2026.',
-  },
-  micro: {
-    title: 'Simulateur micro-entreprise : net après cotisations et impôt',
-    description:
-      'Projection 5 ans en micro-entreprise : plafonds, versement libératoire ou IR, ACRE, CFE et croissance du CA pour estimer votre revenu net.',
-  },
-  'eurl-ir': {
-    title: 'Simulateur EURL à l’IR : gérant TNS, projection 5 ans',
-    description:
-      'Simulez une EURL à l’impôt sur le revenu : résultat, cotisations TNS, IR du foyer et charges réelles sur 5 ans.',
-  },
-  'eurl-is': {
-    title: 'Simulateur EURL à l’IS : IS, rémunération et résultat',
-    description:
-      'Projection 5 ans pour une EURL à l’impôt sur les sociétés : IS, rémunération du gérant, dividendes et trésorerie indicative.',
-  },
-  sasu: {
-    title: 'Simulateur SASU : IS, salaire président et dividendes',
-    description:
-      'Simulez une SASU sur 5 ans : impôt sur les sociétés, rémunération assimilée salarié, dividendes (PFU), ACRE et CFE.',
-  },
-};
-
-const DEFAULT_META = {
-  title: 'Simulateur par statut freelance : Portage, Micro, EURL, SASU',
-  description:
-    'Simulateur détaillé par statut (portage salarial, micro-entreprise, EURL IR/IS, SASU) avec projection 5 ans et options selon le cas.',
-};
-
-type Props = { params: Promise<{ statut: string }> };
+type Props = { children: React.ReactNode; params: Promise<{ statut: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { statut } = await params;
   const slug = (statut ?? '').toLowerCase();
-  const meta = META_BY_SLUG[slug] ?? DEFAULT_META;
-  const canonical = `${BASE}/simulateur/${encodeURIComponent(slug)}`;
+  const seo = getSimulateurStatutSeo(slug);
+  const canonical = `${SITE_URL}/simulateur/${encodeURIComponent(slug)}`;
 
   return {
-    title: meta.title,
-    description: meta.description,
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
     alternates: { canonical },
     openGraph: {
-      title: `${meta.title} | Freelance Simulateur`,
-      description: meta.description,
+      title: `${seo.title} | Freelance Simulateur`,
+      description: seo.description,
       url: canonical,
       siteName: 'Freelance Simulateur',
       locale: 'fr_FR',
       type: 'website',
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${meta.title} | Freelance Simulateur`,
-      description: meta.description,
+      title: `${seo.title} | Freelance Simulateur`,
+      description: seo.description,
+      images: ['/og-image.png'],
     },
   };
 }
 
-export default function SimulateurStatutLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
+export default async function SimulateurStatutLayout({ children, params }: Props) {
+  const { statut } = await params;
+  const slug = (statut ?? '').toLowerCase();
+  const seo = getSimulateurStatutSeo(slug);
+  const canonical = `${SITE_URL}/simulateur/${encodeURIComponent(slug)}`;
+
+  const structured = isSimulateurStatutSlug(slug)
+    ? getWebPageFaqJsonLd({
+        canonicalUrl: canonical,
+        title: seo.title,
+        description: seo.description,
+        faq: seo.faq,
+      })
+    : null;
+
+  return (
+    <>
+      {structured ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+        />
+      ) : null}
+      {children}
+    </>
+  );
 }

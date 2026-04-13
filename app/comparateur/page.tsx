@@ -1,12 +1,25 @@
+import type { Metadata } from 'next';
 import ComparateurView from '@/components/comparateur/ComparateurView';
 import Footer from '@/components/Footer';
+import { getComparateurPageJsonLd } from '@/lib/seo/mainPagesJsonLd';
+import { comparateurPageMetadata } from '@/lib/seo/mainPagesMetadata';
 import Link from 'next/link';
+
+export const metadata: Metadata = comparateurPageMetadata;
+
+const comparateurJsonLd = getComparateurPageJsonLd();
 
 export default function ComparateurPage() {
   return (
     <ComparateurView>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(comparateurJsonLd) }}
+      />
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-10 text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">
-        <h1 className="sr-only">Comparateur de statuts freelance 2026</h1>
+        <h1 className="sr-only">
+          Comparateur de statuts freelance : portage, micro-entreprise, EURL et SASU (2026)
+        </h1>
 
         <h2 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
           Pourquoi comparer les statuts freelance ?

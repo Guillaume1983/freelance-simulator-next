@@ -1,12 +1,21 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Simulateur freelance 5 ans : Portage, Micro, EURL, SASU',
+  title: 'Simulation freelance 5 ans : portage, micro, EURL, SASU (gratuit)',
   description:
-    'Projetez votre activité freelance sur 5 ans : portage salarial, micro-entreprise, EURL IR/IS et SASU, avec croissance du chiffre d’affaires et options selon le statut (ACRE, CFE, etc. lorsque le modèle les intègre).',
+    'Simulations par statut sur 5 ans : portage salarial, micro-entreprise, EURL à l’IR ou à l’IS, SASU. Simulez revenu net, cotisations et fiscalité — croissance du CA, ACRE, CFE selon le cas. Barèmes 2026, indicatif.',
+  keywords: [
+    'simulation freelance',
+    'simulation portage salarial',
+    'simulation micro entreprise',
+    'simulation EURL',
+    'simulation SASU',
+    'simulateur 5 ans',
+  ],
   openGraph: {
-    title: 'Simulateur freelance 5 ans | Freelance Simulateur',
-    description: 'Simulation 5 ans par statut : Portage, Micro, EURL, SASU. Paramètres et options selon le cas.',
+    title: 'Simulation freelance 5 ans | Freelance Simulateur',
+    description:
+      'Choisissez votre statut : simulation portage, micro, EURL ou SASU sur 5 ans avec les barèmes en vigueur.',
     url: 'https://www.freelance-simulateur.fr/simulateur',
   },
   alternates: { canonical: 'https://www.freelance-simulateur.fr/simulateur' },

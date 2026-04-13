@@ -90,7 +90,54 @@ export function getArticleJsonLd(article: {
   };
 }
 
-/** Page institutionnelle À propos. */
+/** WebPage + FAQ (simulateur/[statut], comparateur, outils…) pour rich results. */
+export function getWebPageFaqJsonLd(input: {
+  canonicalUrl: string;
+  title: string;
+  description: string;
+  faq: { q: string; a: string }[];
+}) {
+  const nodes: Record<string, unknown>[] = [
+    {
+      '@type': 'WebPage',
+      '@id': `${input.canonicalUrl}#webpage`,
+      url: input.canonicalUrl,
+      name: input.title,
+      description: input.description,
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Freelance Simulateur',
+        url: SITE_URL,
+      },
+      inLanguage: 'fr-FR',
+      publisher: { '@type': 'Organization', name: 'Freelance Simulateur', url: SITE_URL },
+    },
+  ];
+
+  if (input.faq.length > 0) {
+    nodes.push({
+      '@type': 'FAQPage',
+      '@id': `${input.canonicalUrl}#faq`,
+      mainEntity: input.faq.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.a,
+        },
+      })),
+    });
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': nodes,
+  };
+}
+
+/** @deprecated Utiliser getWebPageFaqJsonLd */
+export const getSimulateurStatutPageJsonLd = getWebPageFaqJsonLd;
+
 export function getAboutPageJsonLd() {
   return {
     '@context': 'https://schema.org',

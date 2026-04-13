@@ -1,12 +1,25 @@
+import type { Metadata } from 'next';
 import OutilsUnifiedClient from '@/components/outils/OutilsUnifiedClient';
 import Footer from '@/components/Footer';
+import { getOutilsPageJsonLd } from '@/lib/seo/mainPagesJsonLd';
+import { outilsPageMetadata } from '@/lib/seo/mainPagesMetadata';
 import Link from 'next/link';
+
+export const metadata: Metadata = outilsPageMetadata;
+
+const outilsJsonLd = getOutilsPageJsonLd();
 
 export default function OutilsPage() {
   return (
     <OutilsUnifiedClient>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(outilsJsonLd) }}
+      />
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-10 text-[14px] leading-relaxed text-slate-500 dark:text-slate-400">
-        <h1 className="sr-only">Outils et calculateurs freelance 2026</h1>
+        <h1 className="sr-only">
+          Outils freelance : calculateurs IK, CFE, ACRE, micro, TVA, TJM, IR et cotisations TNS (2026)
+        </h1>
 
         <h2 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
           Des calculateurs pour piloter votre activité
