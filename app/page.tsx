@@ -256,8 +256,14 @@ export default function Home() {
         </div>
 
         {/* Entrées principales */}
-        <section className="relative z-10 bg-page-settings py-12 md:py-16">
+        <section
+          className="relative z-10 bg-page-settings py-12 md:py-16"
+          aria-labelledby="home-main-tools-heading"
+        >
           <div className="max-w-[1000px] mx-auto px-4 md:px-6">
+            <h2 id="home-main-tools-heading" className="sr-only">
+              Comparateur, simulateur et outils
+            </h2>
             {/* Ligne 1 : 3 cartes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-6">
               <Link
@@ -363,7 +369,7 @@ export default function Home() {
                   <div className="w-12 h-12 mx-auto rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
                     <Lock className="w-6 h-6" />
                   </div>
-                  <h4 className="font-black text-slate-900 dark:text-white text-sm">Compte minimal</h4>
+                  <h3 className="font-black text-slate-900 dark:text-white text-sm">Compte minimal</h3>
                   <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400">
                     Pas de profil fiscal détaillé : seule une adresse email pour créer le compte et lier la sauvegarde.
                   </p>
