@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import { getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
-import {
-  getSimulateurStatutSeo,
-  isSimulateurStatutSlug,
-} from '@/lib/seo/simulateurStatutContent';
+import { getSiteGlobalFaqPairs, getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
+import { getSimulateurStatutSeo } from '@/lib/seo/simulateurStatutContent';
 
 const ogImage = {
   url: '/og-image.png',
@@ -49,23 +46,19 @@ export default async function SimulateurStatutLayout({ children, params }: Props
   const seo = getSimulateurStatutSeo(slug);
   const canonical = `${SITE_URL}/simulateur/${encodeURIComponent(slug)}`;
 
-  const structured = isSimulateurStatutSlug(slug)
-    ? getWebPageFaqJsonLd({
-        canonicalUrl: canonical,
-        title: seo.title,
-        description: seo.description,
-        faq: seo.faq,
-      })
-    : null;
+  const structured = getWebPageFaqJsonLd({
+    canonicalUrl: canonical,
+    title: seo.title,
+    description: seo.description,
+    faqLists: [[...seo.faq], getSiteGlobalFaqPairs()],
+  });
 
   return (
     <>
-      {structured ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
-        />
-      ) : null}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+      />
       {children}
     </>
   );

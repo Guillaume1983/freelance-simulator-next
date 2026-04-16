@@ -5,12 +5,7 @@ import './globals.css';
 import { SimulationProvider } from '@/context/SimulationContext';
 import AppShell from '@/components/AppShell';
 import ChatBot from '@/components/ChatBot';
-import {
-  getFaqPageJsonLd,
-  getOrganizationJsonLd,
-  getWebApplicationJsonLd,
-  SITE_URL,
-} from '@/lib/seo/jsonLd';
+import { getOrganizationJsonLd, getWebApplicationJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -95,12 +90,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(getWebApplicationJsonLd()),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(getFaqPageJsonLd()),
           }}
         />
         <SimulationProvider>

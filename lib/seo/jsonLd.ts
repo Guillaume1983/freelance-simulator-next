@@ -43,19 +43,24 @@ export function getWebApplicationJsonLd() {
   };
 }
 
-export function getFaqPageJsonLd() {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  };
+export type FaqPair = { q: string; a: string };
+
+/** FAQ globale du site (section accueil / contenu partagé). */
+export function getSiteGlobalFaqPairs(): FaqPair[] {
+  return FAQ_ITEMS.map((item) => ({ q: item.question, a: item.answer }));
+}
+
+/** Fusion de listes de Q/R : une seule entrée par libellé de question (insensible à la casse / espaces). */
+export function dedupeFaqByQuestion(entries: FaqPair[]): FaqPair[] {
+  const seen = new Set<string>();
+  const out: FaqPair[] = [];
+  for (const e of entries) {
+    const k = e.q.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(e);
+  }
+  return out;
 }
 
 /** Données structurées Article pour les guides. */
@@ -90,13 +95,18 @@ export function getArticleJsonLd(article: {
   };
 }
 
-/** WebPage + FAQ (simulateur/[statut], comparateur, outils…) pour rich results. */
+/**
+ * Un seul bloc JSON-LD avec @graph : WebPage + au plus un FAQPage.
+ * `faqLists` : plusieurs tableaux concaténés puis dédoublonnés dans `FAQPage.mainEntity`.
+ */
 export function getWebPageFaqJsonLd(input: {
   canonicalUrl: string;
   title: string;
   description: string;
-  faq: { q: string; a: string }[];
+  faqLists: FaqPair[][];
 }) {
+  const mergedFaq = dedupeFaqByQuestion(input.faqLists.flat());
+
   const nodes: Record<string, unknown>[] = [
     {
       '@type': 'WebPage',
@@ -114,11 +124,11 @@ export function getWebPageFaqJsonLd(input: {
     },
   ];
 
-  if (input.faq.length > 0) {
+  if (mergedFaq.length > 0) {
     nodes.push({
       '@type': 'FAQPage',
       '@id': `${input.canonicalUrl}#faq`,
-      mainEntity: input.faq.map((item) => ({
+      mainEntity: mergedFaq.map((item) => ({
         '@type': 'Question',
         name: item.q,
         acceptedAnswer: {

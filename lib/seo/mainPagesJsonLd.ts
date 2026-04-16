@@ -1,4 +1,4 @@
-import { getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
+import { getSiteGlobalFaqPairs, getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
 import {
   comparateurSeo,
   homePageDescription,
@@ -53,7 +53,7 @@ export function getHomePageJsonLd() {
     canonicalUrl: SITE_URL,
     title: homePageTitleAbsolute,
     description: homePageDescription,
-    faq: [],
+    faqLists: [getSiteGlobalFaqPairs()],
   });
 }
 
@@ -62,7 +62,7 @@ export function getComparateurPageJsonLd() {
     canonicalUrl: `${SITE_URL}/comparateur`,
     title: comparateurSeo.title,
     description: comparateurSeo.description,
-    faq: [...COMPARATEUR_FAQ],
+    faqLists: [[...COMPARATEUR_FAQ], getSiteGlobalFaqPairs()],
   });
 }
 
@@ -71,6 +71,6 @@ export function getOutilsPageJsonLd() {
     canonicalUrl: `${SITE_URL}/outils`,
     title: outilsSeo.title,
     description: outilsSeo.description,
-    faq: [...OUTILS_FAQ],
+    faqLists: [[...OUTILS_FAQ], getSiteGlobalFaqPairs()],
   });
 }
