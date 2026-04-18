@@ -24,6 +24,7 @@ import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
+import { ShareSimulationLinkButton } from '@/components/simulation/ShareSimulationLinkButton';
 import { PdfComparateurDocument } from '@/components/pdf/PdfComparateurDocument';
 import { PdfPrintHost } from '@/components/pdf/PdfPrintHost';
 
@@ -267,6 +268,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
                   <PdfIcon size={20} className="shrink-0" />
                   <span className="text-[10px] font-bold uppercase tracking-wide">PDF</span>
                 </button>
+                <ShareSimulationLinkButton variant="compact" />
               </span>
             </div>
             <div
@@ -303,6 +305,7 @@ function ComparateurViewContent({ children }: { children?: React.ReactNode }) {
                 <PdfIcon size={24} className="shrink-0" />
                 <span className="text-xs font-bold uppercase tracking-wide">PDF</span>
               </button>
+              <ShareSimulationLinkButton variant="mobile" />
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DAYS_FOR_PALIER, STATUT_SLUG_TO_ID } from '@/lib/simulateur/paliers';
+import { SHARE_QUERY_KEY } from '@/lib/simulateur/simulationShareCodec';
 
 type Setters = { setTjm: (n: number) => void; setDays: (n: number) => void };
 
@@ -18,6 +19,8 @@ export function useComparateurUrlSync(setters: Setters) {
   const appliedRef = useRef<string>('');
 
   useEffect(() => {
+    if (searchParams.get(SHARE_QUERY_KEY)) return;
+
     const caStr = searchParams.get('ca');
     const statutSlug = searchParams.get('statut');
     const key = `${caStr ?? ''}|${statutSlug ?? ''}`;

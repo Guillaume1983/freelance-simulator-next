@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { SimulationProvider } from '@/context/SimulationContext';
 import AppShell from '@/components/AppShell';
 import ChatBot from '@/components/ChatBot';
+import { SimulationShareHydrator } from '@/components/simulation/SimulationShareHydrator';
 import { getOrganizationJsonLd, getWebApplicationJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -94,6 +96,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <SimulationProvider>
           <AppShell>{children}</AppShell>
+          <Suspense fallback={null}>
+            <SimulationShareHydrator />
+          </Suspense>
           <ChatBot />
         </SimulationProvider>
         <Analytics />

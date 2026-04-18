@@ -27,12 +27,17 @@ import {
   SimulationSettingsSidebar,
   type SidebarPanelId,
 } from '@/components/simulation/SimulationSettingsSidebar';
+import { ShareSimulationLinkButton } from '@/components/simulation/ShareSimulationLinkButton';
 import { PdfPrintHost } from '@/components/pdf/PdfPrintHost';
 import { PdfSimulateurDocument } from '@/components/pdf/PdfSimulateurDocument';
 import { PLAFOND_MICRO_BNC, PLAFOND_MICRO_BIC } from '@/lib/constants';
 import { projeterSurNAns } from '@/lib/projections';
 import { buildCaRepartitionSegments } from '@/lib/simulateur/caRepartitionColors';
 import { buildComparateurQuery, STATUT_SLUG_TO_ID, VALID_STATUT_SLUGS } from '@/lib/simulateur/paliers';
+import {
+  SIMULATION_SHARE_APPLIED_EVENT,
+  type SimulationShareAppliedDetail,
+} from '@/lib/simulateur/simulationShareCodec';
 import { cn, fmtEur } from '@/lib/utils';
 
 const REGIME_HEX: Record<string, string> = {
@@ -191,6 +196,16 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
     setYearIndex(0);
   }, [slug]);
 
+  useEffect(() => {
+    const onShare = (e: Event) => {
+      const d = (e as CustomEvent<SimulationShareAppliedDetail>).detail?.growthByYear;
+      if (!d || d.length !== 5) return;
+      setGrowthByYear(d.map((n) => Math.min(50, Math.max(0, Math.round(n)))));
+    };
+    window.addEventListener(SIMULATION_SHARE_APPLIED_EVENT, onShare);
+    return () => window.removeEventListener(SIMULATION_SHARE_APPLIED_EVENT, onShare);
+  }, []);
+
   const backLink = useMemo(() => {
     if (searchParams.get('from') === 'comparateur') {
       return { href: '/comparateur', label: 'Retour au comparateur' };
@@ -299,6 +314,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                   <PdfIcon size={20} className="shrink-0" />
                   <span className="text-[10px] font-bold uppercase tracking-wide">PDF</span>
                 </button>
+                <ShareSimulationLinkButton growthByYear={growthByYear} variant="compact" />
                 <Link
                   href={comparateurHref}
                   className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-600 text-[10px] font-bold uppercase tracking-wide"
@@ -342,6 +358,7 @@ function SimulateurStatutViewContent({ children }: { children?: React.ReactNode 
                 <PdfIcon size={24} className="shrink-0" />
                 <span className="text-xs font-bold uppercase tracking-wide">PDF</span>
               </button>
+              <ShareSimulationLinkButton growthByYear={growthByYear} variant="mobile" />
               <Link
                 href={comparateurHref}
                 className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-600 min-h-[44px] text-xs font-bold uppercase tracking-wide"
