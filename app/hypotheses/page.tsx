@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Footer from '@/components/Footer';
 import { SitePageHeader } from '@/components/SitePageHeader';
+import { SEUIL_TRIMESTRE_RETRAITE } from '@/lib/constants';
 
 export default function HypothesesPage() {
   return (
@@ -134,6 +135,47 @@ export default function HypothesesPage() {
               <li>
                 Les frais de gestion additionnels et services optionnels ne sont pas modélisés de
                 façon exhaustive.
+              </li>
+            </ul>
+          </div>
+
+          <div id="retraite-trimestres">
+            <h2 className="font-bold text-slate-900 dark:text-white mb-1">
+              Retraite : badge « trimestres validés »
+            </h2>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>
+                Le badge <strong>~X/4 trim. retraite</strong> (ou « 4 trim. retraite validés ») est un{' '}
+                <strong>indicateur pédagogique</strong> calculé dans le moteur à partir de la{' '}
+                <strong>base avant impôt sur l&apos;année affichée</strong>, pas une attestation
+                Urssaf ni le nombre réel de trimestres acquis.
+              </li>
+              <li>
+                Formule simplifiée&nbsp;:{' '}
+                <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">
+                  min(4, ⌊ base_avant_impôt_annuelle / seuil ⌋)
+                </code>
+                . Le seuil vient de la constante{' '}
+                <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">SEUIL_TRIMESTRE_RETRAITE</code> (
+                {SEUIL_TRIMESTRE_RETRAITE.toLocaleString('fr-FR')}&nbsp;€), identique à la valeur indiquée sur la page{' '}
+                <Link href="/bareme#seuil-retraite-moteur" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                  Barèmes &amp; plafonds
+                </Link>
+                .
+              </li>
+              <li>
+                <strong>Assimilé salarié</strong> (portage, président de SASU dans ce modèle)&nbsp;: le
+                diviseur est {SEUIL_TRIMESTRE_RETRAITE.toLocaleString('fr-FR')}&nbsp;€.{' '}
+                <strong>TNS</strong> (micro-entreprise, EURL IR, EURL IS)&nbsp;: le diviseur est majoré par un
+                coefficient <strong>1,6</strong> (soit{' '}
+                {Math.round(SEUIL_TRIMESTRE_RETRAITE * 1.6).toLocaleString('fr-FR')}&nbsp;€).
+              </li>
+              <li>
+                En pratique légale, la validation d&apos;un trimestre dépend du <strong>revenu d&apos;activité</strong>, des{' '}
+                <strong>montants minimaux</strong> fixés chaque année, du <strong>prorata</strong> sur la période, des{' '}
+                <strong>plafonds</strong> (PSS, etc.) et du <strong>régime</strong> (professions libérales Cipav,
+                artisans, etc.). Ce modèle ne reproduit pas ces règles&nbsp;: il sert uniquement à comparer
+                visuellement les statuts dans l&apos;outil.
               </li>
             </ul>
           </div>

@@ -63,12 +63,13 @@ depensesPro = Σ (chargeAmounts[id] × 12) pour chaque charge active
 - **Règle :** CFE = 0 € en année 1 (exonération création)
 - **Modifier :** `lib/constants.ts` → `CFE_PAR_VILLE`
 
-### 1.5 Seuil trimestre retraite
+### 1.5 Seuil trimestre retraite (indicateur moteur)
 
-**Fichier :** `lib/constants.ts` (ligne 33)
+**Fichiers :** `lib/constants.ts` → `SEUIL_TRIMESTRE_RETRAITE` ; `lib/projections.ts` → `retirementQuarters`
 
-- **Valeur :** 1 800 € (assimilé salarié) / 2 880 € (TNS)
-- **Modifier :** `SEUIL_TRIMESTRE_RETRAITE`
+- **Constante :** une seule valeur en euros (`SEUIL_TRIMESTRE_RETRAITE`). Pour le **TNS**, le moteur utilise **1,6 ×** cette valeur comme diviseur ; pour l’**assimilé salarié** (portage, SASU dans ce modèle), le diviseur est la valeur telle quelle.
+- **Formule affichée dans l’outil :** à partir de la **base annuelle avant impôt**, nombre entier `min(4, ⌊ base / seuil ⌋)` avec le seuil ci-dessus selon le type de régime. Ce n’est **pas** la règle Urssaf complète (revenu d’activité, minimum annuel, prorata, plafonds, caisse, etc.).
+- **Texte utilisateur :** page `/hypotheses` (ancre `#retraite-trimestres`) et page `/bareme` (ancre `#seuil-retraite-moteur`).
 
 ---
 

@@ -295,11 +295,16 @@ export default function BaremePage() {
           </p>
         </section>
 
-        <section>
+        <section id="seuil-retraite-moteur">
           <h2 className="text-base font-bold text-slate-900 dark:text-white">Autres constantes</h2>
           <p className="mt-2">
             Seuil trimestre de retraite (base utilisée dans le moteur pour l’affichage du seuil) :{' '}
-            <strong>{eur(SEUIL_TRIMESTRE_RETRAITE)}</strong> / trimestre.
+            <strong>{eur(SEUIL_TRIMESTRE_RETRAITE)}</strong> / trimestre. Utilisé comme diviseur de la base annuelle
+            avant impôt pour l’indicateur « trimestres » — voir la page{' '}
+            <Link href="/hypotheses#retraite-trimestres" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              Hypothèses
+            </Link>
+            .
           </p>
         </section>
 

@@ -15,9 +15,11 @@ export function RetirementBadge({
 }) {
   const validated = quarters >= 4;
   const label = validated ? '4 trim. retraite validés' : `~${quarters}/4 trim. retraite`;
+  const titleHint =
+    'Indicateur simplifié (0 à 4) à partir de la base avant impôt et d’un seuil forfaitaire — pas le nombre légal de trimestres Urssaf. Détails : page Hypothèses, section Retraite.';
   return (
     <span
-      title={`${label} · ${regimeId}`}
+      title={`${label} · ${regimeId} — ${titleHint}`}
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[8px] font-bold cursor-default select-none ${
         validated
           ? 'bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400'
