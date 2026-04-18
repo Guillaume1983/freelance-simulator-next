@@ -12,7 +12,7 @@ export function getOrganizationJsonLd() {
     url: SITE_URL,
     logo: LOGO_URL,
     description:
-      'Outil en ligne de comparaison et de simulation de revenus nets pour les travailleurs indépendants en France (portage salarial, micro-entreprise, EURL, SASU).',
+      'Outil en ligne de comparaison et de simulation de revenus nets pour travailleurs indépendants et freelances en France (portage salarial, micro-entreprise / auto-entrepreneur, EURL, SASU).',
   };
 }
 
@@ -36,7 +36,7 @@ export function getWebApplicationJsonLd() {
       description: 'Accès gratuit au comparateur et aux simulateurs.',
     },
     description:
-      'Comparateur et simulateurs de revenu net freelance (portage, micro-entreprise, EURL IR/IS, SASU). Les résultats sont indicatifs et s’appuient sur les barèmes de la Loi de Finances en vigueur et sur les publications de référence (Urssaf, impots.gouv.fr). Ils ne constituent pas un conseil fiscal ou social personnalisé.',
+      'Comparateur et simulateurs de revenu net pour freelances et auto-entrepreneurs (portage, micro-entreprise, EURL IR/IS, SASU). Les résultats sont indicatifs et s’appuient sur les barèmes de la Loi de Finances en vigueur et sur les publications de référence (Urssaf, impots.gouv.fr). Ils ne constituent pas un conseil fiscal ou social personnalisé.',
     author: { '@type': 'Organization', name: 'Freelance Simulateur', url: SITE_URL },
     publisher: { '@type': 'Organization', name: 'Freelance Simulateur', url: SITE_URL },
     inLanguage: 'fr-FR',

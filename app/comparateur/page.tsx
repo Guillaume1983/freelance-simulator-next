@@ -25,7 +25,7 @@ export default function ComparateurPage() {
           Pourquoi comparer les statuts freelance ?
         </h2>
         <p className="mb-3">
-          Le choix du statut juridique détermine directement votre revenu net, vos cotisations sociales, votre imposition et votre protection. Portage salarial, micro-entreprise, EURL (IR ou IS) et SASU répondent chacun à des logiques différentes en termes de charges, de plafonds et de couverture sociale. Ce comparateur vous permet de visualiser ces différences sur un même chiffre d&apos;affaires pour identifier le régime le plus adapté à votre situation.
+          Le choix du statut juridique détermine directement votre revenu net, vos cotisations sociales, votre imposition et votre protection. Portage salarial, micro-entreprise (souvent dite auto-entreprise), EURL (IR ou IS) et SASU répondent chacun à des logiques différentes en termes de charges, de plafonds et de couverture sociale pour un indépendant. Ce comparateur vous permet de visualiser ces différences sur un même chiffre d&apos;affaires pour identifier le régime le plus adapté à votre situation.
         </p>
         <p className="mb-6 text-[13px] italic">
           Les résultats sont indicatifs et s&apos;appuient sur les barèmes de la Loi de Finances 2026 (Urssaf, impots.gouv.fr). Ils ne remplacent pas un conseil personnalisé auprès d&apos;un expert-comptable.

@@ -3,9 +3,10 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Simulation freelance 5 ans : portage, micro, EURL, SASU (gratuit)',
   description:
-    'Simulations par statut sur 5 ans : portage salarial, micro-entreprise, EURL à l’IR ou à l’IS, SASU. Simulez revenu net, cotisations et fiscalité — croissance du CA, ACRE, CFE selon le cas. Barèmes 2026, indicatif.',
+    'Simulations par statut sur 5 ans pour indépendants : portage salarial, micro-entreprise (auto-entrepreneur), EURL à l’IR ou à l’IS, SASU. Revenu net, cotisations et fiscalité — croissance du CA, ACRE, CFE selon le cas. Barèmes 2026, indicatif.',
   keywords: [
     'simulation freelance',
+    'simulation auto-entrepreneur',
     'simulation portage salarial',
     'simulation micro entreprise',
     'simulation EURL',

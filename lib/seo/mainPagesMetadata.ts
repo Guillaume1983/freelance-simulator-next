@@ -13,7 +13,7 @@ export const homePageTitleAbsolute =
   'Simulateur freelance : comparateur de revenu net (Portage, Micro, EURL, SASU) 2026 | Freelance Simulateur';
 
 export const homePageDescription =
-  'Simulateur freelance et comparateur de revenu net : portage, micro-entreprise, EURL IR/IS, SASU. Simulation freelance sur 5 ans, outils (TJM, IK, TVA…), barèmes 2026. Indicatif.';
+  'Simulateur freelance et comparateur de revenu net pour indépendants : portage, micro-entreprise (auto-entrepreneur), EURL IR/IS, SASU. Simulation sur 5 ans, outils (TJM, IK, TVA…), barèmes 2026. Indicatif.';
 
 /** Page d’accueil : titre absolu pour contrôler l’affichage dans la SERP. */
 export const homePageMetadata: Metadata = {
@@ -23,9 +23,11 @@ export const homePageMetadata: Metadata = {
   description: homePageDescription,
   keywords: [
     'simulateur freelance',
+    'simulateur auto-entrepreneur',
     'simulation freelance',
     'freelance simulateur',
     'comparateur statut freelance',
+    'comparateur travailleur indépendant',
     'revenu net freelance',
   ],
   alternates: { canonical: SITE_URL },
@@ -33,7 +35,7 @@ export const homePageMetadata: Metadata = {
     title:
       'Simulateur freelance : comparateur de revenu net (Portage, Micro, EURL, SASU) 2026',
     description:
-      'Comparez et simulez votre revenu net selon le statut : portage, micro, EURL, SASU. Barèmes 2026.',
+      'Comparez et simulez votre revenu net (freelance, auto-entrepreneur, indépendant) : portage, micro, EURL, SASU. Barèmes 2026.',
     url: SITE_URL,
     siteName: 'Freelance Simulateur',
     locale: 'fr_FR',
@@ -45,7 +47,7 @@ export const homePageMetadata: Metadata = {
     title:
       'Simulateur freelance : comparateur de revenu net (Portage, Micro, EURL, SASU) 2026',
     description:
-      'Comparez et simulez votre revenu net selon le statut : portage, micro, EURL, SASU. Barèmes 2026.',
+      'Comparez et simulez votre revenu net (freelance, auto-entrepreneur, indépendant) : portage, micro, EURL, SASU. Barèmes 2026.',
     images: ['/og-image.png'],
   },
 };
@@ -54,7 +56,7 @@ export const homePageMetadata: Metadata = {
 export const comparateurSeo = {
   title: 'Comparateur de statuts freelance : portage, micro, EURL, SASU 2026',
   description:
-    'Comparateur freelance : revenu net côte à côte pour portage salarial, micro-entreprise, EURL IR/IS et SASU. Même profil (TJM, charges, foyer). Indicatif, barèmes 2026.',
+    'Comparateur pour freelances et indépendants : revenu net côte à côte (portage, micro-entreprise / auto-entrepreneur, EURL IR/IS, SASU). Même profil (TJM, charges, foyer). Indicatif, barèmes 2026.',
 } as const;
 
 export const comparateurPageMetadata: Metadata = {
@@ -62,6 +64,7 @@ export const comparateurPageMetadata: Metadata = {
   description: comparateurSeo.description,
   keywords: [
     'comparateur statut freelance',
+    'comparateur auto-entrepreneur',
     'comparaison statut freelance',
     'comparer portage micro EURL SASU',
     'revenu net comparateur',
@@ -72,7 +75,7 @@ export const comparateurPageMetadata: Metadata = {
   openGraph: {
     title: 'Comparateur de statuts freelance 2026 | Freelance Simulateur',
     description:
-      'Visualisez le revenu net pour chaque statut sur un même chiffre d’affaires et les mêmes hypothèses.',
+      'Portage, micro-entreprise (auto-entrepreneur), EURL, SASU : même CA, même hypothèses — revenu net comparé.',
     url: `${SITE_URL}/comparateur`,
     siteName: 'Freelance Simulateur',
     locale: 'fr_FR',
@@ -83,7 +86,7 @@ export const comparateurPageMetadata: Metadata = {
     card: 'summary_large_image',
     title: 'Comparateur de statuts freelance 2026',
     description:
-      'Portage, micro, EURL, SASU : comparez le revenu net sur un même profil.',
+      'Freelances et indépendants : portage, micro, EURL, SASU — comparez le revenu net sur un même profil.',
     images: ['/og-image.png'],
   },
 };
@@ -91,7 +94,7 @@ export const comparateurPageMetadata: Metadata = {
 export const outilsSeo = {
   title: 'Outils freelance : IK, CFE, ACRE, micro, TVA, TJM, IR, cotisations TNS',
   description:
-    'Outils et calculateurs pour freelances : indemnités km, CFE, ACRE, plafonds micro-entreprise, franchise TVA, TJM vers net, taux IR effectif, cotisations TNS. Barèmes 2026, résultats indicatifs.',
+    'Outils pour freelances et auto-entrepreneurs : indemnités km, CFE, ACRE, plafonds micro-entreprise, franchise TVA, TJM vers net, taux IR effectif, cotisations TNS. Barèmes 2026, résultats indicatifs.',
 } as const;
 
 export const outilsPageMetadata: Metadata = {
@@ -99,6 +102,7 @@ export const outilsPageMetadata: Metadata = {
   description: outilsSeo.description,
   keywords: [
     'outils freelance',
+    'outils auto-entrepreneur',
     'calculateurs freelance',
     'calculateur freelance',
     'indemnités kilométriques freelance',

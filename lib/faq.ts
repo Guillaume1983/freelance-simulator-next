@@ -3,7 +3,7 @@ export const FAQ_ITEMS = [
   {
     question: 'Quel est le meilleur statut pour un freelance ?',
     answer:
-      'Cela dépend de votre chiffre d\'affaires, de vos charges et de votre situation personnelle. La micro-entreprise est idéale pour débuter (simplicité, faibles charges). L\'EURL ou la SASU deviennent pertinents au-delà de certains plafonds ou pour optimiser fiscalement. Utilisez le comparateur pour voir l\'impact sur votre revenu net.',
+      'Cela dépend de votre chiffre d\'affaires, de vos charges et de votre situation personnelle. La micro-entreprise (souvent appelée auto-entreprise ou auto-entrepreneur) est idéale pour débuter en indépendant (simplicité, charges sociales forfaitaires). L\'EURL ou la SASU deviennent pertinentes au-delà de certains plafonds ou pour optimiser fiscalement. Utilisez le comparateur pour voir l\'impact sur votre revenu net.',
   },
   {
     question: 'Comment est calculé le revenu net dans le simulateur ?',

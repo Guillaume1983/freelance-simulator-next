@@ -88,7 +88,7 @@ function OutilsUnifiedInner({ children }: { children?: React.ReactNode }) {
         backHref="/"
         backLabel="Retour à l'accueil"
         title="Outils"
-        subtitle="Calculatrices et simulateurs pour freelance et création d’entreprise. Choisissez un outil dans le menu."
+        subtitle="Calculatrices et simulateurs pour freelances, auto-entrepreneurs et création d’entreprise. Choisissez un outil dans le menu."
         tertiary={
           <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500 italic">
             Indicatif uniquement : pas un avis fiscal, social ou juridique.

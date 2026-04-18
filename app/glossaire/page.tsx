@@ -29,7 +29,7 @@ export default function GlossairePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <SitePageHeader
         title="Glossaire"
-        description="Termes fréquents autour du statut freelance, de la fiscalité et des cotisations, à titre pédagogique et indicatif."
+        description="Termes fréquents pour freelances et indépendants : statuts, fiscalité et cotisations, à titre pédagogique et indicatif."
       />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-8 text-sm text-slate-700 dark:text-slate-300">

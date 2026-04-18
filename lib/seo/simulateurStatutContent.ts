@@ -84,6 +84,7 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       'simuler micro entreprise',
       'simulateur micro entreprise',
       'simulation auto-entrepreneur',
+      'revenu net auto-entrepreneur',
     ],
   },
   'eurl-ir': {
@@ -177,13 +178,14 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
 export const SIMULATEUR_STATUT_DEFAULT: SimulateurStatutSeoBlock = {
   title: 'Simulations freelance par statut : portage, micro, EURL, SASU',
   description:
-    'Simulations par statut (portage, micro-entreprise, EURL IR/IS, SASU) sur 5 ans : cotisations, IR ou IS, ACRE et CFE selon les cas. Gratuit, barèmes 2026.',
+    'Simulations par statut pour indépendants (portage, micro-entreprise / auto-entrepreneur, EURL IR/IS, SASU) sur 5 ans : cotisations, IR ou IS, ACRE et CFE selon les cas. Gratuit, barèmes 2026.',
   h1: 'Simulations freelance par statut',
   intro:
-    'Choisissez un statut dans la liste pour ouvrir une simulation dédiée (portage salarial, micro-entreprise, EURL à l’IR ou à l’IS, SASU) avec les paramètres et barèmes adaptés.',
+    'Choisissez un statut dans la liste pour ouvrir une simulation dédiée (portage salarial, micro-entreprise ou auto-entrepreneur, EURL à l’IR ou à l’IS, SASU) avec les paramètres et barèmes adaptés.',
   faq: [],
   keywords: [
     'simulation freelance',
+    'simulation auto-entrepreneur',
     'simulation statut indépendant',
     'simulateur freelance',
     'simuler revenu freelance',

@@ -9,11 +9,11 @@ import {
 const COMPARATEUR_FAQ = [
   {
     q: 'Quel est le statut le plus avantageux en freelance ?',
-    a: "Il n'existe pas de réponse universelle : le meilleur statut dépend de votre chiffre d'affaires, de vos charges déductibles, de votre situation familiale et de vos objectifs (protection sociale, retraite, dividendes). Le comparateur vous aide à objectiver la différence de revenu net entre chaque option.",
+    a: "Il n'existe pas de réponse universelle : le meilleur statut dépend de votre chiffre d'affaires, de vos charges déductibles, de votre situation familiale et de vos objectifs (protection sociale, retraite, dividendes). Que vous soyez freelance, auto-entrepreneur ou autre indépendant, le comparateur vous aide à objectiver la différence de revenu net entre chaque option.",
   },
   {
     q: 'Comment sont calculées les cotisations ?',
-    a: 'Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise, barème TNS détaillé pour l’EURL IR, cotisations TNS forfaitaires (environ 45 %) pour l’EURL IS, cotisations assimilé salarié (environ 82 % du net) pour la SASU et le portage. Le comparateur part d’une situation type année 2 : l’ACRE (première année) n’y est pas appliquée. Utilisez le simulateur 5 ans pour la modéliser.',
+    a: 'Les cotisations sont estimées selon les taux en vigueur pour chaque régime : taux forfaitaire en micro-entreprise (auto-entrepreneur), barème TNS détaillé pour l’EURL IR, cotisations TNS forfaitaires (environ 45 %) pour l’EURL IS, cotisations assimilé salarié (environ 82 % du net) pour la SASU et le portage. Le comparateur part d’une situation type année 2 : l’ACRE (première année) n’y est pas appliquée. Utilisez le simulateur 5 ans pour la modéliser.',
   },
   {
     q: 'Comment fonctionne la SASU dans le comparateur ?',
