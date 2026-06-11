@@ -13,5 +13,14 @@ describe('SEO : canonical pages palier', () => {
     expect(canonical).toBe('https://www.freelance-simulateur.fr/simulateur/portage/100000');
     expect(ogUrl).toBe('https://www.freelance-simulateur.fr/simulateur/portage/100000');
   });
+
+  it('titre palier SASU orienté requête « simulation / simulateur SASU »', async () => {
+    const res = await generateMetadata({
+      params: Promise.resolve({ statut: 'sasu', ca: '100000' }),
+    });
+    expect((res as { title?: string }).title).toContain('Simulation SASU');
+    expect((res as { title?: string }).title).toContain('100');
+    expect((res as { description?: string }).description).toMatch(/Simulateur SASU/i);
+  });
 });
 

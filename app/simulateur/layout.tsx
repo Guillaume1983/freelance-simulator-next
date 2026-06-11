@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Simulation freelance 5 ans : portage, micro, EURL, SASU (gratuit)',
+  title: 'Simulateurs freelance 5 ans : portage, micro, EURL, SASU (gratuit)',
   description:
-    'Simulations par statut sur 5 ans pour indépendants : portage salarial, micro-entreprise (auto-entrepreneur), EURL à l’IR ou à l’IS, SASU. Revenu net, cotisations et fiscalité — croissance du CA, ACRE, CFE selon le cas. Barèmes 2026, indicatif.',
+    'Simulateurs et simulations par statut sur 5 ans : portage salarial, micro-entreprise (auto-entrepreneur), EURL à l’IR ou à l’IS, SASU (président, dividendes). Revenu net, cotisations et fiscalité — croissance du CA, ACRE, CFE selon le cas. Barèmes 2026, indicatif.',
   keywords: [
+    'simulateur freelance',
+    'simulateur SASU',
+    'simulateur micro entreprise',
+    'simulateur portage salarial',
     'simulation freelance',
-    'simulation auto-entrepreneur',
-    'simulation portage salarial',
-    'simulation micro entreprise',
-    'simulation EURL',
     'simulation SASU',
+    'simulation EURL',
     'simulateur 5 ans',
   ],
   openGraph: {

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getSiteGlobalFaqPairs, getWebPageFaqJsonLd, SITE_URL } from '@/lib/seo/jsonLd';
+import { SITE_URL } from '@/lib/seo/jsonLd';
 import { getSimulateurStatutSeo } from '@/lib/seo/simulateurStatutContent';
 
 const ogImage = {
@@ -40,26 +40,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function SimulateurStatutLayout({ children, params }: Props) {
-  const { statut } = await params;
-  const slug = (statut ?? '').toLowerCase();
-  const seo = getSimulateurStatutSeo(slug);
-  const canonical = `${SITE_URL}/simulateur/${encodeURIComponent(slug)}`;
-
-  const structured = getWebPageFaqJsonLd({
-    canonicalUrl: canonical,
-    title: seo.title,
-    description: seo.description,
-    faqLists: [[...seo.faq], getSiteGlobalFaqPairs()],
-  });
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
-      />
-      {children}
-    </>
-  );
+export default function SimulateurStatutLayout({ children }: Pick<Props, 'children'>) {
+  return <>{children}</>;
 }

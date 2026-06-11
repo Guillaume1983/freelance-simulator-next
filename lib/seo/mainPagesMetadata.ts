@@ -64,11 +64,13 @@ export const comparateurPageMetadata: Metadata = {
   description: comparateurSeo.description,
   keywords: [
     'comparateur statut freelance',
+    'comparateur SASU micro portage',
     'comparateur auto-entrepreneur',
     'comparaison statut freelance',
     'comparer portage micro EURL SASU',
     'revenu net comparateur',
     'simulateur comparatif freelance',
+    'simulateur SASU vs EURL',
     'comparateur revenu net freelance',
   ],
   alternates: { canonical: `${SITE_URL}/comparateur` },

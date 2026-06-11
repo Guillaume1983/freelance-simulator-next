@@ -29,9 +29,9 @@ export type SimulateurStatutSlug = (typeof SIMULATEUR_STATUT_SLUGS)[number];
 
 export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurStatutSeoBlock> = {
   portage: {
-    title: 'Simulation portage salarial : revenu net sur 5 ans (gratuit)',
+    title: 'Simulateur portage salarial : salaire net et cotisations sur 5 ans',
     description:
-      'Simulation portage salarial en ligne : salaire net, frais de gestion et cotisations sur 5 ans. Simuler freelance en portage — barèmes 2026, résultat indicatif.',
+      'Simulateur portage salarial gratuit : simulation salaire net, frais de gestion et cotisations sur 5 ans. Simuler le freelance en portage — barèmes 2026, résultat indicatif.',
     h1: 'Simulation portage salarial : revenu net sur 5 ans',
     intro:
       "Cette simulation de portage salarial en ligne estime votre salaire net après frais de gestion et cotisations, avec l'évolution du chiffre d'affaires sur cinq ans. Le portage permet de facturer comme indépendant tout en restant salarié du cabinet (couverture sociale, bulletin de paie). En général 5 à 10 % de frais de gestion sur le CA HT s'ajoutent aux cotisations salariales et patronales. L'ACRE et la CFE ne s'appliquent pas à ce statut dans notre modèle.",
@@ -53,14 +53,15 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       'simulation portage salarial',
       'simuler portage salarial',
       'simulateur portage salarial',
+      'simulateur salaire portage',
       'simulation salaire portage',
       'freelance portage simulation',
     ],
   },
   micro: {
-    title: 'Simulation micro-entreprise : net, cotisations et IR sur 5 ans',
+    title: 'Simulateur micro-entreprise : net, cotisations et IR sur 5 ans',
     description:
-      'Simulation micro-entreprise et auto-entrepreneur : CA, cotisations, versement libératoire ou IR, ACRE et CFE sur 5 ans. Simuler en ligne — barèmes 2026.',
+      'Simulateur micro-entreprise et auto-entrepreneur : simulation CA, cotisations, versement libératoire ou IR, ACRE et CFE sur 5 ans. Barèmes 2026, indicatif.',
     h1: 'Simulation micro-entreprise : revenu net sur 5 ans',
     intro:
       "Cette simulation micro-entreprise (auto-entrepreneur) calcule votre revenu net sur cinq ans à partir du chiffre d'affaires, des taux de cotisations, du versement libératoire ou de l'imposition à l'IR, ainsi que de l'ACRE et de la CFE lorsque le modèle les inclut. La micro impose des plafonds de CA et ne permet pas la déduction des charges au réel.",
@@ -79,18 +80,19 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       },
     ],
     keywords: [
+      'simulateur micro entreprise',
       'simulation micro entreprise',
       'simulation auto entrepreneur',
       'simuler micro entreprise',
-      'simulateur micro entreprise',
+      'simulateur auto-entrepreneur',
       'simulation auto-entrepreneur',
       'revenu net auto-entrepreneur',
     ],
   },
   'eurl-ir': {
-    title: 'Simulation EURL à l’IR : gérant TNS, revenu net sur 5 ans',
+    title: 'Simulateur EURL IR : gérant TNS, revenu net sur 5 ans',
     description:
-      'Simulation EURL à l’impôt sur le revenu : bénéfice, cotisations TNS, IR du foyer, charges. Simuler une EURL IR en ligne — barèmes 2026, indicatif.',
+      'Simulateur EURL à l’IR : simulation bénéfice, cotisations TNS, IR du foyer et charges sur 5 ans. Simuler une EURL impôt sur le revenu — barèmes 2026, indicatif.',
     h1: 'Simulation EURL à l’IR : revenu net gérant sur 5 ans',
     intro:
       "Cette simulation EURL à l'IR projette le revenu net du gérant TNS sur cinq ans : charges déductibles au réel, cotisations sociales, intégration du bénéfice au barème IR du foyer, ACRE et CFE selon les réglages. Elle complète une simple simulation « société » en montrant l'impact fiscal personnel.",
@@ -109,17 +111,18 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       },
     ],
     keywords: [
+      'simulateur EURL IR',
       'simulation EURL',
       'simulation EURL IR',
       'simuler EURL impôt sur le revenu',
-      'simulateur EURL IR',
       'simulation gérant EURL',
+      'simulateur gérant EURL',
     ],
   },
   'eurl-is': {
-    title: 'Simulation EURL à l’IS : IS, rémunération et net sur 5 ans',
+    title: 'Simulateur EURL IS : IS, rémunération et net sur 5 ans',
     description:
-      'Simulation EURL à l’IS : impôt sur les sociétés, rémunération du gérant, résultat distribuable. Simuler une EURL IS en ligne — barèmes 2026.',
+      'Simulateur EURL à l’IS : simulation impôt sur les sociétés, rémunération du gérant et résultat distribuable sur 5 ans. Barèmes 2026, indicatif.',
     h1: 'Simulation EURL à l’IS : rémunération et résultat sur 5 ans',
     intro:
       "Cette simulation EURL à l'IS en ligne estime le net du dirigeant sur cinq ans : IS sur le bénéfice, part salariale / résultat en société, cotisations TNS sur la rémunération, imposition personnelle sur les sommes perçues. Vous pouvez faire varier la répartition rémunération versus bénéfice conservé.",
@@ -138,16 +141,16 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       },
     ],
     keywords: [
+      'simulateur EURL IS',
       'simulation EURL IS',
       'simuler EURL impôt sociétés',
-      'simulateur EURL IS',
       'simulation EURL à l’IS',
     ],
   },
   sasu: {
-    title: 'Simulation SASU : salaire, dividendes et net sur 5 ans',
+    title: 'Simulateur SASU : salaire président, dividendes et net sur 5 ans',
     description:
-      'Simulation SASU freelance : IS, salaire président, dividendes (PFU), ACRE et CFE sur 5 ans. Simuler une SASU en ligne — barèmes 2026, indicatif.',
+      'Simulateur SASU en ligne (gratuit) : simulation freelance président assimilé salarié — IS, salaire, dividendes PFU ou IR, ACRE et CFE sur 5 ans. Barèmes 2026, indicatif.',
     h1: 'Simulation SASU : président, salaire et dividendes sur 5 ans',
     intro:
       "Cette simulation SASU projette votre revenu net sur cinq ans en combinant salaire d'assimilé salarié (cotisations régime général), dividendes au PFU ou au barème IR, et impôt sur les sociétés sur le bénéfice après rémunération. L'ACRE et la CFE sont prises en compte lorsque le modèle les applique.",
@@ -166,28 +169,33 @@ export const SIMULATEUR_STATUT_CONTENT: Record<SimulateurStatutSlug, SimulateurS
       },
     ],
     keywords: [
+      'simulateur SASU',
       'simulation SASU',
       'simuler SASU',
-      'simulateur SASU',
+      'simulateur revenu SASU',
+      'simulation freelance SASU',
       'simulation président SASU',
       'simulation dividendes SASU',
+      'simulateur SASU freelance',
     ],
   },
 };
 
 export const SIMULATEUR_STATUT_DEFAULT: SimulateurStatutSeoBlock = {
-  title: 'Simulations freelance par statut : portage, micro, EURL, SASU',
+  title: 'Simulateurs freelance par statut : portage, micro, EURL, SASU (5 ans)',
   description:
-    'Simulations par statut pour indépendants (portage, micro-entreprise / auto-entrepreneur, EURL IR/IS, SASU) sur 5 ans : cotisations, IR ou IS, ACRE et CFE selon les cas. Gratuit, barèmes 2026.',
+    'Simulateurs et simulations par statut pour indépendants : portage salarial, micro-entreprise / auto-entrepreneur, EURL IR ou IS, SASU — 5 ans, cotisations, IR ou IS, ACRE et CFE selon les cas. Gratuit, barèmes 2026.',
   h1: 'Simulations freelance par statut',
   intro:
     'Choisissez un statut dans la liste pour ouvrir une simulation dédiée (portage salarial, micro-entreprise ou auto-entrepreneur, EURL à l’IR ou à l’IS, SASU) avec les paramètres et barèmes adaptés.',
   faq: [],
   keywords: [
-    'simulation freelance',
-    'simulation auto-entrepreneur',
-    'simulation statut indépendant',
     'simulateur freelance',
+    'simulation freelance',
+    'simulateur SASU',
+    'simulateur micro entreprise',
+    'simulateur portage',
+    'simulation statut indépendant',
     'simuler revenu freelance',
   ],
 };

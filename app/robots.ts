@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-
-const BASE_URL = 'https://www.freelance-simulateur.fr';
+import { SITE_URL } from '@/lib/seo/jsonLd';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,10 +7,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/mon-compte', '/connexion', '/inscription'],
+        disallow: [
+          '/mon-compte',
+          '/connexion',
+          '/inscription',
+          '/mot-de-passe-reset',
+          '/mot-de-passe-oublie',
+        ],
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
-
