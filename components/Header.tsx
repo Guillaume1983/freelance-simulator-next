@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Moon, Sun, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, BarChart3, TrendingUp, BookOpen, Wrench } from 'lucide-react';
+import { Moon, Sun, Menu, X, LogOut, ChevronDown, UserCircle, Check, AlertCircle, Loader, BarChart3, TrendingUp, BookOpen, Wrench, LineChart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { SaveStatus } from '@/hooks/useSimulation';
@@ -169,6 +169,10 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
             <Wrench size={14} />
             Outils
           </Link>
+          <Link href="/tjm-moyens" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors">
+            <LineChart size={14} />
+            Baromètre TJM
+          </Link>
           <Link href="/articles" className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors">
             <BookOpen size={14} />
             Guides
@@ -317,6 +321,14 @@ export default function Header({ isDark, setIsDark, saveStatus }: {
             >
               <Wrench size={16} />
               Outils
+            </Link>
+            <Link
+              href="/tjm-moyens"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-[13px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors pl-5"
+              onClick={() => setMenuOpen(false)}
+            >
+              <LineChart size={16} />
+              Baromètre TJM
             </Link>
             <Link href="/articles" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 transition-colors mt-1" onClick={() => setMenuOpen(false)}>
               <BookOpen size={16} />

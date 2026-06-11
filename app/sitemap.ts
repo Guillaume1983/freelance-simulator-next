@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/simulateur/eurl-is',
     '/simulateur/sasu',
     '/outils',
+    '/tjm-moyens',
     '/articles',
     '/bareme',
     '/hypotheses',

@@ -261,6 +261,7 @@ const REGIME_DISPLAY = [
   { id: 'SASU',     label: 'SASU',               color: 'text-violet-600 dark:text-violet-400'  },
 ] as const;
 
+
 export function TjmRevenuNetOutilPanel() {
   const [tjm, setTjm] = useState(600);
   const [days, setDays] = useState(210);
@@ -347,6 +348,10 @@ export function TjmRevenuNetOutilPanel() {
           ou{' '}
           <Link href="/simulateur/sasu" className="text-indigo-600 dark:text-indigo-400 hover:underline">
             simulateur
+          </Link>
+          .{' '}
+          <Link href="/tjm-moyens" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+            TJM de marché par métier
           </Link>
           .
         </p>
@@ -747,6 +752,10 @@ export function NetTjmCibleOutilPanel() {
           {' '}ou{' '}
           <Link href="/comparateur" className="text-orange-600 dark:text-orange-400 hover:underline">
             comparateur
+          </Link>
+          .{' '}
+          <Link href="/tjm-moyens" className="text-orange-600 dark:text-orange-400 hover:underline">
+            TJM de marché par métier
           </Link>
           .
         </p>

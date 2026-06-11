@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BarChart3, TrendingUp, BookOpen, ArrowRight, Wrench, Sparkles, Save, Lock, Gift, CheckCircle2, X, Trash2, Info } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, ArrowRight, Wrench, Sparkles, Save, Lock, Gift, CheckCircle2, X, Trash2, Info, LineChart } from 'lucide-react';
 import Footer from '@/components/Footer';
 import FaqSection from '@/components/FaqSection';
 import { useSimulationContext } from '@/context/SimulationContext';
@@ -320,17 +320,17 @@ export default function HomePageClient() {
                 </p>
               </Link>
               <Link
-                href="/a-propos"
-                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md transition-all block flex-1 min-w-0"
+                href="/tjm-moyens"
+                className="rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 p-5 md:p-6 text-center shadow-sm hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-md transition-all block flex-1 min-w-0"
               >
-                <div className="w-12 h-12 mx-auto rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
-                  <Info className="w-6 h-6" />
+                <div className="w-12 h-12 mx-auto rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 mb-3">
+                  <LineChart className="w-6 h-6" />
                 </div>
                 <h3 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-wide">
-                  À propos
+                  Baromètre TJM
                 </h3>
                 <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-400">
-                  Qui sommes-nous et comment le simulateur est construit.
+                  TJM médian par métier, expérience et région — données de marché indicatives.
                 </p>
               </Link>
             </div>
