@@ -145,9 +145,6 @@ export function getWebPageFaqJsonLd(input: {
   };
 }
 
-/** @deprecated Utiliser getWebPageFaqJsonLd */
-export const getSimulateurStatutPageJsonLd = getWebPageFaqJsonLd;
-
 export function getAboutPageJsonLd() {
   return {
     '@context': 'https://schema.org',

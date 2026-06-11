@@ -1,14 +1,3 @@
-/* ── Dépenses professionnelles (mensuelles) ── */
-export const DEPENSES_MENSUELLES = [
-  { id: 'expertComptable', label: 'Expert-Comptable', default: 160 },
-  { id: 'assurancesProtection', label: 'Assurances & Protection', default: 185 },
-  { id: 'outilsEtLogiciels', label: 'Outils & Logiciels', default: 90 },
-  { id: 'restaurationMensuelle', label: 'Restauration', default: 190 },
-  { id: 'transportPublicMensuel', label: 'Transport public', default: 50 },
-] as const;
-
-export type DepenseId = (typeof DEPENSES_MENSUELLES)[number]['id'];
-
 /* ── Catalogue charges récurrentes (€ / mois indicatifs) ── */
 /**
  * Périmètre dans le simulateur :

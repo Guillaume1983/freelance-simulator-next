@@ -208,9 +208,6 @@ export const CA_REPARTITION_INK = {
   net: CA_REPARTITION_SEGMENTS[3].ink,
 } as const;
 
-/** @deprecated — alias vers CA_REPARTITION_INK */
-export const CA_REPARTITION_HEX = CA_REPARTITION_INK;
-
 export function tooltipColorForRowKey(key: string): string | undefined {
   switch (key) {
     case 'fees':
