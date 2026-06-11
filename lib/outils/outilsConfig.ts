@@ -9,6 +9,7 @@ import {
   Receipt,
   Wallet,
   Target,
+  Scale,
 } from 'lucide-react';
 
 export const OUTIL_IDS = [
@@ -19,6 +20,7 @@ export const OUTIL_IDS = [
   'franchise-tva',
   'tjm-revenu-net',
   'net-tjm-cible',
+  'optim-remuneration',
   'taux-effectif-ir',
   'cotisations-tns',
 ] as const;
@@ -130,6 +132,18 @@ export const OUTILS_TABS: readonly OutilTabConfig[] = [
     headerGradient: 'from-orange-500 to-orange-600',
   },
   {
+    id: 'optim-remuneration',
+    label: 'Salaire vs dividendes',
+    description: 'Optimum SASU / EURL IS',
+    icon: Scale,
+    gradient: 'from-purple-500 to-purple-600',
+    activeBg: 'bg-purple-50',
+    activeBorder: 'border-purple-300',
+    activeText: 'text-purple-700',
+    activeIcon: 'from-purple-500 to-purple-600',
+    headerGradient: 'from-purple-500 to-purple-600',
+  },
+  {
     id: 'taux-effectif-ir',
     label: 'Taux effectif IR',
     description: 'Barème progressif',
@@ -165,4 +179,5 @@ export const OUTIL_TAB_COLORS: Record<OutilId, string> = {
   'taux-effectif-ir': '#e11d48',
   'cotisations-tns': '#64748b',
   'net-tjm-cible': '#ea580c',
+  'optim-remuneration': '#9333ea',
 };

@@ -755,6 +755,272 @@ export function NetTjmCibleOutilPanel() {
   );
 }
 
+type OptimPoint = {
+  pct: number;
+  salaireNet: number;
+  cotis: number;
+  is: number;
+  pfu: number;
+  dividendesNets: number;
+  ir: number;
+  netTotal: number;
+};
+
+function computeOptimPoint(
+  resultat: number,
+  pct: number,
+  statut: 'SASU' | 'EURL IS',
+  taxParts: number,
+  acreActive: boolean,
+): OptimPoint {
+  const ratio = pct / 100;
+  const enveloppeSalaire = resultat * ratio;
+  if (statut === 'SASU') {
+    const cotisRate = acreActive
+      ? RATES_2026.sasu.cotis * RATES_2026.sasu.acre
+      : RATES_2026.sasu.cotis;
+    const salaireNet = enveloppeSalaire > 0 ? enveloppeSalaire / (1 + cotisRate) : 0;
+    const cotis = salaireNet * cotisRate;
+    const baseIS = Math.max(0, resultat - enveloppeSalaire);
+    const { tauxReduit, seuilTauxReduit, tauxNormal } = RATES_2026.isSasu;
+    const is =
+      Math.min(baseIS, seuilTauxReduit) * tauxReduit +
+      Math.max(0, baseIS - seuilTauxReduit) * tauxNormal;
+    const apresIS = baseIS - is;
+    const pfu = apresIS * RATES_2026.flatTaxDividendes;
+    const dividendesNets = apresIS - pfu;
+    const ir = salaireNet > 0 ? computeIR(salaireNet, taxParts) : 0;
+    return { pct, salaireNet, cotis, is, pfu, dividendesNets, ir, netTotal: salaireNet + dividendesNets - ir };
+  } else {
+    const cotisRate = acreActive
+      ? RATES_2026.eurlIs.cotis * RATES_2026.eurlIs.acre
+      : RATES_2026.eurlIs.cotis;
+    const salaireNet = enveloppeSalaire > 0 ? enveloppeSalaire / (1 + cotisRate) : 0;
+    const cotis = salaireNet * cotisRate;
+    const baseIS = Math.max(0, resultat - enveloppeSalaire);
+    const is = baseIS * RATES_2026.is.taux;
+    const apresIS = baseIS - is;
+    const pfu = apresIS * RATES_2026.flatTaxDividendes;
+    const dividendesNets = apresIS - pfu;
+    const ir = salaireNet > 0 ? computeIR(salaireNet, taxParts) : 0;
+    return { pct, salaireNet, cotis, is, pfu, dividendesNets, ir, netTotal: salaireNet + dividendesNets - ir };
+  }
+}
+
+export function OptimRemunerationPanel() {
+  const [tjm, setTjm] = useState(600);
+  const [jours, setJours] = useState(210);
+  const [parts, setParts] = useState(1);
+  const [citySize, setCitySize] = useState<CitySize>('moyenne');
+  const [acreActive, setAcreActive] = useState(false);
+  const [activeStatut, setActiveStatut] = useState<'SASU' | 'EURL IS'>('SASU');
+
+  const ca = tjm * jours;
+  const cfe = CFE_PAR_VILLE[citySize];
+  const resultat = Math.max(0, ca - cfe);
+  const taxParts = useMemo(() => computeTaxParts(parts, 0), [parts]);
+
+  const allPoints = useMemo(
+    () => Array.from({ length: 101 }, (_, i) => computeOptimPoint(resultat, i, activeStatut, taxParts, acreActive)),
+    [resultat, activeStatut, taxParts, acreActive],
+  );
+
+  const optimal = useMemo(
+    () => allPoints.reduce((best, p) => (p.netTotal > best.netTotal ? p : best), allPoints[0]!),
+    [allPoints],
+  );
+
+  const tablePoints = useMemo(() => {
+    const pcts = [0, 25, 50, 75, 100];
+    if (!pcts.includes(optimal.pct)) pcts.push(optimal.pct);
+    pcts.sort((a, b) => a - b);
+    return pcts.map((pct) => ({ ...allPoints[pct]!, isOptimal: pct === optimal.pct }));
+  }, [allPoints, optimal]);
+
+  const fmt = (n: number) => Math.round(n).toLocaleString('fr-FR');
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="px-6 py-5 bg-linear-to-r from-purple-500 to-purple-600 text-white">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Salaire vs dividendes</h2>
+            <p className="text-white/80 text-sm mt-1">
+              Répartition optimale — {activeStatut}
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{fmt(optimal.netTotal)} €</p>
+            <p className="text-sm text-white/80 mt-0.5">Net optimal / an</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-5">
+        <div className="flex gap-2">
+          {(['SASU', 'EURL IS'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setActiveStatut(s)}
+              className={[
+                'px-4 py-2 rounded-xl text-sm font-semibold transition-all',
+                activeStatut === s
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
+              ].join(' ')}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">TJM (€)</label>
+            <input
+              type="number" min={0} step={1} value={tjm || ''}
+              onChange={(e) => setTjm(Math.max(0, Number(e.target.value) || 0))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Jours / an</label>
+            <input
+              type="number" min={1} max={365} value={jours || ''}
+              onChange={(e) => setJours(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Parts fiscales</label>
+            <select
+              value={parts} onChange={(e) => setParts(Number(e.target.value))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
+            >
+              <option value={1}>1 part</option>
+              <option value={1.5}>1,5 parts</option>
+              <option value={2}>2 parts</option>
+              <option value={2.5}>2,5 parts</option>
+              <option value={3}>3 parts</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Commune</label>
+            <select
+              value={citySize} onChange={(e) => setCitySize(e.target.value as CitySize)}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
+            >
+              {(Object.keys(CFE_PAR_VILLE) as CitySize[]).map((s) => (
+                <option key={s} value={s}>{CITY_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+          <input
+            type="checkbox" checked={acreActive}
+            onChange={(e) => setAcreActive(e.target.checked)}
+            className="rounded border-slate-300"
+          />
+          <span>ACRE (exonération partielle cotisations an 1)</span>
+        </label>
+
+        <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 px-4 py-3 text-sm text-slate-600 dark:text-slate-400 space-y-1">
+          <p>
+            CA : <span className="font-semibold text-slate-900 dark:text-white">{fmt(ca)} €</span>
+            {' '}— Résultat net de CFE : <span className="font-semibold text-slate-900 dark:text-white">{fmt(resultat)} €</span>
+          </p>
+          {activeStatut === 'EURL IS' && (
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Modèle simplifié : dividendes soumis au PFU 30 % seulement. En pratique, les dividendes du gérant majoritaire EURL IS excédant 10 % du capital social sont aussi soumis aux cotisations TNS — ce qui les rend souvent moins avantageux.
+            </p>
+          )}
+        </div>
+
+        <div className="rounded-xl border-2 border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 px-4 py-4">
+          <p className="text-sm font-bold text-purple-700 dark:text-purple-300 mb-3">
+            Optimum : {optimal.pct} % en salaire — {100 - optimal.pct} % en dividendes
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Salaire net</p>
+              <p className="font-semibold text-slate-900 dark:text-white">{fmt(optimal.salaireNet)} €</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Dividendes nets</p>
+              <p className="font-semibold text-slate-900 dark:text-white">{fmt(optimal.dividendesNets)} €</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Cotisations</p>
+              <p className="font-semibold text-rose-600 dark:text-rose-400">−{fmt(optimal.cotis)} €</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">IS société</p>
+              <p className="font-semibold text-rose-600 dark:text-rose-400">−{fmt(optimal.is)} €</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">PFU 30 %</p>
+              <p className="font-semibold text-rose-600 dark:text-rose-400">−{fmt(optimal.pfu)} €</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">IR foyer</p>
+              <p className="font-semibold text-rose-600 dark:text-rose-400">−{fmt(optimal.ir)} €</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-600">
+                <th className="text-left py-2 font-semibold text-slate-700 dark:text-slate-300">% salaire</th>
+                <th className="text-right py-2 font-semibold text-slate-700 dark:text-slate-300">Salaire net</th>
+                <th className="text-right py-2 font-semibold text-slate-700 dark:text-slate-300">Dividendes nets</th>
+                <th className="text-right py-2 font-semibold text-slate-700 dark:text-slate-300">Net total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tablePoints.map((p) => (
+                <tr
+                  key={p.pct}
+                  className={[
+                    'border-b border-slate-100 dark:border-slate-700',
+                    p.isOptimal ? 'bg-purple-50 dark:bg-purple-900/20' : '',
+                  ].join(' ')}
+                >
+                  <td className="py-2 tabular-nums">
+                    {p.pct} %
+                    {p.isOptimal && (
+                      <span className="ml-2 text-xs font-semibold text-purple-600 dark:text-purple-400">optimal</span>
+                    )}
+                  </td>
+                  <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">{fmt(p.salaireNet)} €</td>
+                  <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">{fmt(p.dividendesNets)} €</td>
+                  <td className={[
+                    'py-2 text-right tabular-nums font-bold',
+                    p.isOptimal ? 'text-purple-700 dark:text-purple-300' : 'text-slate-900 dark:text-white',
+                  ].join(' ')}>
+                    {fmt(p.netTotal)} €
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          Hypothèses : an 2, CFE incluse, sans charges ni IK. IR calculé sur le seul salaire du foyer. Pour affiner :{' '}
+          <Link href="/simulateur/sasu" className="text-purple-600 dark:text-purple-400 hover:underline">simulateur SASU</Link>
+          {' '}ou{' '}
+          <Link href="/comparateur" className="text-purple-600 dark:text-purple-400 hover:underline">comparateur</Link>.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function CotisationsTnsOutilPanel() {
   const [benefice, setBenefice] = useState(45000);
   const [acreActive, setAcreActive] = useState(true);
