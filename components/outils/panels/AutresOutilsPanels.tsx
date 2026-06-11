@@ -755,6 +755,197 @@ export function NetTjmCibleOutilPanel() {
   );
 }
 
+export function MultiTjmPanel() {
+  const [tjms, setTjms] = useState<number[]>([400, 500, 600, 700, 800]);
+  const [jours, setJours] = useState(210);
+  const [parts, setParts] = useState(1);
+  const [citySize, setCitySize] = useState<CitySize>('moyenne');
+  const [typeActiviteMicro, setTypeActiviteMicro] = useState<RegimeMicro>('BNC');
+
+  const taxParts = useMemo(() => computeTaxParts(parts, 0), [parts]);
+
+  const columns = useMemo(() => {
+    const base = {
+      days: jours,
+      taxParts,
+      spouseIncome: 0,
+      kmAnnuel: 0,
+      cvFiscaux: '6' as const,
+      typeVehicule: 'voiture' as const,
+      vehiculeElectrique: false,
+      loyerPercu: 0,
+      sectionsActive: { vehicule: false },
+      portageComm: DEFAULT_PORTAGE_COMM,
+      chargeAmounts: {} as Record<string, number>,
+      activeCharges: [] as string[],
+      acreEnabled: false,
+      citySize,
+      growthRate: 0,
+      annee: 2,
+      materielAnnuel: 0,
+      avantagesOptimises: 0,
+      typeActiviteMicro,
+      prelevementLiberatoire: false,
+      remunerationDirigeantMensuelle: 1,
+      repartitionRemuneration: 0,
+    };
+    return tjms.map((tjm) => ({ tjm, ca: tjm * jours, results: calculateRegimes({ ...base, tjm }) }));
+  }, [tjms, jours, taxParts, citySize, typeActiviteMicro]);
+
+  const bestPerCol = useMemo(
+    () => columns.map((col) => Math.max(...REGIME_DISPLAY.map(({ id }) => col.results.find((r) => r.id === id)?.net ?? 0))),
+    [columns],
+  );
+
+  const plafondMicro = plafondMicroPourType(typeActiviteMicro);
+  const fmt = (n: number) => Math.round(n).toLocaleString('fr-FR');
+  const fmtK = (n: number) => `${Math.round(n / 1000)} k€`;
+
+  const updateTjm = (i: number, val: number) =>
+    setTjms((prev) => { const next = [...prev]; next[i] = Math.max(0, val); return next; });
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="px-6 py-5 bg-linear-to-r from-cyan-500 to-cyan-600 text-white">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Comparatif multi-TJM</h2>
+            <p className="text-white/80 text-sm mt-1">Net annuel par statut pour {tjms.length} niveaux de TJM</p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">{tjms.length} TJM</p>
+            <p className="text-sm text-white/80 mt-0.5">{jours} jours / an</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-5">
+        <div>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">TJM à comparer (€/j)</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            {tjms.map((tjm, i) => (
+              <input
+                key={i}
+                type="number" min={0} step={50} value={tjm || ''}
+                onChange={(e) => updateTjm(i, Number(e.target.value) || 0)}
+                className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm text-center tabular-nums"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Jours / an</label>
+            <input
+              type="number" min={1} max={365} value={jours || ''}
+              onChange={(e) => setJours(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Parts fiscales</label>
+            <select
+              value={parts} onChange={(e) => setParts(Number(e.target.value))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
+            >
+              <option value={1}>1 part</option>
+              <option value={1.5}>1,5 parts</option>
+              <option value={2}>2 parts</option>
+              <option value={2.5}>2,5 parts</option>
+              <option value={3}>3 parts</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Commune</label>
+            <select
+              value={citySize} onChange={(e) => setCitySize(e.target.value as CitySize)}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
+            >
+              {(Object.keys(CFE_PAR_VILLE) as CitySize[]).map((s) => (
+                <option key={s} value={s}>{CITY_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Type micro (plafond)</label>
+          <select
+            value={typeActiviteMicro} onChange={(e) => setTypeActiviteMicro(e.target.value as RegimeMicro)}
+            className="w-full max-w-md px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
+          >
+            {REGIMES.map((opt) => <option key={opt.id} value={opt.id}>{opt.label}</option>)}
+          </select>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b-2 border-slate-200 dark:border-slate-600">
+                <th className="text-left py-2 pr-4 font-semibold text-slate-700 dark:text-slate-300 min-w-[140px]">Statut</th>
+                {columns.map((col, i) => (
+                  <th key={i} className="text-right py-2 px-2 font-semibold text-slate-700 dark:text-slate-300 min-w-[100px]">
+                    <span className="block">{col.tjm} €/j</span>
+                    <span className="block text-xs font-normal text-slate-400">{fmtK(col.ca)}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {REGIME_DISPLAY.map(({ id, label, color }) => (
+                <tr key={id} className="border-b border-slate-100 dark:border-slate-700">
+                  <td className={['py-2.5 pr-4 font-semibold', color].join(' ')}>{label}</td>
+                  {columns.map((col, i) => {
+                    const net = col.results.find((r) => r.id === id)?.net ?? 0;
+                    const isBest = net > 0 && net === bestPerCol[i];
+                    const microDepasse = id === 'Micro' && col.ca > plafondMicro;
+                    return (
+                      <td
+                        key={i}
+                        className={[
+                          'py-2.5 px-2 text-right tabular-nums',
+                          isBest
+                            ? 'font-bold text-emerald-600 dark:text-emerald-400'
+                            : 'text-slate-700 dark:text-slate-300',
+                        ].join(' ')}
+                      >
+                        {fmt(net)} €
+                        {microDepasse && (
+                          <span className="block text-xs font-normal text-amber-600 dark:text-amber-400">
+                            plafond dépassé
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/50">
+                <td className="py-2 pr-4 text-xs font-semibold text-slate-500 dark:text-slate-400">CA annuel</td>
+                {columns.map((col, i) => (
+                  <td key={i} className="py-2 px-2 text-right text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                    {fmt(col.ca)} €
+                  </td>
+                ))}
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          An 2, sans ACRE ni charges. SASU : dividendes uniquement. EURL IS : 100 % salaire. Meilleur net par colonne en vert. Pour affiner :{' '}
+          <Link href="/comparateur" className="text-cyan-600 dark:text-cyan-400 hover:underline">comparateur</Link>
+          {' '}ou{' '}
+          <Link href="/simulateur/sasu" className="text-cyan-600 dark:text-cyan-400 hover:underline">simulateur 5 ans</Link>.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 type OptimPoint = {
   pct: number;
   salaireNet: number;
