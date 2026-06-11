@@ -20,6 +20,7 @@ import {
   CfeOutilPanel,
   CotisationsTnsOutilPanel,
   FranchiseTvaOutilPanel,
+  NetTjmCibleOutilPanel,
   PlafondsMicroOutilPanel,
   TauxEffectifIrOutilPanel,
   TjmRevenuNetOutilPanel,
@@ -77,6 +78,8 @@ function OutilsUnifiedInner({ children }: { children?: React.ReactNode }) {
         return <TauxEffectifIrOutilPanel />;
       case 'cotisations-tns':
         return <CotisationsTnsOutilPanel />;
+      case 'net-tjm-cible':
+        return <NetTjmCibleOutilPanel />;
       default:
         return <IndemnitesKmOutilPanel />;
     }

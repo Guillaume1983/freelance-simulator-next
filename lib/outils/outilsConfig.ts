@@ -8,6 +8,7 @@ import {
   Calculator,
   Receipt,
   Wallet,
+  Target,
 } from 'lucide-react';
 
 export const OUTIL_IDS = [
@@ -17,6 +18,7 @@ export const OUTIL_IDS = [
   'plafonds-micro',
   'franchise-tva',
   'tjm-revenu-net',
+  'net-tjm-cible',
   'taux-effectif-ir',
   'cotisations-tns',
 ] as const;
@@ -116,6 +118,18 @@ export const OUTILS_TABS: readonly OutilTabConfig[] = [
     headerGradient: 'from-indigo-500 to-indigo-600',
   },
   {
+    id: 'net-tjm-cible',
+    label: 'Net → TJM',
+    description: 'TJM cible par statut',
+    icon: Target,
+    gradient: 'from-orange-500 to-orange-600',
+    activeBg: 'bg-orange-50',
+    activeBorder: 'border-orange-300',
+    activeText: 'text-orange-700',
+    activeIcon: 'from-orange-500 to-orange-600',
+    headerGradient: 'from-orange-500 to-orange-600',
+  },
+  {
     id: 'taux-effectif-ir',
     label: 'Taux effectif IR',
     description: 'Barème progressif',
@@ -150,4 +164,5 @@ export const OUTIL_TAB_COLORS: Record<OutilId, string> = {
   'tjm-revenu-net': '#4f46e5',
   'taux-effectif-ir': '#e11d48',
   'cotisations-tns': '#64748b',
+  'net-tjm-cible': '#ea580c',
 };

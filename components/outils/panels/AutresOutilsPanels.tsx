@@ -56,7 +56,7 @@ export function CfeOutilPanel() {
           ))}
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-          Les montants sont indicatifs. La CFE réelle dépend du taux voté par la commune et de la base d’imposition.
+          Les montants sont indicatifs. La CFE réelle dépend du taux voté par la commune et de la base d'imposition.
         </p>
       </div>
     </div>
@@ -95,7 +95,7 @@ export function AcreOutilPanel() {
         />
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Avec ACRE : vous payez environ 75 % de ce montant (soit ~25 % d&apos;exonération, hors CSG/CRDS non réductibles).
-          L’ACRE ne s’applique pas au portage salarial ni aux assimilés salariés.
+          L'ACRE ne s'applique pas au portage salarial ni aux assimilés salariés.
         </p>
         <p className="text-sm">
           <a
@@ -206,7 +206,7 @@ export function FranchiseTvaOutilPanel() {
         </div>
       </div>
       <div className="p-6 space-y-4">
-        <label className="block font-semibold text-slate-700 dark:text-slate-300">Type d’activité</label>
+        <label className="block font-semibold text-slate-700 dark:text-slate-300">Type d'activité</label>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -252,6 +252,14 @@ const zeroChargeAmountsComparateur = CHARGES_CATALOG.reduce(
 function plafondMicroPourType(type: 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE'): number {
   return type === 'BIC_COMMERCE' ? PLAFOND_MICRO_BIC : PLAFOND_MICRO_BNC;
 }
+
+const REGIME_DISPLAY = [
+  { id: 'Portage',  label: 'Portage salarial',  color: 'text-indigo-600 dark:text-indigo-400'  },
+  { id: 'Micro',    label: 'Micro-entreprise',   color: 'text-amber-600 dark:text-amber-400'    },
+  { id: 'EURL IR',  label: "EURL à l'IR",        color: 'text-emerald-600 dark:text-emerald-400'},
+  { id: 'EURL IS',  label: "EURL à l'IS",        color: 'text-blue-600 dark:text-blue-400'      },
+  { id: 'SASU',     label: 'SASU',               color: 'text-violet-600 dark:text-violet-400'  },
+] as const;
 
 export function TjmRevenuNetOutilPanel() {
   const [tjm, setTjm] = useState(600);
@@ -352,45 +360,48 @@ export function TjmRevenuNetOutilPanel() {
               </tr>
             </thead>
             <tbody>
-              {resultats.map((r) => (
-                <tr key={r.id} className="border-b border-slate-100 dark:border-slate-700">
-                  <td className="py-2 text-slate-900 dark:text-white align-top">
-                    {r.id === 'Micro' ? (
-                      <div className="flex flex-col gap-2 min-w-0 sm:min-w-[220px]">
-                        <span className="font-semibold">Micro</span>
-                        <label htmlFor="tjm-revenu-net-type-micro" className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          Type d’activité (plafond micro)
-                        </label>
-                        <select
-                          id="tjm-revenu-net-type-micro"
-                          value={typeActiviteMicro}
-                          onChange={(e) =>
-                            setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')
-                          }
-                          className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
-                        >
-                          {REGIMES.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                        {microDepasse && (
-                          <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                            Plafond micro dépassé (+{Math.round(depassementMicro).toLocaleString('fr-FR')} €)
-                          </span>
-                        )}
-                      </div>
-                    ) : (
-                      <span>{r.id}</span>
-                    )}
-                  </td>
-                  <td className="py-2 text-right tabular-nums font-medium">{Math.round(r.net).toLocaleString('fr-FR')} €</td>
-                  <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">
-                    {r.tauxNet != null ? `${Number(r.tauxNet).toFixed(1)} %` : '–'}
-                  </td>
-                </tr>
-              ))}
+              {resultats.map((r) => {
+                const rd = REGIME_DISPLAY.find((d) => d.id === r.id);
+                return (
+                  <tr key={r.id} className="border-b border-slate-100 dark:border-slate-700">
+                    <td className="py-2 align-top">
+                      {r.id === 'Micro' ? (
+                        <div className="flex flex-col gap-2 min-w-0 sm:min-w-[220px]">
+                          <span className={['font-semibold', rd?.color].filter(Boolean).join(' ')}>Micro-entreprise</span>
+                          <label htmlFor="tjm-revenu-net-type-micro" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Type d'activité (plafond micro)
+                          </label>
+                          <select
+                            id="tjm-revenu-net-type-micro"
+                            value={typeActiviteMicro}
+                            onChange={(e) =>
+                              setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')
+                            }
+                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                          >
+                            {REGIMES.map((opt) => (
+                              <option key={opt.id} value={opt.id}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          {microDepasse && (
+                            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                              Plafond micro dépassé (+{Math.round(depassementMicro).toLocaleString('fr-FR')} €)
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className={['font-semibold', rd?.color ?? 'text-slate-900 dark:text-white'].join(' ')}>{rd?.label ?? r.id}</span>
+                      )}
+                    </td>
+                    <td className="py-2 text-right tabular-nums font-medium">{Math.round(r.net).toLocaleString('fr-FR')} €</td>
+                    <td className="py-2 text-right tabular-nums text-slate-600 dark:text-slate-400">
+                      {r.tauxNet != null ? `${Number(r.tauxNet).toFixed(1)} %` : '–'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -507,6 +518,235 @@ export function TauxEffectifIrOutilPanel() {
             <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Aucun revenu imposable par part.</p>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function findTjmForNet(
+  targetNetAnnuel: number,
+  jours: number,
+  regimeId: string,
+  options: { taxParts: number; citySize: CitySize; typeActiviteMicro?: RegimeMicro },
+): number | null {
+  if (targetNetAnnuel <= 0) return 0;
+  const base = {
+    days: jours,
+    taxParts: options.taxParts,
+    spouseIncome: 0,
+    kmAnnuel: 0,
+    cvFiscaux: '5',
+    loyerPercu: 0,
+    activeCharges: [] as string[],
+    sectionsActive: { vehicule: false },
+    portageComm: DEFAULT_PORTAGE_COMM,
+    chargeAmounts: {} as Record<string, number>,
+    acreEnabled: false,
+    citySize: options.citySize,
+    growthRate: 0,
+    annee: 2,
+    avantagesOptimises: 0,
+    materielAnnuel: 0,
+    typeActiviteMicro: options.typeActiviteMicro ?? 'BNC',
+    prelevementLiberatoire: false,
+    remunerationDirigeantMensuelle: 1,
+    repartitionRemuneration: 0,
+  };
+  const netFor = (tjm: number) =>
+    calculateRegimes({ ...base, tjm }).find((r) => r.id === regimeId)?.net ?? 0;
+  const MAX_TJM = 5_000;
+  if (netFor(MAX_TJM) < targetNetAnnuel) return null;
+  let lo = 0;
+  let hi = MAX_TJM;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    if (netFor(mid) < targetNetAnnuel) lo = mid;
+    else hi = mid;
+  }
+  return Math.ceil((lo + hi) / 2);
+}
+
+export function NetTjmCibleOutilPanel() {
+  const [netMensuel, setNetMensuel] = useState(3500);
+  const [jours, setJours] = useState(210);
+  const [parts, setParts] = useState(1);
+  const [citySize, setCitySize] = useState<CitySize>('moyenne');
+  const [typeActiviteMicro, setTypeActiviteMicro] = useState<RegimeMicro>('BNC');
+
+  const results = useMemo(() => {
+    if (netMensuel <= 0 || jours <= 0) return [];
+    const targetAnnuel = netMensuel * 12;
+    return REGIME_DISPLAY.map(({ id, label, color }) => {
+      const tjm = findTjmForNet(targetAnnuel, jours, id, {
+        taxParts: parts,
+        citySize,
+        typeActiviteMicro: id === 'Micro' ? typeActiviteMicro : undefined,
+      });
+      const ca = tjm != null ? tjm * jours : null;
+      const plafond = id === 'Micro' ? plafondMicroPourType(typeActiviteMicro) : null;
+      const plafondDepasse = plafond != null && ca != null && ca > plafond;
+      return { id, label, color, tjm, ca, plafondDepasse };
+    });
+  }, [netMensuel, jours, parts, citySize, typeActiviteMicro]);
+
+  const minTjm = results.reduce<number | null>(
+    (min, r) => (r.tjm != null && (min == null || r.tjm < min) ? r.tjm : min),
+    null,
+  );
+
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 overflow-hidden">
+      <div className="px-6 py-5 bg-linear-to-r from-orange-500 to-orange-600 text-white">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">TJM nécessaire par statut</h2>
+            <p className="text-white/80 text-sm mt-1">
+              Pour {netMensuel.toLocaleString('fr-FR')} € net / mois
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-3xl font-black tabular-nums leading-tight">
+              {minTjm != null ? `dès ${minTjm.toLocaleString('fr-FR')} €/j` : '—'}
+            </p>
+            <p className="text-sm text-white/80 mt-0.5">TJM le plus bas</p>
+          </div>
+        </div>
+      </div>
+      <div className="p-6 space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Net mensuel cible (€)
+            </label>
+            <input
+              type="number"
+              min={100}
+              max={30000}
+              step={100}
+              value={netMensuel || ''}
+              onChange={(e) => setNetMensuel(Math.max(0, Number(e.target.value) || 0))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Jours facturés / an
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={365}
+              step={1}
+              value={jours || ''}
+              onChange={(e) => setJours(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Parts fiscales
+            </label>
+            <select
+              value={parts}
+              onChange={(e) => setParts(Number(e.target.value))}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+            >
+              <option value={1}>1 part (célibataire)</option>
+              <option value={1.5}>1,5 parts</option>
+              <option value={2}>2 parts</option>
+              <option value={2.5}>2,5 parts</option>
+              <option value={3}>3 parts</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Commune
+            </label>
+            <select
+              value={citySize}
+              onChange={(e) => setCitySize(e.target.value as CitySize)}
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+            >
+              {(Object.keys(CFE_PAR_VILLE) as CitySize[]).map((s) => (
+                <option key={s} value={s}>{CITY_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 dark:border-slate-600">
+                <th className="text-left py-2 pr-4 font-semibold text-slate-700 dark:text-slate-300">Statut</th>
+                <th className="text-right py-2 pr-4 font-semibold text-slate-700 dark:text-slate-300">TJM nécessaire</th>
+                <th className="text-right py-2 font-semibold text-slate-700 dark:text-slate-300">CA annuel</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((r) => {
+                const isMin = r.tjm != null && r.tjm === minTjm;
+                return (
+                  <tr key={r.id} className="border-b border-slate-100 dark:border-slate-700">
+                    <td className={['py-2.5 pr-4 font-semibold align-top', r.color].join(' ')}>
+                      {r.id === 'Micro' ? (
+                        <div className="flex flex-col gap-1.5 min-w-0">
+                          <span>Micro-entreprise</span>
+                          <select
+                            id="net-tjm-type-micro"
+                            value={typeActiviteMicro}
+                            onChange={(e) => setTypeActiviteMicro(e.target.value as RegimeMicro)}
+                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                          >
+                            {REGIMES.map((opt) => (
+                              <option key={opt.id} value={opt.id}>{opt.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        r.label
+                      )}
+                    </td>
+                    <td className="py-2.5 pr-4 text-right tabular-nums font-bold text-slate-900 dark:text-white align-top">
+                      {r.tjm != null ? (
+                        <span className={isMin ? 'text-emerald-600 dark:text-emerald-400' : ''}>
+                          {r.tjm.toLocaleString('fr-FR')} €/j
+                          {isMin && <span className="ml-1.5 text-xs font-normal text-emerald-500">✓ min</span>}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 font-normal text-xs">&gt; 5 000 €/j</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 text-right tabular-nums text-slate-500 dark:text-slate-400 align-top">
+                      {r.ca != null ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span>{Math.round(r.ca).toLocaleString('fr-FR')} €</span>
+                          {r.plafondDepasse && (
+                            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                              Plafond micro dépassé
+                            </span>
+                          )}
+                        </div>
+                      ) : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          Régime de croisière (an 2, CFE incluse, sans ACRE ni charges déductibles, sans IK ni loyer). Pour affiner :{' '}
+          <Link href="/simulateur" className="text-orange-600 dark:text-orange-400 hover:underline">
+            simulateur 5 ans
+          </Link>
+          {' '}ou{' '}
+          <Link href="/comparateur" className="text-orange-600 dark:text-orange-400 hover:underline">
+            comparateur
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );
