@@ -316,25 +316,25 @@ export function TjmRevenuNetOutilPanel() {
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300">TJM (€)</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">TJM (€)</label>
             <input
               type="number"
               min={0}
               step={1}
               value={tjm || ''}
               onChange={(e) => setTjm(Math.max(0, Number(e.target.value) || 0))}
-              className="w-full mt-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
             />
           </div>
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300">Jours travaillés / an</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Jours travaillés / an</label>
             <input
               type="number"
               min={0}
               max={365}
               value={days || ''}
               onChange={(e) => setDays(Math.max(0, Math.min(365, Number(e.target.value) || 0)))}
-              className="w-full mt-1 px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
             />
           </div>
         </div>
@@ -377,7 +377,7 @@ export function TjmRevenuNetOutilPanel() {
                             onChange={(e) =>
                               setTypeActiviteMicro(e.target.value as 'BNC' | 'BIC_SERVICE' | 'BIC_COMMERCE')
                             }
-                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
                           >
                             {REGIMES.map((opt) => (
                               <option key={opt.id} value={opt.id}>
@@ -625,7 +625,7 @@ export function NetTjmCibleOutilPanel() {
               step={100}
               value={netMensuel || ''}
               onChange={(e) => setNetMensuel(Math.max(0, Number(e.target.value) || 0))}
-              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
             />
           </div>
           <div>
@@ -639,7 +639,7 @@ export function NetTjmCibleOutilPanel() {
               step={1}
               value={jours || ''}
               onChange={(e) => setJours(Math.max(1, Math.min(365, Number(e.target.value) || 1)))}
-              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              className="w-full px-4 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
             />
           </div>
           <div>
@@ -690,13 +690,16 @@ export function NetTjmCibleOutilPanel() {
                   <tr key={r.id} className="border-b border-slate-100 dark:border-slate-700">
                     <td className={['py-2.5 pr-4 font-semibold align-top', r.color].join(' ')}>
                       {r.id === 'Micro' ? (
-                        <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex flex-col gap-2 min-w-0">
                           <span>Micro-entreprise</span>
+                          <label htmlFor="net-tjm-type-micro" className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Type d'activité (plafond micro)
+                          </label>
                           <select
                             id="net-tjm-type-micro"
                             value={typeActiviteMicro}
                             onChange={(e) => setTypeActiviteMicro(e.target.value as RegimeMicro)}
-                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm"
+                            className="w-full max-w-md px-3 py-2 rounded-xl border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-normal"
                           >
                             {REGIMES.map((opt) => (
                               <option key={opt.id} value={opt.id}>{opt.label}</option>
